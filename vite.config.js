@@ -10,8 +10,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Shopper',
-        short_name: 'Shopper',
+        name: 'weCare',
+        short_name: 'weCare',
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
@@ -37,6 +37,7 @@ export default defineConfig({
     }
   },
   server: {
+    host: 'shopper.local',
     port: 3000,
     open: true,
     proxy: {

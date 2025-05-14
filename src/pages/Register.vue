@@ -1,86 +1,143 @@
 <template>
-  <div class="register-page">
-    <v-container class="d-flex align-center justify-center" style="min-height: 100vh;">
-      <v-card width="350" elevation="8" class="rounded-lg pa-6">
-        <h1 class="text-h5 font-weight-bold mb-6 text-center">Register</h1>
-        <v-form ref="form" v-model="isFormValid" @submit.prevent="onRegister">
-          <v-alert v-if="error" type="error" class="mb-4" closable>{{ error }}</v-alert>
-          <v-text-field
-            v-model="name"
-            label="Name"
-            :rules="[v => !!v || 'Name is required']"
-            variant="outlined"
-            class="mb-4"
-            autocomplete="name"
-            prepend-inner-icon="mdi-account"
-          />
-          <v-text-field
-            v-model="email"
-            label="Email"
-            :rules="emailRules"
-            variant="outlined"
-            class="mb-4"
-            autocomplete="email"
-            prepend-inner-icon="mdi-email"
-          />
-          <v-text-field
-            v-model="password"
-            label="Password"
-            :rules="passwordRules"
-            :type="showPassword ? 'text' : 'password'"
-            :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-            @click:append-inner="showPassword = !showPassword"
-            variant="outlined"
-            class="mb-4"
-            autocomplete="new-password"
-            prepend-inner-icon="mdi-lock"
-          />
-          <v-btn block color="primary" type="submit" :loading="loading" :disabled="!isFormValid" class="mb-4 text-white">Register</v-btn>
-          <div class="text-center">
-            <span>Already have an account?</span>
-            <v-btn variant="text" color="primary" :to="{ name: 'Login' }" size="small">Login</v-btn>
+  <div class="auth-page">
+    <div class="auth-container">
+      <!-- <div class="auth-illustration">
+        <img src="/src/assets/images/register-illustration.svg" alt="Register illustration" />
+      </div> -->
+      
+      <div class="auth-content">
+        <h1 class="auth-title">Register</h1>
+        <p class="auth-subtitle">Please register to login.</p>
+        
+        <v-form ref="form" v-model="isFormValid" @submit.prevent="onRegister" class="w-100">
+          <v-alert v-if="authStore.error" type="error" class="mb-4" variant="tonal" density="compact" closable>
+            {{ authStore.error }}
+          </v-alert>
+          
+          <div class="input-field">
+            <v-text-field
+              v-model="formData.email"
+              label="Email"
+              :rules="[v => !!v || 'Email is required', v => /.+@.+\..+/.test(v) || 'Email must be valid']"
+              variant="outlined"
+              autocomplete="email"
+              prepend-inner-icon="mdi-email"
+              hide-details="auto"
+              width="100%"
+            ></v-text-field>
+          </div>
+          
+          <div class="input-field">
+            <v-text-field
+              v-model="formData.mobile"
+              label="Mobile Number"
+              :rules="[v => !!v || 'Mobile number is required']"
+              variant="outlined"
+              autocomplete="tel"
+              prepend-inner-icon="mdi-cellphone"
+              hide-details="auto"
+              width="100%"
+            ></v-text-field>
+          </div>
+          <div class="input-field">
+            <v-text-field
+              v-model="formData.password"
+              label="Password"
+              :rules="passwordRules"
+              :type="showPassword ? 'text' : 'password'"
+              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+              @click:append-inner="showPassword = !showPassword"
+              variant="outlined"
+              autocomplete="new-password"
+              prepend-inner-icon="mdi-lock"
+              hide-details="auto"
+              width="100%"
+            ></v-text-field>
+          </div>
+          <div class="input-field">
+            <v-text-field
+              v-model="formData.password_confirm"
+              label="Confirm Password"
+              :rules="confirmPasswordRules"
+              :type="showPassword ? 'text' : 'password'"
+              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+              @click:append-inner="showPassword = !showPassword"
+              variant="outlined"
+              autocomplete="new-password"
+              prepend-inner-icon="mdi-lock"
+              hide-details="auto"
+              width="100%"
+            ></v-text-field>
+          </div>
+          <v-btn 
+            block 
+            color="#1a2233" 
+            type="submit" 
+            :loading="authStore.loading" 
+            :disabled="!isFormValid" 
+            class="auth-btn"
+          >
+            Sign Up
+          </v-btn>
+          
+          <div class="text-center auth-link">
+            Already have account? <router-link :to="{ name: 'Login' }">Sign In</router-link>
           </div>
         </v-form>
-      </v-card>
-    </v-container>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const form = ref(null)
 const isFormValid = ref(false)
-const name = ref('')
-const email = ref('')
-const password = ref('')
 const showPassword = ref(false)
-const error = ref(null)
-const loading = ref(false)
 
-const emailRules = [v => !!v || 'Email is required', v => /.+@.+\..+/.test(v) || 'Email must be valid']
-const passwordRules = [v => !!v || 'Password is required', v => v.length >= 8 || 'Min 8 characters']
+const formData = ref({
+  email: '',
+  mobile: '',
+  first_name: '',
+  last_name: '',
+  password: '',
+  password_confirm: ''
+})
+
+const passwordRules = [
+  v => !!v || 'Password is required', 
+  v => v.length >= 8 || 'Password must be at least 8 characters',
+  v => /[A-Z]/.test(v) || 'Password must contain at least one uppercase letter',
+  v => /[a-z]/.test(v) || 'Password must contain at least one lowercase letter',
+  v => /[0-9]/.test(v) || 'Password must contain at least one number'
+]
+
+const confirmPasswordRules = [
+  v => !!v || 'Confirm password is required', 
+  v => v === formData.value.password || 'Passwords must match'
+]
 
 const onRegister = async () => {
   if (!isFormValid.value) return
-  loading.value = true
-  error.value = null
-  try {
-    await axios.post('/api/auth/register/', { name: name.value, email: email.value, password: password.value })
-    router.push({ name: 'Login', query: { registered: 1 } })
-  } catch (err) {
-    error.value = err.response?.data?.detail || 'Registration failed.'
-  } finally {
-    loading.value = false
+  
+  const success = await authStore.register(formData.value)
+  
+  if (success) {
+    // If registration includes login (tokens), redirect to home
+    if (authStore.isAuthenticated) {
+      router.push('/')
+    }
+    // Otherwise, login page with registered=true will be handled by the store
   }
 }
 
 onMounted(() => {
+  // If already authenticated, redirect to home
   if (authStore.isAuthenticated) {
     router.replace({ name: 'Home' })
   }
@@ -88,7 +145,150 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.register-page {
-  padding-bottom: 64px;
+.auth-page {
+  width: 100%;
+  min-height: 100vh;
+  background: #f5f7fb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.auth-container {
+  width: 100%;
+}
+
+/* .auth-illustration {
+  width: 100%;
+  background-color: #f0f2f8;
+  display: flex;
+  justify-content: center;
+  padding: 30px 0;
+}
+
+.auth-illustration img {
+  height: 180px;
+  width: auto;
+  max-width: 100%;
+} */
+
+.auth-content {
+  padding: 24px;
+  width: 100%;
+  /* box-sizing: border-box; */
+}
+
+.auth-title {
+  font-size: 35px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #1a2233;
+  width: 100%;
+}
+
+.auth-subtitle {
+  font-size: 16px;
+  color: #707a8a;
+  margin-bottom: 28px;
+  width: 100%;
+}
+
+.input-field {
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+/* .auth-input {
+  width: 100%;
+}
+
+.auth-input :deep(.v-field__outline) {
+  border-color: #e0e4ec;
+}
+
+.auth-input :deep(.v-field--focused .v-field__outline) {
+  border-color: #1a2233;
+} */
+
+/* .auth-input :deep(.v-field__input) {
+  width: 100%;
+} */
+
+.remember-me {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+/* .remember-switch :deep(.v-label) {
+  font-size: 14px;
+  color: #707a8a;
+  opacity: 1;
+} */
+
+.auth-btn {
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  min-height: 48px;
+  text-transform: none;
+  margin-bottom: 16px;
+  box-shadow: none;
+  width: 100%;
+}
+
+.auth-link {
+  margin-top: 16px;
+  color: #707a8a;
+  font-size: 15px;
+  width: 100%;
+}
+
+.auth-link a {
+  /* color: #1a2233; */
+  color: var(--primary-color);
+  font-weight: 600;
+  margin-left: 4px;
+  text-decoration: none;
+}
+
+/* Media queries for better responsiveness */
+@media screen and (max-width: 600px) {
+  .auth-container {
+    max-width: 100%;
+  }
+  
+  .auth-content {
+    padding: 20px 16px;
+  }
+  
+  .auth-title {
+    font-size: 35px;
+  }
+  
+  .auth-subtitle {
+    font-size: 17px;
+  }
+}
+
+/* For very small screens */
+@media screen and (max-width: 320px) {
+  .auth-page {
+    padding: 8px;
+  }
+  
+  .auth-illustration {
+    padding: 20px 0;
+  }
+  
+  .auth-illustration img {
+    height: 140px;
+  }
+}
+
+.w-100 {
+  width: 100%;
 }
 </style> 

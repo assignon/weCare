@@ -1,49 +1,84 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
-import HelloWorld from './components/HelloWorld.vue'
+
+const route = useRoute()
+const mainPages = ['Home', 'Orders', 'Wishlist', 'Cart']
+const showBottomNav = computed(() => mainPages.includes(route.name))
 </script>
 
 <template>
-  <v-app>
-    <v-main>
+  <v-app class="app-container">
+    <v-main class="main-content">
       <router-view />
     </v-main>
     <v-bottom-navigation
       v-if="showBottomNav"
-      app
+      fixed
       color="primary"
       grow
       class="bottom-nav"
     >
-      <v-btn :to="{ name: 'Home' }" icon>
+      <v-btn :to="{ name: 'Home' }">
         <v-icon>mdi-home</v-icon>
+        <span>Home</span>
       </v-btn>
-      <v-btn :to="{ name: 'Orders' }" icon>
+      <v-btn :to="{ name: 'Orders' }">
         <v-icon>mdi-receipt</v-icon>
+        <span>Orders</span>
       </v-btn>
-      <v-btn :to="{ name: 'Wishlist' }" icon>
+      <v-btn :to="{ name: 'Wishlist' }">
         <v-icon>mdi-heart</v-icon>
+        <span>Wishlist</span>
       </v-btn>
-      <v-btn :to="{ name: 'Cart' }" icon>
+      <v-btn :to="{ name: 'Cart' }">
         <v-icon>mdi-cart</v-icon>
+        <span>Cart</span>
       </v-btn>
     </v-bottom-navigation>
   </v-app>
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #7C3AED;
+  --secondary-color: #006763;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+
+html, body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
 }
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+* {
+  box-sizing: border-box;
+}
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.app-container {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.main-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .bottom-nav {
@@ -52,9 +87,22 @@ import HelloWorld from './components/HelloWorld.vue'
   right: 0;
   bottom: 0;
   z-index: 100;
+  width: 100%;
 }
 
 body {
   background: #f9f9f9;
+}
+
+/* Fix for v-app not taking full width in some browsers */
+.v-application {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+}
+
+.v-application__wrap {
+  width: 100% !important;
+  min-width: 100% !important;
 }
 </style>
