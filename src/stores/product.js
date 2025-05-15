@@ -49,10 +49,11 @@ export const useProductStore = defineStore('product', () => {
         params.category = selectedCategory.value
       }
       
-      params.page = currentPage.value
-      params.page_size = pageSize.value
+      // params.page = currentPage.value
+      // params.page_size = pageSize.value
       
       const response = await apiService.getProducts(params)
+      
       products.value = response.data.results || response.data
       
       // If paginated response
@@ -115,7 +116,7 @@ export const useProductStore = defineStore('product', () => {
   const fetchPopularProducts = async () => {
     try {
       // Assuming the API has a way to fetch popular products
-      const response = await apiService.getProducts({ popular: true })
+      const response = await apiService.getPopularProducts()
       popularProducts.value = response.data.results || response.data
       return popularProducts.value
     } catch (err) {
@@ -127,7 +128,7 @@ export const useProductStore = defineStore('product', () => {
   const fetchNewArrivals = async () => {
     try {
       // Assuming the API has a way to fetch new arrivals
-      const response = await apiService.getProducts({ is_new: true })
+      const response = await apiService.getNewArrivals()
       newArrivals.value = response.data.results || response.data
       return newArrivals.value
     } catch (err) {

@@ -9,7 +9,7 @@
           <v-card class="cart-items-container mb-4" flat>
             <div 
               v-for="(item, index) in cart.items" 
-              :key="item.id"
+              :key="item.cartItemId || item.id"
               class="cart-item"
               :class="{ 'has-divider': index < cart.items.length - 1 }"
             >
@@ -31,6 +31,7 @@
                     <div>
                       <h3 class="text-subtitle-1 font-weight-medium">{{ item.name }}</h3>
                       <div class="text-body-2 text-grey mb-2">SKU: {{ item.id }}</div>
+                      <div v-if="item.selectedSize" class="text-body-2 mb-2">Size: {{ item.selectedSize }}</div>
                     </div>
                     <v-btn density="compact" icon="mdi-close" variant="text" @click="removeItem(item)"></v-btn>
                   </div>
@@ -193,17 +194,17 @@ const cart = useCartStore()
 const router = useRouter()
 
 const increaseQuantity = (item) => {
-  cart.updateQuantity(item.id, item.quantity + 1)
+  cart.updateQuantity(item.cartItemId || item.id, item.quantity + 1)
 }
 
 const decreaseQuantity = (item) => {
   if (item.quantity > 1) {
-    cart.updateQuantity(item.id, item.quantity - 1)
+    cart.updateQuantity(item.cartItemId || item.id, item.quantity - 1)
   }
 }
 
 const removeItem = (item) => {
-  cart.removeFromCart(item.id)
+  cart.removeFromCart(item.cartItemId || item.id)
 }
 </script>
 

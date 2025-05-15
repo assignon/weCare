@@ -75,7 +75,15 @@ export const apiService = {
   
   // Products
   getProducts(params = {}) {
-    return api.get('/products/products/', { params })
+    return api.get('/products/shopper/products/all/', { params })
+  },
+
+  getPopularProducts() {
+    return api.get('/products/shopper/products/popular/')
+  },
+
+  getNewArrivals() {
+    return api.get('/products/shopper/products/new_arrivals/')
   },
   
   getProductDetails(id) {

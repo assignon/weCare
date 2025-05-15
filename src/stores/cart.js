@@ -5,20 +5,47 @@ export const useCartStore = defineStore('cart', () => {
   const items = ref([])
 
   const addToCart = (product, quantity = 1) => {
-    const existing = items.value.find(i => i.id === product.id)
+    // Generate a unique cart item ID based on product ID and size if available
+    const cartItemId = product.selectedSize 
+      ? `${product.id}-${product.selectedSize}`
+      : product.id
+    
+    // Look for existing item with same ID and size
+    const existing = items.value.find(item => {
+      const itemId = item.selectedSize 
+        ? `${item.id}-${item.selectedSize}`
+        : item.id
+      return itemId === cartItemId
+    })
+    
     if (existing) {
       existing.quantity += quantity
     } else {
-      items.value.push({ ...product, quantity })
+      items.value.push({ 
+        ...product, 
+        cartItemId,
+        quantity 
+      })
     }
   }
 
-  const removeFromCart = (productId) => {
-    items.value = items.value.filter(i => i.id !== productId)
+  const removeFromCart = (cartItemId) => {
+    items.value = items.value.filter(item => {
+      const itemId = item.selectedSize 
+        ? `${item.id}-${item.selectedSize}`
+        : item.id
+      return itemId !== cartItemId
+    })
   }
 
-  const updateQuantity = (productId, quantity) => {
-    const item = items.value.find(i => i.id === productId)
+  const updateQuantity = (cartItemId, quantity) => {
+    const item = items.value.find(item => {
+      const itemId = item.selectedSize 
+        ? `${item.id}-${item.selectedSize}`
+        : item.id
+      return itemId === cartItemId
+    })
+    
     if (item) item.quantity = quantity
   }
 

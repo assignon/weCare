@@ -1,185 +1,181 @@
 <template>
   <div class="product-details-page">
-    <v-container>
-      <!-- Breadcrumbs and back button -->
-      <div class="d-flex align-center mb-4">
-        <v-btn icon @click="$router.back()" class="mr-2">
-          <v-icon>mdi-arrow-left</v-icon>
+    <v-container class="pa-0">
+      <!-- Top navigation bar -->
+      <div class="top-bar px-4 py-2 d-flex align-center">
+        <v-btn icon @click="$router.go(-1)" class="mr-2" variant="text">
+          <v-icon color="primary">mdi-arrow-left</v-icon>
         </v-btn>
-        <v-breadcrumbs :items="breadcrumbs" class="pa-0"></v-breadcrumbs>
+        <v-spacer></v-spacer>
+        <v-btn icon variant="text" class="mr-2">
+          <v-icon color="primary">mdi-heart</v-icon>
+        </v-btn>
       </div>
       
       <!-- Loading skeleton -->
-      <v-skeleton-loader v-if="loading" type="image, heading, paragraph, actions" class="my-4" />
+      <v-skeleton-loader v-if="loading" type="image, article" class="my-4" />
       
       <!-- Error alert -->
       <v-alert v-if="error" type="error" class="mb-4">{{ error }}</v-alert>
       
       <!-- Product details -->
       <div v-if="product" class="product-details">
-        <v-row>
-          <!-- Product images -->
-          <v-col cols="12" md="6">
-            <v-card class="product-image-card" flat>
-              <v-img 
-                :src="product.image || 'https://via.placeholder.com/600'" 
-                height="400" 
-                cover
-                class="main-image"
-              >
-                <template v-slot:placeholder>
-                  <v-row class="fill-height ma-0" align="center" justify="center">
-                    <v-progress-circular indeterminate color="grey-lighten-5"></v-progress-circular>
-                  </v-row>
-                </template>
-              </v-img>
-              
-              <!-- Thumbnail gallery -->
-              <div class="thumbnail-gallery d-flex mt-3">
-                <v-img 
-                  v-for="n in 4" 
-                  :key="n"
-                  :src="product.image || `https://via.placeholder.com/100?text=Image ${n}`" 
-                  width="80" 
-                  height="80" 
-                  cover
-                  class="thumbnail-image ma-1"
-                ></v-img>
-              </div>
-            </v-card>
-          </v-col>
-          
-          <!-- Product info -->
-          <v-col cols="12" md="6">
-            <div class="product-info pa-2">
-              <h1 class="text-h4 font-weight-bold mb-1">{{ product.name }}</h1>
-              
-              <!-- Rating -->
-              <div class="d-flex align-center mb-3">
-                <v-rating
-                  :model-value="4.5"
-                  color="amber"
-                  density="compact"
-                  half-increments
-                  readonly
-                  size="small"
-                ></v-rating>
-                <span class="text-body-2 ml-2">(24 reviews)</span>
-              </div>
-              
-              <!-- Price -->
-              <div class="text-h5 font-weight-bold primary-color mb-4">${{ product.price }}</div>
-              
-              <!-- Description -->
-              <v-divider class="mb-4"></v-divider>
-              <h3 class="text-subtitle-1 font-weight-bold mb-2">Description</h3>
-              <p class="text-body-1 mb-4">{{ product.description || "No description available." }}</p>
-              
-              <!-- Quantity selector -->
-              <div class="mb-6">
-                <h3 class="text-subtitle-1 font-weight-bold mb-2">Quantity</h3>
-                <div class="d-flex align-center quantity-selector">
-                  <v-btn variant="outlined" icon="mdi-minus" @click="decreaseQuantity"></v-btn>
-                  <div class="quantity-display mx-4">{{ quantity }}</div>
-                  <v-btn variant="outlined" icon="mdi-plus" @click="increaseQuantity"></v-btn>
-                </div>
-              </div>
-              
-              <!-- Action buttons -->
-              <div class="action-buttons">
-                <v-btn 
-                  color="primary" 
-                  size="large" 
-                  block 
-                  class="mb-3"
-                  prepend-icon="mdi-cart"
-                  @click="addToCart"
-                >
-                  Add to Cart
-                </v-btn>
-                
-                <v-btn
-                  variant="outlined"
-                  size="large"
-                  block
-                  class="mb-3"
-                  :color="inWishlist ? 'error' : 'primary'"
-                  :prepend-icon="inWishlist ? 'mdi-heart' : 'mdi-heart-outline'"
-                  @click="toggleWishlist"
-                >
-                  {{ inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}
-                </v-btn>
-              </div>
-              
-              <!-- Delivery info -->
-              <v-card class="delivery-info mt-4 pa-3" variant="outlined">
-                <div class="d-flex align-center mb-2">
-                  <v-icon color="primary" class="mr-2">mdi-truck-delivery</v-icon>
-                  <span class="text-subtitle-2 font-weight-medium">Fast Delivery</span>
-                </div>
-                <div class="d-flex align-center mb-2">
-                  <v-icon color="primary" class="mr-2">mdi-cash-multiple</v-icon>
-                  <span class="text-subtitle-2 font-weight-medium">Secure Payment</span>
-                </div>
-                <div class="d-flex align-center">
-                  <v-icon color="primary" class="mr-2">mdi-refresh</v-icon>
-                  <span class="text-subtitle-2 font-weight-medium">30 Days Return Policy</span>
-                </div>
-              </v-card>
-            </div>
-          </v-col>
-        </v-row>
+        <!-- Product image carousel -->
+        <div class="product-image-container">
+          <v-carousel 
+            :show-arrows="false"
+            hide-delimiter-background 
+            height="450"
+            delimiter-icon="mdi-circle"
+            cycle
+            color="primary"
+            interval="12000"
+          >
+            <v-carousel-item
+              :src="product.main_image || packagingImage"
+              cover
+            ></v-carousel-item>
+            <v-carousel-item
+              v-for="(image, i) in [product.image_1, product.image_2, product.image_3] || []"
+              :key="i"
+              :src="image"
+              cover
+            ></v-carousel-item>
+          </v-carousel>
+        </div>
         
-        <!-- Related products -->
-        <div class="related-products mt-10">
-          <h2 class="text-h5 font-weight-medium mb-4">You May Also Like</h2>
-          <v-row>
-            <v-col 
-              v-for="related in productStore.relatedProducts.slice(0, 4)" 
-              :key="related.id" 
-              cols="6" sm="3"
-            >
-              <v-card 
-                class="related-product-card" 
-                flat 
-                hover
-                @click="$router.push({ name: 'ProductDetails', params: { id: related.id }})"
-              >
-                <v-img 
-                  :src="related.image || `https://via.placeholder.com/300?text=${related.name}`" 
-                  height="160" 
-                  cover
-                ></v-img>
-                <v-card-text class="pa-3">
-                  <div class="text-subtitle-2 font-weight-medium text-truncate">{{ related.name }}</div>
-                  <div class="d-flex justify-space-between align-center mt-1">
-                    <div class="text-subtitle-1 font-weight-bold primary-color">${{ related.price.toFixed(2) }}</div>
-                  </div>
-                </v-card-text>
-              </v-card>
-            </v-col>
+        <!-- Product info -->
+        <div class="product-info pa-4">
+          <div class="d-flex justify-space-between align-center mb-2">
+            <div class="brand text-caption text-grey">{{ product.seller_name || 'weCare' }}</div>
+            <v-chip color="success" size="x-small" class="text-caption">In Stock</v-chip>
+          </div>
+          
+          <h1 class="product-title text-h6 font-weight-bold mb-1">{{ product.name }}</h1>
+          
+          <div class="d-flex justify-space-between align-center mb-4">
+            <div class="price text-h5 font-weight-bold primary-color">${{ product.price }}</div>
+          </div>
+          
+          <!-- Tab section -->
+          <v-tabs v-model="activeTab" bg-color="transparent" color="primary" grow>
+            <v-tab value="description" class="text-none">Description</v-tab>
+            <v-tab value="reviews" class="text-none">Reviews</v-tab>
+            <v-tab value="how-to-use" class="text-none">How to use</v-tab>
+          </v-tabs>
+          
+          <v-window v-model="activeTab" class="mt-4">
+            <v-window-item value="description">
+              <p class="text-body-2">{{ product.description || "No description available." }}</p>
+            </v-window-item>
             
-            <!-- Fallback placeholders if not enough related products -->
-            <v-col 
-              v-for="i in Math.max(0, 4 - productStore.relatedProducts.length)"
-              :key="`placeholder-${i}`" 
-              cols="6" sm="3"
-            >
-              <v-card class="related-product-card" flat hover>
-                <v-img 
-                  :src="`https://via.placeholder.com/300?text=Related ${i}`" 
-                  height="160" 
-                  cover
-                ></v-img>
-                <v-card-text class="pa-3">
-                  <div class="text-subtitle-2 font-weight-medium text-truncate">Similar Product {{ i }}</div>
-                  <div class="d-flex justify-space-between align-center mt-1">
-                    <div class="text-subtitle-1 font-weight-bold primary-color">${{ (product.price * 0.8).toFixed(2) }}</div>
+            <v-window-item value="reviews">
+              <div class="reviews-section">
+                <div class="d-flex align-center mb-3">
+                  <v-rating
+                    :model-value="4.5"
+                    color="amber"
+                    density="compact"
+                    half-increments
+                    readonly
+                    size="small"
+                  ></v-rating>
+                  <span class="text-body-2 ml-2">({{ product.review_stats.count }} reviews)</span>
+                </div>
+                
+                <!-- Sample reviews -->
+                <div class="review-item pa-3 mb-3 rounded" v-if="product.review_stats.count > 0">
+                  <div class="d-flex justify-space-between">
+                    <div class="font-weight-medium">John D.</div>
+                    <div class="text-caption text-grey">2 days ago</div>
                   </div>
-                </v-card-text>
-              </v-card>
-            </v-col>
-          </v-row>
+                  <v-rating
+                    :model-value="product.review_stats.avg_rating"
+                    color="amber"
+                    density="compact"
+                    readonly
+                    size="x-small"
+                    class="my-1"
+                  ></v-rating>
+                  <p class="text-caption">Great product! I love how it feels on my skin.</p>
+                </div>
+                <div class="review-item pa-3 mb-3 rounded" v-else>
+                  <v-icon size="x-large" color="primary" class="mb-2">mdi-comment-quote-outline</v-icon>
+                  <p class="text-body-2">No reviews yet. Be the first to review this product.</p>
+                </div>
+              </div>
+            </v-window-item>
+            
+            <v-window-item value="how-to-use">
+              <p class="text-body-2">{{ product.usage_instructions || "Apply a small amount to clean, damp skin. Massage gently in circular motions, then rinse thoroughly with water." }}</p>
+            </v-window-item>
+          </v-window>
+          
+          <!-- Size and Quantity -->
+          <div class="mt-6">
+            <div class="d-flex justify-space-between align-center mb-2">
+              <h3 class="text-subtitle-2 font-weight-medium">Size</h3>
+              <div class="text-caption">{{ product.size || '500 ml' }}</div>
+            </div>
+            
+            <!-- Size options -->
+            <div class="size-options d-flex mb-4">
+              <v-btn 
+                variant="outlined" 
+                class="size-btn mr-2" 
+                :color="selectedSize === '100ml' ? 'primary' : ''" 
+                @click="selectedSize = '100ml'"
+              >
+                100ml
+              </v-btn>
+              <v-btn 
+                variant="outlined" 
+                class="size-btn mr-2" 
+                :color="selectedSize === '250ml' ? 'primary' : ''" 
+                @click="selectedSize = '250ml'"
+              >
+                250ml
+              </v-btn>
+              <v-btn 
+                variant="outlined" 
+                class="size-btn" 
+                :color="selectedSize === '500ml' ? 'primary' : ''" 
+                @click="selectedSize = '500ml'"
+              >
+                500ml
+              </v-btn>
+            </div>
+            
+            <!-- Quantity selector -->
+            <div class="mb-6">
+              <h3 class="text-subtitle-2 font-weight-medium mb-2">Quantity</h3>
+              <div class="d-flex align-center quantity-selector">
+                <v-btn variant="outlined" icon="mdi-minus" density="comfortable" @click="decreaseQuantity"></v-btn>
+                <div class="quantity-display mx-4">{{ quantity }}</div>
+                <v-btn variant="outlined" icon="mdi-plus" density="comfortable" @click="increaseQuantity"></v-btn>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Action buttons -->
+          <div class="action-buttons d-flex">
+            <v-btn 
+              color="secondary" 
+              variant="outlined"
+              class="mr-4 flex-grow-1"
+              @click="addToCart"
+            >
+              Add to Cart
+            </v-btn>
+            
+            <v-btn
+              color="primary" 
+              class="flex-grow-1"
+              @click="buyNow"
+            >
+              Buy Now
+            </v-btn>
+          </div>
         </div>
       </div>
     </v-container>
@@ -192,10 +188,13 @@ import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useProductStore } from '@/stores/product'
+import packagingImage from '@/assets/packaging_10471395.png'
 
 const route = useRoute()
 const router = useRouter()
 const quantity = ref(1)
+const activeTab = ref('description')
+const selectedSize = ref('500ml')
 const cart = useCartStore()
 const wishlist = useWishlistStore()
 const productStore = useProductStore()
@@ -203,11 +202,6 @@ const productStore = useProductStore()
 const loading = computed(() => productStore.loading)
 const error = computed(() => productStore.error)
 const product = computed(() => productStore.currentProduct)
-
-const breadcrumbs = computed(() => [
-  { title: 'Home', disabled: false, to: { name: 'Home' } },
-  { title: product.value?.name || 'Product Details', disabled: true }
-])
 
 const increaseQuantity = () => {
   quantity.value++
@@ -221,10 +215,17 @@ const decreaseQuantity = () => {
 
 const addToCart = () => {
   if (product.value) {
-    cart.addToCart(product.value, quantity.value)
-    // Show success toast
-    router.push({ name: 'Cart' })
+    cart.addToCart({
+      ...product.value,
+      selectedSize: selectedSize.value
+    }, quantity.value)
+    // Show snackbar notification
   }
+}
+
+const buyNow = () => {
+  addToCart()
+  router.push({ name: 'Cart' })
 }
 
 const inWishlist = computed(() => wishlist.items.some(i => i.id === product.value?.id))
@@ -247,32 +248,29 @@ onMounted(async () => {
 
 <style scoped>
 .product-details-page {
-  padding-bottom: 64px;
+  background-color: white;
+  min-height: 100vh;
 }
 
-.product-image-card {
-  border-radius: 8px;
-  overflow: hidden;
+.top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
 }
 
-.main-image {
-  border-radius: 8px;
-  background-color: #f9f9f9;
+.product-image-container {
+  position: relative;
+  margin-bottom: 16px;
 }
 
-.thumbnail-gallery {
-  overflow-x: auto;
+.product-title {
+  text-transform: capitalize;
 }
 
-.thumbnail-image {
-  border-radius: 4px;
-  border: 1px solid #eeeeee;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.thumbnail-image:hover {
-  border-color: var(--primary-color);
+.primary-color {
+  color: #6b3aa5;
 }
 
 .quantity-selector {
@@ -286,29 +284,32 @@ onMounted(async () => {
   font-weight: bold;
 }
 
-.primary-color {
-  color: var(--primary-color);
+.size-btn {
+  min-width: 70px;
+  border-radius: 12px;
+}
+
+.review-item {
+  background-color: #f8f9fa;
 }
 
 .action-buttons {
   margin-top: 24px;
+  margin-bottom: 24px;
 }
 
-.related-product-card {
-  transition: transform 0.2s, box-shadow 0.2s;
-  height: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.related-product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-}
-
-@media (max-width: 600px) {
+@media (min-width: 960px) {
+  .product-details {
+    display: flex;
+  }
+  
+  .product-image-container {
+    flex: 1;
+    margin-bottom: 0;
+  }
+  
   .product-info {
-    padding-top: 24px;
+    flex: 1;
   }
 }
 </style> 
