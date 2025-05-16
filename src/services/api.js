@@ -89,6 +89,14 @@ export const apiService = {
   getProductDetails(id) {
     return api.get(`/products/products/${id}/`)
   },
+
+  getProductReviews(id) {
+    return api.get(`/products/products/${id}/reviews/`)
+  },
+  
+  requestRestockNotification(productId) {
+    return api.post(`/products/products/${productId}/request_restock_notification/`)
+  },
   
   // Categories
   getCategories() {
@@ -130,16 +138,16 @@ export const apiService = {
   },
   
   // Wishlist
-  getWishlist() {
-    return api.get('/wishlist/wishlist/')
+  getWishlist(userId) {
+    return api.get(`/products/wishlists/${userId}/`)
   },
   
-  addToWishlist(productId) {
-    return api.post('/wishlist/wishlist/add/', { product_id: productId })
+  addToWishlist(productId, userId) {
+    return api.post(`/products/wishlists/${userId}/add_product/`, { product_id: productId })
   },
   
   removeFromWishlist(itemId) {
-    return api.delete(`/wishlist/wishlist/items/${itemId}/`)
+    return api.delete(`/products/wishlists/${userId}/remove_product/${itemId}/`)
   },
   
   // User profile

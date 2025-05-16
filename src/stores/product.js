@@ -10,6 +10,7 @@ export const useProductStore = defineStore('product', () => {
   const popularProducts = ref([])
   const newArrivals = ref([])
   const currentProduct = ref(null)
+  const productReviews = ref([])
   const relatedProducts = ref([])
   const searchQuery = ref('')
   const selectedCategory = ref(null)
@@ -170,6 +171,17 @@ export const useProductStore = defineStore('product', () => {
     currentPage.value = page
     return await fetchProducts()
   }
+
+  const fetchProductReviews = async (productId) => {
+    try {
+      const response = await apiService.getProductReviews(productId)
+      productReviews.value = response.data || []
+      
+      return productReviews.value
+    } catch (err) {
+      console.error(`Failed to fetch reviews for product ${productId}:`, err)
+    }
+  }
   
   return {
     // State
@@ -179,6 +191,7 @@ export const useProductStore = defineStore('product', () => {
     popularProducts,
     newArrivals,
     currentProduct,
+    productReviews,
     relatedProducts,
     searchQuery,
     selectedCategory,
@@ -202,6 +215,7 @@ export const useProductStore = defineStore('product', () => {
     searchProducts,
     filterByCategory,
     clearFilters,
-    goToPage
+    goToPage,
+    fetchProductReviews
   }
 }) 
