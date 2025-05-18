@@ -238,7 +238,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
@@ -338,10 +338,44 @@ const toggleWishlist = () => {
 
 onMounted(async () => {
   const productId = route.params.id
-  await productStore.fetchProductById(productId)
-  await productStore.fetchRelatedProducts(productId)
-  await productStore.fetchProductReviews(productId)
+  
+  try {
+    await productStore.fetchProductById(productId)
+    
+    // Fetch related data
+    await Promise.all([
+      productStore.fetchRelatedProducts(productId),
+      productStore.fetchProductReviews(productId)
+    ])
+  } catch (error) {
+    // Handle error and redirect to home page
+    console.error('Error fetching product:', error)
+    snackbarText.value = "Product not found"
+    snackbarColor.value = "error"
+    showSnackbar.value = true
+    
+    // Redirect to home page
+    router.push({ name: 'Home' })
+  }
 })
+
+// Watch for product data and check if it's published
+watch(product, (newProduct) => {
+  if (!newProduct) return
+  
+  // Check various conditions that would make product unavailable
+  const isUnavailable = !newProduct.published
+  
+  if (isUnavailable) {
+    // Show notification for unavailable product
+    snackbarText.value = "This product is not available"
+    snackbarColor.value = "error"
+    showSnackbar.value = true
+    
+    // Redirect to home page
+    router.push({ name: 'Home' })
+  }
+}, { immediate: true })
 </script>
 
 <style scoped>
