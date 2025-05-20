@@ -116,27 +116,6 @@ export const apiService = {
     return api.post('/orders/orders/', orderData)
   },
   
-  // Cart
-  getCart() {
-    return api.get('/cart/cart/')
-  },
-  
-  addToCart(productId, quantity) {
-    return api.post('/cart/cart/add/', { product_id: productId, quantity })
-  },
-  
-  updateCartItem(itemId, quantity) {
-    return api.patch(`/cart/cart/items/${itemId}/`, { quantity })
-  },
-  
-  removeFromCart(itemId) {
-    return api.delete(`/cart/cart/items/${itemId}/`)
-  },
-  
-  clearCart() {
-    return api.delete('/cart/cart/clear/')
-  },
-  
   // Wishlist
   getWishlist(userId) {
     return api.get(`/products/wishlists/${userId}/`)
@@ -170,5 +149,28 @@ export const apiService = {
   
   getUnreadNotificationsCount() {
     return api.get('/notifications/notifications/unread_count/')
-  }
+  },
+
+  // Cart endpoints
+  getCart() {
+    return api.get('/orders/cart/view_cart/')
+  },
+  createCart(items) {
+    return api.post('/orders/cart/add_item/', items)
+  },
+
+  updateCartItem(cartId, item) {
+    return api.patch(`/orders/cart/${cartId}/update_item/`, {
+      product_id: item.product_id,
+      variant_id: item.variant_id,
+      quantity: item.quantity
+    })
+  },
+
+  removeCartItem(cartId, itemId) {
+    return api.delete(`/orders/cart/${cartId}/remove_item/`)
+  },
+  clearCart() {
+    return api.post('/orders/cart/clear/')
+  },
 } 

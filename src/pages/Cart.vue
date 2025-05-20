@@ -8,16 +8,15 @@
         <v-col cols="12" md="8">
           <v-card class="cart-items-container mb-4" flat>
             <div 
-              v-for="(item, index) in cart.items" 
-              :key="item.cartItemId || item.id"
-              class="cart-item"
-              :class="{ 'has-divider': index < cart.items.length - 1 }"
+              v-for="group in groupedCartItems" 
+              :key="group.product.id"
+              class="cart-product-group"
             >
-              <div class="d-flex cart-item-content">
-                <!-- Product image -->
+              <!-- Product header -->
+              <div class="d-flex cart-item-content mb-2">
                 <div class="cart-item-image-container mr-4">
                   <v-img 
-                    :src="item.image || 'https://via.placeholder.com/150'" 
+                    :src="group.product.main_image || 'https://via.placeholder.com/150'" 
                     width="100" 
                     height="100" 
                     class="cart-item-image"
@@ -25,40 +24,52 @@
                   ></v-img>
                 </div>
                 
-                <!-- Product details -->
-                <div class="cart-item-details flex-grow-1">
-                  <div class="d-flex justify-space-between">
-                    <div>
-                      <h3 class="text-subtitle-1 font-weight-medium">{{ item.name }}</h3>
-                      <div class="text-body-2 text-grey mb-2">SKU: {{ item.id }}</div>
-                      <div v-if="item.selectedSize" class="text-body-2 mb-2">Size: {{ item.selectedSize }}</div>
-                    </div>
-                    <v-btn density="compact" icon="mdi-close" variant="text" @click="removeItem(item)"></v-btn>
+                <div class="flex-grow-1">
+                  <h3 class="text-subtitle-1 font-weight-medium mb-1">{{ group.product.name }}</h3>
+                  <p class="text-caption text-grey mb-0">{{ group.product.seller_name || 'weCare' }}</p>
+                </div>
+              </div>
+              
+              <!-- Variants -->
+              <div class="variants-container pl-16">
+                <div 
+                  v-for="variant in group.variants" 
+                  :key="variant.id"
+                  class="variant-item d-flex align-center justify-space-between py-2"
+                >
+                  <div class="d-flex align-center">
+                    <span class="text-body-2 mr-4">{{ variant.name }}</span>
+                    <span class="text-subtitle-2 font-weight-medium">${{ variant.price }}</span>
                   </div>
                   
-                  <div class="d-flex flex-wrap justify-space-between align-center">
-                    <div class="quantity-controls d-flex align-center">
+                  <div class="d-flex align-center">
+                    <div class="d-flex align-center quantity-controls mr-4">
                       <v-btn 
-                        variant="tonal" 
-                        size="small" 
+                        variant="outlined" 
                         icon="mdi-minus" 
-                        density="compact"
-                        @click="decreaseQuantity(item)"
-                        :disabled="item.quantity <= 1"
+                        density="comfortable"
+                        size="small"
+                        :disabled="variant.quantity <= 1"
+                        @click="updateVariantQuantity(group.product.id, variant.id, variant.quantity - 1)"
                       ></v-btn>
-                      <span class="quantity-display mx-3">{{ item.quantity }}</span>
+                      <div class="quantity-display mx-2">{{ variant.quantity }}</div>
                       <v-btn 
-                        variant="tonal" 
-                        size="small" 
+                        variant="outlined" 
                         icon="mdi-plus" 
-                        density="compact"
-                        @click="increaseQuantity(item)"
+                        density="comfortable"
+                        size="small"
+                        :disabled="variant.quantity >= variant.stock"
+                        @click="updateVariantQuantity(group.product.id, variant.id, variant.quantity + 1)"
                       ></v-btn>
                     </div>
                     
-                    <div class="item-price text-subtitle-1 font-weight-bold primary-color mt-2 mt-sm-0">
-                      ${{ (item.price * item.quantity).toFixed(2) }}
-                    </div>
+                    <v-btn
+                      icon="mdi-delete"
+                      variant="text"
+                      color="error"
+                      density="comfortable"
+                      @click="removeVariant(group.product.id, variant.id)"
+                    ></v-btn>
                   </div>
                 </div>
               </div>
@@ -79,12 +90,12 @@
         
         <!-- Order summary -->
         <v-col cols="12" md="4">
-          <v-card class="order-summary pa-4">
+          <v-card class="order-summary pa-2" variant="text">
             <h2 class="text-h6 font-weight-bold mb-4">Order Summary</h2>
             
             <div class="d-flex justify-space-between mb-2">
               <span class="text-body-1">Items ({{ cart.totalItems }})</span>
-              <span class="text-body-1">${{ cart.totalPrice.toFixed(2) }}</span>
+              <span class="text-body-1">${{ cart.subtotal.toFixed(2) }}</span>
             </div>
             
             <div class="d-flex justify-space-between mb-2">
@@ -96,18 +107,18 @@
             
             <div class="d-flex justify-space-between mb-4">
               <span class="text-subtitle-1 font-weight-bold">Total</span>
-              <span class="text-h6 font-weight-bold primary-color">${{ cart.totalPrice.toFixed(2) }}</span>
+              <span class="text-h6 font-weight-bold primary-color">${{ cart.subtotal.toFixed(2) }}</span>
             </div>
             
             <!-- Promo code -->
-            <v-text-field
+            <!-- <v-text-field
               label="Promo Code"
               variant="outlined"
               density="compact"
               append-inner-icon="mdi-tag"
               hide-details
               class="mb-4"
-            ></v-text-field>
+            ></v-text-field> -->
             
             <!-- Checkout button -->
             <v-btn 
@@ -127,11 +138,11 @@
             </div>
             
             <!-- Payment methods -->
-            <div class="payment-methods d-flex justify-center mt-4">
+            <!-- <div class="payment-methods d-flex justify-center mt-4">
               <v-icon size="large" class="mx-1">mdi-credit-card</v-icon>
               <v-icon size="large" class="mx-1">mdi-paypal</v-icon>
               <v-icon size="large" class="mx-1">mdi-bank</v-icon>
-            </div>
+            </div> -->
           </v-card>
         </v-col>
       </v-row>
@@ -151,7 +162,7 @@
       </v-card>
       
       <!-- Suggested products -->
-      <div v-if="cart.items.length > 0" class="suggested-products mt-8">
+      <!-- <div v-if="cart.items.length > 0" class="suggested-products mt-8">
         <h2 class="text-h5 font-weight-medium mb-4">You Might Also Like</h2>
         <v-row>
           <v-col 
@@ -180,7 +191,26 @@
             </v-card>
           </v-col>
         </v-row>
-      </div>
+      </div> -->
+
+      <!-- Add warning dialog -->
+      <v-dialog v-model="showWarningDialog" max-width="400">
+        <v-card>
+          <v-card-title class="text-h6">Unsaved Changes</v-card-title>
+          <v-card-text>
+            You have unsaved changes in your cart. Are you sure you want to leave this page?
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" variant="text" @click="showWarningDialog = false">
+              Stay
+            </v-btn>
+            <v-btn color="error" variant="text" @click="handleLeave">
+              Leave
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog> 
     </v-container>
   </div>
 </template>
@@ -188,23 +218,94 @@
 <script setup>
 import { useCartStore } from '@/stores/cart'
 import { useRouter } from 'vue-router'
-import { computed } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 
 const cart = useCartStore()
 const router = useRouter()
 
-const increaseQuantity = (item) => {
-  cart.updateQuantity(item.cartItemId || item.id, item.quantity + 1)
-}
+// Add computed property to group cart items by product
+const groupedCartItems = computed(() => {
+  const groups = {}
+  
+  cart.items.forEach(item => {
+    if (!groups[item.id]) {
+      groups[item.id] = {
+        product: {
+          id: item.id,
+          name: item.name,
+          main_image: item.main_image,
+          seller_name: item.seller_name
+        },
+        variants: []
+      }
+    }
+    
+    groups[item.id].variants.push({
+      id: item.selectedVariant.id,
+      name: item.selectedVariant.name,
+      price: item.price,
+      quantity: item.quantity,
+      stock: item.stock
+    })
+  })
+  
+  return Object.values(groups)
+})
 
-const decreaseQuantity = (item) => {
-  if (item.quantity > 1) {
-    cart.updateQuantity(item.cartItemId || item.id, item.quantity - 1)
+// Add warning dialog
+const showWarningDialog = ref(false)
+
+// Handle page unload
+const handleBeforeUnload = (e) => {
+  if (cart.cartUpdated) {
+    e.preventDefault()
+    e.returnValue = ''
   }
 }
 
-const removeItem = (item) => {
-  cart.removeFromCart(item.cartItemId || item.id)
+onMounted(async () => {
+  // Add event listener for page unload
+  window.addEventListener('beforeunload', handleBeforeUnload)
+  
+  try {
+    // Initialize cart state
+    cart.initCartState()
+    
+    // If cart is updated, sync with backend
+    if (cart.cartUpdated) {
+      await cart.syncCartWithBackend()
+    } else {
+      // Otherwise just fetch the latest cart state
+      await cart.fetchCart()
+    }
+  } catch (error) {
+    console.error('Failed to initialize cart:', error)
+  }
+})
+
+onBeforeUnmount(() => {
+  // Remove event listener
+  window.removeEventListener('beforeunload', handleBeforeUnload)
+})
+
+// Update variant quantity with backend sync
+const updateVariantQuantity = async (productId, variantId, newQuantity) => {
+  try {
+    await cart.updateVariantQuantity(productId, variantId, newQuantity)
+    await cart.syncCartWithBackend()
+  } catch (error) {
+    console.error('Failed to update variant quantity:', error)
+  }
+}
+
+// Update remove variant with backend sync
+const removeVariant = async (productId, variantId) => {
+  try {
+    await cart.removeVariant(productId, variantId)
+    await cart.syncCartWithBackend()
+  } catch (error) {
+    console.error('Failed to remove variant:', error)
+  }
 }
 </script>
 
@@ -293,4 +394,39 @@ const removeItem = (item) => {
     height: 120px;
   }
 }
-</style> 
+
+.cart-product-group {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cart-product-group:last-child {
+  border-bottom: none;
+}
+
+.variants-container {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.variant-item {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.variant-item:last-child {
+  border-bottom: none;
+}
+
+.quantity-controls {
+  background-color: white;
+  border-radius: 4px;
+  padding: 2px;
+}
+
+.quantity-display {
+  min-width: 32px;
+  text-align: center;
+  font-weight: bold;
+}
+</style>

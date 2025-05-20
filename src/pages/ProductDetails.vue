@@ -53,59 +53,33 @@
         <div class="product-info pa-4">
           <div class="d-flex justify-space-between align-center mb-2">
             <div class="brand text-caption text-grey">{{ product.seller_name || 'weCare' }}</div>
-            <!-- <v-chip color="error" size="x-small" class="text-caption" v-if="product.stock<product.low_stock_threshold">{{product.stock}} left</v-chip> -->
-            <v-chip color="success" size="x-small" class="text-caption" v-if="product.stock > 0">{{ product.stock }} In Stock</v-chip>
+            <v-chip color="success" size="x-small" class="text-caption" v-if="currentStock > 0">{{ currentStock }} In Stock</v-chip>
             <v-chip color="error" size="x-small" class="text-caption" v-else>Out of Stock</v-chip>
           </div>
           
-          <h1 class="product-title text-h6 font-weight-bold mb-1">{{ product.name }}</h1>
+          <h1 class="product-title text-h6 font-weight-bold mb-1 text-capitalize">{{ product.name }}</h1>
           
           <div class="d-flex justify-space-between align-center mb-4">
-            <div class="price text-h5 font-weight-bold primary-color">${{ product.price }}</div>
-          </div>
-
-          <!-- Quantity selector - Only show if in stock -->
-          <div class="mb-6" v-if="product.stock > 0">
-            <h3 class="text-subtitle-2 font-weight-medium mb-2">Quantity</h3>
-            <div class="d-flex align-center quantity-selector">
-              <v-btn variant="outlined" icon="mdi-minus" density="comfortable" @click="decreaseQuantity"></v-btn>
-              <div class="quantity-display mx-4 font-weight-bold text-primary">{{ quantity }}</div>
-              <v-btn variant="outlined" icon="mdi-plus" density="comfortable" @click="increaseQuantity(product.stock)"></v-btn>
-            </div>
+            <div class="price text-h5 font-weight-bold primary-color">${{ currentPrice }}</div>
           </div>
 
           <!-- Size and Quantity - Only show if in stock -->
-          <div class="mt-6" v-if="product.stock > 0">
+          <div class="mt-6" v-if="product.variants && product.variants.length > 0">
             <div class="d-flex justify-space-between align-center mb-2">
-              <h3 class="text-subtitle-2 font-weight-medium">Size</h3>
-              <div class="text-caption">{{ product.size || '500 ml' }}</div>
+              <h3 class="text-subtitle-2 font-weight-medium">Size (ml)</h3>
             </div>
             
             <!-- Size options -->
             <div class="size-options d-flex mb-4">
               <v-btn 
-                variant="outlined" 
+                v-for="variant in product.variants" 
+                :key="variant.id"
+                :variant="selectedVariant?.id === variant.id ? 'flat' : 'outlined'" 
                 class="size-btn mr-2" 
-                :color="selectedSize === '100ml' ? 'primary' : ''" 
-                @click="selectedSize = '100ml'"
+                :color="selectedVariant?.id === variant.id ? 'primary' : ''" 
+                @click="selectVariant(variant)"
               >
-                100ml
-              </v-btn>
-              <v-btn 
-                variant="outlined" 
-                class="size-btn mr-2" 
-                :color="selectedSize === '250ml' ? 'primary' : ''" 
-                @click="selectedSize = '250ml'"
-              >
-                250ml
-              </v-btn>
-              <v-btn 
-                variant="outlined" 
-                class="size-btn" 
-                :color="selectedSize === '500ml' ? 'primary' : ''" 
-                @click="selectedSize = '500ml'"
-              >
-                500ml
+                {{ variant.name }}
               </v-btn>
             </div>
           </div>
@@ -113,7 +87,7 @@
           <!-- Tab section -->
           <v-tabs v-model="activeTab" bg-color="transparent" color="primary" grow>
             <v-tab value="description" class="text-none">Description</v-tab>
-            <v-tab value="reviews" class="text-none">Reviews</v-tab>
+            <v-tab value="reviews" class="text-none">Reviews ({{ product.review_stats.count }})</v-tab>
             <v-tab value="how-to-use" class="text-none">How to use</v-tab>
           </v-tabs>
           
@@ -124,8 +98,8 @@
               <p class="text-body-2">{{ product.ingredients || "No ingredients available." }}</p>
               <h6 class="text-h6 font-weight-bold mb-1 mt-2">Benefits</h6>
               <p class="text-body-2">{{ product.benefits || "No benefits available." }}</p>
-              <h6 class="text-h6 font-weight-bold mb-1 mt-2" v-if="product.suitable_for.length > 0">Suitable for</h6>
-              <v-chip v-for="suitable in product.suitable_for" :key="suitable" class="text-body-2" variant="outlined" color="primary" size="small">{{ suitable }}</v-chip>
+              <h6 class="text-h6 font-weight-bold mb-1 mt-2" v-if="product.suitable_for.length > 0">Skin Types</h6>
+              <v-chip v-for="suitable in product.suitable_for" :key="suitable" class="text-body-2 mr-2 mb-2" variant="outlined" color="primary" size="small">{{ suitable.name }}</v-chip>
             </v-window-item>
             
             <v-window-item value="reviews">
@@ -179,7 +153,7 @@
         <div class="bottom-actions-buttons">
           <!-- Out of stock notification button -->
           <v-btn
-            v-if="product.stock <= 0"
+            v-if="currentStock <= 0"
             color="primary"
             class="text-none"
             block
@@ -192,27 +166,52 @@
           </v-btn>
           
           <!-- In stock action buttons -->
-          <div v-else class="d-flex">
+          <div v-else class="d-flex align-center">
+            <div class="d-flex align-center mr-4">
+              <v-btn 
+                variant="outlined" 
+                icon="mdi-minus" 
+                density="comfortable" 
+                @click="decreaseQuantity"
+                class="quantity-btn font-weight-bold"
+                color="primary"
+              ></v-btn>
+              <div class="quantity-display mx-1 font-weight-bold text-primary">{{ quantity }}</div>
+              <v-btn 
+                variant="outlined" 
+                icon="mdi-plus" 
+                density="comfortable" 
+                @click="increaseQuantity(currentStock)"
+                class="quantity-btn font-weight-bold"
+                color="primary"
+              ></v-btn>
+            </div>
+            
             <v-btn 
               color="primary" 
               rounded
               variant="outlined"
-              class="mr-4 flex-grow-1 text-none"
+              class="flex-grow-1 text-none"
               size="large"
               @click="addToCart"
             >
-              <v-icon>mdi-cart-plus</v-icon>
+              <v-badge
+                :content="cartItemsCount"
+                color="error"
+                class="mr-2"
+              >
+                <v-icon>mdi-cart</v-icon>
+              </v-badge>
               Add to Cart
             </v-btn>
             
             <v-btn
               color="primary" 
-              class="flex-grow-1 text-none"
-              rounded
-              size="large"
+              class="ml-4"
+              icon
               @click="buyNow"
             >
-              Buy Now
+              <v-icon>mdi-basket-check</v-icon>
             </v-btn>
           </div>
         </div>
@@ -223,6 +222,8 @@
         v-model="showSnackbar"
         :color="snackbarColor"
         :timeout="3000"
+        location="top"
+        class="ml-4"
       >
         {{ snackbarText }}
         <template v-slot:actions>
@@ -250,7 +251,8 @@ const route = useRoute()
 const router = useRouter()
 const quantity = ref(1)
 const activeTab = ref('description')
-const selectedSize = ref('500ml')
+const selectedVariant = ref(null)
+const selectedSize = ref(null)
 const cart = useCartStore()
 const wishlist = useWishlistStore()
 const productStore = useProductStore()
@@ -276,11 +278,16 @@ const decreaseQuantity = () => {
 }
 
 const addToCart = () => {
-  if (product.value && product.value.stock > 0) {
-    cart.addToCart({
+  if (product.value && currentStock.value > 0) {
+    const cartItem = {
       ...product.value,
-      selectedSize: selectedSize.value
-    }, quantity.value)
+      selectedVariant: selectedVariant.value,
+      price: currentPrice.value,
+      stock: currentStock.value,
+      variantName: selectedVariant.value.name
+    }
+    
+    cart.addToCart(cartItem, quantity.value)
     
     // Show success snackbar
     snackbarText.value = 'Product added to cart'
@@ -336,6 +343,69 @@ const toggleWishlist = () => {
   }
 }
 
+// Add new computed property to get cart item quantity for current variant
+const cartItemQuantity = computed(() => {
+  if (!product.value || !selectedVariant.value) return 0
+  
+  const cartItem = cart.items.find(item => 
+    item.id === product.value.id && 
+    item.selectedVariant?.id === selectedVariant.value.id
+  )
+  
+  return cartItem ? cartItem.quantity : 0
+})
+
+// Update watch for product to set initial quantity
+watch(product, (newProduct) => {
+  if (!newProduct) return
+  
+  // Check various conditions that would make product unavailable
+  const isUnavailable = !newProduct.published
+  
+  if (isUnavailable) {
+    // Show notification for unavailable product
+    snackbarText.value = "This product is not available"
+    snackbarColor.value = "error"
+    showSnackbar.value = true
+    
+    // Redirect to home page
+    router.push({ name: 'Home' })
+  } else if (newProduct.variants && newProduct.variants.length > 0) {
+    // Find the default variant or use the first one
+    const defaultVariant = newProduct.variants.find(v => v.is_default) || newProduct.variants[0]
+    selectedVariant.value = defaultVariant
+    selectedSize.value = defaultVariant.name
+    
+    // Set initial quantity based on cart
+    quantity.value = cartItemQuantity.value || 1
+  }
+}, { immediate: true })
+
+// Computed properties for current variant's price and stock
+const currentPrice = computed(() => {
+  return selectedVariant.value ? selectedVariant.value.price : product.value?.price
+})
+
+const currentStock = computed(() => {
+  return selectedVariant.value ? selectedVariant.value.stock : product.value?.stock
+})
+
+// Update selectVariant method to set quantity from cart
+const selectVariant = (variant) => {
+  selectedVariant.value = variant
+  selectedSize.value = variant.name
+  
+  // Update quantity based on cart
+  const cartItem = cart.items.find(item => 
+    item.id === product.value.id && 
+    item.selectedVariant?.id === variant.id
+  )
+  
+  quantity.value = cartItem ? cartItem.quantity : 1
+}
+
+const cartItemsCount = computed(() => cart.items.length)
+
 onMounted(async () => {
   const productId = route.params.id
   
@@ -358,24 +428,6 @@ onMounted(async () => {
     router.push({ name: 'Home' })
   }
 })
-
-// Watch for product data and check if it's published
-watch(product, (newProduct) => {
-  if (!newProduct) return
-  
-  // Check various conditions that would make product unavailable
-  const isUnavailable = !newProduct.published
-  
-  if (isUnavailable) {
-    // Show notification for unavailable product
-    snackbarText.value = "This product is not available"
-    snackbarColor.value = "error"
-    showSnackbar.value = true
-    
-    // Redirect to home page
-    router.push({ name: 'Home' })
-  }
-}, { immediate: true })
 </script>
 
 <style scoped>
@@ -459,5 +511,16 @@ watch(product, (newProduct) => {
   .bottom-actions-buttons {
     max-width: 960px;
   }
+}
+
+.quantity-btn {
+  min-width: 36px;
+  height: 36px;
+}
+
+.quantity-display {
+  min-width: 32px;
+  text-align: center;
+  font-weight: bold;
 }
 </style> 
