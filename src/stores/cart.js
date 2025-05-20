@@ -44,6 +44,13 @@ export const useCartStore = defineStore('cart', () => {
     }
     
     cartUpdated.value = true
+    
+    // Immediately sync with backend
+    try {
+      await syncCartWithBackend()
+    } catch (error) {
+      console.error('Failed to sync cart with backend:', error)
+    }
   }
   
   const updateVariantQuantity = async (productId, variantId, newQuantity) => {
@@ -86,6 +93,7 @@ export const useCartStore = defineStore('cart', () => {
 
       // If we have a cart ID, update existing cart
       console.log('cartId', cartId.value)
+      console.log('items.value', items.value);
       if (cartId.value) {
         // Update each item in the cart
         for (const item of items.value) {
@@ -122,7 +130,7 @@ export const useCartStore = defineStore('cart', () => {
   const fetchCart = async () => {
     try {
       const response = await apiService.getCart()
-      items.value = response.data.items
+      items.value = response.data
       cartId.value = response.data.id
       cartUpdated.value = false
     } catch (error) {

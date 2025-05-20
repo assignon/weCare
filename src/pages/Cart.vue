@@ -3,20 +3,20 @@
     <v-container>
       <h1 class="text-h5 font-weight-bold mb-6">Shopping Cart</h1>
       
-      <v-row v-if="cart.items.length > 0">
+      <v-row v-if="cart.items.items.length > 0">
         <!-- Cart items -->
         <v-col cols="12" md="8">
           <v-card class="cart-items-container mb-4" flat>
             <div 
-              v-for="group in groupedCartItems" 
-              :key="group.product.id"
+              v-for="group in cart.items.items" 
+              :key="group.product_id"
               class="cart-product-group"
             >
               <!-- Product header -->
               <div class="d-flex cart-item-content mb-2">
                 <div class="cart-item-image-container mr-4">
                   <v-img 
-                    :src="group.product.main_image || 'https://via.placeholder.com/150'" 
+                    :src="group.main_image || 'https://via.placeholder.com/150'" 
                     width="100" 
                     height="100" 
                     class="cart-item-image"
@@ -25,8 +25,12 @@
                 </div>
                 
                 <div class="flex-grow-1">
-                  <h3 class="text-subtitle-1 font-weight-medium mb-1">{{ group.product.name }}</h3>
-                  <p class="text-caption text-grey mb-0">{{ group.product.seller_name || 'weCare' }}</p>
+                  <h3 class="text-subtitle-1 font-weight-medium mb-1">{{ group.product_name }}</h3>
+                  <p class="text-caption text-grey mb-0">{{ group.seller_name || '---' }}</p>
+                  <p class="text-caption text-primary font-weight-bold">
+                    <v-icon size="x-small" color="primary" class="mr-1">mdi-truck-delivery</v-icon>
+                    {{ group.delivery_info.estimated_delivery_display }}
+                  </p>
                 </div>
               </div>
               
@@ -50,7 +54,7 @@
                         density="comfortable"
                         size="small"
                         :disabled="variant.quantity <= 1"
-                        @click="updateVariantQuantity(group.product.id, variant.id, variant.quantity - 1)"
+                        @click="updateVariantQuantity(group.product_id, variant.id, variant.quantity - 1)"
                       ></v-btn>
                       <div class="quantity-display mx-2">{{ variant.quantity }}</div>
                       <v-btn 
@@ -59,7 +63,7 @@
                         density="comfortable"
                         size="small"
                         :disabled="variant.quantity >= variant.stock"
-                        @click="updateVariantQuantity(group.product.id, variant.id, variant.quantity + 1)"
+                        @click="updateVariantQuantity(group.product_id, variant.id, variant.quantity + 1)"
                       ></v-btn>
                     </div>
                     
@@ -68,7 +72,7 @@
                       variant="text"
                       color="error"
                       density="comfortable"
-                      @click="removeVariant(group.product.id, variant.id)"
+                      @click="removeVariant(group.product_id, variant.id)"
                     ></v-btn>
                   </div>
                 </div>
@@ -94,8 +98,8 @@
             <h2 class="text-h6 font-weight-bold mb-4">Order Summary</h2>
             
             <div class="d-flex justify-space-between mb-2">
-              <span class="text-body-1">Items ({{ cart.totalItems }})</span>
-              <!-- <span class="text-body-1">${{ cart.total_amount.toFixed(2) }}</span> -->
+              <span class="text-body-1">Items ({{ cart.items.total_items }})</span>
+              <span class="text-body-1">${{ cart.items.total_amount ? cart.items.total_amount.toFixed(2) : '0.00' }}</span>
             </div>
             
             <div class="d-flex justify-space-between mb-2">
@@ -107,7 +111,7 @@
             
             <div class="d-flex justify-space-between mb-4">
               <span class="text-subtitle-1 font-weight-bold">Total</span>
-              <!-- <span class="text-h6 font-weight-bold primary-color">${{ cart.total_amount.toFixed(2) }}</span> -->
+              <span class="text-h6 font-weight-bold primary-color">${{ cart.items.total_amount ? cart.items.total_amount.toFixed(2) : '0.00' }}</span>
             </div>
             
             <!-- Promo code -->
@@ -119,17 +123,6 @@
               hide-details
               class="mb-4"
             ></v-text-field> -->
-            
-            <!-- Checkout button -->
-            <v-btn 
-              color="primary" 
-              block 
-              :to="{ name: 'Checkout' }"
-              size="large"
-              class="checkout-btn"
-            >
-              Proceed to Checkout
-            </v-btn>
             
             <!-- Secure checkout info -->
             <div class="d-flex align-center justify-center mt-4">
@@ -146,6 +139,20 @@
           </v-card>
         </v-col>
       </v-row>
+      
+      <!-- Fixed checkout button for mobile -->
+      <div v-if="cart.items.items.length > 0" class="fixed-checkout-button">
+        <v-btn 
+          color="primary" 
+          block 
+          :to="{ name: 'Checkout' }"
+          size="large"
+          class="checkout-btn d-flex align-center justify-space-between"
+        >
+          <span>Proceed to Checkout</span>
+          <span>${{ cart.total_amount ? cart.total_amount.toFixed(2) : '0.00' }}</span>
+        </v-btn>
+      </div>
       
       <!-- Empty cart -->
       <v-card v-else class="empty-cart pa-6 text-center">
@@ -226,27 +233,32 @@ const router = useRouter()
 // Add computed property to group cart items by product
 const groupedCartItems = computed(() => {
   const groups = {}
-  console.log('cart.items', cart.items)
+  
   cart.items.forEach(item => {
-    if (!groups[item.id]) {
-      groups[item.id] = {
+    const productId = item.product_id
+    
+    if (!groups[productId]) {
+      groups[productId] = {
         product: {
-          id: item.id,
-          name: item.name,
+          id: productId,
+          name: item.product_name,
           main_image: item.main_image,
-          seller_name: item.seller_name
+          seller_name: item.seller_name,
+          delivery_info: item.delivery_info || "Standard Delivery"
         },
         variants: []
       }
     }
     
-    groups[item.id].variants.push({
+    groups[productId].variants.push({
       id: item.variant,
       name: item.variant_name,
       price: item.variant_price,
       quantity: item.quantity,
+      stock: item.stock && item.stock.available ? item.stock.available : 0
     })
   })
+  console.log('groups', Object.values(groups));
   
   return Object.values(groups)
 })
@@ -265,7 +277,6 @@ const handleBeforeUnload = (e) => {
 onMounted(async () => {
   // Add event listener for page unload
   window.addEventListener('beforeunload', handleBeforeUnload)
-  
   try {
     // Initialize cart state
     cart.initCartState()
@@ -280,6 +291,7 @@ onMounted(async () => {
   } catch (error) {
     console.error('Failed to initialize cart:', error)
   }
+  console.log('cartItems', cart.items.total_amount);
 })
 
 onBeforeUnmount(() => {
@@ -310,7 +322,7 @@ const removeVariant = async (productId, variantId) => {
 
 <style scoped>
 .cart-page {
-  padding-bottom: 64px;
+  padding-bottom: 84px; /* Increased to accommodate bottom fixed button */
 }
 
 .cart-items-container {
@@ -427,5 +439,16 @@ const removeVariant = async (productId, variantId) => {
   min-width: 32px;
   text-align: center;
   font-weight: bold;
+}
+
+.fixed-checkout-button {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  padding: 16px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  z-index: 10;
 }
 </style>
