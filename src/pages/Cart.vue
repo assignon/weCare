@@ -95,7 +95,7 @@
             
             <div class="d-flex justify-space-between mb-2">
               <span class="text-body-1">Items ({{ cart.totalItems }})</span>
-              <span class="text-body-1">${{ cart.subtotal.toFixed(2) }}</span>
+              <!-- <span class="text-body-1">${{ cart.total_amount.toFixed(2) }}</span> -->
             </div>
             
             <div class="d-flex justify-space-between mb-2">
@@ -107,7 +107,7 @@
             
             <div class="d-flex justify-space-between mb-4">
               <span class="text-subtitle-1 font-weight-bold">Total</span>
-              <span class="text-h6 font-weight-bold primary-color">${{ cart.subtotal.toFixed(2) }}</span>
+              <!-- <span class="text-h6 font-weight-bold primary-color">${{ cart.total_amount.toFixed(2) }}</span> -->
             </div>
             
             <!-- Promo code -->
@@ -226,7 +226,7 @@ const router = useRouter()
 // Add computed property to group cart items by product
 const groupedCartItems = computed(() => {
   const groups = {}
-  
+  console.log('cart.items', cart.items)
   cart.items.forEach(item => {
     if (!groups[item.id]) {
       groups[item.id] = {
@@ -241,11 +241,10 @@ const groupedCartItems = computed(() => {
     }
     
     groups[item.id].variants.push({
-      id: item.selectedVariant.id,
-      name: item.selectedVariant.name,
-      price: item.price,
+      id: item.variant,
+      name: item.variant_name,
+      price: item.variant_price,
       quantity: item.quantity,
-      stock: item.stock
     })
   })
   

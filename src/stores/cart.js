@@ -28,7 +28,7 @@ export const useCartStore = defineStore('cart', () => {
   
   const addToCart = async (product, quantity = 1) => {
     const existingItemIndex = items.value.findIndex(
-      item => item.id === product.id && item.selectedVariant?.id === product.selectedVariant.id
+      item => item.id === product.id && item.variant === product.variant
     )
     
     if (existingItemIndex > -1) {
@@ -39,7 +39,7 @@ export const useCartStore = defineStore('cart', () => {
       items.value.push({
         ...product,
         quantity,
-        cartItemId: `${product.id}-${product.selectedVariant.id}`
+        cartItemId: `${product.id}-${product.variant}`
       })
     }
     
@@ -48,7 +48,7 @@ export const useCartStore = defineStore('cart', () => {
   
   const updateVariantQuantity = async (productId, variantId, newQuantity) => {
     const itemIndex = items.value.findIndex(
-      item => item.id === productId && item.selectedVariant?.id === variantId
+      item => item.id === productId && item.variant === variantId
     )
     
     if (itemIndex > -1) {
@@ -59,7 +59,7 @@ export const useCartStore = defineStore('cart', () => {
   
   const removeVariant = async (productId, variantId) => {
     const itemIndex = items.value.findIndex(
-      item => item.id === productId && item.selectedVariant?.id === variantId
+      item => item.id === productId && item.variant === variantId
     )
     
     if (itemIndex > -1) {
@@ -85,20 +85,23 @@ export const useCartStore = defineStore('cart', () => {
       }
 
       // If we have a cart ID, update existing cart
+      console.log('cartId', cartId.value)
       if (cartId.value) {
         // Update each item in the cart
         for (const item of items.value) {
           await apiService.updateCartItem(cartId.value, {
-            product_id: item.id,
-            variant_id: item.selectedVariant.id,
-            quantity: item.quantity
+            id: item.id,
+            product_id: item.product,
+            variant_id: item.variant,
+            quantity: item.quantity,
+            stock: item.stock.available
           })
         }
       } else {
         // Create new cart with items
         const cartItems = items.value.map(item => ({
-          product_id: item.id,
-          variant_id: item.selectedVariant.id,
+          product_id: item.product,
+          variant_id: item.variant,
           quantity: item.quantity
         }))
         
@@ -108,7 +111,7 @@ export const useCartStore = defineStore('cart', () => {
       
       // Fetch latest cart state
       const cartResponse = await apiService.getCart()
-      items.value = cartResponse.data.items
+      items.value = cartResponse.data
       cartUpdated.value = false
     } catch (error) {
       console.error('Failed to sync cart with backend:', error)

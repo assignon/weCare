@@ -156,14 +156,16 @@ export const apiService = {
     return api.get('/orders/cart/view_cart/')
   },
   createCart(items) {
-    return api.post('/orders/cart/add_item/', items)
+    return api.post('/orders/cart/add_item/', {items: items})
   },
 
   updateCartItem(cartId, item) {
     return api.patch(`/orders/cart/${cartId}/update_item/`, {
+      id: item.id,
       product_id: item.product_id,
       variant_id: item.variant_id,
-      quantity: item.quantity
+      quantity: item.quantity,
+      stock: item.stock.available
     })
   },
 
