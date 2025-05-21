@@ -138,6 +138,27 @@ export const apiService = {
     return api.put('/accounts/profile/', profileData)
   },
   
+  // Addresses
+  getAddresses() {
+    return api.get('/accounts/addresses/')
+  },
+  
+  addAddress(addressData) {
+    return api.post('/accounts/addresses/', addressData)
+  },
+  
+  updateAddress(addressId, addressData) {
+    return api.put(`/accounts/addresses/${addressId}/`, addressData)
+  },
+  
+  deleteAddress(addressId) {
+    return api.delete(`/accounts/addresses/${addressId}/`)
+  },
+  
+  setDefaultAddress(addressId) {
+    return api.post(`/accounts/addresses/${addressId}/set_default/`)
+  },
+  
   // Notifications
   getNotifications() {
     return api.get('/notifications/notifications/')
@@ -156,21 +177,22 @@ export const apiService = {
     return api.get('/orders/cart/view_cart/')
   },
   createCart(items) {
+    console.log(items)
     return api.post('/orders/cart/add_item/', {items: items})
   },
 
-  updateCartItem(cartId, item) {
-    return api.patch(`/orders/cart/${cartId}/update_item/`, {
+  updateCartItem(item) {
+    return api.patch(`/orders/cart/${item.id}/update_item/`, {
       id: item.id,
-      product_id: item.product_id,
+      // product_id: item.product_id,
       variant_id: item.variant_id,
       quantity: item.quantity,
-      stock: item.stock.available
+      stock: item.stock
     })
   },
 
-  removeCartItem(cartId, itemId) {
-    return api.delete(`/orders/cart/${cartId}/remove_item/`)
+  removeCartItem(cartItemId) {
+    return api.delete(`/orders/cart/${cartItemId}/remove_item/`)
   },
   clearCart() {
     return api.post('/orders/cart/clear/')

@@ -3,7 +3,7 @@ import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 
 const route = useRoute()
-const mainPages = ['Home', 'Orders', 'Wishlist', 'Cart']
+const mainPages = ['Home', 'Orders', 'Wishlist']
 const showBottomNav = computed(() => mainPages.includes(route.name))
 </script>
 

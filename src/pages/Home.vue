@@ -11,7 +11,7 @@
           <v-btn icon class="" variant="text">
             <v-icon>mdi-bell-outline</v-icon>
           </v-btn>
-          <v-btn icon class="" variant="text">
+          <v-btn icon class="" variant="text" @click="navigateToProfile">
             <v-icon>mdi-account-circle-outline</v-icon>
           </v-btn>
         </div>
@@ -356,6 +356,10 @@ const sectionTitle = computed(() => {
   if (isFiltering.value) return 'Filtered Products'
   return 'All Products'
 })
+
+const navigateToProfile = () => {
+  router.push({ name: 'Profile' })
+}
 
 const toggleSearch = () => {
   showSearch.value = !showSearch.value

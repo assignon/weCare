@@ -209,7 +209,7 @@
               color="primary" 
               class="ml-4"
               icon
-              @click="buyNow"
+              @click="goToCart"
             >
               <v-icon>mdi-basket-check</v-icon>
             </v-btn>
@@ -277,27 +277,35 @@ const decreaseQuantity = () => {
   }
 }
 
-const addToCart = () => {
+const addToCart = async () => {
   if (product.value && currentStock.value > 0) {
-    const cartItem = {
-      ...product.value,
-      selectedVariant: selectedVariant.value,
-      price: currentPrice.value,
-      stock: currentStock.value,
-      variantName: selectedVariant.value.name
+    try {
+      // Only send the necessary data to create a new cart
+      await cart.createNewCart(
+        selectedVariant.value, 
+        quantity.value,
+        product.value.id
+      );
+      
+      // Reset quantity to 1 after successful addition
+      quantity.value = 1;
+      
+      // Show success snackbar
+      snackbarText.value = 'Product added to cart';
+      snackbarColor.value = 'success';
+      showSnackbar.value = true;
+    } catch (error) {
+      console.error('Failed to add product to cart:', error);
+      
+      // Show error snackbar
+      snackbarText.value = 'Failed to add product to cart';
+      snackbarColor.value = 'error';
+      showSnackbar.value = true;
     }
-    
-    cart.addToCart(cartItem, quantity.value)
-    
-    // Show success snackbar
-    snackbarText.value = 'Product added to cart'
-    snackbarColor.value = 'success'
-    showSnackbar.value = true
   }
 }
 
-const buyNow = () => {
-  addToCart()
+const goToCart = () => {
   router.push({ name: 'Cart' })
 }
 
@@ -343,16 +351,17 @@ const toggleWishlist = () => {
   }
 }
 
-// Add new computed property to get cart item quantity for current variant
+// Fix cart.items.find is not a function error
 const cartItemQuantity = computed(() => {
-  if (!product.value || !selectedVariant.value) return 0
+  if (!product.value || !selectedVariant.value || !cart.items || !cart.items.items) return 0
   
-  const cartItem = cart.items.find(item => 
-    item.id === product.value.id && 
-    item.selectedVariant?.id === selectedVariant.value.id
-  )
+  // Find the product in the cart items
+  const cartProduct = cart.items.items.find(item => item.product_id === product.value.id);
+  if (!cartProduct) return 0;
   
-  return cartItem ? cartItem.quantity : 0
+  // Find the variant in the product's variants
+  const cartVariant = cartProduct.variants.find(v => v.id === selectedVariant.value.id);
+  return cartVariant ? cartVariant.quantity : 0;
 })
 
 // Update watch for product to set initial quantity
@@ -376,8 +385,8 @@ watch(product, (newProduct) => {
     selectedVariant.value = defaultVariant
     selectedSize.value = defaultVariant.name
     
-    // Set initial quantity based on cart
-    quantity.value = cartItemQuantity.value || 1
+    // Always set quantity to 1 when product loads
+    quantity.value = 1
   }
 }, { immediate: true })
 
@@ -390,18 +399,13 @@ const currentStock = computed(() => {
   return selectedVariant.value ? selectedVariant.value.stock : product.value?.stock
 })
 
-// Update selectVariant method to set quantity from cart
+// Update selectVariant to always set quantity to 1
 const selectVariant = (variant) => {
-  selectedVariant.value = variant
-  selectedSize.value = variant.name
+  selectedVariant.value = variant;
+  selectedSize.value = variant.name;
   
-  // Update quantity based on cart
-  const cartItem = cart.items.find(item => 
-    item.id === product.value.id && 
-    item.selectedVariant?.id === variant.id
-  )
-  
-  quantity.value = cartItem ? cartItem.quantity : 1
+  // Always set quantity to 1 when selecting a variant
+  quantity.value = 1;
 }
 
 const cartItemsCount = computed(() => cart.items.length)
