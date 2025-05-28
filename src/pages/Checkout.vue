@@ -994,22 +994,31 @@ const placeOrder = async () => {
     // Check if error response contains specific payment failure info
     if (error.response && error.response.data) {
       const errorData = error.response.data
+
+      // Payment failed - redirect to failed page
+      router.push({
+        name: 'PaymentFailed',
+        query: {
+          error: errorData.payment?.error_message || errorData.error || 'Payment processing failed',
+          message: 'Your payment could not be processed. Please try again.'
+        }
+      })
       
-      // Check if it's a payment-related error
-      if (errorData.payment_status === 'failed' || 
-          (errorData.payment && errorData.payment.status === 'failed')) {
-        // Payment failed - redirect to failed page
-        router.push({
-          name: 'PaymentFailed',
-          query: {
-            error: errorData.payment?.error_message || errorData.error || 'Payment processing failed',
-            message: 'Your payment could not be processed. Please try again.'
-          }
-        })
-      } else {
-        // Other API error
-        showError(errorData.message || errorData.error || 'Failed to create order')
-      }
+      // // Check if it's a payment-related error
+      // if (errorData.payment_status === 'failed' || 
+      //     (errorData.payment && errorData.payment.status === 'failed')) {
+      //   // Payment failed - redirect to failed page
+      //   router.push({
+      //     name: 'PaymentFailed',
+      //     query: {
+      //       error: errorData.payment?.error_message || errorData.error || 'Payment processing failed',
+      //       message: 'Your payment could not be processed. Please try again.'
+      //     }
+      //   })
+      // } else {
+      //   // Other API error
+      //   showError(errorData.message || errorData.error || 'Failed to create order')
+      // }
     } else {
       // Network or other error
       showError('Failed to create order. Please check your connection and try again.')

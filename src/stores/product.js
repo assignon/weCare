@@ -19,6 +19,11 @@ export const useProductStore = defineStore('product', () => {
   const totalProducts = ref(0)
   const currentPage = ref(1)
   const pageSize = ref(20)
+  const pagination = ref({
+    page: 1,
+    pageSize: 20,
+    total: 0
+  })
   
   // Getters
   const filteredProducts = computed(() => {
@@ -37,7 +42,7 @@ export const useProductStore = defineStore('product', () => {
   })
   
   // Actions
-  const fetchProducts = async (params = {}) => {
+  const fetchProducts = async (params = {}, append = false) => {
     loading.value = true
     error.value = null
     
@@ -50,19 +55,41 @@ export const useProductStore = defineStore('product', () => {
         params.category = selectedCategory.value
       }
       
-      // params.page = currentPage.value
-      // params.page_size = pageSize.value
+      // Add pagination params
+      if (!params.page) {
+        params.page = append ? pagination.value.page + 1 : 1
+      }
+      params.page_size = pagination.value.pageSize
       
       const response = await apiService.getProducts(params)
       
-      products.value = response.data.results || response.data
+      const newProducts = response.data.results || response.data
+      
+      if (append) {
+        products.value = [...products.value, ...newProducts]
+        pagination.value.page = params.page
+      } else {
+        products.value = newProducts
+        pagination.value.page = 1
+      }
       
       // If paginated response
       if (response.data.count !== undefined) {
         totalProducts.value = response.data.count
+        pagination.value.total = response.data.count
       }
       
-      return products.value
+      // Return whether there are more products to load
+      let hasMore = false
+      if (response.data.count !== undefined) {
+        // If we have pagination info, check if current products length is less than total
+        hasMore = products.value.length < response.data.count
+      } else {
+        // If no pagination info, check if we got a full page of results
+        hasMore = newProducts.length === pagination.value.pageSize
+      }
+      
+      return hasMore
     } catch (err) {
       console.error('Failed to fetch products:', err)
       error.value = 'Failed to load products. Please try again later.'
@@ -165,6 +192,7 @@ export const useProductStore = defineStore('product', () => {
   const clearFilters = () => {
     searchQuery.value = ''
     selectedCategory.value = null
+    pagination.value.page = 1
   }
   
   const goToPage = async (page) => {
@@ -200,6 +228,7 @@ export const useProductStore = defineStore('product', () => {
     totalProducts,
     currentPage,
     pageSize,
+    pagination,
     
     // Getters
     filteredProducts,

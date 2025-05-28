@@ -1,6 +1,6 @@
 <template>
   <div class="home-page">
-    <v-container class="pa-4">
+    <v-container class="pa-4 pb-24">
       <!-- Header -->
       <div class="d-flex align-center justify-space-between mb-5">
         <h1 class="text-h5 font-weight-bold">weCare</h1>
@@ -140,7 +140,7 @@
       <div v-if="!isFiltering && !isSearching && productStore.popularProducts.length > 0" class="section mb-6">
         <div class="d-flex justify-space-between align-center mb-3">
           <h2 class="section-title font-weight-bold">Popular Product</h2>
-          <span class="text-caption primary-color">View More</span>
+          <!-- <span class="text-caption primary-color">View More</span> -->
         </div>
         
         <!-- Loading state -->
@@ -151,30 +151,32 @@
         <!-- Error state -->
         <v-alert v-else-if="error" type="error" class="mb-4">{{ error }}</v-alert>
         
-        <!-- Popular products -->
-        <div v-else class="d-flex overflow-x-auto">
-          <v-card 
-            v-for="product in productStore.popularProducts.slice(0, 5)" 
-            :key="product.id"
-            class="product-card mr-3" 
-            flat 
-            width="200"
-            @click="navigateToDetails(product.id)"
-          >
-            <v-img 
-              :src="product.main_image || packagingImage" 
-              height="150"
-              class="mb-2"
-            ></v-img>
-            <div class="px-2 pb-2">
-              <h3 class="text-subtitle-2 font-weight-medium mb-1">{{ product.name }}</h3>
-              <p class="text-caption mb-1">{{ product.seller_name || 'weCare' }}</p>
-              <div class="d-flex justify-space-between align-center">
-                <span class="text-subtitle-2 font-weight-bold">${{ product.price }}</span>
-                <v-btn icon="mdi-heart-outline" variant="text" density="compact" size="" color="primary"></v-btn>
+        <!-- Popular products with horizontal scroll -->
+        <div v-else class="horizontal-scroll-container">
+          <div class="horizontal-scroll-content">
+            <v-card 
+              v-for="product in productStore.popularProducts.slice(0, 10)" 
+              :key="product.id"
+              class="product-card-horizontal" 
+              flat 
+              @click="navigateToDetails(product.id)"
+            >
+              <v-img 
+                :src="product.main_image || packagingImage" 
+                height="150"
+                class="mb-2"
+                cover
+              ></v-img>
+              <div class="px-2 pb-2">
+                <h3 class="text-subtitle-2 font-weight-medium mb-1 text-truncate text-capitalize">{{ product.name }}</h3>
+                <p class="text-caption mb-1 text-truncate">{{ product.seller_name || 'weCare' }}</p>
+                <div class="d-flex justify-space-between align-center">
+                  <span class="text-subtitle-2 font-weight-bold">${{ product.price }}</span>
+                  <v-btn icon="mdi-heart-outline" variant="text" density="compact" size="small" color="primary"></v-btn>
+                </div>
               </div>
-            </div>
-          </v-card>
+            </v-card>
+          </div>
         </div>
       </div>
       
@@ -182,7 +184,7 @@
       <div v-if="!isFiltering && !isSearching && productStore.newArrivals.length > 0" class="section mb-6">
         <div class="d-flex justify-space-between align-center mb-3">
           <h2 class="section-title font-weight-bold">New Arrivals</h2>
-          <span class="text-caption primary-color">View More</span>
+          <!-- <span class="text-caption primary-color">View More</span> -->
         </div>
         
         <!-- Loading state -->
@@ -194,58 +196,51 @@
         <v-alert v-else-if="error" type="error" class="mb-4">{{ error }}</v-alert>
         
         <!-- New arrivals with horizontal scroll -->
-        <div v-else class="d-flex overflow-x-auto">
-          <v-card 
-            v-for="product in productStore.newArrivals.slice(0, 5)" 
-            :key="product.id"
-            class="product-card-bundle mr-3" 
-            flat 
-            width="100%"
-            height="150"
-            @click="navigateToDetails(product.id)"
-          >
-            <div class="d-flex">
-              <v-img 
-                :src="product.main_image || packagingImage" 
-                height="100%"
-                width="100"
-                class="rounded-lg"
-                cover
-              ></v-img>
-              <div class="px-3 py-2 d-flex flex-column justify-space-between">
-                <div>
-                  <h3 class="text-subtitle-1 font-weight-medium mb-1 text-truncate">{{ product.name }}</h3>
-                  <p class="text-caption text-grey mb-1">{{ product.seller_name || 'weCare' }}</p>
-                  <p class="text-caption text-grey-darken-1">{{ product.short_description || 'For your intensive bodycare set' }}</p>
-                </div>
-                <div class="d-flex align-center justify-space-between">
+        <div v-else class="horizontal-scroll-container">
+          <div class="horizontal-scroll-content">
+            <v-card 
+              v-for="product in productStore.newArrivals.slice(0, 10)" 
+              :key="product.id"
+              class="product-card-bundle-horizontal" 
+              flat 
+              @click="navigateToDetails(product.id)"
+            >
+              <div class="d-flex">
+                <v-img 
+                  :src="product.main_image || packagingImage" 
+                  height="150"
+                  width="100"
+                  class="rounded-lg flex-shrink-0"
+                  cover
+                ></v-img>
+                <div class="px-3 py-2 d-flex flex-column justify-space-between flex-grow-1">
                   <div>
-                    <span v-if="product.original_price && product.original_price > product.price" class="text-caption text-decoration-line-through text-grey mr-1">${{ product.original_price }}</span>
-                    <span class="text-subtitle-2 font-weight-bold primary-color">${{ product.price }}</span>
+                    <h3 class="text-subtitle-1 font-weight-medium mb-1 text-truncate text-capitalize">{{ product.name }}</h3>
+                    <p class="text-caption text-grey mb-1 text-truncate">{{ product.seller_name || 'weCare' }}</p>
+                    <!-- <p class="text-caption text-grey-darken-1 text-truncate">{{ product.short_description || 'For your intensive bodycare set' }}</p> -->
                   </div>
-                  <v-btn icon="mdi-heart-outline" variant="text" density="compact" size="" color="primary"></v-btn>
-                  <!-- <v-btn 
-                    icon="mdi-cart-plus" 
-                    size="small" 
-                    color="primary" 
-                    variant="text"
-                    @click.stop="addToCart(product)" 
-                  ></v-btn> -->
+                  <div class="d-flex align-center justify-space-between">
+                    <div>
+                      <span v-if="product.original_price && product.original_price > product.price" class="text-caption text-decoration-line-through text-grey mr-1">${{ product.original_price }}</span>
+                      <span class="text-subtitle-2 font-weight-bold primary-color">${{ product.price }}</span>
+                    </div>
+                    <v-btn icon="mdi-heart-outline" variant="text" density="compact" size="small" color="primary"></v-btn>
+                  </div>
                 </div>
               </div>
-            </div>
-          </v-card>
+            </v-card>
+          </div>
         </div>
       </div>
       
-      <!-- All Products Section -->
+      <!-- All Products Section with Infinite Scroll -->
       <div class="section mb-6">
         <div class="d-flex justify-space-between align-center mb-3">
           <h2 class="section-title font-weight-bold">{{ sectionTitle }}</h2>
         </div>
         
-        <!-- Loading state -->
-        <div v-if="loading" class="d-flex justify-center my-4">
+        <!-- Loading state for initial load -->
+        <div v-if="loading && productStore.products.length === 0" class="d-flex justify-center my-4">
           <v-progress-circular indeterminate color="primary" />
         </div>
         
@@ -269,7 +264,7 @@
             ></v-img>
             <div class="px-2 pb-2">
               <h3 class="text-subtitle-2 font-weight-medium mb-1 text-truncate text-capitalize">{{ product.name }}</h3>
-              <p class="text-caption mb-1">{{ product.seller_name || 'weCare' }}</p>
+              <p class="text-caption mb-1 text-truncate">{{ product.seller_name || 'weCare' }}</p>
               <div class="d-flex justify-space-between align-center">
                 <span class="text-subtitle-2 font-weight-bold">${{ product.price }}</span>
                 <v-btn 
@@ -284,8 +279,39 @@
           </v-card>
         </div>
         
+        <!-- Infinite Scroll Loading -->
+        <div 
+          v-if="hasMoreProducts && productStore.products.length > 0"
+          ref="loadMoreTrigger"
+          class="text-center py-6"
+        >
+          <v-progress-circular 
+            v-if="loadingMore"
+            indeterminate 
+            color="primary" 
+            size="32"
+          />
+          <p v-if="loadingMore" class="text-body-2 text-medium-emphasis mt-2">
+            Loading more products...
+          </p>
+        </div>
+
+        <!-- End of Results - Always show when products exist and no more to load -->
+        <div v-if="!hasMoreProducts && productStore.products.length > 0 && !loading" class="text-center py-8 mb-20">
+          <v-divider class="mb-4"></v-divider>
+          <v-icon color="grey-lighten-1" size="24" class="mb-2">
+            mdi-check-circle-outline
+          </v-icon>
+          <p class="text-body-2 text-medium-emphasis">
+            That's all for now!
+          </p>
+          <p class="text-caption text-medium-emphasis">
+            You've seen all {{ productStore.products.length }} products
+          </p>
+        </div>
+        
         <!-- No products state -->
-        <div v-else class="empty-state text-center my-6">
+        <div v-else-if="!loading && productStore.products.length === 0" class="empty-state text-center my-6">
           <v-img
             :src="emptyBoxImage"
             width="200"
@@ -324,7 +350,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useProductStore } from '@/stores/product'
 import { useRouter } from 'vue-router'
@@ -346,6 +372,12 @@ const minPrice = ref('')
 const maxPrice = ref('')
 const sortOrder = ref('asc')
 const isFiltering = ref(false)
+
+// Infinite scroll for all products
+const loadingMore = ref(false)
+const hasMoreProducts = ref(true)
+const loadMoreTrigger = ref(null)
+let observer = null
 
 const loading = computed(() => productStore.loading)
 const error = computed(() => productStore.error)
@@ -375,7 +407,8 @@ const toggleSearch = () => {
 const handleSearch = async () => {
   if (search.value.trim()) {
     isSearching.value = true
-    await productStore.searchProducts(search.value)
+    const hasMore = await productStore.searchProducts(search.value)
+    hasMoreProducts.value = hasMore
   } else {
     await clearSearch()
   }
@@ -385,7 +418,8 @@ const clearSearch = async () => {
   search.value = ''
   isSearching.value = false
   productStore.clearFilters()
-  await productStore.fetchProducts()
+  const hasMore = await productStore.fetchProducts()
+  hasMoreProducts.value = hasMore
   // Refresh all products
   await Promise.all([
     productStore.fetchPopularProducts(),
@@ -425,7 +459,8 @@ const applyPriceFilter = async () => {
   }
   
   isFiltering.value = Object.keys(params).length > 0
-  await productStore.fetchProducts(params)
+  const hasMore = await productStore.fetchProducts(params)
+  hasMoreProducts.value = hasMore
 }
 
 const clearAllFilters = async () => {
@@ -434,7 +469,8 @@ const clearAllFilters = async () => {
   sortOrder.value = 'asc'
   isFiltering.value = false
   productStore.clearFilters()
-  await productStore.fetchProducts()
+  const hasMore = await productStore.fetchProducts()
+  hasMoreProducts.value = hasMore
 }
 
 const addToCart = (product) => {
@@ -446,28 +482,109 @@ const navigateToDetails = (productId) => {
   router.push({ name: 'ProductDetails', params: { id: productId } })
 }
 
-const filterByCategory = (categoryId) => {
+const filterByCategory = async (categoryId) => {
   // If a category is selected (not "All"), hide popular and new arrivals sections
   isFiltering.value = true
-  productStore.filterByCategory(categoryId)
+  const hasMore = await productStore.filterByCategory(categoryId)
+  hasMoreProducts.value = hasMore
 }
 
 const showAllProducts = async () => {
   productStore.clearFilters()
-  await productStore.fetchProducts()
+  const hasMore = await productStore.fetchProducts()
   clearAllFilters()
+  hasMoreProducts.value = hasMore
+  setupInfiniteScroll()
 }
+
+// Infinite scroll methods
+const loadMoreProducts = async () => {
+  if (loadingMore.value || !hasMoreProducts.value || isSearching.value || isFiltering.value) {
+    return
+  }
+  
+  loadingMore.value = true
+  
+  try {
+    const currentPage = productStore.pagination?.page || 1
+    const nextPage = currentPage + 1
+    
+    console.log('Loading more products, page:', nextPage)
+    const hasMore = await productStore.fetchProducts({ page: nextPage }, true) // true for append
+    hasMoreProducts.value = hasMore
+    
+    console.log('Has more products:', hasMore, 'Total products:', productStore.products.length)
+    
+    if (!hasMore && observer) {
+      observer.disconnect()
+      console.log('No more products, disconnecting observer')
+    }
+  } catch (error) {
+    console.error('Error loading more products:', error)
+  } finally {
+    loadingMore.value = false
+  }
+}
+
+const setupInfiniteScroll = () => {
+  if (observer) {
+    observer.disconnect()
+  }
+  
+  observer = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0]
+      if (entry.isIntersecting && hasMoreProducts.value && !loadingMore.value && !loading.value) {
+        loadMoreProducts()
+      }
+    },
+    {
+      threshold: 0.1,
+      rootMargin: '50px'
+    }
+  )
+  
+  nextTick(() => {
+    if (loadMoreTrigger.value) {
+      observer.observe(loadMoreTrigger.value)
+    }
+  })
+}
+
+// Watch for products changes to re-setup infinite scroll
+watch(() => productStore.products, () => {
+  if (productStore.products.length > 0 && !isSearching.value && !isFiltering.value) {
+    nextTick(() => {
+      setupInfiniteScroll()
+    })
+  }
+}, { flush: 'post' })
 
 onMounted(async () => {
   // Fetch categories
   await productStore.fetchCategories()
   
   // Fetch products for each section
-  await Promise.all([
+  const [hasMoreFromInitialLoad] = await Promise.all([
     productStore.fetchProducts(),
     productStore.fetchPopularProducts(),
     productStore.fetchNewArrivals()
   ])
+  
+  // Set initial hasMoreProducts state
+  hasMoreProducts.value = hasMoreFromInitialLoad
+  console.log('Initial load - has more products:', hasMoreProducts.value)
+  
+  // Setup infinite scroll after initial load
+  nextTick(() => {
+    setupInfiniteScroll()
+  })
+})
+
+onUnmounted(() => {
+  if (observer) {
+    observer.disconnect()
+  }
 })
 </script>
 
@@ -538,7 +655,57 @@ onMounted(async () => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Make sure horizontal scrolling is smooth */
+/* Horizontal scroll containers */
+.horizontal-scroll-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.horizontal-scroll-container::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
+.horizontal-scroll-content {
+  display: flex;
+  gap: 12px;
+  padding-bottom: 4px;
+}
+
+.product-card-horizontal {
+  flex: 0 0 160px; /* Fixed width */
+  width: 160px;
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.product-card-horizontal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.product-card-bundle-horizontal {
+  flex: 0 0 280px; /* Fixed width for bundle cards */
+  width: 280px;
+  height: 150px;
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.product-card-bundle-horizontal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Make sure vertical scrolling is smooth */
 ::-webkit-scrollbar {
   height: 0;
   width: 0;

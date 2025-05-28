@@ -3,7 +3,7 @@
     <v-container class="fill-height">
       <v-row justify="center" align="center" class="fill-height">
         <v-col cols="12" sm="8" md="6" lg="4">
-          <v-card class="text-center pa-8" elevation="0">
+          <v-card class="text-center pa-8" elevation="0" variant="text">
             <!-- Success Animation/Icon -->
             <div class="success-icon-container mb-6">
               <v-icon 
@@ -142,25 +142,25 @@ onMounted(async () => {
   }
   
   // Fetch latest orders to update the orders list
-  await fetchOrders()
+  // await fetchOrders()
   
   // Clear the cart since payment was successful
   await clearCart()
 })
 
 // Fetch orders from API
-const fetchOrders = async () => {
-  loading.value = true
-  try {
-    await apiService.getOrders()
-    console.log('Orders fetched successfully after payment')
-  } catch (error) {
-    console.error('Error fetching orders after payment:', error)
-    showError('Failed to fetch latest orders')
-  } finally {
-    loading.value = false
-  }
-}
+// const fetchOrders = async () => {
+//   loading.value = true
+//   try {
+//     await apiService.getOrders()
+//     console.log('Orders fetched successfully after payment')
+//   } catch (error) {
+//     console.error('Error fetching orders after payment:', error)
+//     showError('Failed to fetch latest orders')
+//   } finally {
+//     loading.value = false
+//   }
+// }
 
 // Clear cart after successful payment
 const clearCart = async () => {

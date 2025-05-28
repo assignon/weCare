@@ -1,61 +1,496 @@
 <template>
   <div class="order-status-page">
     <v-container>
-      <v-btn icon @click="$router.back()" class="mb-2"><v-icon>mdi-arrow-left</v-icon></v-btn>
-      <v-skeleton-loader v-if="loading" type="list-item, heading, paragraph, actions" />
-      <v-alert v-if="error" type="error">{{ error }}</v-alert>
-      <div v-if="order">
-        <h2 class="text-h6 font-weight-bold mb-2">Order #{{ order.id }}</h2>
-        <div class="mb-2">Status: <strong>{{ order.status }}</strong></div>
-        <div class="mb-2">Date: {{ order.created_at ? new Date(order.created_at).toLocaleString() : '' }}</div>
-        <v-list>
-          <v-list-item v-for="item in order.items || []" :key="item.id">
-            <v-list-item-content>
-              <v-list-item-title>{{ item.product_name }}</v-list-item-title>
-              <v-list-item-subtitle>Qty: {{ item.quantity }} &times; ${{ item.price }}</v-list-item-subtitle>
-            </v-list-item-content>
-            <v-list-item-action>
-              <span>${{ (item.price * item.quantity).toFixed(2) }}</span>
-            </v-list-item-action>
-          </v-list-item>
-        </v-list>
-        <div class="d-flex justify-space-between align-center mt-4">
-          <span class="font-weight-bold">Total:</span>
-          <span class="text-h6">${{ order.total }}</span>
+      <!-- Header -->
+      <div class="d-flex align-center mb-6">
+        <v-btn
+          icon="mdi-arrow-left"
+          variant="text"
+          @click="$router.back()"
+          class="me-3"
+        />
+        <div class="flex-grow-1">
+          <h1 class="text-h6 font-weight-bold">Order #{{ orderId }}</h1>
+          <p v-if="order" class="text-body-1 text-caption text-medium-emphasis mb-0 text-primary">
+            Placed on {{ formatDate(order.created_at) }}
+          </p>
         </div>
+        <v-chip
+          v-if="order"
+          :color="getStatusColor(order.status)"
+          :variant="order.status === 'delivered' ? 'flat' : 'outlined'"
+          size="small"
+        >
+          <v-icon start :icon="getStatusIcon(order.status)" />
+          {{ formatStatus(order.status) }}
+        </v-chip>
       </div>
+
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-12">
+        <v-progress-circular indeterminate color="primary" size="64" />
+        <p class="mt-4 text-body-1">Loading order details...</p>
+      </div>
+
+      <!-- Error State -->
+      <v-alert v-if="error" type="error" class="mb-4" closable @click:close="error = null">
+        {{ error }}
+      </v-alert>
+
+      <!-- Order Content -->
+      <div v-if="!loading && order">
+        <v-row>
+          <!-- Main Content -->
+          <v-col cols="12" lg="8">
+            <!-- Order Status Timeline -->
+            <v-card class="mb-6" elevation="1">
+              <v-card-title class="d-flex align-center">
+                <v-icon class="me-2">mdi-timeline-clock</v-icon>
+                Order Timeline
+              </v-card-title>
+              <v-card-text>
+                <OrderStatusTimeline :order="order" />
+              </v-card-text>
+            </v-card>
+
+            <!-- Order Items -->
+            <v-card class="mb-6" elevation="1">
+              <v-card-title class="d-flex align-center">
+                <v-icon class="me-2">mdi-package-variant</v-icon>
+                Order Items ({{ order.items?.length || 0 }})
+              </v-card-title>
+              <v-card-text>
+                <div
+                  v-for="(item, index) in order.items"
+                  :key="index"
+                  class="order-item"
+                  :class="{ 'border-bottom': index < order.items.length - 1 }"
+                >
+                  <v-row align="center">
+                    <v-col cols="auto">
+                      <v-avatar size="80" rounded="lg">
+                        <v-img
+                          v-if="item.product?.main_image"
+                          :src="item.product.main_image"
+                          :alt="item.product?.name"
+                          cover
+                        />
+                        <v-icon v-else size="40" color="grey-lighten-1">
+                          mdi-package-variant
+                        </v-icon>
+                      </v-avatar>
+                    </v-col>
+                    
+                    <v-col>
+                      <h3 class="text-h6 font-weight-medium mb-1">
+                        {{ item.product?.name || 'Product' }}
+                      </h3>
+                      <p v-if="item.product?.description" class="text-body-2 text-medium-emphasis mb-2">
+                        {{ truncateText(item.product.description, 100) }}
+                      </p>
+                      <div class="d-flex align-center gap-4">
+                        <v-chip size="small" variant="outlined">
+                          Qty: {{ item.quantity }}
+                        </v-chip>
+                        <v-chip size="small" variant="outlined" color="primary" class="ml-2">
+                          ${{ formatAmount(item.price) }} each
+                        </v-chip>
+                      </div>
+                    </v-col>
+                    
+                    <v-col cols="auto" class="text-right">
+                      <h3 class="text-h6 font-weight-bold text-primary">
+                        ${{ formatAmount(item.price * item.quantity) }}
+                      </h3>
+                      <v-btn
+                        v-if="item.product?.id"
+                        variant="flat"
+                        rounded
+                        size="small"
+                        color="secondary"
+                        class="text-none"
+                        @click="goToProduct(item.product.id)"
+                      >
+                        View Product
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                </div>
+              </v-card-text>
+            </v-card>
+
+            <!-- Delivery Information -->
+            <v-card v-if="order.shipping_address || order.expected_delivery_time" class="mb-6" elevation="1">
+              <v-card-title class="d-flex align-center">
+                <v-icon class="me-2">mdi-truck-delivery</v-icon>
+                Delivery Information
+              </v-card-title>
+              <v-card-text>
+                <v-row>
+                  <v-col v-if="order.shipping_address" cols="12" md="6">
+                    <h4 class="text-subtitle-1 font-weight-medium mb-2">
+                      Delivery Address
+                    </h4>
+                    <p class="text-body-2">{{ order.shipping_address }}</p>
+                  </v-col>
+                  
+                  <v-col v-if="order.expected_delivery_time" cols="12" md="6">
+                    <h4 class="text-subtitle-1 font-weight-medium mb-2">
+                      Expected Delivery
+                    </h4>
+                    <p class="text-body-2">{{ formatDate(order.expected_delivery_time) }}</p>
+                  </v-col>
+                </v-row>
+                
+                <v-alert
+                  v-if="order.notes"
+                  type="info"
+                  variant="tonal"
+                  class="mt-4"
+                >
+                  <strong>Note:</strong> {{ order.notes }}
+                </v-alert>
+              </v-card-text>
+            </v-card>
+          </v-col>
+
+          <!-- Sidebar -->
+          <v-col cols="12" lg="4">
+            <!-- Order Summary -->
+            <v-card class="mb-6" elevation="1">
+              <v-card-title>Order Summary</v-card-title>
+              <v-card-text>
+                <div class="order-summary">
+                  <div class="d-flex justify-space-between mb-2">
+                    <span>Subtotal:</span>
+                    <span>${{ formatAmount(calculateSubtotal()) }}</span>
+                  </div>
+                  <div v-if="order.delivery_fee" class="d-flex justify-space-between mb-2">
+                    <span>Delivery Fee:</span>
+                    <span>${{ formatAmount(order.delivery_fee) }}</span>
+                  </div>
+                  <v-divider class="my-3" />
+                  <div class="d-flex justify-space-between">
+                    <span class="font-weight-bold">Total:</span>
+                    <span class="font-weight-bold text-h6 text-primary">
+                      ${{ formatAmount(order.total_amount) }}
+                    </span>
+                  </div>
+                </div>
+              </v-card-text>
+            </v-card>
+
+            <!-- Payment Information -->
+            <v-card v-if="order.payment" class="mb-6" elevation="1">
+              <v-card-title>Payment Information</v-card-title>
+              <v-card-text>
+                <div class="payment-info">
+                  <div class="d-flex justify-space-between mb-2">
+                    <span>Payment Method:</span>
+                    <span class="text-capitalize">{{ order.payment.payment_method?.replace('_', ' ') }}</span>
+                  </div>
+                  <div class="d-flex justify-space-between mb-2">
+                    <span>Transaction ID:</span>
+                    <span class="text-caption">{{ order.payment.transaction_id || 'N/A' }}</span>
+                  </div>
+                  <div class="d-flex justify-space-between">
+                    <span>Status:</span>
+                    <v-chip
+                      :color="order.payment.status === 'paid' ? 'success' : 'warning'"
+                      size="small"
+                      variant="flat"
+                    >
+                      {{ order.payment.status }}
+                    </v-chip>
+                  </div>
+                </div>
+              </v-card-text>
+            </v-card>
+
+            <!-- Seller Information -->
+            <v-card v-if="order.seller" class="mb-6" elevation="1">
+              <v-card-title>Seller Information</v-card-title>
+              <v-card-text>
+                <div class="seller-info">
+                  <h4 class="text-subtitle-1 font-weight-medium mb-2">
+                    {{ order.seller.business_name || order.seller.first_name + ' ' + order.seller.last_name }}
+                  </h4>
+                  <p v-if="order.seller.email" class="text-body-2 mb-1">
+                    <v-icon size="small" class="me-1">mdi-email</v-icon>
+                    {{ order.seller.email }}
+                  </p>
+                  <p v-if="order.seller.phone_number" class="text-body-2">
+                    <v-icon size="small" class="me-1">mdi-phone</v-icon>
+                    {{ order.seller.phone_number }}
+                  </p>
+                </div>
+              </v-card-text>
+            </v-card>
+
+            <!-- Actions -->
+            <!-- <v-card elevation="1">
+              <v-card-title>Actions</v-card-title>
+              <v-card-text>
+                <div class="d-flex flex-column gap-3">
+                  <v-btn
+                    v-if="canCancelOrder(order.status)"
+                    color="error"
+                    variant="outlined"
+                    block
+                    @click="showCancelDialog = true"
+                  >
+                    <v-icon start>mdi-cancel</v-icon>
+                    Cancel Order
+                  </v-btn>
+                  
+                  <v-btn
+                    v-if="canReorder(order.status)"
+                    color="primary"
+                    variant="flat"
+                    block
+                    @click="reorderItems"
+                  >
+                    <v-icon start>mdi-repeat</v-icon>
+                    Reorder Items
+                  </v-btn>
+                  
+                  <v-btn
+                    color="primary"
+                    variant="outlined"
+                    block
+                    @click="downloadInvoice"
+                  >
+                    <v-icon start>mdi-download</v-icon>
+                    Download Invoice
+                  </v-btn>
+                  
+                  <v-btn
+                    variant="text"
+                    block
+                    @click="contactSupport"
+                  >
+                    <v-icon start>mdi-help-circle</v-icon>
+                    Contact Support
+                  </v-btn>
+                </div>
+              </v-card-text>
+            </v-card> -->
+          </v-col>
+        </v-row>
+      </div>
+
+      <!-- Cancel Order Dialog -->
+      <v-dialog v-model="showCancelDialog" max-width="500">
+        <v-card>
+          <v-card-title>Cancel Order</v-card-title>
+          <v-card-text>
+            <p class="mb-4">Are you sure you want to cancel this order?</p>
+            <v-textarea
+              v-model="cancelReason"
+              label="Reason for cancellation (optional)"
+              variant="outlined"
+              rows="3"
+            />
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn @click="showCancelDialog = false">Cancel</v-btn>
+            <v-btn color="error" @click="cancelOrder">Confirm Cancellation</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-container>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import axios from 'axios'
+import { ref, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { apiService } from '@/services/api'
+import OrderStatusTimeline from '@/components/OrderStatusTimeline.vue'
 
 const route = useRoute()
+const router = useRouter()
+
+// Reactive data
 const order = ref(null)
 const loading = ref(true)
 const error = ref(null)
+const showCancelDialog = ref(false)
+const cancelReason = ref('')
 
-const fetchOrder = async () => {
+// Computed
+const orderId = computed(() => route.params.id)
+
+// Methods
+const loadOrder = async () => {
   loading.value = true
   error.value = null
+  
   try {
-    const res = await axios.get(`/api/orders/${route.params.id}/`)
-    order.value = res.data
+    const response = await apiService.getOrderDetails(orderId.value)
+    order.value = response.data
   } catch (err) {
-    error.value = 'Failed to load order.'
+    console.error('Error loading order:', err)
+    error.value = 'Failed to load order details. Please try again.'
   } finally {
     loading.value = false
   }
 }
 
-onMounted(fetchOrder)
+const calculateSubtotal = () => {
+  if (!order.value?.items) return 0
+  return order.value.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+}
+
+const canCancelOrder = (status) => {
+  return ['pending', 'processing'].includes(status)
+}
+
+const canReorder = (status) => {
+  return ['delivered', 'cancelled'].includes(status)
+}
+
+const cancelOrder = async () => {
+  try {
+    await apiService.cancelOrder(orderId.value, { reason: cancelReason.value })
+    showCancelDialog.value = false
+    cancelReason.value = ''
+    // Reload order to get updated status
+    await loadOrder()
+  } catch (err) {
+    console.error('Error cancelling order:', err)
+    error.value = 'Failed to cancel order. Please try again.'
+  }
+}
+
+const reorderItems = async () => {
+  try {
+    // Add all items from this order to cart
+    const items = order.value.items.map(item => ({
+      product_id: item.product.id,
+      quantity: item.quantity
+    }))
+    
+    await apiService.createCart(items)
+    router.push({ name: 'Cart' })
+  } catch (err) {
+    console.error('Error reordering items:', err)
+    error.value = 'Failed to add items to cart. Please try again.'
+  }
+}
+
+const downloadInvoice = async () => {
+  try {
+    await apiService.downloadOrderInvoice(orderId.value)
+  } catch (err) {
+    console.error('Error downloading invoice:', err)
+    error.value = 'Failed to download invoice. Please try again.'
+  }
+}
+
+const contactSupport = () => {
+  // Implement support contact
+  console.log('Contact support for order:', orderId.value)
+}
+
+const goToProduct = (productId) => {
+  router.push({ name: 'ProductDetails', params: { id: productId } })
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const formatAmount = (amount) => {
+  return parseFloat(amount || 0).toFixed(2)
+}
+
+const formatStatus = (status) => {
+  return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+}
+
+const truncateText = (text, length) => {
+  if (!text) return ''
+  return text.length > length ? text.substring(0, length) + '...' : text
+}
+
+const getStatusColor = (status) => {
+  const colors = {
+    pending: 'orange',
+    processing: 'blue',
+    ready_for_pickup: 'purple',
+    picked_up: 'indigo',
+    delivered: 'success',
+    cancelled: 'error'
+  }
+  return colors[status] || 'grey'
+}
+
+const getStatusIcon = (status) => {
+  const icons = {
+    pending: 'mdi-clock-outline',
+    processing: 'mdi-package-variant',
+    ready_for_pickup: 'mdi-package-check',
+    picked_up: 'mdi-truck',
+    delivered: 'mdi-check-circle',
+    cancelled: 'mdi-close-circle'
+  }
+  return icons[status] || 'mdi-package-variant-closed'
+}
+
+const getDefaultStatusNote = (status) => {
+  const notes = {
+    pending: 'Order has been placed and is awaiting processing',
+    processing: 'Order is being prepared by the seller',
+    ready_for_pickup: 'Order is ready for pickup by delivery driver',
+    picked_up: 'Order has been picked up and is on the way',
+    delivered: 'Order has been successfully delivered'
+  }
+  return notes[status] || ''
+}
+
+// Lifecycle
+onMounted(() => {
+  loadOrder()
+})
 </script>
 
 <style scoped>
 .order-status-page {
   padding-bottom: 64px;
+}
+
+.order-item {
+  padding: 16px 0;
+}
+
+.border-bottom {
+  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.order-summary,
+.payment-info,
+.seller-info {
+  line-height: 1.6;
+}
+
+.order-summary .v-divider {
+  margin: 12px 0;
+}
+
+@media (max-width: 960px) {
+  .order-item .v-col:last-child {
+    text-align: left !important;
+    margin-top: 16px;
+  }
 }
 </style> 

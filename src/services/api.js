@@ -105,7 +105,7 @@ export const apiService = {
   
   // Orders
   getOrders(params = {}) {
-    return api.get('/orders/orders/by_shopper/', { params })
+    return api.get('/orders/orders/', { params })
   },
   
   getOrderDetails(id) {
@@ -114,6 +114,34 @@ export const apiService = {
   
   createOrder(orderData) {
     return api.post('/orders/orders/', orderData)
+  },
+  
+  createOrderFromCart(orderData) {
+    return api.post('/orders/orders/create_from_cart/', orderData)
+  },
+  
+  searchOrders(params = {}) {
+    return api.get('/orders/orders/search/', { params })
+  },
+  
+  getOrdersByStatus(status) {
+    return api.get('/orders/orders/by_status/', { params: { status } })
+  },
+  
+  getRecentOrders() {
+    return api.get('/orders/orders/recent/')
+  },
+  
+  cancelOrder(orderId, data) {
+    return api.post(`/orders/orders/${orderId}/cancel/`, data)
+  },
+  
+  updateOrderStatus(orderId, data) {
+    return api.post(`/orders/orders/${orderId}/update_status/`, data)
+  },
+  
+  downloadOrderInvoice(orderId) {
+    return api.get(`/orders/orders/${orderId}/invoice/`, { responseType: 'blob' })
   },
   
   // Wishlist
