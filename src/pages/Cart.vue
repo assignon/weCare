@@ -178,6 +178,7 @@
           color="primary" 
           size="large" 
           class="text-none"
+          rounded
           :to="{ name: 'Home' }"
         >
           Start Shopping

@@ -6,6 +6,7 @@ export const useProductStore = defineStore('product', () => {
   // State
   const products = ref([])
   const categories = ref([])
+  const skinTypes = ref([])
   const featuredProducts = ref([])
   const popularProducts = ref([])
   const newArrivals = ref([])
@@ -14,6 +15,7 @@ export const useProductStore = defineStore('product', () => {
   const relatedProducts = ref([])
   const searchQuery = ref('')
   const selectedCategory = ref(null)
+  const selectedSkinTypes = ref([])
   const loading = ref(false)
   const error = ref(null)
   const totalProducts = ref(0)
@@ -53,6 +55,12 @@ export const useProductStore = defineStore('product', () => {
       
       if (selectedCategory.value) {
         params.category = selectedCategory.value
+      }
+      
+      if (selectedSkinTypes.value && selectedSkinTypes.value.length > 0) {
+        // For now, send only the first skin type to the API
+        // and filter the rest locally in the component
+        params.suitable_for = selectedSkinTypes.value[0]
       }
       
       // Add pagination params
@@ -129,6 +137,18 @@ export const useProductStore = defineStore('product', () => {
     }
   }
   
+  const fetchSkinTypes = async () => {
+    try {
+      const response = await apiService.getSkinTypes()
+      skinTypes.value = response.data.results || response.data
+      return skinTypes.value
+    } catch (err) {
+      console.error('Failed to fetch skin types:', err)
+      // Don't set error.value here as skin types are not critical
+      return []
+    }
+  }
+  
   const fetchFeaturedProducts = async () => {
     try {
       // Assuming the API has a way to fetch featured products, e.g. with a parameter
@@ -189,9 +209,16 @@ export const useProductStore = defineStore('product', () => {
     return await fetchProducts()
   }
   
+  const filterBySkinTypes = async (skinTypeIds) => {
+    selectedSkinTypes.value = skinTypeIds
+    currentPage.value = 1
+    return await fetchProducts()
+  }
+  
   const clearFilters = () => {
     searchQuery.value = ''
     selectedCategory.value = null
+    selectedSkinTypes.value = []
     pagination.value.page = 1
   }
   
@@ -215,6 +242,7 @@ export const useProductStore = defineStore('product', () => {
     // State
     products,
     categories,
+    skinTypes,
     featuredProducts,
     popularProducts,
     newArrivals,
@@ -223,6 +251,7 @@ export const useProductStore = defineStore('product', () => {
     relatedProducts,
     searchQuery,
     selectedCategory,
+    selectedSkinTypes,
     loading,
     error,
     totalProducts,
@@ -237,12 +266,14 @@ export const useProductStore = defineStore('product', () => {
     fetchProducts,
     fetchProductById,
     fetchCategories,
+    fetchSkinTypes,
     fetchFeaturedProducts,
     fetchPopularProducts,
     fetchNewArrivals,
     fetchRelatedProducts,
     searchProducts,
     filterByCategory,
+    filterBySkinTypes,
     clearFilters,
     goToPage,
     fetchProductReviews

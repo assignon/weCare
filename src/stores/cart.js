@@ -19,11 +19,39 @@ export const useCartStore = defineStore('cart', () => {
   })
   
   const totalItems = computed(() => {
-    return items.value.reduce((total, item) => total + item.quantity, 0)
+    if (items.value && items.value.items && Array.isArray(items.value.items)) {
+      return items.value.items.reduce((total, item) => {
+        if (item.variants && Array.isArray(item.variants)) {
+          return total + item.variants.reduce((variantTotal, variant) => variantTotal + variant.quantity, 0)
+        }
+        return total + (item.quantity || 0)
+      }, 0)
+    }
+    return Array.isArray(items.value) ? items.value.reduce((total, item) => total + (item.quantity || 0), 0) : 0
+  })
+  
+  const cartItemCount = computed(() => {
+    // If items.value has a total_items property, use it
+    if (items.value && typeof items.value.total_items === 'number') {
+      return items.value.total_items
+    }
+    
+    // Otherwise use the calculated totalItems
+    return totalItems.value
   })
   
   const subtotal = computed(() => {
-    return items.value.reduce((total, item) => total + (item.price * item.quantity), 0)
+    if (items.value && items.value.items && Array.isArray(items.value.items)) {
+      return items.value.items.reduce((total, item) => {
+        if (item.variants && Array.isArray(item.variants)) {
+          return total + item.variants.reduce((variantTotal, variant) => 
+            variantTotal + (variant.price * variant.quantity), 0)
+        }
+        return total + ((item.price || 0) * (item.quantity || 0))
+      }, 0)
+    }
+    return Array.isArray(items.value) ? items.value.reduce((total, item) => 
+      total + ((item.price || 0) * (item.quantity || 0)), 0) : 0
   })
   
   const addToCart = async (product, quantity = 1) => {
@@ -226,6 +254,7 @@ export const useCartStore = defineStore('cart', () => {
   return {
     items,
     totalItems,
+    cartItemCount,
     subtotal,
     cartUpdated,
     cartId,

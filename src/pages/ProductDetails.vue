@@ -7,11 +7,6 @@
           <v-icon color="primary">mdi-arrow-left</v-icon>
         </v-btn>
         <v-spacer></v-spacer>
-        <v-btn icon variant="text" class="mr-2" @click="toggleWishlist">
-          <v-icon :color="inWishlist ? 'error' : 'primary'">
-            {{ inWishlist ? 'mdi-heart' : 'mdi-heart-outline' }}
-          </v-icon>
-        </v-btn>
       </div>
       
       <!-- Loading skeleton -->
@@ -242,7 +237,6 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
-import { useWishlistStore } from '@/stores/wishlist'
 import { useProductStore } from '@/stores/product'
 import { apiService } from '@/services/api'
 import packagingImage from '@/assets/packaging_10471395.png'
@@ -254,7 +248,6 @@ const activeTab = ref('description')
 const selectedVariant = ref(null)
 const selectedSize = ref(null)
 const cart = useCartStore()
-const wishlist = useWishlistStore()
 const productStore = useProductStore()
 const notificationStatus = ref('')
 const showSnackbar = ref(false)
@@ -332,25 +325,6 @@ const requestRestockNotification = async () => {
   }
 }
 
-const inWishlist = computed(() => wishlist.items.some(i => i.id === product.value?.id))
-
-const toggleWishlist = () => {
-  if (!product.value) return
-  if (inWishlist.value) {
-    wishlist.remove(product.value.id)
-    // Show removed from wishlist notification
-    snackbarText.value = 'Removed from wishlist'
-    snackbarColor.value = 'info'
-    showSnackbar.value = true
-  } else {
-    wishlist.add(product.value)
-    // Show added to wishlist notification
-    snackbarText.value = 'Added to wishlist'
-    snackbarColor.value = 'success'
-    showSnackbar.value = true
-  }
-}
-
 // Fix cart.items.find is not a function error
 const cartItemQuantity = computed(() => {
   if (!product.value || !selectedVariant.value || !cart.items || !cart.items.items) return 0
@@ -408,12 +382,13 @@ const selectVariant = (variant) => {
   quantity.value = 1;
 }
 
-const cartItemsCount = computed(() => cart.items.length)
+const cartItemsCount = computed(() => cart.cartItemCount)
 
 onMounted(async () => {
   const productId = route.params.id
   
   try {
+    // Fetch product data
     await productStore.fetchProductById(productId)
     
     // Fetch related data

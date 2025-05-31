@@ -26,13 +26,13 @@
                 <v-icon 
                   color="primary" 
                   class="mr-2"
-                  :icon="address.type === 'home' ? 'mdi-home' : 'mdi-office-building'"
+                  icon="mdi-map-marker"
                 ></v-icon>
-                <span class="text-subtitle-1 font-weight-medium">{{ address.label }}</span>
+                <span class="text-subtitle-1 font-weight-medium">{{ address.address_label || 'Address' }}</span>
               </div>
               
               <v-chip 
-                v-if="address.default" 
+                v-if="address.is_default" 
                 color="primary" 
                 size="small"
                 variant="flat"
@@ -42,22 +42,22 @@
             </div>
             
             <div class="address-details text-body-2 text-grey-darken-1 mb-3">
-              {{ address.name }}<br>
-              {{ address.street }}<br>
-              {{ address.city }}, {{ address.state }} {{ address.zipcode }}<br>
-              {{ address.country }}<br>
-              Phone: {{ address.phone }}
+              {{ address.address_line1 }}<br>
+              <span v-if="address.address_line2">{{ address.address_line2 }}<br></span>
+              {{ address.city }}, {{ address.state }} {{ address.postal_code }}<br>
+              {{ address.country }}
             </div>
             
             <div class="d-flex justify-space-between align-center">
               <div>
                 <v-btn 
-                  v-if="!address.default" 
+                  v-if="!address.is_default" 
                   variant="text" 
                   color="primary" 
                   size="small"
                   class="text-none"
-                  @click="setAsDefault(index)"
+                  @click="setAsDefault(address.id)"
+                  :loading="loading"
                 >
                   Set as Default
                 </v-btn>
@@ -80,7 +80,7 @@
                   color="error"
                   size="small"
                   @click="confirmDeleteAddress(index)"
-                  :disabled="address.default"
+                  :disabled="address.is_default"
                 >
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
@@ -103,8 +103,9 @@
         block 
         size="large"
         prepend-icon="mdi-plus"
+        rounded
         @click="addNewAddress"
-        class="text-none rounded-lg mb-4"
+        class="text-none mb-4"
       >
         Add New Address
       </v-btn>
@@ -121,8 +122,8 @@
           <v-card-text class="pa-4">
             <v-form ref="formRef" v-model="formValid">
               <v-text-field
-                v-model="addressForm.label"
-                label="Address Label"
+                v-model="addressForm.address_label"
+                label="Address Label*"
                 variant="outlined"
                 density="comfortable"
                 class="mb-3"
@@ -131,18 +132,9 @@
                 persistent-hint
               ></v-text-field>
               
-              <v-radio-group
-                v-model="addressForm.type"
-                class="mb-3"
-                inline
-              >
-                <v-radio value="home" label="Home"></v-radio>
-                <v-radio value="office" label="Office"></v-radio>
-              </v-radio-group>
-              
               <v-text-field
-                v-model="addressForm.name"
-                label="Full Name"
+                v-model="addressForm.address_line1"
+                label="Street Address*"
                 variant="outlined"
                 density="comfortable"
                 class="mb-3"
@@ -150,28 +142,20 @@
               ></v-text-field>
               
               <v-text-field
-                v-model="addressForm.phone"
-                label="Phone Number"
+                v-model="addressForm.address_line2"
+                label="Address Line 2 (Optional)"
                 variant="outlined"
                 density="comfortable"
                 class="mb-3"
-                :rules="[required, phoneRule]"
-              ></v-text-field>
-              
-              <v-text-field
-                v-model="addressForm.street"
-                label="Street Address"
-                variant="outlined"
-                density="comfortable"
-                class="mb-3"
-                :rules="[required]"
+                hint="Apartment, suite, unit, building, floor, etc."
+                persistent-hint
               ></v-text-field>
               
               <v-row>
                 <v-col cols="6">
                   <v-text-field
                     v-model="addressForm.city"
-                    label="City"
+                    label="City*"
                     variant="outlined"
                     density="comfortable"
                     :rules="[required]"
@@ -184,7 +168,6 @@
                     label="State/Province"
                     variant="outlined"
                     density="comfortable"
-                    :rules="[required]"
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -192,18 +175,17 @@
               <v-row>
                 <v-col cols="6">
                   <v-text-field
-                    v-model="addressForm.zipcode"
+                    v-model="addressForm.postal_code"
                     label="ZIP/Postal Code"
                     variant="outlined"
                     density="comfortable"
-                    :rules="[required]"
                   ></v-text-field>
                 </v-col>
                 
                 <v-col cols="6">
                   <v-text-field
                     v-model="addressForm.country"
-                    label="Country"
+                    label="Country*"
                     variant="outlined"
                     density="comfortable"
                     :rules="[required]"
@@ -212,7 +194,7 @@
               </v-row>
               
               <v-checkbox
-                v-model="addressForm.default"
+                v-model="addressForm.is_default"
                 label="Set as default address"
                 class="mt-2"
               ></v-checkbox>
@@ -283,32 +265,28 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import { apiService } from '@/services/api'
 
-const auth = useAuthStore()
 const router = useRouter()
 
-// Sample addresses data (in a real app, this would come from an API)
+// Reactive data
 const addresses = ref([])
-
-// Form and UI state
 const addressForm = ref({
-  label: '',
-  type: 'home',
-  name: '',
-  phone: '',
-  street: '',
+  address_label: '',
+  address_line1: '',
+  address_line2: '',
   city: '',
   state: '',
-  zipcode: '',
-  country: '',
-  default: false
+  postal_code: '',
+  country: 'Togo', // Default country
+  is_default: false
 })
 const formRef = ref(null)
 const formValid = ref(false)
 const loading = ref(false)
 const editIndex = ref(null)
+const editingAddressId = ref(null)
 const deleteIndex = ref(null)
 const showAddressDialog = ref(false)
 const showDeleteDialog = ref(false)
@@ -324,71 +302,57 @@ const phoneRule = v => /^\+?[0-9\s-]{10,15}$/.test(v) || 'Please enter a valid p
 
 // Fetch addresses on mount
 onMounted(async () => {
+  await fetchAddresses()
+})
+
+// Fetch addresses from API
+const fetchAddresses = async () => {
   loading.value = true
-  
   try {
-    // In a real app, you would fetch from API:
-    // const response = await apiService.getAddresses()
-    // addresses.value = response.data
-    
-    // For demo, add sample addresses
-    addresses.value = [
-      {
-        label: 'Home',
-        type: 'home',
-        name: 'John Doe',
-        phone: '+1 234-567-8900',
-        street: '123 Main Street, Apt 4B',
-        city: 'New York',
-        state: 'NY',
-        zipcode: '10001',
-        country: 'United States',
-        default: true
-      },
-      {
-        label: 'Office',
-        type: 'office',
-        name: 'John Doe',
-        phone: '+1 234-567-8901',
-        street: '456 Business Ave, Floor 8',
-        city: 'New York',
-        state: 'NY',
-        zipcode: '10002',
-        country: 'United States',
-        default: false
-      }
-    ]
+    const response = await apiService.getAddresses()
+    addresses.value = response.data.results || []
   } catch (error) {
+    console.error('Failed to fetch addresses:', error)
     showError('Failed to load addresses')
   } finally {
     loading.value = false
   }
-})
+}
 
 // Add new address
 const addNewAddress = () => {
   // Reset form
   addressForm.value = {
-    label: '',
-    type: 'home',
-    name: '',
-    phone: '',
-    street: '',
+    address_label: '',
+    address_line1: '',
+    address_line2: '',
     city: '',
     state: '',
-    zipcode: '',
-    country: '',
-    default: addresses.value.length === 0 // Set as default if it's the first address
+    postal_code: '',
+    country: 'Togo',
+    is_default: addresses.value.length === 0 // Set as default if it's the first address
   }
   
   editIndex.value = null
+  editingAddressId.value = null
   showAddressDialog.value = true
 }
 
 // Edit address
 const editAddress = (index) => {
+  const address = addresses.value[index]
   editIndex.value = index
-  addressForm.value = { ...addresses.value[index] }
+  editingAddressId.value = address.id
+  addressForm.value = { 
+    address_label: address.address_label || '',
+    address_line1: address.address_line1 || '',
+    address_line2: address.address_line2 || '',
+    city: address.city || '',
+    state: address.state || '',
+    postal_code: address.postal_code || '',
+    country: address.country || 'Togo',
+    is_default: address.is_default || false
+  }
   showAddressDialog.value = true
 }
 
@@ -399,37 +363,25 @@ const saveAddress = async () => {
   loading.value = true
   
   try {
-    // Create a copy of the form data
     const addressData = { ...addressForm.value }
     
-    // If setting as default, update other addresses
-    if (addressData.default) {
-      addresses.value.forEach(addr => {
-        addr.default = false
-      })
-    }
-    
-    // For a real app, you would call API:
-    // if (editIndex.value !== null) {
-    //   await apiService.updateAddress(addresses.value[editIndex.value].id, addressData)
-    // } else {
-    //   const response = await apiService.addAddress(addressData)
-    //   addressData.id = response.data.id
-    // }
-    
-    // In-memory update
-    if (editIndex.value !== null) {
-      addresses.value[editIndex.value] = addressData
+    if (editingAddressId.value) {
+      // Update existing address
+      await apiService.updateAddress(editingAddressId.value, addressData)
       snackbarText.value = 'Address updated successfully'
     } else {
-      addresses.value.push(addressData)
+      // Create new address
+      await apiService.createAddress(addressData)
       snackbarText.value = 'Address added successfully'
     }
     
-    // If no default address exists, make this one default
-    if (addresses.value.filter(a => a.default).length === 0) {
-      addresses.value[0].default = true
+    // If setting as default, make API call to set default
+    if (addressData.is_default && editingAddressId.value) {
+      await apiService.setDefaultAddress(editingAddressId.value)
     }
+    
+    // Refresh addresses list
+    await fetchAddresses()
     
     // Show success message
     snackbarColor.value = 'success'
@@ -438,7 +390,12 @@ const saveAddress = async () => {
     // Close dialog
     showAddressDialog.value = false
   } catch (error) {
-    showError('Failed to save address')
+    console.error('Failed to save address:', error)
+    const errorMessage = error.response?.data?.error || 
+                        error.response?.data?.message || 
+                        Object.values(error.response?.data || {}).flat().join(', ') ||
+                        'Failed to save address'
+    showError(errorMessage)
   } finally {
     loading.value = false
   }
@@ -454,35 +411,28 @@ const confirmDeleteAddress = (index) => {
 const deleteAddress = async () => {
   if (deleteIndex.value === null) return
   
+  const address = addresses.value[deleteIndex.value]
   loading.value = true
   
   try {
-    // For a real app, you would call API:
-    // await apiService.deleteAddress(addresses.value[deleteIndex.value].id)
-    
-    // Remove from local array
-    addresses.value.splice(deleteIndex.value, 1)
-    
-    // If we deleted all addresses, close dialog
-    if (addresses.value.length === 0) {
-      showDeleteDialog.value = false
-      return
-    }
-    
-    // If we deleted the default address, set a new default
-    if (!addresses.value.some(a => a.default)) {
-      addresses.value[0].default = true
-    }
+    await apiService.deleteAddress(address.id)
     
     // Show success message
     snackbarColor.value = 'success'
     snackbarText.value = 'Address deleted successfully'
     showSnackbar.value = true
     
+    // Refresh addresses list
+    await fetchAddresses()
+    
     // Close dialog
     showDeleteDialog.value = false
   } catch (error) {
-    showError('Failed to delete address')
+    console.error('Failed to delete address:', error)
+    const errorMessage = error.response?.data?.error || 
+                        error.response?.data?.message || 
+                        'Failed to delete address'
+    showError(errorMessage)
   } finally {
     loading.value = false
     deleteIndex.value = null
@@ -490,23 +440,22 @@ const deleteAddress = async () => {
 }
 
 // Set address as default
-const setAsDefault = async (index) => {
+const setAsDefault = async (id) => {
+  // const address = addresses.value[index]
   loading.value = true
   
   try {
-    // Update local state
-    addresses.value.forEach((addr, i) => {
-      addr.default = i === index
-    })
-    
-    // For a real app, you would call API:
-    // await apiService.setDefaultAddress(addresses.value[index].id)
+    await apiService.setDefaultAddress(id)
     
     // Show success message
     snackbarColor.value = 'success'
-    snackbarText.value = 'Default address updated'
+    snackbarText.value = 'Default address updated successfully'
     showSnackbar.value = true
+    
+    // Refresh addresses list to get updated data
+    await fetchAddresses()
   } catch (error) {
+    console.error('Failed to set default address:', error)
     showError('Failed to update default address')
   } finally {
     loading.value = false

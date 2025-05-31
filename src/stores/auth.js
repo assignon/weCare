@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { apiService } from '@/services/api'
+import notificationService from '@/services/notificationService'
 import router from '@/router'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -21,6 +22,9 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken.value = null
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
+    
+    // Disconnect notification service
+    notificationService.disconnect()
   }
 
   // Initialize authentication state
@@ -28,6 +32,12 @@ export const useAuthStore = defineStore('auth', () => {
     if (accessToken.value) {
       try {
         await fetchUserData()
+        
+        // Initialize notification service if user is authenticated
+        if (user.value?.id) {
+          notificationService.initWebSocket(user.value.id)
+          await notificationService.requestNotificationPermission()
+        }
       } catch (error) {
         // If token is invalid or expired, clear auth state
         clearAuthState()
@@ -93,6 +103,12 @@ export const useAuthStore = defineStore('auth', () => {
         return false
       }
       
+      // Initialize notification service after successful login
+      if (user.value?.id) {
+        notificationService.initWebSocket(user.value.id)
+        await notificationService.requestNotificationPermission()
+      }
+      
       return true
     } catch (err) {
       console.error('Login error:', err)
@@ -142,6 +158,12 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await apiService.getUserData()
       user.value = response.data
+      
+      // Initialize notification service if not already connected
+      if (user.value?.id && !notificationService.isConnected()) {
+        notificationService.initWebSocket(user.value.id)
+      }
+      
       return user.value
     } catch (err) {
       console.error('Error fetching user data:', err)

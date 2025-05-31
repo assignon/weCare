@@ -5,11 +5,12 @@ const routes = [
   { path: '/login', name: 'Login', component: () => import('@/pages/Login.vue') },
   { path: '/', name: 'Home', component: () => import('@/pages/Home.vue'), meta: { requiresAuth: true } },
   { path: '/orders', name: 'Orders', component: () => import('@/pages/Orders.vue'), meta: { requiresAuth: true } },
-  { path: '/wishlist', name: 'Wishlist', component: () => import('@/pages/Wishlist.vue'), meta: { requiresAuth: true } },
+  { path: '/explore', name: 'Explore', component: () => import('@/pages/Explore.vue'), meta: { requiresAuth: true } },
   { path: '/cart', name: 'Cart', component: () => import('@/pages/Cart.vue'), meta: { requiresAuth: true } },
  
   { path: '/register', name: 'Register', component: () => import('@/pages/Register.vue') },
-  { path: '/password-forgot', name: 'PasswordForgot', component: () => import('@/pages/PasswordForgot.vue') },
+  { path: '/forgot-password', name: 'ForgotPassword', component: () => import('@/pages/ForgotPassword.vue') },
+  { path: '/reset-password/:code', name: 'ResetPassword', component: () => import('@/pages/ResetPassword.vue') },
   { path: '/product/:id', name: 'ProductDetails', component: () => import('@/pages/ProductDetails.vue'), meta: { requiresAuth: true } },
   { path: '/order-status/:id', name: 'OrderStatus', component: () => import('@/pages/OrderStatus.vue'), meta: { requiresAuth: true } },
   { path: '/profile', name: 'Profile', component: () => import('@/pages/Profile.vue'), meta: { requiresAuth: true } },
@@ -24,6 +25,14 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    // If there's a saved position (back/forward navigation), use it
+    if (savedPosition) {
+      return savedPosition
+    }
+    // Otherwise, scroll to top
+    return { top: 0 }
+  }
 })
 
 router.beforeEach(async (to, from, next) => {
@@ -64,7 +73,7 @@ router.beforeEach(async (to, from, next) => {
   }
   
   // If user is authenticated and trying to access login/register pages
-  if (auth.isAuthenticated && (to.name === 'Login' || to.name === 'Register')) {
+  if (auth.isAuthenticated && ['Login', 'Register', 'ForgotPassword', 'ResetPassword'].includes(to.name)) {
     // Redirect to home or to the redirect query parameter if it exists
     return next(to.query.redirect || { name: 'Home' })
   }

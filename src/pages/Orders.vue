@@ -237,6 +237,9 @@
         </v-btn>
       </v-card>
     </v-container>
+    
+    <!-- Bottom Navigation -->
+    <BottomNavigation />
   </div>
 </template>
 
@@ -245,6 +248,7 @@ import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiService } from '@/services/api'
 import { debounce } from 'lodash'
+import BottomNavigation from '@/components/BottomNavigation.vue'
 
 const router = useRouter()
 

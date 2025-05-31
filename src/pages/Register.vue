@@ -69,6 +69,23 @@
               width="100%"
             ></v-text-field>
           </div>
+          
+          <div class="input-field">
+            <v-select
+              v-model="formData.default_language"
+              :items="languages"
+              item-title="name"
+              item-value="id"
+              label="Preferred Language"
+              variant="outlined"
+              prepend-inner-icon="mdi-translate"
+              hide-details="auto"
+              width="100%"
+              :loading="loadingLanguages"
+              :disabled="loadingLanguages"
+            ></v-select>
+          </div>
+          
           <v-btn 
             block 
             color="#1a2233" 
@@ -93,12 +110,15 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { apiService } from '@/services/api'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const form = ref(null)
 const isFormValid = ref(false)
 const showPassword = ref(false)
+const languages = ref([])
+const loadingLanguages = ref(false)
 
 const formData = ref({
   email: '',
@@ -106,7 +126,8 @@ const formData = ref({
   first_name: '',
   last_name: '',
   password: '',
-  password_confirm: ''
+  password_confirm: '',
+  default_language: null
 })
 
 const passwordRules = [
@@ -122,10 +143,40 @@ const confirmPasswordRules = [
   v => v === formData.value.password || 'Passwords must match'
 ]
 
+// Fetch available languages
+const fetchLanguages = async () => {
+  loadingLanguages.value = true
+  try {
+    const response = await apiService.getLanguages()
+    languages.value = response.data.results || response.data || []
+    
+    // Set English as default if available
+    if (languages.value.length > 0 && !formData.value.default_language) {
+      const english = languages.value.find(lang => lang.code === 'en')
+      if (english) {
+        formData.value.default_language = english.id
+      } else {
+        formData.value.default_language = languages.value[0].id
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch languages:', error)
+  } finally {
+    loadingLanguages.value = false
+  }
+}
+
 const onRegister = async () => {
   if (!isFormValid.value) return
   
-  const success = await authStore.register(formData.value)
+  // Prepare registration data with phone_number field name
+  const registrationData = {
+    ...formData.value,
+    phone_number: formData.value.mobile
+  }
+  delete registrationData.mobile
+  
+  const success = await authStore.register(registrationData)
   
   if (success) {
     // If registration includes login (tokens), redirect to home
@@ -136,11 +187,14 @@ const onRegister = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   // If already authenticated, redirect to home
   if (authStore.isAuthenticated) {
     router.replace({ name: 'Home' })
   }
+  
+  // Fetch languages for selection
+  await fetchLanguages()
 })
 </script>
 

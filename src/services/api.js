@@ -103,6 +103,11 @@ export const apiService = {
     return api.get('/products/categories/')
   },
   
+  // Skin Types
+  getSkinTypes() {
+    return api.get('/products/skin-types/')
+  },
+  
   // Orders
   getOrders(params = {}) {
     return api.get('/orders/orders/', { params })
@@ -145,16 +150,20 @@ export const apiService = {
   },
   
   // Wishlist
-  getWishlist(userId) {
-    return api.get(`/products/wishlists/${userId}/`)
+  getWishlist() {
+    return api.get('/products/wishlists/')
   },
   
-  addToWishlist(productId, userId) {
-    return api.post(`/products/wishlists/${userId}/add_product/`, { product_id: productId })
+  createWishlist() {
+    return api.post('/products/wishlists/', {})
   },
   
-  removeFromWishlist(itemId) {
-    return api.delete(`/products/wishlists/${userId}/remove_product/${itemId}/`)
+  addToWishlist(productId) {
+    return api.post(`/products/wishlists/${productId}/add_product/`, { product_id: productId })
+  },
+  
+  removeFromWishlist(productId) {
+    return api.post(`/products/wishlists/${productId}/remove_product/`, { product_id: productId })
   },
   
   // User profile
@@ -162,8 +171,27 @@ export const apiService = {
     return api.get('/accounts/profile/')
   },
   
-  updateProfile(profileData) {
-    return api.put('/accounts/profile/', profileData)
+  updateProfile(profileData, hasFile = false) {
+    if (hasFile) {
+      // Use FormData for file uploads
+      const formData = new FormData()
+      for (const key in profileData) {
+        if (profileData[key] !== null && profileData[key] !== undefined) {
+          formData.append(key, profileData[key])
+        }
+      }
+      return api.put('/accounts/profile/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+    } else {
+      return api.put('/accounts/profile/', profileData)
+    }
+  },
+
+  updateLanguage(languageId) {
+    return api.post('/accounts/languages/set-default/', { language_id: languageId })
   },
   
   // Addresses
@@ -196,6 +224,10 @@ export const apiService = {
     return api.post(`/notifications/notifications/${id}/mark_read/`)
   },
   
+  markAllNotificationsAsRead() {
+    return api.post('/notifications/notifications/mark_all_read/')
+  },
+  
   getUnreadNotificationsCount() {
     return api.get('/notifications/notifications/unread_count/')
   },
@@ -225,4 +257,47 @@ export const apiService = {
   clearCart() {
     return api.post('/orders/cart/clear/')
   },
-} 
+
+  // Password Reset
+  requestPasswordReset(email) {
+    return api.post('/accounts/password/reset_password/', { email })
+  },
+
+  validateResetCode(code) {
+    return api.get(`/accounts/password/reset/validate/${code}/`)
+  },
+
+  confirmPasswordReset(code, password) {
+    return api.post('/accounts/password/reset/confirm/', { code, password })
+  },
+
+  // Profile Management
+  changePassword(passwordData) {
+    return api.put('/accounts/password/change/', passwordData)
+  },
+
+  // Address Management  
+  createAddress(addressData) {
+    return api.post('/accounts/addresses/', addressData)
+  },
+
+  updateAddress(addressId, addressData) {
+    return api.put(`/accounts/addresses/${addressId}/`, addressData)
+  },
+
+  deleteAddress(addressId) {
+    return api.delete(`/accounts/addresses/${addressId}/`)
+  },
+
+  setDefaultAddress(addressId) {
+    return api.post(`/accounts/addresses/${addressId}/set_default/`)
+  },
+
+  // Language Management
+  getLanguages() {
+    return api.get('/accounts/languages/')
+  }
+}
+
+// Export both named and default exports for flexibility
+export default apiService 

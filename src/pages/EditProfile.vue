@@ -14,127 +14,166 @@
       
       <!-- Profile form -->
       <v-form ref="form" v-model="formValid" @submit.prevent="submitForm">
-        <!-- Profile Picture -->
-        <div class="text-center mb-6">
-          <div class="profile-avatar-wrapper d-inline-block position-relative">
-            <v-avatar size="100" color="grey-lighten-3">
-              <v-img
-                v-if="formData.profile_picture"
-                :src="formData.profile_picture"
-                cover
-              ></v-img>
-              <span v-else class="text-h4">{{ userInitials }}</span>
-            </v-avatar>
-            <div 
-              class="profile-edit-badge"
-              @click="openFileInput"
-            >
-              <v-icon size="small" color="white">mdi-camera</v-icon>
-            </div>
-            <input 
-              type="file" 
-              ref="fileInput" 
-              accept="image/*" 
-              class="d-none"
-              @change="handleFileUpload"
-            />
-          </div>
-          <p class="text-subtitle-1 mt-2">Change Profile Picture</p>
+        <!-- Loading state for initial data -->
+        <div v-if="initialLoading" class="text-center py-8">
+          <v-progress-circular indeterminate color="primary" size="48"></v-progress-circular>
+          <p class="text-subtitle-1 mt-4">Loading profile information...</p>
         </div>
         
-        <!-- Form Fields -->
-        <v-card class="mb-4 pa-4 rounded-lg" elevation="1">
-          <v-text-field
-            v-model="formData.first_name"
-            label="First Name"
-            variant="outlined"
-            density="comfortable"
-            class="mb-3"
-            :rules="[required]"
-          ></v-text-field>
+        <!-- Form content -->
+        <div v-else>
+          <!-- Profile Picture -->
+          <div class="text-center mb-6">
+            <div class="profile-avatar-wrapper d-inline-block position-relative">
+              <v-avatar size="100" color="grey-lighten-3">
+                <v-img
+                  v-if="formData.profile_picture"
+                  :src="formData.profile_picture"
+                  cover
+                ></v-img>
+                <span v-else class="text-h4">{{ userInitials }}</span>
+              </v-avatar>
+              <div 
+                class="profile-edit-badge"
+                @click="openFileInput"
+              >
+                <v-icon size="small" color="white">mdi-camera</v-icon>
+              </div>
+              <input 
+                type="file" 
+                ref="fileInput" 
+                accept="image/*" 
+                class="d-none"
+                @change="handleFileUpload"
+              />
+            </div>
+            <p class="text-subtitle-1 mt-2">Change Profile Picture</p>
+          </div>
           
-          <v-text-field
-            v-model="formData.last_name"
-            label="Last Name"
-            variant="outlined"
-            density="comfortable"
-            class="mb-3"
-            :rules="[required]"
-          ></v-text-field>
+          <!-- Form Fields -->
+          <v-card class="mb-4 pa-4 rounded-lg" elevation="1">
+            <v-text-field
+              v-model="formData.first_name"
+              label="First Name"
+              variant="outlined"
+              density="comfortable"
+              class="mb-3"
+            ></v-text-field>
+            
+            <v-text-field
+              v-model="formData.last_name"
+              label="Last Name"
+              variant="outlined"
+              density="comfortable"
+              class="mb-3"
+            ></v-text-field>
+            
+            <v-text-field
+              v-model="formData.email"
+              label="Email*"
+              variant="outlined"
+              density="comfortable"
+              class="mb-3"
+              :rules="[required, emailRule]"
+              type="email"
+              readonly
+              hint="Email cannot be changed"
+              persistent-hint
+            ></v-text-field>
+            
+            <v-text-field
+              v-model="formData.phone_number"
+              label="Phone Number*"
+              variant="outlined"
+              density="comfortable"
+              class="mb-3"
+              :rules="[required, phoneRule]"
+            ></v-text-field>
+            
+            <v-textarea
+              v-model="formData.address"
+              label="Address (Optional)"
+              variant="outlined"
+              density="comfortable"
+              rows="3"
+              class="mb-3"
+              hint="Your primary address"
+              persistent-hint
+            ></v-textarea>
+            
+            <v-select
+              v-model="formData.default_language"
+              :items="languages"
+              item-title="name"
+              item-value="id"
+              label="Preferred Language"
+              variant="outlined"
+              density="comfortable"
+              class="mb-3"
+              :loading="loadingLanguages"
+              :disabled="loadingLanguages"
+              clearable
+            ></v-select>
+          </v-card>
           
-          <v-text-field
-            v-model="formData.email"
-            label="Email"
-            variant="outlined"
-            density="comfortable"
-            class="mb-3"
-            :rules="[required, emailRule]"
-            type="email"
-          ></v-text-field>
+          <!-- Password section -->
+          <v-card class="mb-6 pa-4 rounded-lg" elevation="1">
+            <p class="text-subtitle-1 font-weight-bold mb-3">Change Password (Optional)</p>
+            <p class="text-caption mb-3 text-grey-darken-1">Leave these fields empty if you don't want to change your password</p>
+            
+            <v-text-field
+              v-model="formData.new_password"
+              label="New Password"
+              variant="outlined"
+              density="comfortable"
+              class="mb-3"
+              type="password"
+              :rules="formData.new_password ? [passwordRule] : []"
+              autocomplete="new-password"
+            ></v-text-field>
+            
+            <v-text-field
+              v-model="formData.confirm_password"
+              label="Confirm New Password"
+              variant="outlined"
+              density="comfortable"
+              class="mb-3"
+              type="password"
+              :rules="formData.new_password ? [passwordMatchRule] : []"
+              autocomplete="new-password"
+            ></v-text-field>
+          </v-card>
           
-          <v-text-field
-            v-model="formData.phone"
-            label="Phone Number"
-            variant="outlined"
-            density="comfortable"
-            class="mb-3"
-            :rules="[required, phoneRule]"
-          ></v-text-field>
-        </v-card>
-        
-        <!-- Password section -->
-        <v-card class="mb-6 pa-4 rounded-lg" elevation="1">
-          <p class="text-subtitle-1 font-weight-bold mb-3">Change Password</p>
+          <!-- Current password confirmation -->
+          <v-card class="mb-6 pa-4 rounded-lg" elevation="1">
+            <p class="text-subtitle-1 font-weight-bold mb-3">Confirm Changes</p>
+            <p class="text-caption mb-3">Please enter your current password to save changes</p>
+            
+            <v-text-field
+              v-model="formData.current_password"
+              label="Current Password"
+              variant="outlined"
+              density="comfortable"
+              class="mb-3"
+              type="password"
+              :rules="[currentPasswordRequired]"
+              autocomplete="current-password"
+            ></v-text-field>
+          </v-card>
           
-          <v-text-field
-            v-model="formData.new_password"
-            label="New Password"
-            variant="outlined"
-            density="comfortable"
-            class="mb-3"
-            type="password"
-            :rules="formData.new_password ? [passwordRule] : []"
-          ></v-text-field>
-          
-          <v-text-field
-            v-model="formData.confirm_password"
-            label="Confirm New Password"
-            variant="outlined"
-            density="comfortable"
-            class="mb-3"
-            type="password"
-            :rules="formData.new_password ? [passwordMatchRule] : []"
-          ></v-text-field>
-        </v-card>
-        
-        <!-- Current password confirmation -->
-        <v-card class="mb-6 pa-4 rounded-lg" elevation="1">
-          <p class="text-subtitle-1 font-weight-bold mb-3">Confirm Changes</p>
-          <p class="text-caption mb-3">Please enter your current password to save changes</p>
-          
-          <v-text-field
-            v-model="formData.current_password"
-            label="Current Password"
-            variant="outlined"
-            density="comfortable"
-            class="mb-3"
-            type="password"
-            :rules="[required]"
-          ></v-text-field>
-        </v-card>
-        
-        <!-- Submit button -->
-        <v-btn 
-          color="primary" 
-          block 
-          size="large"
-          type="submit"
-          :loading="loading"
-          :disabled="!formValid"
-          class="text-none rounded-lg"
-        >
-          Save Changes
-        </v-btn>
+          <!-- Submit button -->
+          <v-btn 
+            color="primary" 
+            block 
+            size="large"
+            type="submit"
+            :loading="loading"
+            :disabled="!formValid || !hasChangesToSave"
+            class="text-none rounded-lg"
+          >
+            {{ saveButtonText }}
+          </v-btn>
+        </div>
       </v-form>
       
       <!-- Snackbar for notifications -->
@@ -162,6 +201,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import { apiService } from '@/services/api'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -172,6 +212,10 @@ const form = ref(null)
 const fileInput = ref(null)
 const formValid = ref(false)
 const loading = ref(false)
+const initialLoading = ref(true)
+const profilePictureFile = ref(null)
+const languages = ref([])
+const loadingLanguages = ref(false)
 
 // Snackbar state
 const showSnackbar = ref(false)
@@ -183,11 +227,13 @@ const formData = ref({
   first_name: '',
   last_name: '',
   email: '',
-  phone: '',
+  phone_number: '',
+  address: '',
   profile_picture: null,
   new_password: '',
   confirm_password: '',
-  current_password: ''
+  current_password: '',
+  default_language: null
 })
 
 // Validation rules
@@ -196,6 +242,77 @@ const emailRule = v => /.+@.+\..+/.test(v) || 'Please enter a valid email'
 const phoneRule = v => /^\+?[0-9\s-]{10,15}$/.test(v) || 'Please enter a valid phone number'
 const passwordRule = v => v.length >= 8 || 'Password must be at least 8 characters'
 const passwordMatchRule = v => v === formData.value.new_password || 'Passwords do not match'
+const currentPasswordRequired = v => {
+  // Only require current password if we're making changes or changing password
+  const hasProfileChanges = hasFormChanges()
+  const hasPasswordChange = formData.value.new_password
+  return (hasProfileChanges || hasPasswordChange) ? (!!v || 'Current password is required to save changes') : true
+}
+
+// Initialize form data from user
+onMounted(async () => {
+  await loadUserData()
+  await fetchLanguages()
+})
+
+// Fetch available languages
+const fetchLanguages = async () => {
+  loadingLanguages.value = true
+  try {
+    const response = await apiService.getLanguages()
+    languages.value = response.data.results || response.data || []
+  } catch (error) {
+    console.error('Failed to fetch languages:', error)
+  } finally {
+    loadingLanguages.value = false
+  }
+}
+
+// Load fresh user data
+const loadUserData = async () => {
+  initialLoading.value = true
+  try {
+    // Fetch the latest user data to ensure we have current information
+    await auth.fetchUserData()
+    
+    // Prefill form with current user data
+    if (auth.user) {
+      const userData = auth.user
+      formData.value.first_name = userData.first_name || ''
+      formData.value.last_name = userData.last_name || ''
+      formData.value.email = userData.email || ''
+      formData.value.phone_number = userData.phone_number || ''
+      formData.value.address = userData.address || ''
+      formData.value.profile_picture = userData.profile_picture || null
+      formData.value.default_language = userData.default_language?.id || null
+      
+      // Always keep password fields empty for security
+      formData.value.new_password = ''
+      formData.value.confirm_password = ''
+      formData.value.current_password = ''
+    }
+  } catch (error) {
+    console.error('Failed to load user data:', error)
+    showError('Failed to load profile information')
+  } finally {
+    initialLoading.value = false
+  }
+}
+
+// Check if form has changes from original user data
+const hasFormChanges = () => {
+  if (!auth.user) return false
+  
+  const userData = auth.user
+  return (
+    formData.value.first_name !== (userData.first_name || '') ||
+    formData.value.last_name !== (userData.last_name || '') ||
+    formData.value.phone_number !== (userData.phone_number || '') ||
+    formData.value.address !== (userData.address || '') ||
+    formData.value.default_language !== (userData.default_language?.id || null) ||
+    !!profilePictureFile.value
+  )
+}
 
 // Computed properties
 const userInitials = computed(() => {
@@ -206,15 +323,22 @@ const userInitials = computed(() => {
   return initials || '?'
 })
 
-// Initialize form data from user
-onMounted(() => {
-  if (user.value) {
-    formData.value.first_name = user.value.first_name || ''
-    formData.value.last_name = user.value.last_name || ''
-    formData.value.email = user.value.email || ''
-    formData.value.phone = user.value.phone || user.value.mobile || ''
-    formData.value.profile_picture = user.value.profile_picture || null
+const saveButtonText = computed(() => {
+  const hasProfileChanges = hasFormChanges()
+  const hasPasswordChange = formData.value.new_password
+  if (!hasProfileChanges) {
+    return 'No Changes to Save'
+  } else if (hasProfileChanges && hasPasswordChange) {
+    return 'Save Profile & Password'
+  } else if (hasPasswordChange) {
+    return 'Change Password'
+  } else {
+    return 'Save Profile Changes'
   }
+})
+
+const hasChangesToSave = computed(() => {
+  return hasFormChanges() || !!formData.value.new_password
 })
 
 // File input handlers
@@ -237,53 +361,90 @@ const handleFileUpload = (event) => {
     return
   }
   
+  // Store the file for upload
+  profilePictureFile.value = file
+  
   // Create a preview URL
   formData.value.profile_picture = URL.createObjectURL(file)
-  
-  // In a real app, you would typically upload this to your server
-  // and update the formData with the returned URL
 }
 
 // Form submission
 const submitForm = async () => {
   if (!formValid.value) return
   
+  const hasProfileChanges = hasFormChanges()
+  const hasPasswordChange = formData.value.new_password
+  
+  // Check if there are any changes to save
+  if (!hasProfileChanges && !hasPasswordChange) {
+    showError('No changes detected. Please modify some fields before saving.')
+    return
+  }
+  
   loading.value = true
   
   try {
-    // Create payload (remove confirm password)
-    const payload = { ...formData.value }
-    delete payload.confirm_password
-    
-    // Only include new password if set
-    if (!payload.new_password) {
-      delete payload.new_password
+    // Update profile only if there are profile changes
+    if (hasProfileChanges) {
+      const profilePayload = {
+        first_name: formData.value.first_name,
+        last_name: formData.value.last_name,
+        phone_number: formData.value.phone_number,
+        address: formData.value.address,
+        default_language: formData.value.default_language
+      }
+      
+      // Add profile picture if a new file was selected
+      if (profilePictureFile.value) {
+        profilePayload.profile_picture = profilePictureFile.value
+      }
+      
+      // Update profile
+      await apiService.updateProfile(profilePayload, !!profilePictureFile.value)
     }
     
-    // Call API to update profile
-    // In a real app, you would:
-    // 1. Upload profile picture if changed
-    // 2. Send update request to API
-    // await apiService.updateProfile(payload)
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Handle password change if new password is provided
+    if (hasPasswordChange) {
+      const passwordPayload = {
+        current_password: formData.value.current_password,
+        new_password: formData.value.new_password,
+        confirm_new_password: formData.value.confirm_password
+      }
+      
+      await apiService.changePassword(passwordPayload)
+    }
     
     // Show success message
     snackbarColor.value = 'success'
-    snackbarText.value = 'Profile updated successfully'
+    let successMessage = 'Profile updated successfully'
+    if (hasProfileChanges && hasPasswordChange) {
+      successMessage = 'Profile and password updated successfully'
+    } else if (hasPasswordChange) {
+      successMessage = 'Password changed successfully'
+    }
+    snackbarText.value = successMessage
     showSnackbar.value = true
     
-    // In a real app, you would also update the auth store with new user data
-    // await auth.fetchUserData()
+    // Refresh user data in auth store
+    await auth.fetchUserData()
     
-    // Navigate back to profile page
+    // Clear password fields after successful update
+    formData.value.new_password = ''
+    formData.value.confirm_password = ''
+    formData.value.current_password = ''
+    profilePictureFile.value = null
+    
+    // Navigate back to profile page after a short delay
     setTimeout(() => {
       router.push({ name: 'Profile' })
     }, 1500)
   } catch (error) {
-    // Show error message
-    showError(error.message || 'Failed to update profile')
+    console.error('Profile update error:', error)
+    const errorMessage = error.response?.data?.error || 
+                        error.response?.data?.message || 
+                        Object.values(error.response?.data || {}).flat().join(', ') ||
+                        'Failed to update profile'
+    showError(errorMessage)
   } finally {
     loading.value = false
   }

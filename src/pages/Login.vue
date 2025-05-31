@@ -14,6 +14,10 @@
             Registration successful! Please log in.
           </v-alert>
           
+          <v-alert v-if="route.query.message" type="success" class="mb-4" variant="tonal" density="compact">
+            {{ route.query.message }}
+          </v-alert>
+          
           <v-alert v-if="authStore.error" type="error" class="mb-4" variant="tonal" density="compact" closable>
             {{ authStore.error }}
           </v-alert>
@@ -49,16 +53,10 @@
             />
           </div>
           
-          <div class="remember-me">
-            <v-switch
-              v-model="rememberMe"
-              color="primary"
-              label="Remember me next time"
-              hide-details
-              density="compact"
-              class="remember-switch"
-              inset
-            ></v-switch>
+          <div class="forgot-password-link text-right mb-4">
+            <router-link :to="{ name: 'ForgotPassword' }" class="forgot-link">
+              Forgot Password?
+            </router-link>
           </div>
           
           <v-btn 
@@ -95,7 +93,6 @@ const isFormValid = ref(false)
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
-const rememberMe = ref(false)
 
 const emailRules = [
   v => !!v || 'Email is required',
@@ -273,5 +270,20 @@ onMounted(() => {
 
 .w-100 {
   width: 100%;
+}
+
+.forgot-password-link {
+  width: 100%;
+}
+
+.forgot-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
 }
 </style> 

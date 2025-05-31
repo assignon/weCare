@@ -24,13 +24,10 @@
               ></v-img>
               <span v-else class="text-h5">{{ userInitials }}</span>
             </v-avatar>
-            <div class="profile-edit-badge">
-              <v-icon size="small" color="white">mdi-pencil</v-icon>
-            </div>
           </div>
           
           <div>
-            <div class="text-h6 font-weight-bold">{{ user?.name || user?.full_name || 'User' }}</div>
+            <div class="text-h6 font-weight-bold">{{ user.first_name || user.last_name || user.email  }}</div>
             <div class="text-subtitle-2 text-grey">@{{ userHandle }}</div>
           </div>
           
@@ -50,23 +47,21 @@
       </v-card>
       
       <!-- Menu items -->
-      <v-list class="menu-list rounded-lg pa-2 mb-4" elevation="1">
+      <v-list class="menu-list rounded-lg pa-2 mb-4" flat>
         <!-- Edit Profile -->
         <v-list-item
           :to="{ name: 'EditProfile' }"
           class="rounded-lg mb-2"
-          color="grey-lighten-5"
+          color="red"
         >
           <template v-slot:prepend>
-            <!-- <v-avatar color="primary" size="32" class="profile-icon"> -->
-            <v-icon color="secondary" size="large">mdi-account-edit</v-icon>
-            <!-- </v-avatar> -->
+            <v-icon color="primary" size="large">mdi-account-edit</v-icon>
           </template>
           
           <v-list-item-title>Edit Profile</v-list-item-title>
           
           <template v-slot:append>
-            <v-icon>mdi-chevron-right</v-icon>
+            <v-icon color="primary">mdi-chevron-right</v-icon>
           </template>
         </v-list-item>
         
@@ -77,15 +72,13 @@
           color="grey-lighten-5"
         >
           <template v-slot:prepend>
-            <!-- <v-avatar color="green" size="32" class="profile-icon"> -->
-              <v-icon color="secondary" size="large">mdi-map-marker</v-icon>
-            <!-- </v-avatar> -->
+              <v-icon color="primary" size="large">mdi-map-marker</v-icon>
           </template>
           
           <v-list-item-title>Addresses</v-list-item-title>
           
           <template v-slot:append>
-            <v-icon>mdi-chevron-right</v-icon>
+            <v-icon color="primary">mdi-chevron-right</v-icon>
           </template>
         </v-list-item>
         
@@ -96,15 +89,14 @@
           color="grey-lighten-5"
         >
           <template v-slot:prepend>
-            <!-- <v-avatar color="blue" size="32" class="profile-icon"> -->
-              <v-icon color="secondary" size="large">mdi-translate</v-icon>
-            <!-- </v-avatar> -->
+              <v-icon color="primary" size="large">mdi-translate</v-icon>
           </template>
           
           <v-list-item-title>Language</v-list-item-title>
           
           <template v-slot:append>
-            <v-icon>mdi-chevron-right</v-icon>
+            <span class="text-caption text-grey">{{ currentLanguageName }}</span>
+            <v-icon color="primary">mdi-chevron-right</v-icon>
           </template>
         </v-list-item>
       </v-list>
@@ -134,17 +126,32 @@
       <v-dialog v-model="showLanguageDialog" max-width="300">
         <v-card>
           <v-card-title class="text-h6 pb-1">Select Language</v-card-title>
+          <v-card-subtitle>Current: {{ currentLanguageName }}</v-card-subtitle>
           <v-card-text>
-            <v-radio-group v-model="selectedLanguage">
-              <v-radio value="en" label="English"></v-radio>
-              <v-radio value="fr" label="French"></v-radio>
-              <v-radio value="es" label="Spanish"></v-radio>
+            <div v-if="loadingLanguages" class="text-center py-4">
+              <v-progress-circular indeterminate size="24"></v-progress-circular>
+              <p class="text-caption mt-2">Loading languages...</p>
+            </div>
+            <v-radio-group v-else v-model="selectedLanguage">
+              <v-radio 
+                v-for="lang in languages" 
+                :key="lang.id" 
+                :value="lang.id" 
+                :label="lang.name"
+              ></v-radio>
             </v-radio-group>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="primary" text @click="showLanguageDialog = false">Cancel</v-btn>
-            <v-btn color="primary" @click="changeLanguage">Save</v-btn>
+            <v-btn color="primary" text @click="showLanguageDialog = false" class="text-none">Cancel</v-btn>
+            <v-btn 
+              color="primary" 
+              class="text-none"
+              @click="changeLanguage"
+              :disabled="loadingLanguages"
+            >
+              Save
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -170,7 +177,8 @@
 <script setup>
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { apiService } from '@/services/api'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -179,20 +187,59 @@ const user = auth.user
 // Dialog states
 const showLanguageDialog = ref(false)
 const showLogoutDialog = ref(false)
-const selectedLanguage = ref('en')
+const selectedLanguage = ref('')
+const languages = ref([])
+const loadingLanguages = ref(false)
 
 // Computed properties for user info
 const userInitials = computed(() => {
-  if (!user.value) return '?'
+  if (!user) return '?'
   
-  const name = user.value.name || user.value.full_name || user.value.email || ''
+  const name = user.name || user.full_name || user.email || ''
   return name.split(' ').map(n => n[0]?.toUpperCase() || '').join('').substring(0, 2)
 })
 
 const userHandle = computed(() => {
-  if (!user.value) return 'user'
-  return user.value.username || user.value.email?.split('@')[0] || 'user'
+  if (!user) return 'user'
+  return user.username || user.email?.split('@')[0] || 'user'
 })
+
+const currentLanguageName = computed(() => {
+  if (!user?.default_language) return 'English'
+  return user.default_language.name
+})
+
+// Load languages on mount
+onMounted(async () => {
+  await fetchLanguages()
+  // Set current language as selected
+  if (user?.default_language) {
+    selectedLanguage.value = user.default_language.id
+  }
+})
+
+// Fetch available languages
+const fetchLanguages = async () => {
+  loadingLanguages.value = true
+  try {
+    const response = await apiService.getLanguages()
+    languages.value = response.data.results || response.data || []
+    
+    // If no current language is set, default to English
+    if (!selectedLanguage.value && languages.value.length > 0) {
+      const english = languages.value.find(lang => lang.code === 'en')
+      if (english) {
+        selectedLanguage.value = english.id
+      } else {
+        selectedLanguage.value = languages.value[0].id
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch languages:', error)
+  } finally {
+    loadingLanguages.value = false
+  }
+}
 
 // Confirm logout
 const confirmLogout = () => {
@@ -206,10 +253,25 @@ const logout = () => {
 }
 
 // Change language function
-const changeLanguage = () => {
-  // Here you would implement language change logic
-  console.log(`Language changed to: ${selectedLanguage.value}`)
-  showLanguageDialog.value = false
+const changeLanguage = async () => {
+  try {
+    // Update user's default language
+    const updatePayload = {
+      default_language: selectedLanguage.value
+    }
+    
+    await apiService.updateLanguage(selectedLanguage.value)
+    
+    // Refresh user data to get updated language
+    await auth.fetchUserData()
+    
+    showLanguageDialog.value = false
+    
+    // You could also trigger a UI language change here if implementing i18n
+    console.log(`Language changed to: ${selectedLanguage.value}`)
+  } catch (error) {
+    console.error('Failed to update language:', error)
+  }
 }
 </script>
 
