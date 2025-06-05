@@ -5,6 +5,7 @@ import { useCartStore } from '@/stores/cart'
 import { useNotificationStore } from '@/stores/notification'
 import { useAuthStore } from '@/stores/auth'
 import BottomNavigation from '@/components/BottomNavigation.vue'
+import GlobalSnackbar from '@/components/GlobalSnackbar.vue'
 
 const route = useRoute()
 const cart = useCartStore()
@@ -146,6 +147,9 @@ onMounted(async () => {
     
     <!-- Show bottom navigation only on main pages -->
     <BottomNavigation v-if="showBottomNav" />
+    
+    <!-- Global notification snackbar -->
+    <GlobalSnackbar />
   </v-app>
 </template>
 

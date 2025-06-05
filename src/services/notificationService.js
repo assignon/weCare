@@ -7,6 +7,8 @@ class NotificationService {
     this.maxReconnectAttempts = 5
     this.reconnectAttempts = 0
     this.reconnectDelay = 1000 // Start with 1 second
+    this.heartbeatInterval = null
+    this.snackbarCallbacks = []
   }
 
   // Initialize WebSocket connection for real-time notifications
@@ -21,6 +23,7 @@ class NotificationService {
         console.log('Notification WebSocket connected')
         this.reconnectAttempts = 0
         this.reconnectDelay = 1000
+        this.startHeartbeat()
       }
 
       this.socket.onmessage = (event) => {
@@ -34,6 +37,7 @@ class NotificationService {
 
       this.socket.onclose = (event) => {
         console.log('Notification WebSocket disconnected')
+        this.stopHeartbeat()
         if (!event.wasClean) {
           this.handleReconnect(userId)
         }
@@ -48,17 +52,40 @@ class NotificationService {
     }
   }
 
+  // Start heartbeat to keep connection alive
+  startHeartbeat() {
+    this.heartbeatInterval = setInterval(() => {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        this.socket.send(JSON.stringify({
+          type: 'heartbeat',
+          timestamp: Date.now()
+        }))
+      }
+    }, 30000) // Send heartbeat every 30 seconds
+  }
+
+  // Stop heartbeat
+  stopHeartbeat() {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval)
+      this.heartbeatInterval = null
+    }
+  }
+
   // Handle incoming notification messages
   handleNotificationMessage(data) {
     const notificationStore = useNotificationStore()
     
-    if (data.type === 'notification_message') {
+    if (data.type === 'notification') {
       // Add new notification to store
       const notification = {
         id: data.data?.notification_id || Date.now(),
         title: data.data?.title || 'New Notification',
         message: data.message || data.data?.message,
         type: data.data?.type || 'info',
+        severity: data.data?.severity || 'info',
+        persistent: data.data?.persistent || false,
+        timeout: data.data?.timeout || 5000,
         reference_id: data.data?.reference_id,
         reference_type: data.data?.reference_type,
         is_read: false,
@@ -67,9 +94,54 @@ class NotificationService {
       
       notificationStore.addNotification(notification)
       
+      // Trigger snackbar display
+      this.showSnackbar(notification)
+      
       // Show browser notification if permission granted
       this.showBrowserNotification(notification)
+    } else if (data.type === 'broadcast') {
+      // Handle broadcast messages
+      const broadcastNotification = {
+        id: Date.now(),
+        title: 'System Announcement',
+        message: data.message,
+        type: 'info',
+        severity: 'info',
+        persistent: false,
+        timeout: 10000, // Broadcast messages show for 10 seconds
+        is_read: false,
+        created_at: new Date().toISOString()
+      }
+      
+      this.showSnackbar(broadcastNotification)
+    } else if (data.type === 'heartbeat_response') {
+      // Handle heartbeat response
+      console.debug('Heartbeat response received')
     }
+  }
+
+  // Register snackbar callback for displaying notifications
+  registerSnackbarCallback(callback) {
+    this.snackbarCallbacks.push(callback)
+  }
+
+  // Unregister snackbar callback
+  unregisterSnackbarCallback(callback) {
+    const index = this.snackbarCallbacks.indexOf(callback)
+    if (index > -1) {
+      this.snackbarCallbacks.splice(index, 1)
+    }
+  }
+
+  // Show snackbar notification
+  showSnackbar(notification) {
+    this.snackbarCallbacks.forEach(callback => {
+      try {
+        callback(notification)
+      } catch (error) {
+        console.error('Error calling snackbar callback:', error)
+      }
+    })
   }
 
   // Show browser notification
@@ -80,7 +152,7 @@ class NotificationService {
         icon: '/favicon.ico',
         badge: '/favicon.ico',
         tag: `notification-${notification.id}`,
-        requireInteraction: false,
+        requireInteraction: notification.persistent,
         silent: false
       })
 
@@ -105,10 +177,12 @@ class NotificationService {
         browserNotification.close()
       }
 
-      // Auto close after 5 seconds
-      setTimeout(() => {
-        browserNotification.close()
-      }, 5000)
+      // Auto close non-persistent notifications after timeout
+      if (!notification.persistent && notification.timeout > 0) {
+        setTimeout(() => {
+          browserNotification.close()
+        }, notification.timeout)
+      }
     }
   }
 
@@ -132,25 +206,27 @@ class NotificationService {
 
   // Request notification permission
   async requestNotificationPermission() {
-    if (!('Notification' in window)) {
-      console.log('This browser does not support notifications')
-      return false
+    if ('Notification' in window) {
+      if (Notification.permission === 'default') {
+        const permission = await Notification.requestPermission()
+        return permission === 'granted'
+      }
+      return Notification.permission === 'granted'
     }
-
-    if (Notification.permission === 'granted') {
-      return true
-    }
-
-    if (Notification.permission !== 'denied') {
-      const permission = await Notification.requestPermission()
-      return permission === 'granted'
-    }
-
     return false
+  }
+
+  // Send ping to server
+  ping() {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify({ type: 'ping' }))
+    }
   }
 
   // Disconnect WebSocket
   disconnect() {
+    this.stopHeartbeat()
+    
     if (this.reconnectInterval) {
       clearTimeout(this.reconnectInterval)
       this.reconnectInterval = null
@@ -165,6 +241,24 @@ class NotificationService {
   // Check if WebSocket is connected
   isConnected() {
     return this.socket && this.socket.readyState === WebSocket.OPEN
+  }
+
+  // Get connection status
+  getConnectionStatus() {
+    if (!this.socket) return 'disconnected'
+    
+    switch (this.socket.readyState) {
+      case WebSocket.CONNECTING:
+        return 'connecting'
+      case WebSocket.OPEN:
+        return 'connected'
+      case WebSocket.CLOSING:
+        return 'closing'
+      case WebSocket.CLOSED:
+        return 'closed'
+      default:
+        return 'unknown'
+    }
   }
 }
 

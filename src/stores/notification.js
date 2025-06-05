@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { apiService } from '@/services/api'
+import notificationService from '@/services/notificationService'
+import { useAuthStore } from '@/stores/auth'
 
 export const useNotificationStore = defineStore('notification', () => {
   // State
@@ -95,9 +97,22 @@ export const useNotificationStore = defineStore('notification', () => {
     unreadCount.value = 0
   }
 
-  // Initialize store
+  // Initialize store and WebSocket connection
   const init = async () => {
-    await fetchUnreadCount()
+    try {
+      // Fetch initial notification count
+      await fetchUnreadCount()
+      
+      // Initialize WebSocket connection if user is authenticated
+      const authStore = useAuthStore()
+      if (authStore.isAuthenticated && authStore.user?.id) {
+        console.log('Initializing WebSocket for shopper:', authStore.user.id)
+        notificationService.initWebSocket(authStore.user.id)
+        await notificationService.requestNotificationPermission()
+      }
+    } catch (error) {
+      console.error('Error initializing notification store:', error)
+    }
   }
 
   return {

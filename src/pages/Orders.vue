@@ -309,7 +309,7 @@ const debouncedSearch = debounce(() => {
 // Methods
 const loadOrders = async (append = false) => {
   if (!append) {
-    loading.value = true
+  loading.value = true
   } else {
     loadingMore.value = true
   }
