@@ -1,14 +1,7 @@
 <template>
-  <v-snackbar
-    v-model="show"
-    :color="snackbarColor"
-    :timeout="currentNotification?.timeout || 5000"
-    :persistent="currentNotification?.persistent || false"
-    location="top right"
-    :multi-line="isMultiLine"
-    :vertical="isVertical"
-    class="global-snackbar"
-  >
+  <v-snackbar v-model="show" :color="snackbarColor" :timeout="currentNotification?.timeout || 5000"
+    :persistent="currentNotification?.persistent || false" location="top left" :multi-line="isMultiLine"
+    :vertical="isVertical" class="global-snackbar">
     <div class="d-flex align-center">
       <v-icon :icon="snackbarIcon" class="mr-3" />
       <div class="flex-grow-1">
@@ -20,22 +13,12 @@
         </div>
       </div>
     </div>
-    
+
     <template v-slot:actions>
-      <v-btn
-        variant="text" 
-        icon="mdi-close"
-        size="small"
-        @click="closeSnackbar"
-      />
-      
+      <v-btn variant="text" icon="mdi-close" size="small" @click="closeSnackbar" />
+
       <!-- Action button for certain notification types -->
-      <v-btn
-        v-if="hasAction"
-        variant="text"
-        size="small"
-        @click="handleAction"
-      >
+      <v-btn v-if="hasAction" variant="text" size="small" @click="handleAction">
         {{ actionText }}
       </v-btn>
     </template>
@@ -59,7 +42,7 @@ const snackbarColor = computed(() => {
   const colorMap = {
     'success': 'success',
     'info': 'info',
-    'warning': 'warning', 
+    'warning': 'warning',
     'error': 'error'
   }
   return colorMap[currentNotification.value?.severity] || 'info'
@@ -100,7 +83,7 @@ const actionText = computed(() => {
 const displayNotification = (notification) => {
   // Add to queue
   notificationQueue.value.push(notification)
-  
+
   // If not currently showing a notification, show this one
   if (!show.value) {
     showNextNotification()
@@ -113,11 +96,11 @@ const showNextNotification = () => {
     currentNotification.value = null
     return
   }
-  
+
   // Get next notification from queue
   currentNotification.value = notificationQueue.value.shift()
   show.value = true
-  
+
   // If persistent notification, don't auto-close
   if (!currentNotification.value.persistent && currentNotification.value.timeout > 0) {
     setTimeout(() => {
@@ -140,20 +123,20 @@ const handleAction = () => {
   if (!currentNotification.value?.reference_type || !currentNotification.value?.reference_id) {
     return
   }
-  
+
   const linkMap = {
     'Order': `/order-status/${currentNotification.value.reference_id}`,
     'Product': `/product/${currentNotification.value.reference_id}`,
     'Profile': '/profile'
   }
-  
+
   const link = linkMap[currentNotification.value.reference_type]
   if (link) {
     router.push(link)
   } else {
     router.push('/notifications')
   }
-  
+
   closeSnackbar()
 }
 
@@ -182,4 +165,4 @@ onUnmounted(() => {
 :deep(.v-snackbar__content) {
   padding: 16px !important;
 }
-</style> 
+</style>

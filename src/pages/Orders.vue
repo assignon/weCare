@@ -99,7 +99,7 @@
                                     <!-- Products Preview -->
                                     <v-col cols="12" md="6">
                                         <div class="products-preview">
-                                            <div v-for="(item, index) in order.items?.slice(0, 2)" :key="index"
+                                            <div v-for="(item, index) in order.items?.slice(0, 1)" :key="index"
                                                 class="d-flex align-center mb-1">
                                                 <v-avatar size="32" class="me-2">
                                                     <v-img v-if="item.product?.main_image"
@@ -133,6 +133,22 @@
 
                                 <!-- Action Buttons -->
                                 <div class="action-buttons">
+                                    <!-- On Hold Status Action Buttons -->
+                                    <div v-if="order.status === 'on_hold'" class="mt-2 d-flex gap-2">
+                                        <v-btn color="error" variant="outlined" size="small" class="text-none"
+                                            @click.stop="cancelOrder(order.id)" :loading="updatingOrderId === order.id"
+                                            rounded>
+                                            <v-icon start size="small">mdi-close</v-icon>
+                                            Cancel Order
+                                        </v-btn>
+                                        <v-btn color="success" variant="flat" size="small" class="text-none"
+                                            @click.stop="proceedOrder(order.id)" :loading="updatingOrderId === order.id"
+                                            rounded>
+                                            <v-icon start size="small">mdi-play</v-icon>
+                                            Proceed Order
+                                        </v-btn>
+                                    </div>
+
                                     <!-- Delivered No Confirmation Action Button -->
                                     <div v-if="order.status === 'delivered_no_confirmation'" class="mt-2">
                                         <v-btn color="primary" variant="flat" size="small" class="text-none"
@@ -211,7 +227,7 @@
                         Cancel
                     </v-btn>
                     <v-btn color="error" variant="flat" @click="executeCancelOrder"
-                        :loading="updatingOrderId === orderToUpdate">
+                        :loading="updatingOrderId === orderToUpdate" class="text-none" rounded>
                         Confirm Cancel
                     </v-btn>
                 </v-card-actions>
@@ -233,7 +249,7 @@
                         Cancel
                     </v-btn>
                     <v-btn color="success" variant="flat" @click="executeProceedOrder"
-                        :loading="updatingOrderId === orderToUpdate">
+                        :loading="updatingOrderId === orderToUpdate" class="text-none" rounded>
                         Confirm Proceed
                     </v-btn>
                 </v-card-actions>
@@ -256,7 +272,7 @@
                     Cancel
                 </v-btn>
                 <v-btn color="success" variant="flat" @click="executeDeliveryConfirmation"
-                    :loading="updatingOrderId === orderToUpdate">
+                    :loading="updatingOrderId === orderToUpdate" class="text-none" rounded>
                     Confirm Delivery
                 </v-btn>
             </v-card-actions>
@@ -303,12 +319,12 @@ const pagination = ref({
 // Filter options
 const statusOptions = [
     { title: 'Pending', value: 'pending' },
+    { title: 'On Hold', value: 'on_hold' },
     { title: 'Processed', value: 'assigned_to_driver' },
     { title: 'Picked up', value: 'picked_up' },
     { title: 'Delivered (Confirmation Needed)', value: 'delivered_no_confirmation' },
     { title: 'Delivered', value: 'delivered' },
-    { title: 'Cancelled', value: 'cancelled' },
-    { title: 'On Hold', value: 'on_hold' }
+    { title: 'Cancelled', value: 'cancelled' }
 ]
 
 const quickStatusOptions = [
@@ -592,7 +608,15 @@ const getStatusColor = (status) => {
         picked_up: 'indigo',
         delivered_no_confirmation: 'amber',
         delivered: 'success',
-        cancelled: 'error'
+        cancelled: 'error',
+        on_hold: 'warning',
+        not_received: 'warning',
+        not_returned: 'warning',
+        returned: 'warning',
+        rescheduled: 'info',
+        wrong_delivery: 'error',
+        assigned_to_admin: 'info',
+        assigned_to_driver: 'info'
     }
     return colors[status] || 'grey'
 }
@@ -610,22 +634,76 @@ const getStatusIcon = (status) => {
     return icons[status] || 'mdi-package-variant-closed'
 }
 
-// Delivery confirmation methods
+// Order action methods
+const cancelOrder = (orderId) => {
+    orderToUpdate.value = orderId
+    showCancelDialog.value = true
+}
+
+const proceedOrder = (orderId) => {
+    orderToUpdate.value = orderId
+    showProceedDialog.value = true
+}
+
 const confirmDelivery = (orderId) => {
     orderToUpdate.value = orderId
     showDeliveryConfirmDialog.value = true
+}
+
+const executeCancelOrder = async () => {
+    if (orderToUpdate.value) {
+        updatingOrderId.value = orderToUpdate.value
+        try {
+            await apiService.updateOrderStatus(orderToUpdate.value, {
+                status: 'cancelled',
+                notes: 'Order cancelled by customer'
+            })
+            await loadOrders()
+            showCancelDialog.value = false
+            orderToUpdate.value = null
+        } catch (error) {
+            console.error('Error cancelling order:', error)
+            error.value = 'Failed to cancel order. Please try again.'
+        } finally {
+            updatingOrderId.value = null
+        }
+    }
+}
+
+const executeProceedOrder = async () => {
+    if (orderToUpdate.value) {
+        updatingOrderId.value = orderToUpdate.value
+        try {
+            await apiService.updateOrderStatus(orderToUpdate.value, {
+                status: 'pending',
+                notes: 'Order proceeded by customer from on-hold status'
+            })
+            await loadOrders()
+            showProceedDialog.value = false
+            orderToUpdate.value = null
+        } catch (error) {
+            console.error('Error proceeding with order:', error)
+            error.value = 'Failed to proceed with order. Please try again.'
+        } finally {
+            updatingOrderId.value = null
+        }
+    }
 }
 
 const executeDeliveryConfirmation = async () => {
     if (orderToUpdate.value) {
         updatingOrderId.value = orderToUpdate.value
         try {
-            await apiService.updateOrderStatus(orderToUpdate.value, { status: 'delivered' })
+            await apiService.updateOrderStatus(orderToUpdate.value, {
+                status: 'delivered',
+                notes: 'Delivery confirmed by customer'
+            })
             await loadOrders()
             showDeliveryConfirmDialog.value = false
             orderToUpdate.value = null
         } catch (error) {
             console.error('Error confirming delivery:', error)
+            error.value = 'Failed to confirm delivery. Please try again.'
         } finally {
             updatingOrderId.value = null
         }
@@ -703,14 +781,23 @@ onUnmounted(() => {
     align-items: flex-end;
 }
 
+.gap-2 {
+    gap: 8px;
+}
+
 @media (max-width: 960px) {
     .amount-section {
         text-align: left;
     }
 
     .action-buttons {
-        flex-direction: row;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .action-buttons .d-flex {
+        flex-wrap: wrap;
+        width: 100%;
     }
 
     .status-chip {
