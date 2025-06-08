@@ -1,20 +1,13 @@
 <template>
   <v-timeline density="compact" side="end">
-    <v-timeline-item
-      v-for="(tracking, index) in timeline"
-      :key="index"
-      :dot-color="tracking.completed ? getStatusColor(tracking.status) : 'grey-lighten-2'"
-      size="small"
-    >
+    <v-timeline-item v-for="(tracking, index) in timeline" :key="index"
+      :dot-color="tracking.completed ? getStatusColor(tracking.status) : 'grey-lighten-2'" size="small">
       <template #icon>
-        <v-icon
-          :color="tracking.completed ? 'white' : 'grey'"
-          size="small"
-        >
+        <v-icon :color="tracking.completed ? 'white' : 'grey'" size="small">
           {{ getStatusIcon(tracking.status) }}
         </v-icon>
       </template>
-      
+
       <div class="d-flex justify-space-between align-center">
         <div>
           <h4 class="text-subtitle-1 font-weight-medium">
@@ -27,11 +20,7 @@
             {{ formatDate(tracking.timestamp) }}
           </p>
         </div>
-        <v-icon
-          v-if="tracking.completed"
-          color="success"
-          size="small"
-        >
+        <v-icon v-if="tracking.completed" color="success" size="small">
           mdi-check-circle
         </v-icon>
       </div>
@@ -51,20 +40,19 @@ const props = defineProps({
 
 const timeline = computed(() => {
   if (!props.order) return []
-  
+
   const statusFlow = [
     'pending',
-    'processing', 
-    'ready_for_pickup',
+    'assigned_to_driver',
     'picked_up',
     'delivered'
   ]
-  
+
   const currentStatusIndex = statusFlow.indexOf(props.order.status)
-  
+
   return statusFlow.map((status, index) => {
     const trackingItem = props.order.tracking_history?.find(t => t.status === status)
-    
+
     return {
       status,
       completed: index <= currentStatusIndex && props.order.status !== 'cancelled',
@@ -94,8 +82,7 @@ const formatStatus = (status) => {
 const getStatusColor = (status) => {
   const colors = {
     pending: 'orange',
-    processing: 'blue',
-    ready_for_pickup: 'purple',
+    assigned_to_driver: 'blue',
     picked_up: 'indigo',
     delivered: 'success',
     cancelled: 'error'
@@ -106,8 +93,7 @@ const getStatusColor = (status) => {
 const getStatusIcon = (status) => {
   const icons = {
     pending: 'mdi-clock-outline',
-    processing: 'mdi-package-variant',
-    ready_for_pickup: 'mdi-package-check',
+    assigned_to_driver: 'mdi-package-variant',
     picked_up: 'mdi-truck',
     delivered: 'mdi-check-circle',
     cancelled: 'mdi-close-circle'
@@ -118,11 +104,10 @@ const getStatusIcon = (status) => {
 const getDefaultStatusNote = (status) => {
   const notes = {
     pending: 'Order has been placed and is awaiting processing',
-    processing: 'Order is being prepared by the seller',
-    ready_for_pickup: 'Order is ready for pickup by delivery driver',
+    assigned_to_driver: 'Order is prepared by the seller and is awaiting pickup by the delivery driver',
     picked_up: 'Order has been picked up and is on the way',
     delivered: 'Order has been successfully delivered'
   }
   return notes[status] || ''
 }
-</script> 
+</script>

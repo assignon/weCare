@@ -8,8 +8,17 @@ export const useNotificationStore = defineStore('notification', () => {
   // State
   const notifications = ref([])
   const loading = ref(false)
+  const loadingMore = ref(false)
   const error = ref(null)
   const unreadCount = ref(0)
+  
+  // Pagination state
+  const pagination = ref({
+    page: 1,
+    pageSize: 20,
+    total: 0,
+    hasMore: true
+  })
 
   // Getters
   const unreadNotifications = computed(() => 
@@ -23,20 +32,53 @@ export const useNotificationStore = defineStore('notification', () => {
   const hasUnreadNotifications = computed(() => unreadCount.value > 0)
 
   // Actions
-  const fetchNotifications = async () => {
-    loading.value = true
+  const fetchNotifications = async (append = false) => {
+    if (append) {
+      loadingMore.value = true
+    } else {
+      loading.value = true
+      pagination.value.page = 1
+    }
     error.value = null
+    
     try {
-      const response = await apiService.getNotifications()
-      notifications.value = response.data.results || response.data
-      // Update unread count from the fetched notifications
-      unreadCount.value = notifications.value.filter(n => !n.is_read).length
+      const params = {
+        page: pagination.value.page,
+        page_size: pagination.value.pageSize
+      }
+      
+      const response = await apiService.getNotifications(params)
+      const newNotifications = response.data.results || response.data
+      
+      if (append) {
+        notifications.value = [...notifications.value, ...newNotifications]
+      } else {
+        notifications.value = newNotifications
+      }
+      
+      // Update pagination info
+      pagination.value.total = response.data.count || notifications.value.length
+      pagination.value.hasMore = notifications.value.length < pagination.value.total
+      
+      // Update unread count from the fetched notifications if not appending
+      if (!append) {
+        unreadCount.value = notifications.value.filter(n => !n.is_read).length
+      }
+      
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch notifications'
       console.error('Error fetching notifications:', err)
     } finally {
       loading.value = false
+      loadingMore.value = false
     }
+  }
+
+  const loadMoreNotifications = async () => {
+    if (!pagination.value.hasMore || loadingMore.value) return
+    
+    pagination.value.page += 1
+    await fetchNotifications(true)
   }
 
   const fetchUnreadCount = async () => {
@@ -93,8 +135,15 @@ export const useNotificationStore = defineStore('notification', () => {
   const resetStore = () => {
     notifications.value = []
     loading.value = false
+    loadingMore.value = false
     error.value = null
     unreadCount.value = 0
+    pagination.value = {
+      page: 1,
+      pageSize: 20,
+      total: 0,
+      hasMore: true
+    }
   }
 
   // Initialize store and WebSocket connection
@@ -119,8 +168,10 @@ export const useNotificationStore = defineStore('notification', () => {
     // State
     notifications,
     loading,
+    loadingMore,
     error,
     unreadCount,
+    pagination,
 
     // Getters
     unreadNotifications,
@@ -129,6 +180,7 @@ export const useNotificationStore = defineStore('notification', () => {
 
     // Actions
     fetchNotifications,
+    loadMoreNotifications,
     fetchUnreadCount,
     markAsRead,
     markAllAsRead,

@@ -216,8 +216,8 @@ export const apiService = {
   },
   
   // Notifications
-  getNotifications() {
-    return api.get('/notifications/notifications/')
+  getNotifications(params = {}) {
+    return api.get('/notifications/notifications/', { params })
   },
   
   markNotificationAsRead(id) {

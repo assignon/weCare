@@ -1,0 +1,9 @@
+                                            <!-- Delivered No Confirmation Action Button -->
+                                            <div v-if="order.status === 'delivered_no_confirmation'" class="mt-2">
+                                                <v-btn color="primary" variant="flat" size="small" class="text-none"
+                                                    @click.stop="confirmDelivery(order.id)"
+                                                    :loading="updatingOrderId === order.id" rounded>
+                                                    <v-icon start size="small">mdi-check</v-icon>
+                                                    Confirm Delivery
+                                                </v-btn>
+                                            </div> 

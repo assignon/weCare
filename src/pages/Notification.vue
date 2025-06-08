@@ -6,16 +6,9 @@
         <v-btn variant="text" @click="$router.back()">
           <v-icon size="24">mdi-arrow-left</v-icon>
           <h2 class="text-h6 font-weight-bold ml-2">Notifications</h2>
-        </v-btn>  
-        <v-btn
-          v-if="notifications.length > 0 && hasUnreadNotifications"
-          color="primary"
-          variant="text"
-          size="small"
-          class="text-none"
-          @click="handleMarkAllAsRead"
-          :loading="markingAllAsRead"
-        >
+        </v-btn>
+        <v-btn v-if="notifications.length > 0 && hasUnreadNotifications" color="primary" variant="text" size="small"
+          class="text-none" @click="handleMarkAllAsRead" :loading="markingAllAsRead">
           Mark all as read
         </v-btn>
       </div>
@@ -34,56 +27,32 @@
       </div>
 
       <!-- Error state -->
-      <v-alert
-        v-if="error && !loading"
-        type="error"
-        variant="tonal"
-        class="mb-4"
-        closable
-        @click:close="clearError"
-      >
+      <v-alert v-if="error && !loading" type="error" variant="tonal" class="mb-4" closable @click:close="clearError">
         {{ error }}
       </v-alert>
 
       <!-- Notifications list -->
       <div v-if="!loading && notifications.length > 0">
-        <v-expansion-panels
-          v-model="expandedPanels"
-          multiple
-          variant="accordion"
-        >
-          <v-expansion-panel
-            v-for="notification in notifications"
-            :key="notification.id"
-            :class="[
-              'notification-item',
-              { 'unread-notification': !notification.is_read }
-            ]"
-          >
+        <v-expansion-panels v-model="expandedPanels" multiple variant="accordion">
+          <v-expansion-panel v-for="notification in notifications" :key="notification.id" :class="[
+            'notification-item',
+            { 'unread-notification': !notification.is_read }
+          ]">
             <v-expansion-panel-title>
               <div class="d-flex align-center justify-space-between w-100">
                 <div class="d-flex align-center">
                   <!-- Notification icon based on type -->
-                  <v-icon
-                    :color="getNotificationIcon(notification.type).color"
-                    class="me-3"
-                    size="20"
-                  >
+                  <v-icon :color="getNotificationIcon(notification.type).color" class="me-3" size="20">
                     {{ getNotificationIcon(notification.type).icon }}
                   </v-icon>
-                  
+
                   <!-- Title and unread indicator -->
                   <div>
                     <div class="d-flex align-center">
                       <span class="text-subtitle-1 font-weight-medium">
                         {{ notification.title }}
                       </span>
-                      <v-chip
-                        v-if="!notification.is_read"
-                        color="primary"
-                        size="x-small"
-                        class="ml-2"
-                      >
+                      <v-chip v-if="!notification.is_read" color="primary" size="x-small" class="ml-2">
                         New
                       </v-chip>
                     </div>
@@ -94,14 +63,8 @@
                 </div>
 
                 <!-- Mark as read button -->
-                <v-btn
-                  v-if="!notification.is_read"
-                  icon
-                  size="small"
-                  variant="text"
-                  @click.stop="handleMarkAsRead(notification.id)"
-                  :loading="markingAsRead[notification.id]"
-                >
+                <v-btn v-if="!notification.is_read" icon size="small" variant="text"
+                  @click.stop="handleMarkAsRead(notification.id)" :loading="markingAsRead[notification.id]">
                   <v-icon size="18">mdi-check</v-icon>
                   <v-tooltip activator="parent" location="top">
                     Mark as read
@@ -113,17 +76,11 @@
             <v-expansion-panel-text>
               <div class="notification-content">
                 <p class="text-body-2">{{ notification.message }}</p>
-                
+
                 <!-- Reference link if available -->
                 <div v-if="notification.reference_type && notification.reference_id" class="mt-3">
-                  <v-btn
-                    :to="getNotificationLink(notification)"
-                    color="primary"
-                    variant="outlined"
-                    size="small"
-                    rounded
-                    class="text-none"
-                  >
+                  <v-btn :to="getNotificationLink(notification)" color="primary" variant="outlined" size="small" rounded
+                    class="text-none">
                     View {{ notification.reference_type }}
                   </v-btn>
                 </div>
@@ -132,16 +89,22 @@
           </v-expansion-panel>
         </v-expansion-panels>
 
-        <!-- Pagination if needed -->
-        <div v-if="notifications.length >= 20" class="text-center mt-6">
-          <v-btn
-            color="primary"
-            variant="text"
-            @click="loadMoreNotifications"
-            :loading="loadingMore"
-          >
+        <!-- Load More Button -->
+        <div v-if="pagination.hasMore" class="text-center mt-6">
+          <v-btn color="primary" variant="text" @click="loadMoreNotifications" :loading="loadingMore">
             Load more notifications
           </v-btn>
+        </div>
+
+        <!-- End of notifications -->
+        <div v-if="!pagination.hasMore && notifications.length > 0" class="text-center mt-6">
+          <v-divider class="mb-4"></v-divider>
+          <v-icon color="grey-lighten-1" size="24" class="mb-2">
+            mdi-check-circle-outline
+          </v-icon>
+          <p class="text-body-2 text-medium-emphasis">
+            You've seen all {{ notifications.length }} notifications
+          </p>
         </div>
       </div>
 
@@ -169,31 +132,32 @@ const notificationStore = useNotificationStore()
 const expandedPanels = ref([])
 const markingAsRead = ref({})
 const markingAllAsRead = ref(false)
-const loadingMore = ref(false)
 
 // Computed properties from store
 const notifications = computed(() => notificationStore.notifications)
 const loading = computed(() => notificationStore.loading)
+const loadingMore = computed(() => notificationStore.loadingMore)
 const error = computed(() => notificationStore.error)
 const unreadCount = computed(() => notificationStore.unreadCount)
 const hasUnreadNotifications = computed(() => notificationStore.hasUnreadNotifications)
+const pagination = computed(() => notificationStore.pagination)
 
 // Methods
 const formatDate = (dateString) => {
   if (!dateString) return ''
-  
+
   const date = new Date(dateString)
   const now = new Date()
   const diffMs = now - date
   const diffMins = Math.floor(diffMs / 60000)
   const diffHours = Math.floor(diffMins / 60)
   const diffDays = Math.floor(diffHours / 24)
-  
+
   if (diffMins < 1) return 'Just now'
   if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`
   if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`
   if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`
-  
+
   return date.toLocaleDateString()
 }
 
@@ -210,13 +174,13 @@ const getNotificationIcon = (type) => {
 
 const getNotificationLink = (notification) => {
   if (!notification.reference_type || !notification.reference_id) return null
-  
+
   const linkMap = {
     'Order': `/order-status/${notification.reference_id}`,
     'Product': `/product/${notification.reference_id}`,
     'Profile': '/profile'
   }
-  
+
   return linkMap[notification.reference_type] || null
 }
 
@@ -243,13 +207,7 @@ const clearError = () => {
 }
 
 const loadMoreNotifications = async () => {
-  loadingMore.value = true
-  try {
-    // Implement pagination if needed
-    await notificationStore.fetchNotifications()
-  } finally {
-    loadingMore.value = false
-  }
+  await notificationStore.loadMoreNotifications()
 }
 
 // Auto-refresh notifications every 30 seconds
@@ -257,7 +215,7 @@ let refreshInterval = null
 
 onMounted(async () => {
   await notificationStore.fetchNotifications()
-  
+
   // Set up auto-refresh
   refreshInterval = setInterval(() => {
     notificationStore.fetchUnreadCount()
@@ -273,7 +231,8 @@ onUnmounted(() => {
 
 <style scoped>
 .notification-page {
-  padding-bottom: 100px; /* Account for bottom navigation */
+  padding-bottom: 100px;
+  /* Account for bottom navigation */
 }
 
 .notification-item {
@@ -300,4 +259,4 @@ onUnmounted(() => {
 .unread-notification .v-expansion-panel-title {
   background-color: rgba(var(--v-theme-primary), 0.05);
 }
-</style> 
+</style>
