@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Background Notification Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .step {
+            margin: 15px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        .step.success {
+            border-color: #4CAF50;
+            background: #f1f8e9;
+        }
+
+        .step.error {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+
+        .step.warning {
+            border-color: #ff9800;
+            background: #fff3e0;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #2196F3;
+            color: white;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .token-display {
+            width: 100%;
+            height: 60px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔥 Background Notification Test</h1>
+    <p>This page will help diagnose background notification issues.</p>
+
+    <div id="step1" class="step">
+        <h3>Step 1: Check Browser Support</h3>
+        <ul id="support-details"></ul>
+    </div>
+
+    <div id="step2" class="step">
+        <h3>Step 2: Get FCM Token</h3>
+        <button onclick="initializeFirebase()">Initialize Firebase & Get Token</button>
+        <textarea id="token-display" class="token-display" readonly
+            placeholder="FCM token will appear here..."></textarea>
+        <button onclick="copyToken()" id="copy-btn" disabled>Copy Token</button>
+    </div>
+
+    <div id="step3" class="step">
+        <h3>Step 3: Test Background Notifications</h3>
+        <p><strong>Instructions:</strong></p>
+        <ol>
+            <li>Copy the FCM token from above</li>
+            <li><button onclick="minimizeTab()">Click here to background this tab</button></li>
+            <li>Run this curl command in your terminal:</li>
+        </ol>
+        <textarea readonly style="width: 100%; height: 80px; font-family: monospace; font-size: 11px;">
+curl -X POST http://localhost:8000/api/core/fcm/test/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "token": "YOUR_FCM_TOKEN",
+    "title": "Background Test",
+    "message": "This is a background notification test"
+  }'
+        </textarea>
+    </div>
+
+    <div id="debug-log" class="log">Initializing...\n</div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+
+    <script>
+        let messaging = null;
+        let currentToken = '';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCaqWsFGxHRHHGRseTLJKWuKjVR-hrkmtU",
+            authDomain: "afriqmarket-place.firebaseapp.com",
+            projectId: "afriqmarket-place",
+            storageBucket: "afriqmarket-place.firebasestorage.app",
+            messagingSenderId: "1055977022832",
+            appId: "1:1055977022832:web:f90d5495ab5c6d2f76dbb5",
+            measurementId: "G-YN6BC2P6LV",
+        };
+
+        const vapidKey = "BFyxyz123abcDEF456_GHI789jklMNO012_pqrSTU345-vwxYZ678_90abcDEF123";
+
+        function log(message) {
+            const logElement = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function updateStep(stepId, status) {
+            document.getElementById(stepId).className = `step ${status}`;
+        }
+
+        async function initializeFirebase() {
+            try {
+                log('🔄 Requesting notification permission...');
+                const permission = await Notification.requestPermission();
+                if (permission !== 'granted') {
+                    log('❌ Notification permission denied');
+                    return;
+                }
+                log('✅ Notification permission granted');
+
+                log('🔄 Registering service worker...');
+                await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                log('✅ Service worker registered');
+
+                log('🔄 Initializing Firebase...');
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                messaging = firebase.messaging();
+                log('✅ Firebase initialized');
+
+                log('🔄 Getting FCM token...');
+                currentToken = await messaging.getToken({ vapidKey });
+
+                if (currentToken) {
+                    document.getElementById('token-display').value = currentToken;
+                    document.getElementById('copy-btn').disabled = false;
+                    updateStep('step2', 'success');
+                    log(`✅ FCM token: ${currentToken.substring(0, 20)}...`);
+
+                    messaging.onMessage((payload) => {
+                        log(`📱 Foreground message: ${JSON.stringify(payload)}`);
+                    });
+                } else {
+                    log('❌ No FCM token available');
+                }
+
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+                updateStep('step2', 'error');
+            }
+        }
+
+        function copyToken() {
+            navigator.clipboard.writeText(currentToken).then(() => {
+                alert('Token copied!');
+                log('📋 Token copied to clipboard');
+            });
+        }
+
+        function minimizeTab() {
+            window.blur();
+            log('🔄 Tab backgrounded - ready for test');
+            setTimeout(() => {
+                alert('Tab backgrounded. Run your curl command now!');
+            }, 500);
+        }
+
+        // Check browser support on load
+        window.addEventListener('load', () => {
+            const checks = [
+                { name: 'Notifications', check: 'Notification' in window },
+                { name: 'Service Worker', check: 'serviceWorker' in navigator },
+                { name: 'Push Messaging', check: 'PushManager' in window },
+                { name: 'Secure Context', check: location.protocol === 'https:' || location.hostname === 'localhost' }
+            ];
+
+            const supportElement = document.getElementById('support-details');
+            let allSupported = true;
+
+            checks.forEach(({ name, check }) => {
+                const li = document.createElement('li');
+                li.textContent = `${name}: ${check ? '✅' : '❌'}`;
+                supportElement.appendChild(li);
+                if (!check) allSupported = false;
+            });
+
+            updateStep('step1', allSupported ? 'success' : 'error');
+            log('🚀 Page loaded and browser support checked');
+        });
+    </script>
+</body>
+
+</html>
