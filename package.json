@@ -5,14 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "node scripts/generate-sw.js && vite build",
+    "preview": "vite preview",
+    "generate-sw": "node scripts/generate-sw.js",
+    "dev:sw": "node scripts/generate-sw.js && vite"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "apexcharts": "^4.7.0",
     "axios": "^1.6.2",
     "chart.js": "^4.4.0",
+    "firebase": "^10.7.1",
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
     "lodash": "^4.17.21",

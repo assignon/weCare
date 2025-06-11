@@ -299,5 +299,6 @@ export const apiService = {
   }
 }
 
-// Export both named and default exports for flexibility
+// Export both the axios instance and apiService for flexibility
+export { api }
 export default apiService 

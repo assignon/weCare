@@ -146,17 +146,17 @@ export const useNotificationStore = defineStore('notification', () => {
     }
   }
 
-  // Initialize store and WebSocket connection
+  // Initialize store and notification services (FCM + WebSocket)
   const init = async () => {
     try {
       // Fetch initial notification count
       await fetchUnreadCount()
       
-      // Initialize WebSocket connection if user is authenticated
+      // Initialize FCM and WebSocket connection if user is authenticated
       const authStore = useAuthStore()
       if (authStore.isAuthenticated && authStore.user?.id) {
-        console.log('Initializing WebSocket for shopper:', authStore.user.id)
-        notificationService.initWebSocket(authStore.user.id)
+        console.log('Initializing notification services for shopper:', authStore.user.id)
+        await notificationService.init(authStore.user.id)
         await notificationService.requestNotificationPermission()
       }
     } catch (error) {
