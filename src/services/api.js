@@ -18,6 +18,46 @@ const api = axios.create({
 // Setup auth interceptors for automatic token handling and refreshing
 setupAuthInterceptors(api)
 
+// Helper function to create axios instance for public endpoints (no auth)
+const createPublicApi = () => {
+  const publicApi = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    withCredentials: false
+  })
+
+  // Add debug interceptors to public API instances
+  publicApi.interceptors.request.use(
+    config => {
+      return config
+    },
+    error => {
+      console.error('🔍 [PUBLIC API REQUEST ERROR]', error)
+      return Promise.reject(error)
+    }
+  )
+
+  publicApi.interceptors.response.use(
+    response => {
+      return response
+    },
+    error => {
+      console.error('🔍 [PUBLIC API RESPONSE ERROR]', {
+        status: error.response?.status,
+        url: error.config?.url,
+        data: error.response?.data,
+        message: error.message
+      })
+      return Promise.reject(error)
+    }
+  )
+
+  return publicApi
+}
+
 export const apiService = {
   // Authentication
   login(credentials) {
@@ -25,16 +65,8 @@ export const apiService = {
   },
   
   register(userData) {
-    // Create a new axios instance specifically for registration
-    // This ensures no interceptors or default headers are applied
-    const registerApi = axios.create({
-      baseURL: API_BASE_URL,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      withCredentials: false
-    })
+    // Use public API instance to ensure no interceptors or default headers are applied
+    const registerApi = createPublicApi()
     
     // Add shopper role to registration data
     const registerData = {
@@ -259,21 +291,48 @@ export const apiService = {
   },
 
   // Password Reset
-  requestPasswordReset(email) {
-    return api.post('/accounts/password/reset_password/', { email })
+  requestPasswordReset(email, hostUrl) {
+    // Use public API instance to avoid auth issues
+    const resetApi = createPublicApi()
+    return resetApi.post('/accounts/password/reset_password/', { email, hostUrl })
   },
 
   validateResetCode(code) {
-    return api.get(`/accounts/password/reset/validate/${code}/`)
+    // Use public API instance to avoid auth issues
+    const resetApi = createPublicApi()
+    return resetApi.get(`/accounts/password/reset/validate/${code}/`)
   },
 
   confirmPasswordReset(code, password) {
-    return api.post('/accounts/password/reset/confirm/', { code, password })
+    // Use public API instance to avoid auth issues
+    const resetApi = createPublicApi()
+    return resetApi.post('/accounts/password/reset/confirm/', { code, password })
   },
 
   // Profile Management
   changePassword(passwordData) {
     return api.put('/accounts/password/change/', passwordData)
+  },
+
+  // Email Verification
+  requestEmailChange(newEmail) {
+    return api.post('/accounts/password/email/request-change/', { new_email: newEmail })
+  },
+
+  verifyEmailChange(code) {
+    return api.post('/accounts/password/email/verify-change/', { code })
+  },
+
+  getEmailVerificationStatus() {
+    return api.get('/accounts/password/email/verification-status/')
+  },
+
+  invalidateExpiredEmailVerification() {
+    return api.post('/accounts/password/email/invalidate-expired/')
+  },
+
+  cancelEmailVerification() {
+    return api.post('/accounts/password/email/cancel-verification/')
   },
 
   // Address Management  

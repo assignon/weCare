@@ -23,11 +23,11 @@ onMounted(async () => {
   try {
     cart.initCartState()
     await cart.fetchCart()
-    
+
     // Initialize notification store
     await notification.init()
   } catch (error) {
-    console.error('Error initializing app stores:', error)
+    console.log('Error initializing app stores:', error)
   }
 })
 </script>
@@ -41,24 +41,24 @@ onMounted(async () => {
       flat
       density="compact"
     > -->
-      <!-- Back button for non-main pages -->
-      <!-- <v-btn 
+    <!-- Back button for non-main pages -->
+    <!-- <v-btn 
         v-if="showTopNav"
         icon 
         @click="$router.back()"
       >
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn> -->
-      
-      <!-- App title/logo for main pages -->
-      <!-- <v-toolbar-title v-if="!showTopNav" class="text-h6 font-weight-bold">
+
+    <!-- App title/logo for main pages -->
+    <!-- <v-toolbar-title v-if="!showTopNav" class="text-h6 font-weight-bold">
         afriQExpress
       </v-toolbar-title>
       
       <v-spacer></v-spacer>
        -->
-      <!-- Navigation buttons for non-main pages -->
-      <!-- <template v-if="showTopNav">
+    <!-- Navigation buttons for non-main pages -->
+    <!-- <template v-if="showTopNav">
         <v-btn :to="{ name: 'Explore' }">
           <v-icon>mdi-compass-outline</v-icon>
           <span>Explore</span>
@@ -77,9 +77,9 @@ onMounted(async () => {
           <span>Cart</span>
         </v-btn>
       </template> -->
-      
-      <!-- Notification icon (always visible for authenticated users) -->
-      <!-- <v-btn 
+
+    <!-- Notification icon (always visible for authenticated users) -->
+    <!-- <v-btn 
         icon
         :to="{ name: 'Notification' }"
       >
@@ -94,9 +94,9 @@ onMounted(async () => {
         </v-badge>
         <v-icon v-else>mdi-bell-outline</v-icon>
       </v-btn> -->
-      
-      <!-- User profile menu -->
-      <!-- <v-menu location="bottom end">
+
+    <!-- User profile menu -->
+    <!-- <v-menu location="bottom end">
         <template v-slot:activator="{ props }">
           <v-btn
             v-bind="props"
@@ -142,12 +142,12 @@ onMounted(async () => {
         </v-list>
       </v-menu>
     </v-app-bar> -->
-    
+
     <router-view />
-    
+
     <!-- Show bottom navigation only on main pages -->
     <BottomNavigation v-if="showBottomNav" />
-    
+
     <!-- Global notification snackbar -->
     <GlobalSnackbar />
   </v-app>
@@ -161,7 +161,8 @@ onMounted(async () => {
   --secondary-color: #006763;
 }
 
-html, body {
+html,
+body {
   font-family: 'Poppins', sans-serif;
   margin: 0;
   padding: 0;

@@ -42,10 +42,10 @@ export default defineConfig({
     port: 3000,
     open: true,
     // allowedHosts: true,
-    https: {
-      key: fs.readFileSync('shopper-key.pem'),
-      cert: fs.readFileSync('shopper.pem'),
-    },
+    // https: {
+    //   key: fs.readFileSync('shopper-key.pem'),
+    //   cert: fs.readFileSync('shopper.pem'),
+    // },
     proxy: {
       "/api": {
         target: "http://localhost:8000",

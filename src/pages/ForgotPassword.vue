@@ -4,37 +4,20 @@
       <div class="auth-content">
         <h1 class="auth-title">Forgot Password</h1>
         <p class="auth-subtitle">Enter your email address and we'll send you a link to reset your password.</p>
-        
+
         <v-form ref="form" v-model="isFormValid" @submit.prevent="onForgotPassword" class="w-100">
           <v-alert v-if="alert" :type="alertType" class="mb-4" variant="tonal" density="compact" closable>
             {{ alert }}
           </v-alert>
-          
+
           <div class="input-field">
-            <v-text-field
-              v-model="email"
-              label="Email"
-              :rules="emailRules"
-              variant="outlined"
-              class="mb-4"
-              autocomplete="email"
-              prepend-inner-icon="mdi-email"
-              hide-details="auto"
-              width="100%"
-            />
+            <v-text-field v-model="email" label="Email" :rules="emailRules" variant="outlined" class="mb-4"
+              autocomplete="email" prepend-inner-icon="mdi-email" hide-details="auto" width="100%" />
           </div>
-          
-          <v-btn 
-            block 
-            color="#1a2233" 
-            type="submit" 
-            :loading="loading" 
-            :disabled="!isFormValid" 
-            class="auth-btn"
-          >
+          <v-btn block color="#1a2233" type="submit" :loading="loading" :disabled="!isFormValid" class="auth-btn">
             Send Reset Link
           </v-btn>
-          
+
           <div class="text-center auth-link">
             Remember your password? <router-link :to="{ name: 'Login' }">Sign In</router-link>
           </div>
@@ -67,9 +50,11 @@ const onForgotPassword = async () => {
 
   loading.value = true
   alert.value = ''
-  
+
   try {
-    await apiService.requestPasswordReset(email.value)
+    // get host url
+    const hostUrl = window.location.origin
+    await apiService.requestPasswordReset(email.value, hostUrl)
     alertType.value = 'success'
     alert.value = 'If your email exists in our system, a reset link has been sent to your email address.'
     email.value = ''
@@ -157,15 +142,15 @@ const onForgotPassword = async () => {
   .auth-container {
     max-width: 100%;
   }
-  
+
   .auth-content {
     padding: 20px 16px;
   }
-  
+
   .auth-title {
     font-size: 35px;
   }
-  
+
   .auth-subtitle {
     font-size: 17px;
   }
@@ -177,4 +162,4 @@ const onForgotPassword = async () => {
     padding: 8px;
   }
 }
-</style> 
+</style>

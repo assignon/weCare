@@ -74,7 +74,7 @@ router.beforeEach(async (to, from, next) => {
   }
   
   // If user is authenticated and trying to access login/register pages
-  if (auth.isAuthenticated && ['Login', 'Register', 'ForgotPassword', 'ResetPassword'].includes(to.name)) {
+  if (auth.isAuthenticated && ['Login', 'Register', 'ForgotPassword'].includes(to.name)) {
     // Redirect to home or to the redirect query parameter if it exists
     return next(to.query.redirect || { name: 'Home' })
   }

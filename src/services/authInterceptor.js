@@ -56,9 +56,30 @@ export function setupAuthInterceptors(axiosInstance) {
   axiosInstance.interceptors.request.use(
     config => {
       const token = localStorage.getItem('access_token')
-      if (token) {
+      
+      // Don't add auth header for public endpoints (password reset validation, confirm, etc.)
+      const publicEndpoints = [
+        '/accounts/password/reset/validate/',
+        '/accounts/password/reset/confirm/',
+        '/accounts/password/reset_password/',
+        '/accounts/password/reset/',
+        '/accounts/register/',
+        '/auth/token/',
+        '/auth/token/refresh/'
+      ]
+      
+      // Check both the relative URL and the full URL
+      const requestUrl = config.url || ''
+      const fullUrl = config.baseURL ? `${config.baseURL}${requestUrl}` : requestUrl
+      
+      const isPublicEndpoint = publicEndpoints.some(endpoint => 
+        requestUrl.includes(endpoint) || fullUrl.includes(endpoint)
+      )
+      
+      if (token && !isPublicEndpoint) {
         config.headers['Authorization'] = `Bearer ${token}`
       }
+      
       return config
     },
     error => Promise.reject(error)
@@ -69,6 +90,29 @@ export function setupAuthInterceptors(axiosInstance) {
     response => response,
     async error => {
       const originalRequest = error.config
+      
+      // Check if this is a public endpoint - don't try to refresh token for these
+      const publicEndpoints = [
+        '/accounts/password/reset/validate/',
+        '/accounts/password/reset/confirm/',
+        '/accounts/password/reset_password/',
+        '/accounts/password/reset/',
+        '/accounts/register/',
+        '/auth/token/',
+        '/auth/token/refresh/'
+      ]
+      
+      const requestUrl = originalRequest.url || ''
+      const fullUrl = originalRequest.baseURL ? `${originalRequest.baseURL}${requestUrl}` : requestUrl
+      
+      const isPublicEndpoint = publicEndpoints.some(endpoint => 
+        requestUrl.includes(endpoint) || fullUrl.includes(endpoint)
+      )
+      
+      // If this is a public endpoint with 401, don't try to refresh - just reject
+      if (isPublicEndpoint && error.response?.status === 401) {
+        return Promise.reject(error)
+      }
       
       // If we get a 401 and we haven't tried to refresh yet
       if (
@@ -118,8 +162,12 @@ export function setupAuthInterceptors(axiosInstance) {
           localStorage.removeItem('access_token')
           localStorage.removeItem('refresh_token')
           
-          // Redirect to login or dispatch logout
-          if (window.location.pathname !== '/login') {
+          // Only redirect to login if not on auth-related pages
+          const authPages = ['/login', '/register', '/forgot-password']
+          const isResetPasswordPage = window.location.pathname.startsWith('/reset-password/')
+          const isAuthPage = authPages.some(page => window.location.pathname.startsWith(page))
+          
+          if (!isAuthPage && !isResetPasswordPage) {
             window.location.href = '/login'
           }
           

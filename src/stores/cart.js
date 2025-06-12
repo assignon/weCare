@@ -183,7 +183,7 @@ export const useCartStore = defineStore('cart', () => {
       
       cartUpdated.value = false
     } catch (error) {
-      console.error('Failed to fetch cart:', error)
+      console.log('Failed to fetch cart:', error)
       throw error
     }
   }
