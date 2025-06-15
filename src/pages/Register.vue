@@ -4,99 +4,58 @@
       <!-- <div class="auth-illustration">
         <img src="/src/assets/images/register-illustration.svg" alt="Register illustration" />
       </div> -->
-      
+
       <div class="auth-content">
         <h1 class="auth-title">Register</h1>
         <p class="auth-subtitle">Please register to login.</p>
-        
+
         <v-form ref="form" v-model="isFormValid" @submit.prevent="onRegister" class="w-100">
           <v-alert v-if="authStore.error" type="error" class="mb-4" variant="tonal" density="compact" closable>
             {{ authStore.error }}
           </v-alert>
-          
+
           <div class="input-field">
-            <v-text-field
-              v-model="formData.email"
-              label="Email"
+            <v-text-field v-model="formData.email" label="Email"
               :rules="[v => !!v || 'Email is required', v => /.+@.+\..+/.test(v) || 'Email must be valid']"
-              variant="outlined"
-              autocomplete="email"
-              prepend-inner-icon="mdi-email"
-              hide-details="auto"
-              width="100%"
-            ></v-text-field>
+              variant="outlined" autocomplete="email" prepend-inner-icon="mdi-email" hide-details="auto"
+              width="100%"></v-text-field>
           </div>
-          
+
           <div class="input-field">
-            <v-text-field
-              v-model="formData.mobile"
-              label="Mobile Number"
-              :rules="[v => !!v || 'Mobile number is required']"
-              variant="outlined"
-              autocomplete="tel"
-              prepend-inner-icon="mdi-cellphone"
-              hide-details="auto"
-              width="100%"
-            ></v-text-field>
+            <v-text-field v-model="formData.mobile" label="Mobile Number"
+              :rules="[v => !!v || 'Mobile number is required']" variant="outlined" autocomplete="tel"
+              prepend-inner-icon="mdi-cellphone" hide-details="auto" width="100%"></v-text-field>
           </div>
           <div class="input-field">
-            <v-text-field
-              v-model="formData.password"
-              label="Password"
-              :rules="passwordRules"
-              :type="showPassword ? 'text' : 'password'"
-              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-              @click:append-inner="showPassword = !showPassword"
-              variant="outlined"
-              autocomplete="new-password"
-              prepend-inner-icon="mdi-lock"
-              hide-details="auto"
-              width="100%"
-            ></v-text-field>
+            <v-text-field v-model="formData.password" label="Password" :rules="passwordRules"
+              :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+              @click:append-inner="showPassword = !showPassword" variant="outlined" autocomplete="new-password"
+              prepend-inner-icon="mdi-lock" hide-details="auto" width="100%"></v-text-field>
           </div>
           <div class="input-field">
-            <v-text-field
-              v-model="formData.password_confirm"
-              label="Confirm Password"
-              :rules="confirmPasswordRules"
-              :type="showPassword ? 'text' : 'password'"
-              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-              @click:append-inner="showPassword = !showPassword"
-              variant="outlined"
-              autocomplete="new-password"
-              prepend-inner-icon="mdi-lock"
-              hide-details="auto"
-              width="100%"
-            ></v-text-field>
+            <v-text-field v-model="formData.password_confirm" label="Confirm Password" :rules="confirmPasswordRules"
+              :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+              @click:append-inner="showPassword = !showPassword" variant="outlined" autocomplete="new-password"
+              prepend-inner-icon="mdi-lock" hide-details="auto" width="100%"></v-text-field>
           </div>
-          
+
           <div class="input-field">
-            <v-select
-              v-model="formData.default_language"
-              :items="languages"
-              item-title="name"
-              item-value="id"
-              label="Preferred Language"
-              variant="outlined"
-              prepend-inner-icon="mdi-translate"
-              hide-details="auto"
-              width="100%"
-              :loading="loadingLanguages"
-              :disabled="loadingLanguages"
-            ></v-select>
+            <v-select v-model="formData.country" :items="countries" item-title="name" item-value="id" label="Country"
+              :rules="[v => !!v || 'Country is required']" variant="outlined" prepend-inner-icon="mdi-earth"
+              hide-details="auto" width="100%" :loading="loadingCountries" :disabled="loadingCountries"></v-select>
           </div>
-          
-          <v-btn 
-            block 
-            color="#1a2233" 
-            type="submit" 
-            :loading="authStore.loading" 
-            :disabled="!isFormValid" 
-            class="auth-btn"
-          >
+
+          <div class="input-field">
+            <v-select v-model="formData.default_language" :items="languages" item-title="name" item-value="id"
+              label="Preferred Language" variant="outlined" prepend-inner-icon="mdi-translate" hide-details="auto"
+              width="100%" :loading="loadingLanguages" :disabled="loadingLanguages"></v-select>
+          </div>
+
+          <v-btn block color="#1a2233" type="submit" :loading="authStore.loading" :disabled="!isFormValid"
+            class="auth-btn">
             Sign Up
           </v-btn>
-          
+
           <div class="text-center auth-link">
             Already have account? <router-link :to="{ name: 'Login' }">Sign In</router-link>
           </div>
@@ -108,17 +67,22 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { apiService } from '@/services/api'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const form = ref(null)
 const isFormValid = ref(false)
 const showPassword = ref(false)
 const languages = ref([])
 const loadingLanguages = ref(false)
+const countries = ref([])
+const loadingCountries = ref(false)
+
+// Remove beauty profile handling since goals will be set after registration
 
 const formData = ref({
   email: '',
@@ -127,11 +91,12 @@ const formData = ref({
   last_name: '',
   password: '',
   password_confirm: '',
+  country: null,
   default_language: null
 })
 
 const passwordRules = [
-  v => !!v || 'Password is required', 
+  v => !!v || 'Password is required',
   v => v.length >= 8 || 'Password must be at least 8 characters',
   v => /[A-Z]/.test(v) || 'Password must contain at least one uppercase letter',
   v => /[a-z]/.test(v) || 'Password must contain at least one lowercase letter',
@@ -139,9 +104,22 @@ const passwordRules = [
 ]
 
 const confirmPasswordRules = [
-  v => !!v || 'Confirm password is required', 
+  v => !!v || 'Confirm password is required',
   v => v === formData.value.password || 'Passwords must match'
 ]
+
+// Fetch available countries
+const fetchCountries = async () => {
+  loadingCountries.value = true
+  try {
+    const response = await apiService.getCountries()
+    countries.value = response.data.results || response.data || []
+  } catch (error) {
+    console.error('Failed to fetch countries:', error)
+  } finally {
+    loadingCountries.value = false
+  }
+}
 
 // Fetch available languages
 const fetchLanguages = async () => {
@@ -149,7 +127,7 @@ const fetchLanguages = async () => {
   try {
     const response = await apiService.getLanguages()
     languages.value = response.data.results || response.data || []
-    
+
     // Set English as default if available
     if (languages.value.length > 0 && !formData.value.default_language) {
       const english = languages.value.find(lang => lang.code === 'en')
@@ -168,33 +146,34 @@ const fetchLanguages = async () => {
 
 const onRegister = async () => {
   if (!isFormValid.value) return
-  
+
   // Prepare registration data with phone_number field name
   const registrationData = {
     ...formData.value,
     phone_number: formData.value.mobile
   }
   delete registrationData.mobile
-  
+
   const success = await authStore.register(registrationData)
-  
+
   if (success) {
-    // If registration includes login (tokens), redirect to home
+    // If registration includes login (tokens), redirect to shopper goals
     if (authStore.isAuthenticated) {
-      router.push('/')
+      // Always redirect to shopper goals after successful registration
+      router.push({ name: 'ShopperGoals' })
     }
     // Otherwise, login page with registered=true will be handled by the store
   }
 }
 
 onMounted(async () => {
-  // If already authenticated, redirect to home
+  // If already authenticated, redirect to shopper goals
   if (authStore.isAuthenticated) {
-    router.replace({ name: 'Home' })
+    router.replace({ name: 'ShopperGoals' })
   }
-  
-  // Fetch languages for selection
-  await fetchLanguages()
+
+  // Fetch countries and languages for selection
+  await Promise.all([fetchCountries(), fetchLanguages()])
 })
 </script>
 
@@ -313,15 +292,15 @@ onMounted(async () => {
   .auth-container {
     max-width: 100%;
   }
-  
+
   .auth-content {
     padding: 20px 16px;
   }
-  
+
   .auth-title {
     font-size: 35px;
   }
-  
+
   .auth-subtitle {
     font-size: 17px;
   }
@@ -332,11 +311,11 @@ onMounted(async () => {
   .auth-page {
     padding: 8px;
   }
-  
+
   .auth-illustration {
     padding: 20px 0;
   }
-  
+
   .auth-illustration img {
     height: 140px;
   }
@@ -345,4 +324,4 @@ onMounted(async () => {
 .w-100 {
   width: 100%;
 }
-</style> 
+</style>

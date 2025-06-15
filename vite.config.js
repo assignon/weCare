@@ -10,25 +10,84 @@ export default defineConfig({
     vue(),
     VitePWA({
       registerType: "autoUpdate",
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts-cache",
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // <== 365 days
+              },
+              cacheKeyWillBeUsed: async ({ request }) => {
+                return `${request.url}?v=1`;
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "gstatic-fonts-cache",
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // <== 365 days
+              },
+            },
+          },
+          {
+            urlPattern: /\/api\/.*/i,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "api-cache",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24, // <== 24 hours
+              },
+            },
+          },
+        ],
+      },
       manifest: {
         name: "weCare",
         short_name: "weCare",
+        description: "Your beauty marketplace - Browse, buy, and track orders in one place",
         start_url: "/",
         display: "standalone",
-        background_color: "#ffffff",
+        orientation: "portrait",
+        background_color: "#667eea",
         theme_color: "#7C3AED",
+        categories: ["shopping", "lifestyle", "beauty"],
+        lang: "en",
+        scope: "/",
         icons: [
           {
             src: "/pwa-192x192.png",
             sizes: "192x192",
             type: "image/png",
+            purpose: "any maskable",
           },
           {
             src: "/pwa-512x512.png",
             sizes: "512x512",
             type: "image/png",
+            purpose: "any maskable",
           },
         ],
+        screenshots: [
+          {
+            src: "/pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            form_factor: "narrow",
+          },
+        ],
+      },
+      devOptions: {
+        enabled: true,
       },
     }),
   ],
@@ -71,3 +130,4 @@ export default defineConfig({
     },
   },
 });
+

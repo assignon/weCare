@@ -6,12 +6,12 @@
         <v-btn icon variant="text" @click="$router.push({ name: 'Cart' })">
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
-        
+
         <h1 class="text-h5 font-weight-bold text-center">Checkout</h1>
-        
+
         <div style="width: 40px"></div> <!-- Spacer to maintain layout -->
       </div>
-      
+
       <!-- Checkout stepper -->
       <v-stepper v-model="currentStep" class="mb-6 checkout-stepper">
         <v-stepper-header>
@@ -27,48 +27,35 @@
           <v-stepper-window-item :value="1">
             <div class="pa-2">
               <h2 class="text-h6 font-weight-bold mb-4">Delivery to</h2>
-              
+
               <!-- Address list -->
               <div v-if="!loading">
                 <div v-if="addresses.length > 0">
-                  <v-card
-                    v-for="(address, index) in addresses"
-                    :key="index"
-                    :class="['mb-4', 'rounded-lg', 'address-card', {'selected-address': selectedAddressIndex === index}]"
-                    elevation="1"
-                    @click="selectAddress(index)"
-                  >
+                  <v-card v-for="(address, index) in addresses" :key="index"
+                    :class="['mb-4', 'rounded-lg', 'address-card', { 'selected-address': selectedAddressIndex === index }]"
+                    elevation="1" @click="selectAddress(index)">
                     <v-card-text class="pa-4">
                       <div class="d-flex justify-space-between align-center">
                         <div class="d-flex align-center">
-                          <v-avatar 
-                            color="primary" 
-                            class="mr-3"
-                            size="24"
-                          >
+                          <v-avatar color="primary" class="mr-3" size="24">
                             <v-icon color="white" size="small">
                               {{ address.type === 'home' ? 'mdi-home' : 'mdi-office-building' }}
                             </v-icon>
                           </v-avatar>
                           <span class="text-subtitle-1 font-weight-medium">{{ address.address_label }}</span>
                         </div>
-                        
-                        <v-btn 
-                          icon 
-                          variant="text" 
-                          size="small"
-                          @click.stop="editAddress(index)"
-                        >
+
+                        <v-btn icon variant="text" size="small" @click.stop="editAddress(index)">
                           <v-icon>mdi-pencil</v-icon>
                         </v-btn>
                       </div>
-                      
+
                       <div class="address-details text-body-2 text-grey-darken-1 mt-2">
                         {{ address.phone }}<br>
                         {{ address.address_line1 }}<br>
                         {{ address.city }}, {{ address.state }} {{ address.postal_code }}
                       </div>
-                      
+
                       <!-- Selected indicator -->
                       <div v-if="selectedAddressIndex === index" class="selected-indicator">
                         <v-icon color="primary">mdi-check-circle</v-icon>
@@ -76,47 +63,28 @@
                     </v-card-text>
                   </v-card>
                 </div>
-                
+
                 <!-- No addresses state -->
                 <v-card v-else class="mb-4 pa-4 text-center" flat>
                   <v-icon size="large" color="grey-lighten-1" class="mb-2">mdi-map-marker-off</v-icon>
                   <p class="mb-0">No delivery addresses found</p>
                 </v-card>
-                
+
                 <!-- Add new address button -->
-                <v-btn 
-                  color="primary" 
-                  variant="outlined"
-                  block 
-                  size="large"
-                  prepend-icon="mdi-plus"
-                  @click="showAddressDialog = true"
-                  class="mb-4 text-none"
-                >
+                <v-btn color="primary" variant="outlined" block size="large" prepend-icon="mdi-plus"
+                  @click="showAddressDialog = true" class="mb-4 text-none">
                   Add New Address
                 </v-btn>
               </div>
-              
+
               <!-- Loading skeleton -->
               <div v-else>
-                <v-skeleton-loader
-                  v-for="i in 2"
-                  :key="i"
-                  type="card"
-                  class="mb-4"
-                ></v-skeleton-loader>
+                <v-skeleton-loader v-for="i in 2" :key="i" type="card" class="mb-4"></v-skeleton-loader>
               </div>
-              
+
               <!-- Continue button -->
-              <v-btn 
-                color="primary" 
-                block 
-                size="large"
-                :disabled="selectedAddressIndex === null"
-                @click="nextStep"
-                class="mt-4 text-none"
-                rounded
-              >
+              <v-btn color="primary" block size="large" :disabled="selectedAddressIndex === null" @click="nextStep"
+                class="mt-4 text-none" rounded>
                 Continue
               </v-btn>
             </div>
@@ -126,7 +94,7 @@
           <v-stepper-window-item :value="2">
             <div class="pa-2">
               <h2 class="text-h6 font-weight-bold mb-4">Delivery Information</h2>
-              
+
               <!-- Delivery Estimate -->
               <!-- <v-card class="mb-4 rounded-lg" elevation="1">
                 <v-card-text class="pa-4">
@@ -142,104 +110,88 @@
                   </div>
                 </v-card-text>
               </v-card> -->
-              
+
               <v-card class="mb-4 rounded-lg" elevation="1">
                 <v-card-text class="pa-4">
                   <p class="text-subtitle-1 font-weight-medium mb-1">Delivery Address</p>
                   <div v-if="selectedAddressIndex !== null" class="text-body-2">
                     <p class="mb-1">{{ selectedAddress.name }}</p>
                     <p class="mb-1">{{ selectedAddress.address_line1 }}</p>
-                    <p class="mb-1">{{ selectedAddress.city }}, {{ selectedAddress.state }} {{ selectedAddress.postal_code }}</p>
+                    <p class="mb-1">{{ selectedAddress.city }}, {{ selectedAddress.state }} {{
+                      selectedAddress.postal_code }}</p>
                     <p class="mb-1">{{ selectedAddress.country }}</p>
                     <p class="mb-0">{{ selectedAddress.phone }}</p>
                   </div>
                 </v-card-text>
               </v-card>
-              
+
               <!-- Order summary -->
               <v-card class="mb-4 rounded-lg" elevation="1">
                 <v-card-text class="pa-4">
                   <p class="text-subtitle-1 font-weight-bold mb-3">Order Summary</p>
-                  
+
                   <!-- Cart items list (up to 3) -->
                   <div v-if="groupedCartItems.length > 0" class="cart-items-summary mb-4">
-                    <div 
-                      v-for="(item, index) in displayedCartItems" 
-                      :key="item.product_id"
-                      class="cart-item-row d-flex align-center py-2"
-                    >
+                    <div v-for="(item, index) in displayedCartItems" :key="item.product_id"
+                      class="cart-item-row d-flex align-center py-2">
                       <div class="cart-item-image-container mr-2">
-                        <v-img 
-                          :src="'http://localhost:8000'+item.main_image || 'https://via.placeholder.com/150'" 
-                          width="40" 
-                          height="40" 
-                          class="cart-item-image rounded"
-                          cover
-                        ></v-img>
+                        <v-img :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
+                          width="40" height="40" class="cart-item-image rounded" cover></v-img>
                       </div>
                       <div class="flex-grow-1 mr-3">
                         <p class="text-body-2 text-truncate mb-0">{{ item.product_name }}</p>
                         <p class="text-caption text-grey-darken-1 mb-0">
                           {{ item.variants.length }} variant(s) · {{ getTotalQuantity(item) }} items <br>
-                          <span class="text-primary"><v-icon>mdi-truck-delivery</v-icon> {{ item.delivery_info.estimated_delivery_display }}</span>
+                          <span class="text-primary"><v-icon>mdi-truck-delivery</v-icon> {{
+                            item.delivery_info.estimated_delivery_display }}</span>
                         </p>
                       </div>
                       <div class="text-right">
-                        <p class="text-body-2 font-weight-medium mb-0">${{ getItemTotal(item).toFixed(2) }}</p>
+                        <p class="text-body-2 font-weight-medium mb-0">{{ formatApiPrice({
+                          price: getItemTotal(item),
+                          currency_info: cart.items.currency_info }) }}</p>
                       </div>
                     </div>
-                    
+
                     <!-- View all button when more than 3 items -->
-                    <v-btn 
-                      v-if="groupedCartItems.length > 3"
-                      variant="text" 
-                      color="primary" 
-                      block 
-                      size="small"
-                      class="mt-2 text-none"
-                      @click="showCartItemsDialog = true"
-                    >
+                    <v-btn v-if="groupedCartItems.length > 3" variant="text" color="primary" block size="small"
+                      class="mt-2 text-none" @click="showCartItemsDialog = true">
                       View all {{ groupedCartItems.length }} items
                     </v-btn>
                   </div>
-                  
+
                   <!-- Items detail -->
                   <div class="d-flex justify-space-between mb-2">
                     <span class="text-body-2">Sub total</span>
-                    <span class="text-body-2">${{ cart.items?.total_amount ? cart.items.total_amount.toFixed(2) : '0.00' }}</span>
+                    <span class="text-body-2">{{ formatApiPrice({
+                      price: cart.items?.total_amount || 0, currency_info:
+                        cart.items.currency_info }) }}</span>
                   </div>
-                  
+
                   <div class="d-flex justify-space-between mb-2">
                     <span class="text-body-2">Delivery Fee</span>
-                    <span class="text-body-2">${{ shippingFee.toFixed(2) }}</span>
+                    <span class="text-body-2">{{ formatApiPrice({
+                      price: shippingFee, currency_info:
+                        cart.items.currency_info }) }}</span>
                   </div>
-                  
+
                   <v-divider class="my-3"></v-divider>
-                  
+
                   <div class="d-flex justify-space-between">
                     <span class="text-subtitle-1 font-weight-bold">Total</span>
-                    <span class="text-subtitle-1 font-weight-bold">${{ totalAmount.toFixed(2) }}</span>
+                    <span class="text-subtitle-1 font-weight-bold">{{ formatApiPrice({
+                      price: totalAmount,
+                      currency_info: cart.items.currency_info }) }}</span>
                   </div>
                 </v-card-text>
               </v-card>
-              
+
               <!-- Navigation buttons -->
               <div class="d-flex">
-                <v-btn 
-                  variant="outlined" 
-                  class="mr-2 text-none"
-                  rounded
-                  color="secondary"
-                  @click="prevStep"
-                >
+                <v-btn variant="outlined" class="mr-2 text-none" rounded color="secondary" @click="prevStep">
                   Back
                 </v-btn>
-                <v-btn 
-                  color="primary" 
-                  class="text-none"
-                  rounded
-                  @click="nextStep"
-                >
+                <v-btn color="primary" class="text-none" rounded @click="nextStep">
                   Continue
                 </v-btn>
               </div>
@@ -250,7 +202,7 @@
           <v-stepper-window-item :value="3">
             <div class="pa-2">
               <h2 class="text-h6 font-weight-bold mb-4">Payment Method</h2>
-              
+
               <!-- Summary for this step -->
               <v-card class="mb-4 rounded-lg" elevation="1">
                 <v-card-text class="pa-4">
@@ -263,7 +215,7 @@
                       </p>
                     </div>
                   </div>
-                  
+
                   <!-- <div class="d-flex align-center">
                     <v-icon color="primary" class="mr-2">mdi-truck-delivery</v-icon>
                     <div>
@@ -273,20 +225,17 @@
                   </div> -->
                 </v-card-text>
               </v-card>
-              
+
               <!-- Payment methods -->
               <v-card class="mb-4 rounded-lg" elevation="1">
                 <v-card-text class="pa-4">
                   <p class="text-subtitle-1 font-weight-bold mb-3">Payment Method</p>
-                  
+
                   <v-radio-group v-model="paymentMethod">
                     <!-- Credit Card -->
-                    <v-card 
-                      class="mb-2 payment-option" 
-                      :class="{ 'selected-payment': paymentMethod === 'mobile_money' }"
-                      elevation="0"
-                      @click="paymentMethod = 'mobile_money'"
-                    >
+                    <v-card class="mb-2 payment-option"
+                      :class="{ 'selected-payment': paymentMethod === 'mobile_money' }" elevation="0"
+                      @click="paymentMethod = 'mobile_money'">
                       <div class="d-flex align-center pa-3">
                         <v-avatar color="primary" size="32" class="mr-3">
                           <v-icon color="white" size="small">mdi-cellphone</v-icon>
@@ -296,7 +245,7 @@
                         <v-radio value="mobile_money" hide-details color="primary"></v-radio>
                       </div>
                     </v-card>
-                    
+
                     <!-- PayPal -->
                     <!-- <v-card 
                       class="mb-2 payment-option" 
@@ -313,8 +262,8 @@
                         <v-radio value="paypal" hide-details color="primary"></v-radio>
                       </div>
                     </v-card> -->
-                    
-                     <!-- Google Pay -->
+
+                    <!-- Google Pay -->
                     <!-- <v-card 
                       class="mb-2 payment-option" 
                       :class="{ 'selected-payment': paymentMethod === 'google_pay' }"
@@ -333,30 +282,20 @@
                   </v-radio-group>
                 </v-card-text>
               </v-card>
-              
+
               <!-- Navigation and payment button -->
               <div>
                 <div class="d-flex justify-space-between align-center mb-3">
                   <span class="text-subtitle-1 font-weight-bold">Total</span>
-                  <span class="text-h6 font-weight-bold">${{ totalAmount.toFixed(2) }}</span>
+                  <span class="text-h6 font-weight-bold">{{ formatApiPrice({
+                    price: totalAmount, currency_info:
+                      cart.items.currency_info }) }}</span>
                 </div>
-                
-                <v-btn 
-                  variant="outlined" 
-                  @click="prevStep"
-                  class="mt-1 text-none"
-                  rounded
-                  color="secondary"
-                >
+
+                <v-btn variant="outlined" @click="prevStep" class="mt-1 text-none" rounded color="secondary">
                   Back
                 </v-btn>
-                <v-btn 
-                  color="primary" 
-                  :loading="processing"
-                  @click="placeOrder"
-                  class="mt-1 ml-2 text-none"
-                  rounded
-                >
+                <v-btn color="primary" :loading="processing" @click="placeOrder" class="mt-1 ml-2 text-none" rounded>
                   Checkout
                 </v-btn>
               </div>
@@ -364,28 +303,21 @@
           </v-stepper-window-item>
         </v-stepper-window>
       </v-stepper>
-      
+
       <!-- Address dialog (for add/edit) -->
       <v-dialog v-model="showAddressDialog" max-width="500" scrollable>
         <v-card>
           <v-card-title class="text-h6 pa-4">
             {{ editAddressIndex !== null ? 'Edit Address' : 'Add New Address' }}
           </v-card-title>
-          
+
           <v-divider></v-divider>
-          
+
           <v-card-text class="pa-4">
             <v-form ref="formRef" v-model="formValid">
-              <v-text-field
-                v-model="addressForm.address_label"
-                label="Address Label*"
-                variant="outlined"
-                density="comfortable"
-                class="mb-3"
-                :rules="[required]"
-                persistent-hint
-              ></v-text-field>
-              
+              <v-text-field v-model="addressForm.address_label" label="Address Label*" variant="outlined"
+                density="comfortable" class="mb-3" :rules="[required]" persistent-hint></v-text-field>
+
               <!-- <v-radio-group
                 v-model="addressForm.type"
                 class="mb-3"
@@ -394,24 +326,13 @@
                 <v-radio value="home" label="Home" color="primary"></v-radio>
                 <v-radio value="office" label="Office" color="primary"></v-radio>
               </v-radio-group> -->
-              
-              <v-text-field
-                v-model="addressForm.address_line1"
-                label="Address Line 1*"
-                variant="outlined"
-                density="comfortable"
-                class="mb-3"
-                :rules="[required]"
-              ></v-text-field>
-              
-              <v-text-field
-                v-model="addressForm.address_line2"
-                label="Address Line 2"
-                variant="outlined"
-                density="comfortable"
-                class="mb-3"
-              ></v-text-field>
-              
+
+              <v-text-field v-model="addressForm.address_line1" label="Address Line 1*" variant="outlined"
+                density="comfortable" class="mb-3" :rules="[required]"></v-text-field>
+
+              <v-text-field v-model="addressForm.address_line2" label="Address Line 2" variant="outlined"
+                density="comfortable" class="mb-3"></v-text-field>
+
               <!-- <v-text-field
                 v-model="addressForm.street"
                 label="Street Address*"
@@ -420,98 +341,60 @@
                 class="mb-3"
                 :rules="[required]"
               ></v-text-field> -->
-              
+
               <v-row>
                 <v-col cols="6">
-                  <v-text-field
-                    v-model="addressForm.city"
-                    label="City*"
-                    variant="outlined"
-                    density="comfortable"
-                    :rules="[required]"
-                  ></v-text-field>
+                  <v-text-field v-model="addressForm.city" label="City*" variant="outlined" density="comfortable"
+                    :rules="[required]"></v-text-field>
                 </v-col>
-                
+
                 <v-col cols="6">
-                  <v-text-field
-                    v-model="addressForm.state"
-                    label="State/Province"
-                    variant="outlined"
-                    density="comfortable"
-                  ></v-text-field>
+                  <v-text-field v-model="addressForm.state" label="State/Province" variant="outlined"
+                    density="comfortable"></v-text-field>
                 </v-col>
               </v-row>
-              
+
               <v-row>
                 <v-col cols="6">
-                  <v-text-field
-                    v-model="addressForm.postal_code"
-                    label="ZIP/Postal Code"
-                    variant="outlined"
-                    density="comfortable"
-                  ></v-text-field>
+                  <v-text-field v-model="addressForm.postal_code" label="ZIP/Postal Code" variant="outlined"
+                    density="comfortable"></v-text-field>
                 </v-col>
-                
+
                 <v-col cols="6">
-                  <v-text-field
-                    v-model="addressForm.country"
-                    label="Country*"
-                    variant="outlined"
-                    density="comfortable"
-                    :rules="[required]"
-                  ></v-text-field>
+                  <v-text-field v-model="addressForm.country" label="Country*" variant="outlined" density="comfortable"
+                    :rules="[required]"></v-text-field>
                 </v-col>
               </v-row>
-              
-              <v-checkbox
-                v-model="addressForm.default"
-                label="Set as default address"
-                class="mt-2"
-                color="primary"
-              ></v-checkbox>
+
+              <v-checkbox v-model="addressForm.default" label="Set as default address" class="mt-2"
+                color="primary"></v-checkbox>
             </v-form>
           </v-card-text>
-          
+
           <v-divider></v-divider>
-          
+
           <v-card-actions class="pa-4">
-            <v-btn 
-              variant="text" 
-              @click="showAddressDialog = false"
-            >
+            <v-btn variant="text" @click="showAddressDialog = false">
               Cancel
             </v-btn>
             <v-spacer></v-spacer>
-            <v-btn 
-              color="primary" 
-              @click="saveAddress"
-              :loading="addressLoading"
-              :disabled="!formValid"
-            >
+            <v-btn color="primary" @click="saveAddress" :loading="addressLoading" :disabled="!formValid">
               Save
             </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
-      
+
       <!-- Snackbar for notifications -->
-      <v-snackbar
-        v-model="showSnackbar"
-        :color="snackbarColor"
-        timeout="3000"
-        location="top"
-      >
+      <v-snackbar v-model="showSnackbar" :color="snackbarColor" timeout="3000" location="top">
         {{ snackbarText }}
         <template v-slot:actions>
-          <v-btn
-            variant="text"
-            @click="showSnackbar = false"
-          >
+          <v-btn variant="text" @click="showSnackbar = false">
             Close
           </v-btn>
         </template>
       </v-snackbar>
-      
+
       <!-- Cart items dialog -->
       <v-dialog v-model="showCartItemsDialog" max-width="500">
         <v-card>
@@ -522,61 +405,52 @@
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-card-title>
-          
+
           <v-divider></v-divider>
-          
+
           <v-card-text class="pa-4">
-            <div 
-              v-for="item in groupedCartItems" 
-              :key="item.product_id"
-              class="cart-item-row d-flex align-items-start py-3 border-bottom"
-            >
+            <div v-for="item in groupedCartItems" :key="item.product_id"
+              class="cart-item-row d-flex align-items-start py-3 border-bottom">
               <div class="cart-item-image-container mr-3">
-                <v-img 
-                  :src="'http://localhost:8000'+item.main_image || 'https://via.placeholder.com/150'" 
-                  width="60" 
-                  height="60" 
-                  class="cart-item-image rounded"
-                  cover
-                ></v-img>
+                <v-img :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'" width="60"
+                  height="60" class="cart-item-image rounded" cover></v-img>
               </div>
-              
+
               <div class="flex-grow-1">
                 <p class="text-subtitle-2 font-weight-medium mb-1">{{ item.product_name }}</p>
                 <p class="text-caption text-grey-darken-1 mb-2">{{ item.seller_name || 'Unknown Seller' }}</p>
-                <p class="text-caption text-grey-darken-1 mb-2 text-primary">{{ item.delivery_info.estimated_delivery_display }}</p>
-                
+                <p class="text-caption text-grey-darken-1 mb-2 text-primary">{{
+                  item.delivery_info.estimated_delivery_display
+                }}</p>
+
                 <!-- Variants -->
-                <div 
-                  v-for="variant in item.variants" 
-                  :key="variant.id"
-                  class="variant-row d-flex justify-space-between align-center py-1"
-                >
+                <div v-for="variant in item.variants" :key="variant.id"
+                  class="variant-row d-flex justify-space-between align-center py-1">
                   <div>
                     <span class="text-caption font-weight-medium">{{ variant.name }} ML</span>
                     <span class="text-caption text-grey-darken-1 mx-2">×</span>
                     <span class="text-caption font-weight-medium">{{ variant.quantity }}</span>
                   </div>
-                  <span class="text-caption">${{ (variant.price * variant.quantity).toFixed(2) }}</span>
+                  <span class="text-caption">{{ formatApiPrice({
+                    price: variant.price * variant.quantity, currency_info:
+                      cart.items.currency_info }) }}</span>
                 </div>
               </div>
-              
+
               <div class="text-right ml-3">
-                <p class="text-body-2 font-weight-medium mb-0">${{ getItemTotal(item).toFixed(2) }}</p>
+                <p class="text-body-2 font-weight-medium mb-0">{{ formatApiPrice({
+                  price: getItemTotal(item),
+                  currency_info:
+                  cart.items.currency_info }) }}</p>
               </div>
             </div>
           </v-card-text>
-          
+
           <v-divider></v-divider>
-          
+
           <v-card-actions class="pa-4">
             <v-spacer></v-spacer>
-            <v-btn 
-              color="primary" 
-              variant="text"
-              @click="showCartItemsDialog = false"
-              class="text-none"
-            >
+            <v-btn color="primary" variant="text" @click="showCartItemsDialog = false" class="text-none">
               Close
             </v-btn>
           </v-card-actions>
@@ -591,9 +465,11 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useRouter } from 'vue-router'
 import { apiService } from '@/services/api'
+import { useCurrency } from '@/composables/useCurrency'
 
 const router = useRouter()
 const cart = useCartStore()
+const { formatApiPrice } = useCurrency()
 
 // Checkout state
 const currentStep = ref(1)
@@ -653,9 +529,9 @@ const groupedCartItems = computed(() => {
   if (!cart.items || !cart.items.items || cart.items.items.length === 0) {
     return [];
   }
-  
+
   const grouped = {};
-  
+
   // Group items by product_id
   cart.items.items.forEach(item => {
     if (!grouped[item.product_id]) {
@@ -669,7 +545,7 @@ const groupedCartItems = computed(() => {
         variants: []
       };
     }
-    
+
     // Add all variants from this product
     item.variants.forEach(variant => {
       grouped[item.product_id].variants.push({
@@ -679,7 +555,7 @@ const groupedCartItems = computed(() => {
       });
     });
   });
-  
+
   return Object.values(grouped);
 });
 
@@ -692,22 +568,22 @@ const averageDeliveryTime = computed(() => {
   if (!groupedCartItems.value || groupedCartItems.value.length === 0) {
     return "Standard Delivery (3-5 business days)";
   }
-  
+
   let totalDays = 0;
   let itemCount = 0;
   let farthestDays = 0; // Track the farthest delivery date
-  
+
   // Extract delivery times from each item
   groupedCartItems.value.forEach(item => {
     if (item.delivery_info && item.delivery_info.estimated_delivery_display) {
       const deliveryText = item.delivery_info.estimated_delivery_display;
-      
+
       // Try to extract delivery time range (e.g., "3-5" from "3-5 business days")
       const rangeMatch = deliveryText.match(/(\d+)-(\d+)/);
       if (rangeMatch) {
         // For ranges, use the maximum value for worst-case calculation
         const maxDays = parseInt(rangeMatch[2]);
-        
+
         if (!isNaN(maxDays)) {
           totalDays += maxDays;
           itemCount++;
@@ -719,7 +595,7 @@ const averageDeliveryTime = computed(() => {
         const singleMatch = deliveryText.match(/(\d+)/);
         if (singleMatch) {
           const days = parseInt(singleMatch[1]);
-          
+
           if (!isNaN(days)) {
             totalDays += days;
             itemCount++;
@@ -730,15 +606,15 @@ const averageDeliveryTime = computed(() => {
       }
     }
   });
-  
+
   // If no delivery info could be parsed, return a default
   if (itemCount === 0) {
     return "Standard Delivery (3-5 business days)";
   }
-  
+
   // Calculate average days (rounded to nearest whole number)
   const avgDays = Math.round(totalDays / itemCount);
-  
+
   // If average equals farthest, show a single date estimate
   if (avgDays === farthestDays) {
     return `Product will be delivered in ${avgDays} business days`;
@@ -766,9 +642,9 @@ onMounted(async () => {
     console.error('Failed to load cart:', error)
     showError('Failed to load cart data')
   }
-  
+
   await fetchAddresses()
-  
+
   // Set default selected address
   if (Array.isArray(addresses.value) && addresses.value.length > 0) {
     // First look for default address
@@ -784,7 +660,7 @@ const fetchAddresses = async () => {
     try {
       const response = await apiService.getAddresses()
       console.log('Response:', response.data);
-      
+
       addresses.value = Array.isArray(response.data.results) ? response.data.results : []
     } catch (apiError) {
       // Fallback to sample data if API fails      
@@ -811,7 +687,7 @@ const editAddress = (index) => {
   editAddressIndex.value = index;
   addressForm.value = { ...addresses.value[index] };
   showAddressDialog.value = true;
-  
+
   // Give time for form to render with new values, then validate
   setTimeout(() => {
     if (formRef.value) {
@@ -835,7 +711,7 @@ const addNewAddress = () => {
     country: '',
     default: !Array.isArray(addresses.value) || addresses.value.length === 0 // Set as default if it's the first address
   }
-  
+
   editAddressIndex.value = null
   showAddressDialog.value = true
 }
@@ -846,7 +722,7 @@ const saveAddress = async () => {
     showError('Please fill all required fields');
     return;
   }
-  
+
   addressLoading.value = true;
   try {
     const addressData = { ...addressForm.value }
@@ -887,8 +763,8 @@ const saveAddress = async () => {
         await apiService.setDefaultAddress(addressId)
       }
       // If no default address exists, make this one default
-      if (Array.isArray(addresses.value) && addresses.value.length > 0 && 
-          addresses.value.filter(a => a.default).length === 0) {
+      if (Array.isArray(addresses.value) && addresses.value.length > 0 &&
+        addresses.value.filter(a => a.default).length === 0) {
         addresses.value[0].default = true
         await apiService.setDefaultAddress(addresses.value[0].id)
       }
@@ -922,20 +798,20 @@ const placeOrder = async () => {
     showError('Please select an address and payment method')
     return
   }
-  
+
   // Check if cart has items
   if (!cart.items || !cart.items.items || cart.items.items.length === 0) {
     showError('Your cart is empty. Please add items before checkout.')
     return
   }
-  
+
   processing.value = true
-  
+
   try {
     // Build order data according to API specification
     const orderData = {
       // Note: customer will be set automatically by the backend from authenticated user
-      items: cart.items.items.flatMap(cartItem => 
+      items: cart.items.items.flatMap(cartItem =>
         cartItem.variants.map(variant => ({
           product_id: cartItem.product_id,
           product_variant_id: variant.id,
@@ -954,14 +830,14 @@ const placeOrder = async () => {
         currency: 'XOF'
       }
     }
-    
+
     // Call order creation API
     const response = await apiService.createOrder(orderData)
-    
+
     // Check if order was created successfully
     if (response.data) {
       const order = response.data
-      
+
       // Check payment status if available
       if (order.status === 'failed') {
         // Payment failed - redirect to failed page
@@ -990,7 +866,7 @@ const placeOrder = async () => {
     }
   } catch (error) {
     console.error('Error creating order:', error)
-    
+
     // Check if error response contains specific payment failure info
     if (error.response && error.response.data) {
       const errorData = error.response.data
@@ -1003,7 +879,7 @@ const placeOrder = async () => {
           message: 'Your payment could not be processed. Please try again.'
         }
       })
-      
+
       // // Check if it's a payment-related error
       // if (errorData.payment_status === 'failed' || 
       //     (errorData.payment && errorData.payment.status === 'failed')) {
@@ -1075,21 +951,21 @@ const getDeliveryDateRange = () => {
   if (!groupedCartItems.value || groupedCartItems.value.length === 0) {
     return "";
   }
-  
+
   let totalDays = 0;
   let itemCount = 0;
   let farthestDays = 0;
-  
+
   // Extract delivery times from each item
   groupedCartItems.value.forEach(item => {
     if (item.delivery_info && item.delivery_info.estimated_delivery_display) {
       const deliveryText = item.delivery_info.estimated_delivery_display;
-      
+
       // Try to extract delivery time range (e.g., "3-5" from "3-5 business days")
       const rangeMatch = deliveryText.match(/(\d+)-(\d+)/);
       if (rangeMatch) {
         const maxDays = parseInt(rangeMatch[2]);
-        
+
         if (!isNaN(maxDays)) {
           totalDays += maxDays;
           itemCount++;
@@ -1100,7 +976,7 @@ const getDeliveryDateRange = () => {
         const singleMatch = deliveryText.match(/(\d+)/);
         if (singleMatch) {
           const days = parseInt(singleMatch[1]);
-          
+
           if (!isNaN(days)) {
             totalDays += days;
             itemCount++;
@@ -1110,23 +986,23 @@ const getDeliveryDateRange = () => {
       }
     }
   });
-  
+
   if (itemCount === 0) {
     return "";
   }
-  
+
   // Calculate average days
   const avgDays = Math.round(totalDays / itemCount);
-  
+
   // Calculate actual calendar dates (accounting for business days)
   const avgDate = addBusinessDays(new Date(), avgDays);
   const farthestDate = addBusinessDays(new Date(), farthestDays);
-  
+
   // Format dates
   const options = { weekday: 'short', month: 'short', day: 'numeric' };
   const avgDateFormatted = avgDate.toLocaleDateString('en-US', options);
   const farthestDateFormatted = farthestDate.toLocaleDateString('en-US', options);
-  
+
   if (avgDays === farthestDays) {
     return `By ${avgDateFormatted}`;
   } else {
@@ -1138,18 +1014,18 @@ const getDeliveryDateRange = () => {
 const addBusinessDays = (date, days) => {
   const result = new Date(date);
   let addedDays = 0;
-  
+
   while (addedDays < days) {
     // Add one day
     result.setDate(result.getDate() + 1);
-    
+
     // Skip weekends (0 = Sunday, 6 = Saturday)
     const dayOfWeek = result.getDay();
     if (dayOfWeek !== 0 && dayOfWeek !== 6) {
       addedDays++;
     }
   }
-  
+
   return result;
 };
 </script>
@@ -1238,4 +1114,4 @@ const addBusinessDays = (date, days) => {
   padding: 0 8px;
   margin-bottom: 2px;
 }
-</style> 
+</style>

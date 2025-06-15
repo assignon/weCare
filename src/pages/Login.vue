@@ -4,72 +4,47 @@
       <!-- <div class="auth-illustration">
         <img src="/src/assets/images/login-illustration.svg" alt="Login illustration" />
       </div> -->
-      
+
       <div class="auth-content">
         <h1 class="auth-title">Login</h1>
         <p class="auth-subtitle">Please sign in to continue.</p>
-        
+
         <v-form ref="form" v-model="isFormValid" @submit.prevent="onLogin" class="w-100">
           <v-alert v-if="route.query.registered" type="success" class="mb-4" variant="tonal" density="compact">
             Registration successful! Please log in.
           </v-alert>
-          
+
           <v-alert v-if="route.query.message" type="success" class="mb-4" variant="tonal" density="compact">
             {{ route.query.message }}
           </v-alert>
-          
+
           <v-alert v-if="authStore.error" type="error" class="mb-4" variant="tonal" density="compact" closable>
             {{ authStore.error }}
           </v-alert>
-          
+
           <div class="input-field">
-            <v-text-field
-              v-model="email"
-              label="Email"
-              :rules="emailRules"
-              variant="outlined"
-              class="mb-4"
-              autocomplete="email"
-              prepend-inner-icon="mdi-email"
-              hide-details="auto"
-              width="100%"
-            />
+            <v-text-field v-model="email" label="Email" :rules="emailRules" variant="outlined" class="mb-4"
+              autocomplete="email" prepend-inner-icon="mdi-email" hide-details="auto" width="100%" />
           </div>
-          
+
           <div class="input-field">
-            <v-text-field
-              v-model="password"
-              label="Password"
-              :rules="passwordRules"
-              :type="showPassword ? 'text' : 'password'"
-              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-              @click:append-inner="showPassword = !showPassword"
-              variant="outlined"
-              class="mb-4"
-              autocomplete="current-password"
-              prepend-inner-icon="mdi-lock"
-              hide-details="auto"
-              width="100%"
-            />
+            <v-text-field v-model="password" label="Password" :rules="passwordRules"
+              :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+              @click:append-inner="showPassword = !showPassword" variant="outlined" class="mb-4"
+              autocomplete="current-password" prepend-inner-icon="mdi-lock" hide-details="auto" width="100%" />
           </div>
-          
+
           <div class="forgot-password-link text-right mb-4">
             <router-link :to="{ name: 'ForgotPassword' }" class="forgot-link">
               Forgot Password?
             </router-link>
           </div>
-          
-          <v-btn 
-            block 
-            color="#1a2233" 
-            type="submit" 
-            :loading="authStore.loading" 
-            :disabled="!isFormValid" 
-            class="auth-btn"
-          >
+
+          <v-btn block color="#1a2233" type="submit" :loading="authStore.loading" :disabled="!isFormValid"
+            class="auth-btn">
             Sign In
           </v-btn>
-          
+
           <div class="text-center auth-link">
             Don't have account? <router-link :to="{ name: 'Register' }">Sign Up</router-link>
           </div>
@@ -102,16 +77,24 @@ const passwordRules = [v => !!v || 'Password is required']
 
 const onLogin = async () => {
   if (!isFormValid.value) return
-  
-  const success = await authStore.login({ 
-    email: email.value, 
-    password: password.value 
+
+  const success = await authStore.login({
+    email: email.value,
+    password: password.value
   })
-  
+
   if (success) {
-    // Redirect to the originally requested page or home
     const redirectPath = route.query.redirect || '/'
     router.push(redirectPath)
+    // // Check if user has completed their profile (has skin_type set)
+    // if (authStore.user?.profile?.skin_type) {
+    //   // Profile is complete, redirect to the originally requested page or home
+    //   const redirectPath = route.query.redirect || '/'
+    //   router.push(redirectPath)
+    // } else {
+    //   // Profile is incomplete, redirect to shopper goals
+    //   router.push({ name: 'ShopperGoals' })
+    // }
   }
 }
 
@@ -239,15 +222,15 @@ onMounted(() => {
   .auth-container {
     max-width: 100%;
   }
-  
+
   .auth-content {
     padding: 20px 16px;
   }
-  
+
   .auth-title {
     font-size: 35px;
   }
-  
+
   .auth-subtitle {
     font-size: 17px;
   }
@@ -258,11 +241,11 @@ onMounted(() => {
   .auth-page {
     padding: 8px;
   }
-  
+
   .auth-illustration {
     padding: 20px 0;
   }
-  
+
   .auth-illustration img {
     height: 140px;
   }
@@ -286,4 +269,4 @@ onMounted(() => {
 .forgot-link:hover {
   text-decoration: underline;
 }
-</style> 
+</style>

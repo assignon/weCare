@@ -127,15 +127,17 @@
                         <v-chip size="small" variant="outlined">
                           Qty: {{ item.quantity }}
                         </v-chip>
-                        <v-chip size="small" variant="outlined" color="primary" class="ml-2">
-                          ${{ formatAmount(item.price) }} each
-                        </v-chip>
+                        <div class="d-flex align-items-center">
+                          <v-chip size="small" variant="outlined" color="primary" class="ml-2">
+                            {{ formatApiPrice({ price: item.price, currency_info: item.currency_info }) }} each
+                          </v-chip>
+                        </div>
                       </div>
                     </v-col>
 
                     <v-col cols="auto" class="text-right">
                       <h3 class="text-h6 font-weight-bold text-primary">
-                        ${{ formatAmount(item.price * item.quantity) }}
+                        {{ formatApiPrice({ price: item.price * item.quantity, currency_info: item.currency_info }) }}
                       </h3>
                       <v-btn v-if="item.product?.id" variant="flat" rounded size="small" color="secondary"
                         class="text-none" @click="goToProduct(item.product.id)">
@@ -186,17 +188,18 @@
                 <div class="order-summary">
                   <div class="d-flex justify-space-between mb-2">
                     <span>Subtotal:</span>
-                    <span>${{ formatAmount(calculateSubtotal()) }}</span>
+                    <span>{{ formatApiPrice({ price: calculateSubtotal(), currency_info: order.currency_info })
+                      }}</span>
                   </div>
                   <div v-if="order.delivery_fee" class="d-flex justify-space-between mb-2">
                     <span>Delivery Fee:</span>
-                    <span>${{ formatAmount(order.delivery_fee) }}</span>
+                    <span>{{ formatApiPrice({ price: order.delivery_fee, currency_info: order.currency_info }) }}</span>
                   </div>
                   <v-divider class="my-3" />
                   <div class="d-flex justify-space-between">
                     <span class="font-weight-bold">Total:</span>
                     <span class="font-weight-bold text-h6 text-primary">
-                      ${{ formatAmount(order.total_amount) }}
+                      {{ formatApiPrice({ price: order.total_amount, currency_info: order.currency_info }) }}
                     </span>
                   </div>
                 </div>
@@ -402,9 +405,11 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { apiService } from '@/services/api'
 import OrderStatusTimeline from '@/components/OrderStatusTimeline.vue'
+import { useCurrency } from '@/composables/useCurrency'
 
 const route = useRoute()
 const router = useRouter()
+const { formatApiPrice } = useCurrency()
 
 // Reactive data
 const order = ref(null)
@@ -535,10 +540,6 @@ const formatDate = (dateString) => {
     hour: '2-digit',
     minute: '2-digit'
   })
-}
-
-const formatAmount = (amount) => {
-  return parseFloat(amount || 0).toFixed(2)
 }
 
 const formatStatus = (status) => {

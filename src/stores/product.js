@@ -7,9 +7,12 @@ export const useProductStore = defineStore('product', () => {
   const products = ref([])
   const categories = ref([])
   const skinTypes = ref([])
+  const skinConcerns = ref([])
+  const productTypes = ref([])
   const featuredProducts = ref([])
   const popularProducts = ref([])
   const newArrivals = ref([])
+  const recommendedProducts = ref([])
   const currentProduct = ref(null)
   const productReviews = ref([])
   const relatedProducts = ref([])
@@ -148,6 +151,28 @@ export const useProductStore = defineStore('product', () => {
       return []
     }
   }
+
+  const fetchSkinConcerns = async () => {
+    try {
+      const response = await apiService.getSkinConcerns()
+      skinConcerns.value = response.data.results || response.data
+      return skinConcerns.value
+    } catch (err) {
+      console.error('Failed to fetch skin concerns:', err)
+      return []
+    }
+  }
+
+  const fetchProductTypes = async () => {
+    try {
+      const response = await apiService.getProductTypes()
+      productTypes.value = response.data.results || response.data
+      return productTypes.value
+    } catch (err) {
+      console.error('Failed to fetch product types:', err)
+      return []
+    }
+  }
   
   const fetchFeaturedProducts = async () => {
     try {
@@ -181,6 +206,17 @@ export const useProductStore = defineStore('product', () => {
       return newArrivals.value
     } catch (err) {
       console.error('Failed to fetch new arrivals:', err)
+      return []
+    }
+  }
+
+  const fetchRecommendedProducts = async () => {
+    try {
+      const response = await apiService.getRecommendedProducts()
+      recommendedProducts.value = response.data.results || response.data
+      return recommendedProducts.value
+    } catch (err) {
+      console.error('Failed to fetch recommended products:', err)
       return []
     }
   }
@@ -243,9 +279,12 @@ export const useProductStore = defineStore('product', () => {
     products,
     categories,
     skinTypes,
+    skinConcerns,
+    productTypes,
     featuredProducts,
     popularProducts,
     newArrivals,
+    recommendedProducts,
     currentProduct,
     productReviews,
     relatedProducts,
@@ -267,9 +306,12 @@ export const useProductStore = defineStore('product', () => {
     fetchProductById,
     fetchCategories,
     fetchSkinTypes,
+    fetchSkinConcerns,
+    fetchProductTypes,
     fetchFeaturedProducts,
     fetchPopularProducts,
     fetchNewArrivals,
+    fetchRecommendedProducts,
     fetchRelatedProducts,
     searchProducts,
     filterByCategory,

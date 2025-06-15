@@ -117,6 +117,10 @@ export const apiService = {
   getNewArrivals() {
     return api.get('/products/shopper/products/new_arrivals/')
   },
+
+  getRecommendedProducts() {
+    return api.get('/products/shopper/products/recommended_products/')
+  },
   
   getProductDetails(id) {
     return api.get(`/products/products/${id}/`)
@@ -137,7 +141,28 @@ export const apiService = {
   
   // Skin Types
   getSkinTypes() {
-    return api.get('/products/skin-types/')
+    // Use public API instance to allow unauthenticated access
+    const publicApi = createPublicApi()
+    return publicApi.get('/products/skin-types/')
+  },
+
+  // Skin Concerns
+  getSkinConcerns() {
+    // Use public API instance to allow unauthenticated access
+    const publicApi = createPublicApi()
+    return publicApi.get('/products/skin-concerns/')
+  },
+
+  // Product Types
+  getProductTypes() {
+    // Use public API instance to allow unauthenticated access
+    const publicApi = createPublicApi()
+    return publicApi.get('/products/product-types/')
+  },
+
+  // Countries
+  getCountries() {
+    return api.get('/accounts/countries/')
   },
   
   // Orders
@@ -200,7 +225,7 @@ export const apiService = {
   
   // User profile
   getProfile() {
-    return api.get('/accounts/profile/')
+    return api.get('/accounts/profile/details/')
   },
   
   updateProfile(profileData, hasFile = false) {
@@ -209,16 +234,23 @@ export const apiService = {
       const formData = new FormData()
       for (const key in profileData) {
         if (profileData[key] !== null && profileData[key] !== undefined) {
-          formData.append(key, profileData[key])
+          // Handle arrays (like skin_concerns, product_types)
+          if (Array.isArray(profileData[key])) {
+            profileData[key].forEach(item => {
+              formData.append(key, item)
+            })
+          } else {
+            formData.append(key, profileData[key])
+          }
         }
       }
-      return api.put('/accounts/profile/', formData, {
+      return api.put('/accounts/profile/details/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       })
     } else {
-      return api.put('/accounts/profile/', profileData)
+      return api.patch('/accounts/profile/details/', profileData)
     }
   },
 

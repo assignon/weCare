@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const routes = [
+  { path: '/splash', name: 'SplashScreen', component: () => import('@/pages/SplashScreen.vue') },
   { path: '/login', name: 'Login', component: () => import('@/pages/Login.vue') },
   { path: '/', name: 'Home', component: () => import('@/pages/Home.vue'), meta: { requiresAuth: true } },
   { path: '/orders', name: 'Orders', component: () => import('@/pages/Orders.vue'), meta: { requiresAuth: true } },
@@ -9,17 +10,20 @@ const routes = [
   { path: '/cart', name: 'Cart', component: () => import('@/pages/Cart.vue'), meta: { requiresAuth: true } },
  
   { path: '/register', name: 'Register', component: () => import('@/pages/Register.vue') },
+  { path: '/shopper-goals', name: 'ShopperGoals', component: () => import('@/pages/ShopperGoals.vue'), meta: { requiresAuth: true } },
   { path: '/forgot-password', name: 'ForgotPassword', component: () => import('@/pages/ForgotPassword.vue') },
   { path: '/reset-password/:code', name: 'ResetPassword', component: () => import('@/pages/ResetPassword.vue') },
   { path: '/product/:id', name: 'ProductDetails', component: () => import('@/pages/ProductDetails.vue'), meta: { requiresAuth: true } },
   { path: '/order-status/:id', name: 'OrderStatus', component: () => import('@/pages/OrderStatus.vue'), meta: { requiresAuth: true } },
   { path: '/profile', name: 'Profile', component: () => import('@/pages/Profile.vue'), meta: { requiresAuth: true } },
   { path: '/profile/edit', name: 'EditProfile', component: () => import('@/pages/EditProfile.vue'), meta: { requiresAuth: true } },
+  { path: '/profile/skin-profile', name: 'SkinProfile', component: () => import('@/pages/SkinProfile.vue'), meta: { requiresAuth: true } },
   { path: '/profile/addresses', name: 'Addresses', component: () => import('@/pages/Addresses.vue'), meta: { requiresAuth: true } },
   { path: '/checkout', name: 'Checkout', component: () => import('@/pages/Checkout.vue'), meta: { requiresAuth: true } },
   { path: '/payment-success', name: 'PaymentSuccess', component: () => import('@/pages/PaymentSuccess.vue'), meta: { requiresAuth: true } },
   { path: '/payment-failed', name: 'PaymentFailed', component: () => import('@/pages/PaymentFailed.vue'), meta: { requiresAuth: true } },
   { path: '/notifications', name: 'Notification', component: () => import('@/pages/Notification.vue'), meta: { requiresAuth: true } },
+  { path: '/wishlist', name: 'Wishlist', component: () => import('@/pages/Wishlist.vue'), meta: { requiresAuth: true } },
   { path: '/fcm-test', name: 'FCMTest', component: () => import('@/pages/FCMTest.vue'), meta: { requiresAuth: true } },
 ]
 
@@ -39,24 +43,43 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore()
   
+  // Check if this is a fresh app load (no previous route)
+  const isFreshLoad = !from.name && to.name !== 'SplashScreen'
+  
+  // Show splash screen for fresh loads (including PWA launches)
+  if (isFreshLoad) {
+    // Check if we're in PWA mode or it's a fresh browser visit
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                  window.navigator.standalone === true ||
+                  document.referrer.includes('android-app://')
+    
+    // Always show splash for PWA or if going to login/home without auth
+    if (isPWA || to.name === 'Login' || to.name === 'Home') {
+      return next({ name: 'SplashScreen' })
+    }
+  }
+  
+  // Skip auth checks for splash screen
+  if (to.name === 'SplashScreen') {
+    return next()
+  }
+  
   // If route requires auth
   if (to.meta.requiresAuth) {
-    // First check if we have a token in localStorage
-    if (!auth.isAuthenticated) {
-      // If no token, redirect to login
+    // Check if we have a token in localStorage
+    const token = localStorage.getItem('access_token')
+    if (!token) {
       return next({ 
         name: 'Login', 
         query: { redirect: to.fullPath } 
       })
     }
     
-    // If we have a token but haven't verified it yet
+    // If we have a token but haven't verified it yet, verify it
     if (!auth.user) {
       try {
-        // Try to verify the token and fetch user data
         const isValid = await auth.checkAuth()
         if (!isValid) {
-          // If token is invalid, redirect to login
           return next({ 
             name: 'Login', 
             query: { redirect: to.fullPath } 
@@ -64,7 +87,6 @@ router.beforeEach(async (to, from, next) => {
         }
       } catch (error) {
         console.error('Authentication error:', error)
-        // On any error, redirect to login
         return next({ 
           name: 'Login', 
           query: { redirect: to.fullPath } 
@@ -74,12 +96,11 @@ router.beforeEach(async (to, from, next) => {
   }
   
   // If user is authenticated and trying to access login/register pages
-  if (auth.isAuthenticated && ['Login', 'Register', 'ForgotPassword'].includes(to.name)) {
-    // Redirect to home or to the redirect query parameter if it exists
+  if (auth.isAuthenticated && ['Login', 'Register', 'ForgotPassword', 'ResetPassword'].includes(to.name)) {
+    // Always redirect authenticated users to home or requested page
     return next(to.query.redirect || { name: 'Home' })
   }
   
-  // For all other routes, proceed normally
   next()
 })
 

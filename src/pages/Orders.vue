@@ -125,7 +125,10 @@
                                     <v-col cols="12" md="3" class="text-right">
                                         <div class="amount-section">
                                             <h3 class="text-h6 font-weight-bold text-primary mb-2">
-                                                ${{ formatAmount(order.total_amount) }}
+                                                {{ formatApiPrice({
+                                                    price: order.total_amount, currency_info:
+                                                        order.currency_info
+                                                }) }}
                                             </h3>
                                         </div>
                                     </v-col>
@@ -285,9 +288,11 @@ import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiService } from '@/services/api'
 import { debounce } from 'lodash'
+import { useCurrency } from '@/composables/useCurrency'
 import BottomNavigation from '@/components/BottomNavigation.vue'
 
 const router = useRouter()
+const { formatApiPrice } = useCurrency()
 
 // Reactive data
 const orders = ref([])
@@ -590,9 +595,7 @@ const formatDate = (dateString) => {
     })
 }
 
-const formatAmount = (amount) => {
-    return parseFloat(amount || 0).toFixed(2)
-}
+// Remove formatAmount function as we now use formatPrice from useCurrency
 
 const formatStatus = (status) => {
     return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())

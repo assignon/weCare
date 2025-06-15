@@ -6,13 +6,13 @@ import router from '@/router'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
-  const accessToken = ref(localStorage.getItem('access_token') || null)
-  const refreshToken = ref(localStorage.getItem('refresh_token') || null)
+  const accessToken = ref(null) // Don't automatically load from localStorage
+  const refreshToken = ref(null) // Don't automatically load from localStorage
   const error = ref(null)
   const loading = ref(false)
   const authInitialized = ref(false)
 
-  const isAuthenticated = computed(() => !!accessToken.value)
+  const isAuthenticated = computed(() => !!accessToken.value && !!user.value)
   const isShopper = computed(() => user.value?.role === 'SHOPPER')
 
   // Clear all authentication state
@@ -27,8 +27,23 @@ export const useAuthStore = defineStore('auth', () => {
     notificationService.disconnect()
   }
 
-  // Initialize authentication state
+  // Initialize authentication state from localStorage (without validation)
+  function initAuthFromStorage() {
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      accessToken.value = token
+      refreshToken.value = localStorage.getItem('refresh_token')
+    }
+    authInitialized.value = true
+  }
+
+  // Initialize authentication state (with validation)
   async function initAuth() {
+    if (!accessToken.value) {
+      // Load from localStorage first
+      initAuthFromStorage()
+    }
+    
     if (accessToken.value) {
       try {
         await fetchUserData()
@@ -49,19 +64,23 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Check authentication state
   async function checkAuth() {
-    const token = localStorage.getItem('access_token')
-    
-    if (!token) {
-      clearAuthState()
-      return false
+    // Only check localStorage if we don't already have tokens loaded
+    if (!accessToken.value) {
+      const token = localStorage.getItem('access_token')
+      
+      if (!token) {
+        clearAuthState()
+        return false
+      }
+      
+      // Set tokens from localStorage
+      accessToken.value = token
+      refreshToken.value = localStorage.getItem('refresh_token')
     }
     
-    accessToken.value = token
-    refreshToken.value = localStorage.getItem('refresh_token')
-    
     try {
-      if (token) {
-        const isValid = await apiService.verifyToken(token)
+      if (accessToken.value) {
+        const isValid = await apiService.verifyToken(accessToken.value)
           .then(() => true)
           .catch(() => false)
           
@@ -295,13 +314,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Initialize auth on store creation
-  initAuth().catch(err => {
-    console.error('Auth initialization error:', err)
-  })
+  // Don't automatically initialize auth - let router handle it when needed
 
   return {
     user,
+    accessToken,
     isAuthenticated,
     isShopper,
     error,
@@ -312,6 +329,8 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     fetchUserData,
     checkAuth,
-    initAuth
+    initAuth,
+    initAuthFromStorage,
+    clearAuthState
   }
 }) 
