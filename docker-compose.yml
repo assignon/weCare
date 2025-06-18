@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # Development service
+  shopper-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: afriqexpress-shopper-dev
+    ports:
+      - "3001:3001"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:8000/api
+      - VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}
+      - VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN}
+      - VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}
+      - VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET}
+      - VITE_FIREBASE_SENDER_ID=${VITE_FIREBASE_SENDER_ID}
+      - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
+      - VITE_FIREBASE_VAPID_KEY=${VITE_FIREBASE_VAPID_KEY}
+    networks:
+      - afriqexpress
+    depends_on:
+      - backend
+    profiles:
+      - dev
+
+  # Production service
+  shopper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: afriqexpress-shopper
+    ports:
+      - "8081:8081"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=${VITE_API_URL:-/api}
+      - VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}
+      - VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN}
+      - VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}
+      - VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET}
+      - VITE_FIREBASE_SENDER_ID=${VITE_FIREBASE_SENDER_ID}
+      - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
+      - VITE_FIREBASE_VAPID_KEY=${VITE_FIREBASE_VAPID_KEY}
+    networks:
+      - afriqexpress
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    profiles:
+      - prod
+
+  # Backend service (placeholder - should be defined in main docker-compose)
+  backend:
+    image: afriqexpress-backend:latest
+    container_name: afriqexpress-backend
+    ports:
+      - "8000:8000"
+    networks:
+      - afriqexpress
+    profiles:
+      - dev
+      - prod
+
+networks:
+  afriqexpress:
+    driver: bridge
+    name: afriqexpress-network
