@@ -86,7 +86,7 @@
 
           <!-- Submit button -->
           <v-btn color="primary" block size="large" type="submit" :loading="loading"
-            :disabled="!formValid || !hasChangesToSave" class="text-none rounded-lg">
+            :disabled="!hasChangesToSave" class="text-none rounded-lg">
             {{ saveButtonText }}
           </v-btn>
         </div>
@@ -162,7 +162,7 @@ const passwordRule = v => v.length >= 8 || 'Password must be at least 8 characte
 const passwordMatchRule = v => v === formData.value.new_password || 'Passwords do not match'
 const currentPasswordRequired = v => {
   // Only require current password if we're making changes or changing password
-  const hasProfileChanges = hasFormChanges()
+  const hasProfileChanges = hasFormChanges.value
   const hasPasswordChange = formData.value.new_password
   return (hasProfileChanges || hasPasswordChange) ? (!!v || 'Current password is required to save changes') : true
 }
@@ -219,7 +219,7 @@ const loadUserData = async () => {
 }
 
 // Check if form has changes from original user data
-const hasFormChanges = () => {
+const hasFormChanges = computed(() => {
   if (!auth.user) return false
 
   const userData = auth.user
@@ -232,7 +232,7 @@ const hasFormChanges = () => {
     formData.value.default_language !== (userData.default_language?.id || null) ||
     !!profilePictureFile.value
   )
-}
+})
 
 // Computed properties
 const userInitials = computed(() => {
@@ -244,7 +244,7 @@ const userInitials = computed(() => {
 })
 
 const saveButtonText = computed(() => {
-  const hasProfileChanges = hasFormChanges()
+  const hasProfileChanges = hasFormChanges.value
   const hasPasswordChange = formData.value.new_password
   if (!hasProfileChanges) {
     return 'No Changes to Save'
@@ -258,7 +258,7 @@ const saveButtonText = computed(() => {
 })
 
 const hasChangesToSave = computed(() => {
-  return hasFormChanges() || !!formData.value.new_password
+  return hasFormChanges.value || !!formData.value.new_password
 })
 
 // File input handlers
@@ -341,9 +341,9 @@ const checkPendingEmailVerification = async () => {
 
 // Form submission
 const submitForm = async () => {
-  if (!formValid.value) return
+  // if (!formValid.value) return
 
-  const hasProfileChanges = hasFormChanges()
+  const hasProfileChanges = hasFormChanges.value
   const hasPasswordChange = formData.value.new_password
 
   // Check if there are any changes to save

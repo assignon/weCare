@@ -229,6 +229,8 @@ export const apiService = {
   },
   
   updateProfile(profileData, hasFile = false) {
+    console.log('Profile update request:', { profileData, hasFile });
+    
     if (hasFile) {
       // Use FormData for file uploads
       const formData = new FormData()
@@ -244,13 +246,37 @@ export const apiService = {
           }
         }
       }
+      
+      // Log FormData entries
+      console.log('FormData entries:');
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + (pair[1] instanceof File ? `File (${pair[1].name})` : pair[1]));
+      }
+      
       return api.put('/accounts/profile/details/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       })
+      .then(response => {
+        console.log('Profile update success (with file):', response.data);
+        return response;
+      })
+      .catch(error => {
+        console.error('Profile update error (with file):', error.response?.data || error.message);
+        throw error;
+      });
     } else {
-      return api.patch('/accounts/profile/details/', profileData)
+      // Regular JSON request for profile update without files
+      return api.put('/accounts/profile/details/', profileData)
+      .then(response => {
+        console.log('Profile update success:', response.data);
+        return response;
+      })
+      .catch(error => {
+        console.error('Profile update error:', error.response?.data || error.message);
+        throw error;
+      });
     }
   },
 

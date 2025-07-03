@@ -25,6 +25,8 @@
     "vuetify": "^3.8.4"
   },
   "devDependencies": {
+    "@stagewise-plugins/vue": "^0.4.7",
+    "@stagewise/toolbar-vue": "^0.4.9",
     "@vitejs/plugin-vue": "^5.2.4",
     "eslint": "^8.53.0",
     "eslint-plugin-vue": "^9.18.1",
