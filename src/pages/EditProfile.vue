@@ -51,8 +51,8 @@
             <v-text-field v-model="formData.phone_number" label="Phone Number*" variant="outlined" density="comfortable"
               class="mb-3" :rules="[required, phoneRule]"></v-text-field>
 
-            <v-textarea v-model="formData.address" label="Address (Optional)" variant="outlined" density="comfortable"
-              rows="3" class="mb-3" hint="Your primary address" persistent-hint></v-textarea>
+            <!-- <v-textarea v-model="formData.address" label="Address (Optional)" variant="outlined" density="comfortable"
+              rows="3" class="mb-3" hint="Your primary address" persistent-hint></v-textarea> -->
 
             <v-select v-model="formData.default_language" :items="languages" item-title="name" item-value="id"
               label="Preferred Language" variant="outlined" density="comfortable" class="mb-3"
@@ -146,7 +146,7 @@ const formData = ref({
   last_name: '',
   email: '',
   phone_number: '',
-  address: '',
+  // address: '',
   profile_picture: null,
   new_password: '',
   confirm_password: '',
@@ -201,7 +201,7 @@ const loadUserData = async () => {
       formData.value.last_name = userData.last_name || ''
       formData.value.email = userData.email || ''
       formData.value.phone_number = userData.phone_number || ''
-      formData.value.address = userData.address || ''
+      // formData.value.address = userData.address || ''
       formData.value.profile_picture = userData.profile_picture || null
       formData.value.default_language = userData.default_language?.id || null
 
@@ -228,7 +228,7 @@ const hasFormChanges = computed(() => {
     formData.value.last_name !== (userData.last_name || '') ||
     formData.value.email !== (userData.email || '') ||
     formData.value.phone_number !== (userData.phone_number || '') ||
-    formData.value.address !== (userData.address || '') ||
+    // formData.value.address !== (userData.address || '') ||
     formData.value.default_language !== (userData.default_language?.id || null) ||
     !!profilePictureFile.value
   )
@@ -362,7 +362,7 @@ const submitForm = async () => {
         last_name: formData.value.last_name,
         email: formData.value.email,
         phone_number: formData.value.phone_number,
-        address: formData.value.address,
+        // address: formData.value.address || null,
         default_language: formData.value.default_language
       }
 
