@@ -286,23 +286,23 @@ export const apiService = {
   
   // Addresses
   getAddresses() {
-    return api.get('/accounts/addresses/')
+    return api.get('/accounts/shipping-addresses/')
   },
   
   addAddress(addressData) {
-    return api.post('/accounts/addresses/', addressData)
+    return api.post('/accounts/shipping-addresses/', addressData)
   },
   
   updateAddress(addressId, addressData) {
-    return api.put(`/accounts/addresses/${addressId}/`, addressData)
+    return api.put(`/accounts/shipping-addresses/${addressId}/`, addressData)
   },
   
   deleteAddress(addressId) {
-    return api.delete(`/accounts/addresses/${addressId}/`)
+    return api.delete(`/accounts/shipping-addresses/${addressId}/`)
   },
   
   setDefaultAddress(addressId) {
-    return api.post(`/accounts/addresses/${addressId}/set_default/`)
+    return api.post(`/accounts/shipping-addresses/${addressId}/set-default/`)
   },
   
   // Notifications
@@ -395,19 +395,19 @@ export const apiService = {
 
   // Address Management  
   createAddress(addressData) {
-    return api.post('/accounts/addresses/', addressData)
+    return api.post('/accounts/shipping-addresses/', addressData)
   },
 
   updateAddress(addressId, addressData) {
-    return api.put(`/accounts/addresses/${addressId}/`, addressData)
+    return api.put(`/accounts/shipping-addresses/${addressId}/`, addressData)
   },
 
   deleteAddress(addressId) {
-    return api.delete(`/accounts/addresses/${addressId}/`)
+    return api.delete(`/accounts/shipping-addresses/${addressId}/`)
   },
 
   setDefaultAddress(addressId) {
-    return api.post(`/accounts/addresses/${addressId}/set_default/`)
+    return api.post(`/accounts/shipping-addresses/${addressId}/set-default/`)
   },
 
   // Language Management

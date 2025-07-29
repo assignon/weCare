@@ -31,14 +31,26 @@
                 <span class="text-subtitle-1 font-weight-medium">{{ address.address_label || 'Address' }}</span>
               </div>
               
-              <v-chip 
-                v-if="address.is_default" 
-                color="primary" 
-                size="small"
-                variant="flat"
-              >
-                Default
-              </v-chip>
+              <div class="d-flex align-center">
+                <v-chip 
+                  v-if="address.latitude && address.longitude" 
+                  color="success" 
+                  size="x-small"
+                  variant="flat"
+                  class="mr-2"
+                >
+                  <v-icon size="x-small" class="mr-1">mdi-crosshairs-gps</v-icon>
+                  GPS
+                </v-chip>
+                <v-chip 
+                  v-if="address.is_default" 
+                  color="primary" 
+                  size="small"
+                  variant="flat"
+                >
+                  Default
+                </v-chip>
+              </div>
             </div>
             
             <div class="address-details text-body-2 text-grey-darken-1 mb-3">
@@ -242,6 +254,14 @@
         </v-card>
       </v-dialog>
       
+      <!-- Location Confirmation Dialog -->
+      <LocationConfirmationDialog
+        v-model="showLocationDialog"
+        :address="currentAddress"
+        @locationConfirmed="handleLocationConfirmed"
+        @locationSkipped="handleLocationSkipped"
+      />
+      
       <!-- Snackbar for notifications -->
       <v-snackbar
         v-model="showSnackbar"
@@ -267,6 +287,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiService } from '@/services/api'
+import LocationConfirmationDialog from '@/components/LocationConfirmationDialog.vue'
 
 const router = useRouter()
 
@@ -290,6 +311,13 @@ const editingAddressId = ref(null)
 const deleteIndex = ref(null)
 const showAddressDialog = ref(false)
 const showDeleteDialog = ref(false)
+
+// Location confirmation dialog
+const showLocationDialog = ref(false)
+const currentAddress = ref({})
+const pendingAddressData = ref(null)
+const pendingAddressId = ref(null)
+const pendingAction = ref(null) // 'create', 'update', 'set_default'
 
 // Snackbar state
 const showSnackbar = ref(false)
@@ -360,24 +388,69 @@ const editAddress = (index) => {
 const saveAddress = async () => {
   if (!formValid.value) return
   
+  const addressData = { ...addressForm.value }
+  
+  // Check if we need to ask for location confirmation
+  const needsLocationConfirmation = !editingAddressId.value || // New address
+    (editingAddressId.value && addressData.is_default && !hasGpsCoordinates(addressData)) // Existing address being set as default without GPS
+  
+  if (needsLocationConfirmation) {
+    // Store the address data and show location confirmation dialog
+    pendingAddressData.value = addressData
+    pendingAddressId.value = editingAddressId.value
+    pendingAction.value = editingAddressId.value ? 'update' : 'create'
+    currentAddress.value = { ...addressData }
+    showLocationDialog.value = true
+    return
+  }
+  
+  // Save address without location confirmation
+  await performAddressSave(addressData)
+}
+
+// Check if address has GPS coordinates
+const hasGpsCoordinates = (address) => {
+  if (editingAddressId.value) {
+    // For existing addresses, check the current address in the list
+    const existingAddress = addresses.value.find(addr => addr.id === editingAddressId.value)
+    return existingAddress && existingAddress.latitude && existingAddress.longitude
+  }
+  return false
+}
+
+// Perform the actual address save operation
+const performAddressSave = async (addressData, coordinates = null) => {
   loading.value = true
   
   try {
-    const addressData = { ...addressForm.value }
+    // Add GPS coordinates if provided (ensure proper precision for database)
+    if (coordinates) {
+      // Round to 6 decimal places to match database constraints (max_digits=9, decimal_places=6)
+      addressData.latitude = parseFloat(coordinates.latitude.toFixed(6))
+      addressData.longitude = parseFloat(coordinates.longitude.toFixed(6))
+      console.log('Adding GPS coordinates to address:', {
+        latitude: addressData.latitude,
+        longitude: addressData.longitude
+      })
+    }
     
+    let savedAddress
     if (editingAddressId.value) {
       // Update existing address
-      await apiService.updateAddress(editingAddressId.value, addressData)
+      savedAddress = await apiService.updateAddress(editingAddressId.value, addressData)
       snackbarText.value = 'Address updated successfully'
     } else {
       // Create new address
-      await apiService.createAddress(addressData)
+      savedAddress = await apiService.createAddress(addressData)
       snackbarText.value = 'Address added successfully'
     }
     
     // If setting as default, make API call to set default
-    if (addressData.is_default && editingAddressId.value) {
-      await apiService.setDefaultAddress(editingAddressId.value)
+    if (addressData.is_default) {
+      const addressId = editingAddressId.value || savedAddress.data.id
+      if (addressId) {
+        await apiService.setDefaultAddress(addressId)
+      }
     }
     
     // Refresh addresses list
@@ -441,11 +514,51 @@ const deleteAddress = async () => {
 
 // Set address as default
 const setAsDefault = async (id) => {
-  // const address = addresses.value[index]
+  const address = addresses.value.find(addr => addr.id === id)
+  
+  // Check if address has GPS coordinates
+  if (!address.latitude || !address.longitude) {
+    // Ask for location confirmation first
+    pendingAddressData.value = { ...address, is_default: true }
+    pendingAddressId.value = id
+    pendingAction.value = 'set_default'
+    currentAddress.value = { ...address }
+    showLocationDialog.value = true
+    return
+  }
+  
+  // Address has GPS coordinates, proceed with setting as default
+  await performSetAsDefault(id)
+}
+
+// Perform the actual set as default operation
+const performSetAsDefault = async (id, coordinates = null) => {
+  if (!id) {
+    console.error('performSetAsDefault: No address ID provided')
+    showError('Address ID missing')
+    return
+  }
+  
   loading.value = true
+  console.log('performSetAsDefault called with ID:', id, 'coordinates:', coordinates)
   
   try {
-    await apiService.setDefaultAddress(id)
+    // If coordinates are provided, update the address first
+    if (coordinates) {
+      const addressData = addresses.value.find(addr => addr.id === id)
+      if (addressData) {
+        console.log('Updating address with GPS coordinates first')
+        await apiService.updateAddress(id, {
+          ...addressData,
+          latitude: parseFloat(coordinates.latitude.toFixed(6)),
+          longitude: parseFloat(coordinates.longitude.toFixed(6))
+        })
+      }
+    }
+    
+    console.log('Setting address as default:', id)
+    const response = await apiService.setDefaultAddress(id)
+    console.log('Set default response:', response)
     
     // Show success message
     snackbarColor.value = 'success'
@@ -456,10 +569,64 @@ const setAsDefault = async (id) => {
     await fetchAddresses()
   } catch (error) {
     console.error('Failed to set default address:', error)
-    showError('Failed to update default address')
+    console.error('Error details:', error.response?.data || error.message)
+    
+    const errorMessage = error.response?.data?.error || 
+                        error.response?.data?.message || 
+                        `Failed to update default address: ${error.response?.status || error.message}`
+    showError(errorMessage)
   } finally {
     loading.value = false
   }
+}
+
+// Location confirmation dialog handlers
+const handleLocationConfirmed = async (coordinates) => {
+  if (!pendingAddressData.value) return
+  
+  try {
+    if (pendingAction.value === 'set_default') {
+      // Setting existing address as default with GPS coordinates
+      await performSetAsDefault(pendingAddressId.value, coordinates)
+    } else {
+      // Saving new address or updating existing address with GPS coordinates
+      await performAddressSave(pendingAddressData.value, coordinates)
+    }
+  } catch (error) {
+    console.error('Error in handleLocationConfirmed:', error)
+    showError('Failed to save location')
+  }
+  
+  // Clear pending data
+  clearPendingData()
+}
+
+const handleLocationSkipped = async () => {
+  if (!pendingAddressData.value) return
+  
+  try {
+    if (pendingAction.value === 'set_default') {
+      // Setting existing address as default without GPS coordinates
+      await performSetAsDefault(pendingAddressId.value)
+    } else {
+      // Saving address without GPS coordinates
+      await performAddressSave(pendingAddressData.value)
+    }
+  } catch (error) {
+    console.error('Error in handleLocationSkipped:', error)
+    showError('Failed to save address')
+  }
+  
+  // Clear pending data
+  clearPendingData()
+}
+
+// Clear all pending data
+const clearPendingData = () => {
+  pendingAddressData.value = null
+  pendingAddressId.value = null
+  pendingAction.value = null
+  showLocationDialog.value = false
 }
 
 // Show error in snackbar

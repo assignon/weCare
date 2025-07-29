@@ -36,13 +36,26 @@
                     elevation="1" @click="selectAddress(index)">
                     <v-card-text class="pa-4">
                       <div class="d-flex justify-space-between align-center">
-                        <div class="d-flex align-center">
+                        <div class="d-flex align-center flex-grow-1">
                           <v-avatar color="primary" class="mr-3" size="24">
                             <v-icon color="white" size="small">
                               {{ address.type === 'home' ? 'mdi-home' : 'mdi-office-building' }}
                             </v-icon>
                           </v-avatar>
-                          <span class="text-subtitle-1 font-weight-medium">{{ address.address_label }}</span>
+                          <div class="flex-grow-1">
+                            <div class="d-flex align-center">
+                              <span class="text-subtitle-1 font-weight-medium mr-2">{{ address.address_label }}</span>
+                              <v-chip 
+                                v-if="address.latitude && address.longitude" 
+                                color="success" 
+                                size="x-small"
+                                variant="flat"
+                              >
+                                <v-icon size="x-small" class="mr-1">mdi-crosshairs-gps</v-icon>
+                                GPS
+                              </v-chip>
+                            </div>
+                          </div>
                         </div>
 
                         <v-btn icon variant="text" size="small" @click.stop="editAddress(index)">
@@ -456,6 +469,14 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
+      <!-- Location Confirmation Dialog -->
+      <LocationConfirmationDialog
+        v-model="locationConfirmation.showLocationDialog.value"
+        :address="locationConfirmation.currentAddress.value"
+        @locationConfirmed="handleLocationConfirmed"
+        @locationSkipped="handleLocationSkipped"
+      />
     </v-container>
   </div>
 </template>
@@ -466,10 +487,13 @@ import { useCartStore } from '@/stores/cart'
 import { useRouter } from 'vue-router'
 import { apiService } from '@/services/api'
 import { useCurrency } from '@/composables/useCurrency'
+import { useLocationConfirmation } from '@/composables/useLocationConfirmation'
+import LocationConfirmationDialog from '@/components/LocationConfirmationDialog.vue'
 
 const router = useRouter()
 const cart = useCartStore()
 const { formatApiPrice } = useCurrency()
+const locationConfirmation = useLocationConfirmation()
 
 // Checkout state
 const currentStep = ref(1)
@@ -911,6 +935,13 @@ const showError = (message) => {
   showSnackbar.value = true
 }
 
+// Show success in snackbar
+const showSuccess = (message) => {
+  snackbarColor.value = 'success'
+  snackbarText.value = message
+  showSnackbar.value = true
+}
+
 // Monitor form validation changes
 watch(formValid, (newValue) => {
   console.log('Form validation changed:', newValue);
@@ -935,6 +966,19 @@ const goToStep = (step) => {
 }
 
 const nextStep = () => {
+  // If moving from step 1 (address selection), check GPS coordinates
+  if (currentStep.value === 1 && selectedAddress.value) {
+    const needsLocationConfirmation = locationConfirmation.checkAddressLocation(
+      selectedAddress.value,
+      handleLocationConfirmed,
+      handleLocationSkipped
+    )
+    
+    if (needsLocationConfirmation) {
+      return // Wait for location confirmation
+    }
+  }
+  
   if (currentStep.value < 3) {
     currentStep.value++;
   }
@@ -944,6 +988,37 @@ const prevStep = () => {
   if (currentStep.value > 1) {
     currentStep.value--;
   }
+}
+
+// Location confirmation handlers
+const handleLocationConfirmed = async (coordinates) => {
+  if (selectedAddress.value) {
+    try {
+      // Update the selected address with GPS coordinates
+      await apiService.updateAddress(selectedAddress.value.id, {
+        ...selectedAddress.value,
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude
+      })
+      
+      // Update local address data
+      addresses.value[selectedAddressIndex.value].latitude = coordinates.latitude
+      addresses.value[selectedAddressIndex.value].longitude = coordinates.longitude
+      
+      showSuccess('Location saved successfully')
+    } catch (error) {
+      console.error('Failed to update address with GPS coordinates:', error)
+      showError('Failed to save location')
+    }
+  }
+  
+  // Continue to next step
+  currentStep.value++;
+}
+
+const handleLocationSkipped = () => {
+  // Continue to next step without GPS coordinates
+  currentStep.value++;
 }
 
 // Get formatted delivery date range

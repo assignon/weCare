@@ -54,7 +54,8 @@ export default defineConfig({
       manifest: {
         name: "weCare",
         short_name: "weCare",
-        description: "Your beauty marketplace - Browse, buy, and track orders in one place",
+        description:
+          "Your beauty marketplace - Browse, buy, and track orders in one place",
         start_url: "/",
         display: "standalone",
         orientation: "portrait",
@@ -100,6 +101,7 @@ export default defineConfig({
     host: "shopper.local",
     port: 3000,
     open: true,
+    allowedHosts: ["99b2a60ddcad.ngrok-free.app"],
     // allowedHosts: true,
     // https: {
     //   key: fs.readFileSync('shopper-key.pem'),
@@ -130,4 +132,3 @@ export default defineConfig({
     },
   },
 });
-
