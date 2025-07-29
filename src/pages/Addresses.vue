@@ -195,13 +195,18 @@
                 </v-col>
                 
                 <v-col cols="6">
-                  <v-text-field
+                  <v-select
                     v-model="addressForm.country"
+                    :items="countries"
+                    item-title="name"
+                    item-value="name"
                     label="Country*"
                     variant="outlined"
                     density="comfortable"
                     :rules="[required]"
-                  ></v-text-field>
+                    :loading="loadingCountries"
+                    :disabled="loadingCountries"
+                  ></v-select>
                 </v-col>
               </v-row>
               
@@ -293,6 +298,8 @@ const router = useRouter()
 
 // Reactive data
 const addresses = ref([])
+const countries = ref([])
+const loadingCountries = ref(false)
 const addressForm = ref({
   address_label: '',
   address_line1: '',
@@ -300,7 +307,7 @@ const addressForm = ref({
   city: '',
   state: '',
   postal_code: '',
-  country: 'Togo', // Default country
+  country: '', // Will be set after countries are loaded
   is_default: false
 })
 const formRef = ref(null)
@@ -330,7 +337,10 @@ const phoneRule = v => /^\+?[0-9\s-]{10,15}$/.test(v) || 'Please enter a valid p
 
 // Fetch addresses on mount
 onMounted(async () => {
-  await fetchAddresses()
+  await Promise.all([
+    fetchAddresses(),
+    fetchCountries()
+  ])
 })
 
 // Fetch addresses from API
@@ -344,6 +354,20 @@ const fetchAddresses = async () => {
     showError('Failed to load addresses')
   } finally {
     loading.value = false
+  }
+}
+
+// Fetch countries from API
+const fetchCountries = async () => {
+  loadingCountries.value = true
+  try {
+    const response = await apiService.getCountries()
+    countries.value = response.data.results || response.data || []
+  } catch (error) {
+    console.error('Failed to fetch countries:', error)
+    showError('Failed to load countries')
+  } finally {
+    loadingCountries.value = false
   }
 }
 

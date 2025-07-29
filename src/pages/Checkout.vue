@@ -108,22 +108,7 @@
             <div class="pa-2">
               <h2 class="text-h6 font-weight-bold mb-4">Delivery Information</h2>
 
-              <!-- Delivery Estimate -->
-              <!-- <v-card class="mb-4 rounded-lg" elevation="1">
-                <v-card-text class="pa-4">
-                  <div class="d-flex align-center">
-                    <v-avatar color="primary" class="mr-3">
-                      <v-icon color="white">mdi-truck-delivery</v-icon>
-                    </v-avatar>
-                    <div>
-                      <p class="text-subtitle-1 font-weight-bold mb-0">Delivery Estimate</p>
-                      <p class="text-body-2 mb-0">{{ averageDeliveryTime }}</p>
-                      <p class="text-caption text-primary-darken-1 mb-0">{{ getDeliveryDateRange() }}</p>
-                    </div>
-                  </div>
-                </v-card-text>
-              </v-card> -->
-
+              <!-- Delivery Address -->
               <v-card class="mb-4 rounded-lg" elevation="1">
                 <v-card-text class="pa-4">
                   <p class="text-subtitle-1 font-weight-medium mb-1">Delivery Address</p>
@@ -134,6 +119,117 @@
                       selectedAddress.postal_code }}</p>
                     <p class="mb-1">{{ selectedAddress.country }}</p>
                     <p class="mb-0">{{ selectedAddress.phone }}</p>
+                  </div>
+                </v-card-text>
+              </v-card>
+
+              <!-- Delivery Options -->
+              <v-card class="mb-4 rounded-lg" elevation="1">
+                <v-card-text class="pa-4">
+                  
+                  <p class="text-subtitle-1 font-weight-bold mb-3">Delivery Options</p>
+                  
+                  <v-radio-group v-model="deliveryOption" class="mb-4">
+                    <!-- Default Delivery -->
+                    <v-card class="mb-3 delivery-option" 
+                      :class="{ 'selected-delivery': deliveryOption === 'default' }" 
+                      elevation="0" 
+                      @click="deliveryOption = 'default'">
+                      <div class="d-flex align-center pa-3">
+                        <v-avatar color="primary" size="32" class="mr-3">
+                          <v-icon color="white" size="small">mdi-truck-delivery</v-icon>
+                        </v-avatar>
+                        <div class="flex-grow-1">
+                          <div class="d-flex align-center">
+                            <span class="text-subtitle-2 font-weight-medium">Standard Delivery</span>
+                            <v-spacer></v-spacer>
+                            <v-radio value="default" hide-details color="primary"></v-radio>
+                          </div>
+                          <p class="text-caption text-grey-darken-1 mb-0">{{ getDefaultDeliveryTime() }}</p>
+                        </div>
+                      </div>
+                    </v-card>
+
+                    <!-- Express Delivery -->
+                    <v-card v-if="expressDeliveryAvailable" class="mb-3 delivery-option" 
+                      :class="{ 'selected-delivery': deliveryOption === 'express' }" 
+                      elevation="0" 
+                      @click="deliveryOption = 'express'">
+                      <div class="d-flex align-center pa-3">
+                        <v-avatar color="success" size="32" class="mr-3">
+                          <v-icon color="white" size="small">mdi-lightning-bolt</v-icon>
+                        </v-avatar>
+                        <div class="flex-grow-1">
+                          <div class="d-flex align-center">
+                            <span class="text-subtitle-2 font-weight-medium">Express Delivery</span>
+                            <v-spacer></v-spacer>
+                            <v-radio value="express" hide-details color="primary"></v-radio>
+                          </div>
+                          <p class="text-caption text-grey-darken-1 mb-0">{{ getExpressDeliveryTime() }}</p>
+                          <p class="text-caption text-success mb-0" v-if="expressDeliveryFee > 0">
+                            +{{ formatApiPrice({ price: expressDeliveryFee, currency_info: cart.items.currency_info }) }} extra
+                          </p>
+                        </div>
+                      </div>
+                    </v-card>
+
+                    <!-- Custom Delivery -->
+                    <v-card class="mb-3 delivery-option" 
+                      :class="{ 'selected-delivery': deliveryOption === 'custom' }" 
+                      elevation="0" 
+                      @click="deliveryOption = 'custom'">
+                      <div class="d-flex align-center pa-3">
+                        <v-avatar color="warning" size="32" class="mr-3">
+                          <v-icon color="white" size="small">mdi-calendar-clock</v-icon>
+                        </v-avatar>
+                        <div class="flex-grow-1">
+                          <div class="d-flex align-center">
+                            <span class="text-subtitle-2 font-weight-medium">Custom Date & Time</span>
+                            <v-spacer></v-spacer>
+                            <v-radio value="custom" hide-details color="primary"></v-radio>
+                          </div>
+                          <p class="text-caption text-grey-darken-1 mb-0">Choose your preferred delivery date and time</p>
+                        </div>
+                      </div>
+                    </v-card>
+                  </v-radio-group>
+
+                  <!-- Custom Date & Time Selection -->
+                  <div v-if="deliveryOption === 'custom'" class="custom-delivery-section">
+                    <v-divider class="mb-4"></v-divider>
+                    
+                    <div class="mb-4">
+                      <p class="text-subtitle-2 font-weight-medium mb-2">Preferred Delivery Date</p>
+                      <v-date-picker
+                        v-model="customDeliveryDate"
+                        :min="getMinDeliveryDate()"
+                        :max="getMaxDeliveryDate()"
+                        class="mb-2"
+                      ></v-date-picker>
+                    </div>
+
+                    <div class="mb-4">
+                      <p class="text-subtitle-2 font-weight-medium mb-2">Preferred Delivery Time</p>
+                      <v-select
+                        v-model="customDeliveryTime"
+                        :items="availableTimeSlots"
+                        item-title="label"
+                        item-value="value"
+                        label="Select time slot"
+                        variant="outlined"
+                        density="comfortable"
+                        :rules="[required]"
+                      ></v-select>
+                    </div>
+
+                    <v-alert
+                      v-if="customDeliveryFee > 0"
+                      type="info"
+                      variant="tonal"
+                      class="mb-4"
+                    >
+                      Custom delivery fee: {{ formatApiPrice({ price: customDeliveryFee, currency_info: cart.items.currency_info }) }}
+                    </v-alert>
                   </div>
                 </v-card-text>
               </v-card>
@@ -156,7 +252,7 @@
                         <p class="text-caption text-grey-darken-1 mb-0">
                           {{ item.variants.length }} variant(s) · {{ getTotalQuantity(item) }} items <br>
                           <span class="text-primary"><v-icon>mdi-truck-delivery</v-icon> {{
-                            item.delivery_info.estimated_delivery_display }}</span>
+                            getAdaptiveDeliveryDate(item) }}</span>
                         </p>
                       </div>
                       <div class="text-right">
@@ -181,7 +277,15 @@
                         cart.items.currency_info }) }}</span>
                   </div>
 
-                  <div class="d-flex justify-space-between mb-2">
+                  <!-- Show delivery fee based on selected option -->
+                  <div v-if="deliveryOption === 'express'" class="d-flex justify-space-between mb-2">
+                    <span class="text-body-2">Express Delivery Fee</span>
+                    <span class="text-body-2 text-success">{{ formatApiPrice({
+                      price: expressDeliveryFee, currency_info:
+                        cart.items.currency_info }) }}</span>
+                  </div>
+
+                  <div v-else class="d-flex justify-space-between mb-2">
                     <span class="text-body-2">Delivery Fee</span>
                     <span class="text-body-2">{{ formatApiPrice({
                       price: shippingFee, currency_info:
@@ -229,13 +333,13 @@
                     </div>
                   </div>
 
-                  <!-- <div class="d-flex align-center">
+                  <div class="d-flex align-center mb-3">
                     <v-icon color="primary" class="mr-2">mdi-truck-delivery</v-icon>
                     <div>
-                      <p class="text-subtitle-2 font-weight-medium mb-0">Delivery Information</p>
-                      <p class="text-caption text-grey-darken-1 mb-0">Standard Delivery (3-5 business days)</p>
+                      <p class="text-subtitle-2 font-weight-medium mb-0">Delivery Option</p>
+                      <p class="text-caption text-grey-darken-1 mb-0">{{ getDeliveryOptionDisplay() }}</p>
                     </div>
-                  </div> -->
+                  </div>
                 </v-card-text>
               </v-card>
 
@@ -374,8 +478,18 @@
                 </v-col>
 
                 <v-col cols="6">
-                  <v-text-field v-model="addressForm.country" label="Country*" variant="outlined" density="comfortable"
-                    :rules="[required]"></v-text-field>
+                  <v-select
+                    v-model="addressForm.country"
+                    :items="countries"
+                    item-title="name"
+                    item-value="name"
+                    label="Country*"
+                    variant="outlined"
+                    density="comfortable"
+                    :rules="[required]"
+                    :loading="loadingCountries"
+                    :disabled="loadingCountries"
+                  ></v-select>
                 </v-col>
               </v-row>
 
@@ -433,7 +547,7 @@
                 <p class="text-subtitle-2 font-weight-medium mb-1">{{ item.product_name }}</p>
                 <p class="text-caption text-grey-darken-1 mb-2">{{ item.seller_name || 'Unknown Seller' }}</p>
                 <p class="text-caption text-grey-darken-1 mb-2 text-primary">{{
-                  item.delivery_info.estimated_delivery_display
+                  getAdaptiveDeliveryDate(item)
                 }}</p>
 
                 <!-- Variants -->
@@ -502,8 +616,35 @@ const paymentMethod = ref('mobile_money')
 const processing = ref(false)
 const shippingFee = ref(0)
 
+// Delivery options
+const deliveryOption = ref('default')
+const customDeliveryDate = ref(null)
+const customDeliveryTime = ref(null)
+const expressDeliveryFee = ref(500) // 500 FCFA extra for express
+const customDeliveryFee = ref(300) // 300 FCFA extra for custom delivery
+
+// Computed property to ensure date is in correct format
+const formattedCustomDeliveryDate = computed(() => {
+  if (!customDeliveryDate.value) return null;
+  
+  // If it's already a string in YYYY-MM-DD format, return as is
+  if (typeof customDeliveryDate.value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(customDeliveryDate.value)) {
+    return customDeliveryDate.value;
+  }
+  
+  // If it's a Date object or other format, convert to YYYY-MM-DD
+  const date = new Date(customDeliveryDate.value);
+  if (!isNaN(date.getTime())) {
+    return date.toISOString().split('T')[0];
+  }
+  
+  return null;
+})
+
 // Address state
 const addresses = ref([])
+const countries = ref([])
+const loadingCountries = ref(false)
 const loading = ref(false)
 const addressLoading = ref(false)
 const editAddressIndex = ref(null)
@@ -540,7 +681,30 @@ const phoneRule = v => /^\+?[0-9\s-]{10,15}$/.test(v) || 'Please enter a valid p
 // Computed
 const totalAmount = computed(() => {
   const subtotal = cart.items.total_amount || 0
-  return subtotal + shippingFee.value
+  let deliveryFee = 0
+  
+  // Calculate delivery fee based on option
+  if (deliveryOption.value === 'express') {
+    // Express: only express fee (no base fee)
+    deliveryFee = expressDeliveryFee.value
+  } else if (deliveryOption.value === 'custom') {
+    // Custom: same as standard delivery
+    deliveryFee = shippingFee.value
+  } else {
+    // Default: standard delivery fee
+    deliveryFee = shippingFee.value
+  }
+  
+  return subtotal + deliveryFee
+})
+
+// Computed property for express delivery availability (reactive)
+const expressDeliveryAvailable = computed(() => {
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentTime = now.toLocaleTimeString();
+  const isAvailable = currentHour < 20; // Available only before 8 PM
+  return isAvailable;
 })
 
 const selectedAddress = computed(() => {
@@ -599,33 +763,31 @@ const averageDeliveryTime = computed(() => {
 
   // Extract delivery times from each item
   groupedCartItems.value.forEach(item => {
-    if (item.delivery_info && item.delivery_info.estimated_delivery_display) {
-      const deliveryText = item.delivery_info.estimated_delivery_display;
+    const deliveryText = getAdaptiveDeliveryDate(item);
 
-      // Try to extract delivery time range (e.g., "3-5" from "3-5 business days")
-      const rangeMatch = deliveryText.match(/(\d+)-(\d+)/);
-      if (rangeMatch) {
-        // For ranges, use the maximum value for worst-case calculation
-        const maxDays = parseInt(rangeMatch[2]);
+    // Try to extract delivery time range (e.g., "3-5" from "3-5 business days")
+    const rangeMatch = deliveryText.match(/(\d+)-(\d+)/);
+    if (rangeMatch) {
+      // For ranges, use the maximum value for worst-case calculation
+      const maxDays = parseInt(rangeMatch[2]);
 
-        if (!isNaN(maxDays)) {
-          totalDays += maxDays;
+      if (!isNaN(maxDays)) {
+        totalDays += maxDays;
+        itemCount++;
+        // Update farthest delivery date if this is longer
+        farthestDays = Math.max(farthestDays, maxDays);
+      }
+    } else {
+      // Try to find a single number (e.g., "3 business days")
+      const singleMatch = deliveryText.match(/(\d+)/);
+      if (singleMatch) {
+        const days = parseInt(singleMatch[1]);
+
+        if (!isNaN(days)) {
+          totalDays += days;
           itemCount++;
           // Update farthest delivery date if this is longer
-          farthestDays = Math.max(farthestDays, maxDays);
-        }
-      } else {
-        // Try to find a single number (e.g., "3 business days")
-        const singleMatch = deliveryText.match(/(\d+)/);
-        if (singleMatch) {
-          const days = parseInt(singleMatch[1]);
-
-          if (!isNaN(days)) {
-            totalDays += days;
-            itemCount++;
-            // Update farthest delivery date if this is longer
-            farthestDays = Math.max(farthestDays, days);
-          }
+          farthestDays = Math.max(farthestDays, days);
         }
       }
     }
@@ -667,13 +829,24 @@ onMounted(async () => {
     showError('Failed to load cart data')
   }
 
-  await fetchAddresses()
+  await Promise.all([
+    fetchAddresses(),
+    fetchCountries()
+  ])
 
   // Set default selected address
   if (Array.isArray(addresses.value) && addresses.value.length > 0) {
     // First look for default address
     const defaultIndex = addresses.value.findIndex(addr => addr.default)
     selectedAddressIndex.value = defaultIndex >= 0 ? defaultIndex : 0
+  }
+
+  // Initialize delivery fee for default option
+  await calculateDeliveryFee('default');
+  
+  // Ensure express delivery is not selected if it's not available
+  if (deliveryOption.value === 'express' && !expressDeliveryAvailable.value) {
+    deliveryOption.value = 'default';
   }
 })
 
@@ -695,6 +868,20 @@ const fetchAddresses = async () => {
     console.error('Error fetching addresses:', error)
     addresses.value = [] // Ensure addresses is an empty array in case of error
   } finally { loading.value = false }
+}
+
+// Fetch countries from API
+const fetchCountries = async () => {
+  loadingCountries.value = true
+  try {
+    const response = await apiService.getCountries()
+    countries.value = response.data.results || response.data || []
+  } catch (error) {
+    console.error('Failed to fetch countries:', error)
+    showError('Failed to load countries')
+  } finally {
+    loadingCountries.value = false
+  }
 }
 
 // Select address
@@ -829,6 +1016,16 @@ const placeOrder = async () => {
     return
   }
 
+  // Validate custom delivery option
+  if (deliveryOption.value === 'custom') {
+    if (!customDeliveryDate.value || !customDeliveryTime.value) {
+      showError('Please select both delivery date and time for custom delivery')
+      return
+    }
+  }
+
+
+
   processing.value = true
 
   try {
@@ -847,12 +1044,21 @@ const placeOrder = async () => {
       shipping_address: `${selectedAddress.value.address_line1}, ${selectedAddress.value.city}, ${selectedAddress.value.state} ${selectedAddress.value.postal_code}, ${selectedAddress.value.country}`,
       total_amount: totalAmount.value,
       notes: `Payment method: ${paymentMethod.value}`,
+      // Include delivery information
+      delivery_option: deliveryOption.value,
+      delivery_fee: deliveryOption.value === 'express' ? expressDeliveryFee.value : shippingFee.value,
       // Include payment data for processing
       payment_data: {
         payment_method: paymentMethod.value,
         phone_number: selectedAddress.value.phone || '',
         currency: 'XOF'
       }
+    }
+
+    // Add custom delivery details if applicable
+    if (deliveryOption.value === 'custom' && formattedCustomDeliveryDate.value && customDeliveryTime.value) {
+      orderData.custom_delivery_date = formattedCustomDeliveryDate.value;
+      orderData.custom_delivery_time = customDeliveryTime.value;
     }
 
     // Call order creation API
@@ -1033,8 +1239,7 @@ const getDeliveryDateRange = () => {
 
   // Extract delivery times from each item
   groupedCartItems.value.forEach(item => {
-    if (item.delivery_info && item.delivery_info.estimated_delivery_display) {
-      const deliveryText = item.delivery_info.estimated_delivery_display;
+    const deliveryText = getAdaptiveDeliveryDate(item);
 
       // Try to extract delivery time range (e.g., "3-5" from "3-5 business days")
       const rangeMatch = deliveryText.match(/(\d+)-(\d+)/);
@@ -1059,7 +1264,6 @@ const getDeliveryDateRange = () => {
           }
         }
       }
-    }
   });
 
   if (itemCount === 0) {
@@ -1103,6 +1307,164 @@ const addBusinessDays = (date, days) => {
 
   return result;
 };
+
+// Delivery option functions
+const getDefaultDeliveryTime = () => {
+  return getDeliveryDateRange() || '3-5 business days';
+};
+
+const getExpressDeliveryTime = () => {
+  const now = new Date();
+  const currentHour = now.getHours();
+  
+  if (currentHour >= 20) { // After 8 PM
+    // Can only deliver next day
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const options = { weekday: 'short', month: 'short', day: 'numeric' };
+    return `Next day delivery (${tomorrow.toLocaleDateString('en-US', options)})`;
+  } else {
+    // Can deliver same day if ordered before 8 PM
+    const options = { weekday: 'short', month: 'short', day: 'numeric' };
+    return `Same day delivery (${now.toLocaleDateString('en-US', options)})`;
+  }
+};
+
+
+
+const getMinDeliveryDate = () => {
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow.toISOString().split('T')[0];
+};
+
+const getMaxDeliveryDate = () => {
+  const now = new Date();
+  const maxDate = new Date(now);
+  maxDate.setDate(maxDate.getDate() + 30); // Allow up to 30 days in the future
+  return maxDate.toISOString().split('T')[0];
+};
+
+const availableTimeSlots = [
+  { label: 'Morning (8:00 AM - 12:00 PM)', value: 'morning' },
+  { label: 'Afternoon (12:00 PM - 4:00 PM)', value: 'afternoon' },
+  { label: 'Evening (4:00 PM - 8:00 PM)', value: 'evening' },
+];
+
+const getDeliveryOptionDisplay = () => {
+  switch (deliveryOption.value) {
+    case 'default':
+      return `Standard Delivery - ${getDefaultDeliveryTime()}`;
+    case 'express':
+      return `Express Delivery - ${getExpressDeliveryTime()}`;
+    case 'custom':
+      if (customDeliveryDate.value && customDeliveryTime.value) {
+        const date = new Date(customDeliveryDate.value);
+        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+        const timeSlot = availableTimeSlots.find(slot => slot.value === customDeliveryTime.value);
+        return `Custom Delivery - ${date.toLocaleDateString('en-US', options)} ${timeSlot?.label || ''}`;
+      }
+      return 'Custom Delivery - Date and time to be selected';
+    default:
+      return 'Standard Delivery';
+  }
+};
+
+// Function to get adaptive delivery date for each product based on selected delivery option
+const getAdaptiveDeliveryDate = (item) => {
+  switch (deliveryOption.value) {
+    case 'default':
+      // Show default delivery date of the product
+      return item.delivery_info?.estimated_delivery_display || 'Standard Delivery';
+      
+    case 'express':
+      // Show current date for express delivery
+      const now = new Date();
+      const currentHour = now.getHours();
+      
+      if (currentHour >= 20) { // After 8 PM
+        // Can only deliver next day
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+        return `Express Delivery - ${tomorrow.toLocaleDateString('en-US', options)}`;
+      } else {
+        // Can deliver same day if ordered before 8 PM
+        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+        return `Express Delivery - ${now.toLocaleDateString('en-US', options)}`;
+      }
+      
+    case 'custom':
+      // Show selected date and time for custom delivery
+      if (customDeliveryDate.value && customDeliveryTime.value) {
+        const date = new Date(customDeliveryDate.value);
+        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+        const timeSlot = availableTimeSlots.find(slot => slot.value === customDeliveryTime.value);
+        return `Custom Delivery - ${date.toLocaleDateString('en-US', options)} ${timeSlot?.label || ''}`;
+      }
+      return 'Custom Delivery - Date and time to be selected';
+      
+    default:
+      return item.delivery_info?.estimated_delivery_display || 'Standard Delivery';
+  }
+};
+
+// Initialize custom delivery date to tomorrow if not set
+const initializeCustomDeliveryDate = () => {
+  if (!customDeliveryDate.value) {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    customDeliveryDate.value = tomorrow.toISOString().split('T')[0];
+  }
+};
+
+// Function to calculate delivery fee based on option
+const calculateDeliveryFee = async (option) => {
+  try {
+    // Default distance - in a real app, this would be calculated based on seller/customer location
+    const defaultDistance = 5.0; // 5km default
+    
+    const response = await apiService.calculateDeliveryFee(defaultDistance, option);
+    
+    if (response.data) {
+      // Update fees based on API response
+      shippingFee.value = response.data.base_fee || 0;
+      expressDeliveryFee.value = response.data.express_fee || 0;
+      customDeliveryFee.value = response.data.custom_fee || 0;
+    }
+  } catch (error) {
+    console.error('Error calculating delivery fee:', error);
+    // Fallback to default values if API fails
+    shippingFee.value = 0;
+    expressDeliveryFee.value = 0;
+    customDeliveryFee.value = 0;
+  }
+};
+
+// Watch delivery option changes
+watch(deliveryOption, async (newOption) => {
+  if (newOption === 'custom') {
+    initializeCustomDeliveryDate();
+  }
+  
+  // If express delivery is selected but not available, switch to default
+  if (newOption === 'express' && !expressDeliveryAvailable.value) {
+    deliveryOption.value = 'default';
+    return;
+  }
+  
+  // Calculate delivery fee for the selected option
+  await calculateDeliveryFee(newOption);
+});
+
+// Watch for express delivery availability changes
+watch(expressDeliveryAvailable, (isAvailable) => {
+  // If express delivery becomes unavailable and it's currently selected, switch to default
+  if (!isAvailable && deliveryOption.value === 'express') {
+    deliveryOption.value = 'default';
+  }
+});
 </script>
 
 <style scoped>
@@ -1152,6 +1514,32 @@ const addBusinessDays = (date, days) => {
 .selected-payment {
   border: 2px solid #7C3AED;
   background-color: #FFFDE7;
+}
+
+.delivery-option {
+  cursor: pointer;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.delivery-option:hover {
+  border-color: #7C3AED;
+}
+
+.selected-delivery {
+  border: 2px solid #7C3AED;
+  background-color: #FFFDE7;
+}
+
+
+
+.custom-delivery-section {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
 }
 
 @media (max-width: 600px) {

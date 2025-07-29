@@ -583,6 +583,10 @@ const canTrackOrder = (status) => {
     return ['processing', 'ready_for_pickup', 'picked_up'].includes(status)
 }
 
+const canCancelOrder = (status) => {
+  return ['pending', 'ready_to_pickup'].includes(status)
+}
+
 const formatDate = (dateString) => {
     if (!dateString) return ''
     const date = new Date(dateString)

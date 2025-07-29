@@ -150,7 +150,7 @@
             </v-card>
 
             <!-- Delivery Information -->
-            <v-card v-if="order.shipping_address || order.expected_delivery_time" class="mb-6" elevation="1">
+            <v-card v-if="order.shipping_address || order.expected_delivery_date || order.expected_delivery_time" class="mb-6" elevation="1">
               <v-card-title class="d-flex align-center">
                 <v-icon class="me-2">mdi-truck-delivery</v-icon>
                 Delivery Information
@@ -164,11 +164,69 @@
                     <p class="text-body-2">{{ order.shipping_address }}</p>
                   </v-col>
 
-                  <v-col v-if="order.expected_delivery_time" cols="12" md="6">
+                  <v-col v-if="order.expected_delivery_date || order.expected_delivery_time" cols="12" md="6">
                     <h4 class="text-subtitle-1 font-weight-medium mb-2">
                       Expected Delivery
                     </h4>
-                    <p class="text-body-2">{{ formatDate(order.expected_delivery_time) }}</p>
+                    <div v-if="order.expected_delivery_date" class="mb-2">
+                      <p class="text-body-2">
+                        <strong>Date:</strong> {{ formatDate(order.expected_delivery_date) }}
+                      </p>
+                    </div>
+                    <div v-if="order.expected_delivery_time" class="mb-2">
+                      <p class="text-body-2">
+                        <strong>Time:</strong> {{ formatDeliveryTime(order.expected_delivery_time) }}
+                      </p>
+                    </div>
+                  </v-col>
+                </v-row>
+
+                <!-- Delivery Option Information -->
+                <v-row v-if="order.delivery_option" class="mt-4">
+                  <v-col cols="12">
+                    <h4 class="text-subtitle-1 font-weight-medium mb-2">
+                      Delivery Option
+                    </h4>
+                    <div class="d-flex align-center gap-3">
+                      <v-chip 
+                        :color="getDeliveryOptionColor(order.delivery_option)" 
+                        variant="tonal" 
+                        size="small"
+                      >
+                        <v-icon start :icon="getDeliveryOptionIcon(order.delivery_option)"></v-icon>
+                        {{ getDeliveryOptionDisplay(order.delivery_option) }}
+                      </v-chip>
+                      <v-chip 
+                        v-if="order.express_delivery" 
+                        color="warning" 
+                        variant="tonal" 
+                        size="small"
+                      >
+                        <v-icon start>mdi-flash</v-icon>
+                        Express Delivery
+                      </v-chip>
+                    </div>
+                  </v-col>
+                </v-row>
+
+                <!-- Custom Delivery Details -->
+                <v-row v-if="order.delivery_option === 'custom' && (order.custom_delivery_date || order.custom_delivery_time)" class="mt-4">
+                  <v-col cols="12">
+                    <h4 class="text-subtitle-1 font-weight-medium mb-2">
+                      Custom Delivery Details
+                    </h4>
+                    <div class="d-flex gap-4">
+                      <div v-if="order.custom_delivery_date">
+                        <p class="text-body-2">
+                          <strong>Requested Date:</strong> {{ formatDate(order.custom_delivery_date) }}
+                        </p>
+                      </div>
+                      <div v-if="order.custom_delivery_time">
+                        <p class="text-body-2">
+                          <strong>Requested Time:</strong> {{ formatDeliveryTime(order.custom_delivery_time) }}
+                        </p>
+                      </div>
+                    </div>
                   </v-col>
                 </v-row>
 
@@ -460,7 +518,7 @@ const calculateSubtotal = () => {
 }
 
 const canCancelOrder = (status) => {
-  return ['pending', 'processing'].includes(status)
+  return ['pending', 'ready_to_pickup'].includes(status)
 }
 
 const canReorder = (status) => {
@@ -588,6 +646,43 @@ const getDefaultStatusNote = (status) => {
     delivered: 'Order has been successfully delivered'
   }
   return notes[status] || ''
+}
+
+// Delivery option helper functions
+const formatDeliveryTime = (timeSlot) => {
+  const timeMap = {
+    'morning': 'Morning (8:00 AM - 12:00 PM)',
+    'afternoon': 'Afternoon (12:00 PM - 4:00 PM)',
+    'evening': 'Evening (4:00 PM - 8:00 PM)'
+  }
+  return timeMap[timeSlot] || timeSlot
+}
+
+const getDeliveryOptionDisplay = (option) => {
+  const options = {
+    'default': 'Standard Delivery',
+    'express': 'Express Delivery',
+    'custom': 'Custom Date & Time'
+  }
+  return options[option] || option
+}
+
+const getDeliveryOptionColor = (option) => {
+  const colors = {
+    'default': 'primary',
+    'express': 'warning',
+    'custom': 'info'
+  }
+  return colors[option] || 'grey'
+}
+
+const getDeliveryOptionIcon = (option) => {
+  const icons = {
+    'default': 'mdi-truck-delivery',
+    'express': 'mdi-flash',
+    'custom': 'mdi-calendar-clock'
+  }
+  return icons[option] || 'mdi-truck-delivery'
 }
 
 // Confirmation methods for on_hold orders

@@ -181,6 +181,13 @@ export const apiService = {
   createOrderFromCart(orderData) {
     return api.post('/orders/orders/create_from_cart/', orderData)
   },
+
+  calculateDeliveryFee(distanceKm, deliveryOption) {
+    return api.post('/orders/orders/calculate_delivery_fee/', {
+      distance_km: distanceKm,
+      delivery_option: deliveryOption
+    })
+  },
   
   searchOrders(params = {}) {
     return api.get('/orders/orders/search/', { params })
@@ -195,7 +202,10 @@ export const apiService = {
   },
   
   cancelOrder(orderId, data) {
-    return api.post(`/orders/orders/${orderId}/cancel/`, data)
+    return api.post(`/orders/orders/${orderId}/update_status/`, {
+      status: 'cancelled',
+      notes: data.reason || 'Order cancelled by customer'
+    })
   },
   
   updateOrderStatus(orderId, data) {
