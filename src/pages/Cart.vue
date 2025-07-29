@@ -1,18 +1,22 @@
 <template>
-  <div class="cart-page">
-    <v-container>
-      <!-- Updated header with centered title and icons -->
-      <div class="d-flex align-center justify-space-between mb-6">
-        <v-btn icon variant="text" @click="$router.push({ name: 'Home' })">
-          <v-icon>mdi-arrow-left</v-icon>
-        </v-btn>
+  <div class="min-h-screen bg-gray-50 pb-20">
+    <div class="px-4 pt-4">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
+        <button class="btn-icon" @click="$router.push({ name: 'Home' })">
+          <ArrowLeft class="w-6 h-6" />
+        </button>
 
-        <h1 class="text-h5 font-weight-bold text-center">Cart Items</h1>
+        <h1 class="text-xl font-bold text-gray-900">Cart Items</h1>
 
-        <v-btn icon variant="text" @click="confirmClearCart" v-if="cart.items.items && cart.items.items.length > 0">
-          <v-icon>mdi-trash-can-outline</v-icon>
-        </v-btn>
-        <div v-else style="width: 40px"></div> <!-- Spacer to maintain layout when cart is empty -->
+        <button 
+          v-if="cart.items.items && cart.items.items.length > 0"
+          class="btn-icon" 
+          @click="confirmClearCart"
+        >
+          <Trash2 class="w-6 h-6" />
+        </button>
+        <div v-else class="w-10"></div> <!-- Spacer to maintain layout when cart is empty -->
       </div>
 
       <v-row v-if="cart.items.items && cart.items.items.length > 0">

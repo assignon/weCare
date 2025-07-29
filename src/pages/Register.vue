@@ -1,88 +1,210 @@
 <template>
-  <div class="auth-page">
-    <div class="auth-container">
-      <!-- <div class="auth-illustration">
-        <img src="/src/assets/images/register-illustration.svg" alt="Register illustration" />
-      </div> -->
+  <div class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Register</h1>
+        <p class="text-gray-600 mb-6">Please register to login.</p>
 
-      <div class="auth-content">
-        <h1 class="auth-title">Register</h1>
-        <p class="auth-subtitle">Please register to login.</p>
-
-        <v-form ref="form" v-model="isFormValid" @submit.prevent="onRegister" class="w-100">
-          <v-alert v-if="authStore.error" type="error" class="mb-4" variant="tonal" density="compact" closable>
-            {{ authStore.error }}
-          </v-alert>
-
-          <div class="input-field">
-            <v-text-field v-model="formData.email" label="Email"
-              :rules="[v => !!v || 'Email is required', v => /.+@.+\..+/.test(v) || 'Email must be valid']"
-              variant="outlined" autocomplete="email" prepend-inner-icon="mdi-email" hide-details="auto"
-              width="100%"></v-text-field>
+        <form @submit.prevent="onRegister" class="space-y-4">
+          <!-- Error Message -->
+          <div v-if="authStore.error" class="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center justify-between">
+            <div class="flex items-center">
+              <AlertCircle class="w-5 h-5 text-red-500 mr-2" />
+              <span class="text-red-800 text-sm">{{ authStore.error }}</span>
+            </div>
+            <button @click="authStore.clearError()" type="button" class="text-red-500 hover:text-red-700">
+              <X class="w-4 h-4" />
+            </button>
           </div>
 
-          <div class="input-field">
-            <v-text-field v-model="formData.mobile" label="Mobile Number"
-              :rules="[v => !!v || 'Mobile number is required']" variant="outlined" autocomplete="tel"
-              prepend-inner-icon="mdi-cellphone" hide-details="auto" width="100%"></v-text-field>
-          </div>
-          <div class="input-field">
-            <v-text-field v-model="formData.password" label="Password" :rules="passwordRules"
-              :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-              @click:append-inner="showPassword = !showPassword" variant="outlined" autocomplete="new-password"
-              prepend-inner-icon="mdi-lock" hide-details="auto" width="100%"></v-text-field>
-          </div>
-          <div class="input-field">
-            <v-text-field v-model="formData.password_confirm" label="Confirm Password" :rules="confirmPasswordRules"
-              :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-              @click:append-inner="showPassword = !showPassword" variant="outlined" autocomplete="new-password"
-              prepend-inner-icon="mdi-lock" hide-details="auto" width="100%"></v-text-field>
-          </div>
-
-          <div class="input-field">
-            <v-select v-model="formData.country" :items="countries" item-title="name" item-value="id" label="Country"
-              :rules="[v => !!v || 'Country is required']" variant="outlined" prepend-inner-icon="mdi-earth"
-              hide-details="auto" width="100%" :loading="loadingCountries" :disabled="loadingCountries"></v-select>
+          <!-- Email Field -->
+          <div>
+            <label class="form-label">Email</label>
+            <div class="relative">
+              <Mail class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                v-model="formData.email"
+                type="email"
+                autocomplete="email"
+                :class="[
+                  'input-field pl-10',
+                  emailError ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''
+                ]"
+                placeholder="Enter your email"
+                @blur="validateEmail"
+              />
+            </div>
+            <p v-if="emailError" class="text-red-500 text-xs mt-1">{{ emailError }}</p>
           </div>
 
-          <div class="input-field">
-            <v-select v-model="formData.default_language" :items="languages" item-title="name" item-value="id"
-              label="Preferred Language" variant="outlined" prepend-inner-icon="mdi-translate" hide-details="auto"
-              width="100%" :loading="loadingLanguages" :disabled="loadingLanguages"></v-select>
+          <!-- Mobile Field -->
+          <div>
+            <label class="form-label">Mobile Number</label>
+            <div class="relative">
+              <Phone class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                v-model="formData.mobile"
+                type="tel"
+                autocomplete="tel"
+                :class="[
+                  'input-field pl-10',
+                  mobileError ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''
+                ]"
+                placeholder="Enter your mobile number"
+                @blur="validateMobile"
+              />
+            </div>
+            <p v-if="mobileError" class="text-red-500 text-xs mt-1">{{ mobileError }}</p>
           </div>
 
-          <v-btn block color="#1a2233" type="submit" :loading="authStore.loading" :disabled="!isFormValid"
-            class="auth-btn">
+          <!-- Password Field -->
+          <div>
+            <label class="form-label">Password</label>
+            <div class="relative">
+              <Lock class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                v-model="formData.password"
+                :type="showPassword ? 'text' : 'password'"
+                autocomplete="new-password"
+                :class="[
+                  'input-field pl-10 pr-10',
+                  passwordError ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''
+                ]"
+                placeholder="Enter your password"
+                @blur="validatePassword"
+              />
+              <button
+                type="button"
+                @click="showPassword = !showPassword"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <Eye v-if="!showPassword" class="w-5 h-5" />
+                <EyeOff v-else class="w-5 h-5" />
+              </button>
+            </div>
+            <p v-if="passwordError" class="text-red-500 text-xs mt-1">{{ passwordError }}</p>
+          </div>
+
+          <!-- Confirm Password Field -->
+          <div>
+            <label class="form-label">Confirm Password</label>
+            <div class="relative">
+              <Lock class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                v-model="formData.password_confirm"
+                :type="showPassword ? 'text' : 'password'"
+                autocomplete="new-password"
+                :class="[
+                  'input-field pl-10 pr-10',
+                  confirmPasswordError ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''
+                ]"
+                placeholder="Confirm your password"
+                @blur="validateConfirmPassword"
+              />
+              <button
+                type="button"
+                @click="showPassword = !showPassword"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <Eye v-if="!showPassword" class="w-5 h-5" />
+                <EyeOff v-else class="w-5 h-5" />
+              </button>
+            </div>
+            <p v-if="confirmPasswordError" class="text-red-500 text-xs mt-1">{{ confirmPasswordError }}</p>
+          </div>
+
+          <!-- Country Field -->
+          <div>
+            <label class="form-label">Country</label>
+            <div class="relative">
+              <Globe class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <select
+                v-model="formData.country"
+                :class="[
+                  'input-field pl-10',
+                  countryError ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''
+                ]"
+                :disabled="loadingCountries"
+                @blur="validateCountry"
+              >
+                <option value="">Select a country</option>
+                <option v-for="country in countries" :key="country.id" :value="country.id">
+                  {{ country.name }}
+                </option>
+              </select>
+              <div v-if="loadingCountries" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div class="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin"></div>
+              </div>
+            </div>
+            <p v-if="countryError" class="text-red-500 text-xs mt-1">{{ countryError }}</p>
+          </div>
+
+          <!-- Language Field -->
+          <div>
+            <label class="form-label">Preferred Language</label>
+            <div class="relative">
+              <Languages class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <select
+                v-model="formData.default_language"
+                class="input-field pl-10"
+                :disabled="loadingLanguages"
+              >
+                <option value="">Select a language</option>
+                <option v-for="language in languages" :key="language.id" :value="language.id">
+                  {{ language.name }}
+                </option>
+              </select>
+              <div v-if="loadingLanguages" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div class="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            :disabled="!isFormValid || authStore.loading"
+            class="btn-primary w-full py-3 text-base flex items-center justify-center"
+          >
+            <div v-if="authStore.loading" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
             Sign Up
-          </v-btn>
+          </button>
 
-          <div class="text-center auth-link">
-            Already have account? <router-link :to="{ name: 'Login' }">Sign In</router-link>
+          <!-- Sign In Link -->
+          <div class="text-center text-gray-600 text-sm">
+            Already have account? 
+            <router-link :to="{ name: 'Login' }" class="text-primary font-medium hover:underline ml-1">
+              Sign In
+            </router-link>
           </div>
-        </v-form>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { apiService } from '@/services/api'
+import { AlertCircle, X, Mail, Phone, Lock, Eye, EyeOff, Globe, Languages } from 'lucide-vue-next'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
-const form = ref(null)
-const isFormValid = ref(false)
 const showPassword = ref(false)
 const languages = ref([])
 const loadingLanguages = ref(false)
 const countries = ref([])
 const loadingCountries = ref(false)
 
-// Remove beauty profile handling since goals will be set after registration
+// Form validation errors
+const emailError = ref('')
+const mobileError = ref('')
+const passwordError = ref('')
+const confirmPasswordError = ref('')
+const countryError = ref('')
 
 const formData = ref({
   email: '',
@@ -95,18 +217,77 @@ const formData = ref({
   default_language: null
 })
 
-const passwordRules = [
-  v => !!v || 'Password is required',
-  v => v.length >= 8 || 'Password must be at least 8 characters',
-  v => /[A-Z]/.test(v) || 'Password must contain at least one uppercase letter',
-  v => /[a-z]/.test(v) || 'Password must contain at least one lowercase letter',
-  v => /[0-9]/.test(v) || 'Password must contain at least one number'
-]
+// Validation functions
+const validateEmail = () => {
+  if (!formData.value.email) {
+    emailError.value = 'Email is required'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)) {
+    emailError.value = 'Email must be valid'
+  } else {
+    emailError.value = ''
+  }
+}
 
-const confirmPasswordRules = [
-  v => !!v || 'Confirm password is required',
-  v => v === formData.value.password || 'Passwords must match'
-]
+const validateMobile = () => {
+  if (!formData.value.mobile) {
+    mobileError.value = 'Mobile number is required'
+  } else {
+    mobileError.value = ''
+  }
+}
+
+const validatePassword = () => {
+  const password = formData.value.password
+  if (!password) {
+    passwordError.value = 'Password is required'
+  } else if (password.length < 8) {
+    passwordError.value = 'Password must be at least 8 characters'
+  } else if (!/[A-Z]/.test(password)) {
+    passwordError.value = 'Password must contain at least one uppercase letter'
+  } else if (!/[a-z]/.test(password)) {
+    passwordError.value = 'Password must contain at least one lowercase letter'
+  } else if (!/[0-9]/.test(password)) {
+    passwordError.value = 'Password must contain at least one number'
+  } else {
+    passwordError.value = ''
+  }
+  // Re-validate confirm password if it has a value
+  if (formData.value.password_confirm) {
+    validateConfirmPassword()
+  }
+}
+
+const validateConfirmPassword = () => {
+  if (!formData.value.password_confirm) {
+    confirmPasswordError.value = 'Confirm password is required'
+  } else if (formData.value.password_confirm !== formData.value.password) {
+    confirmPasswordError.value = 'Passwords must match'
+  } else {
+    confirmPasswordError.value = ''
+  }
+}
+
+const validateCountry = () => {
+  if (!formData.value.country) {
+    countryError.value = 'Country is required'
+  } else {
+    countryError.value = ''
+  }
+}
+
+const isFormValid = computed(() => {
+  return formData.value.email && 
+         formData.value.mobile && 
+         formData.value.password && 
+         formData.value.password_confirm && 
+         formData.value.country &&
+         !emailError.value && 
+         !mobileError.value && 
+         !passwordError.value && 
+         !confirmPasswordError.value && 
+         !countryError.value &&
+         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)
+})
 
 // Fetch available countries
 const fetchCountries = async () => {
@@ -145,6 +326,13 @@ const fetchLanguages = async () => {
 }
 
 const onRegister = async () => {
+  // Validate all fields before submitting
+  validateEmail()
+  validateMobile()
+  validatePassword()
+  validateConfirmPassword()
+  validateCountry()
+  
   if (!isFormValid.value) return
 
   // Prepare registration data with phone_number field name
@@ -178,150 +366,5 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.auth-page {
-  width: 100%;
-  min-height: 100vh;
-  background: #f5f7fb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-
-.auth-container {
-  width: 100%;
-}
-
-/* .auth-illustration {
-  width: 100%;
-  background-color: #f0f2f8;
-  display: flex;
-  justify-content: center;
-  padding: 30px 0;
-}
-
-.auth-illustration img {
-  height: 180px;
-  width: auto;
-  max-width: 100%;
-} */
-
-.auth-content {
-  padding: 24px;
-  width: 100%;
-  /* box-sizing: border-box; */
-}
-
-.auth-title {
-  font-size: 35px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: #1a2233;
-  width: 100%;
-}
-
-.auth-subtitle {
-  font-size: 16px;
-  color: #707a8a;
-  margin-bottom: 28px;
-  width: 100%;
-}
-
-.input-field {
-  margin-bottom: 12px;
-  width: 100%;
-}
-
-/* .auth-input {
-  width: 100%;
-}
-
-.auth-input :deep(.v-field__outline) {
-  border-color: #e0e4ec;
-}
-
-.auth-input :deep(.v-field--focused .v-field__outline) {
-  border-color: #1a2233;
-} */
-
-/* .auth-input :deep(.v-field__input) {
-  width: 100%;
-} */
-
-.remember-me {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 20px;
-  width: 100%;
-}
-
-/* .remember-switch :deep(.v-label) {
-  font-size: 14px;
-  color: #707a8a;
-  opacity: 1;
-} */
-
-.auth-btn {
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 16px;
-  min-height: 48px;
-  text-transform: none;
-  margin-bottom: 16px;
-  box-shadow: none;
-  width: 100%;
-}
-
-.auth-link {
-  margin-top: 16px;
-  color: #707a8a;
-  font-size: 15px;
-  width: 100%;
-}
-
-.auth-link a {
-  /* color: #1a2233; */
-  color: var(--primary-color);
-  font-weight: 600;
-  margin-left: 4px;
-  text-decoration: none;
-}
-
-/* Media queries for better responsiveness */
-@media screen and (max-width: 600px) {
-  .auth-container {
-    max-width: 100%;
-  }
-
-  .auth-content {
-    padding: 20px 16px;
-  }
-
-  .auth-title {
-    font-size: 35px;
-  }
-
-  .auth-subtitle {
-    font-size: 17px;
-  }
-}
-
-/* For very small screens */
-@media screen and (max-width: 320px) {
-  .auth-page {
-    padding: 8px;
-  }
-
-  .auth-illustration {
-    padding: 20px 0;
-  }
-
-  .auth-illustration img {
-    height: 140px;
-  }
-}
-
-.w-100 {
-  width: 100%;
-}
+/* Component-specific styles if needed */
 </style>

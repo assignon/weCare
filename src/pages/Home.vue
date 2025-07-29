@@ -1,221 +1,301 @@
 <template>
-  <div class="home-page">
-    <v-container class="pa-4 pb-24">
+  <div class="min-h-screen bg-gray-50 pb-20">
+    <div class="px-4 pt-4">
       <!-- Header -->
-      <div class="d-flex align-center justify-space-between mb-5">
-        <h1 class="text-h5 font-weight-bold">weCare</h1>
-        <div class="d-flex">
-          <v-btn icon class="" variant="text" @click="navigateToNotification">
-            <v-badge v-if="notification.hasUnreadNotifications" :content="notification.unreadCount" color="error"
-              offset-x="1" offset-y="1">
-              <v-icon>mdi-bell-outline</v-icon>
-            </v-badge>
-            <v-icon v-else>mdi-bell-outline</v-icon>
-          </v-btn>
-          <v-btn icon class="" variant="text" @click="navigateToProfile">
-            <v-avatar size="32" v-if="auth.user?.profile_picture">
-              <v-img :src="auth.user.profile_picture" alt="Profile" />
-            </v-avatar>
-            <v-icon v-else>mdi-account-circle-outline</v-icon>
-          </v-btn>
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">weCare</h1>
+        <div class="flex items-center space-x-2">
+          <button class="btn-icon relative" @click="navigateToNotification">
+            <Bell class="w-6 h-6" />
+            <span
+              v-if="notification.hasUnreadNotifications"
+              class="absolute -top-1 -right-1 bg-error text-white text-xs rounded-full w-5 h-5 flex items-center justify-center min-w-0"
+            >
+              {{ notification.unreadCount }}
+            </span>
+          </button>
+          <button class="btn-icon" @click="navigateToProfile">
+            <img
+              v-if="auth.user?.profile_picture"
+              :src="auth.user.profile_picture"
+              alt="Profile"
+              class="w-8 h-8 rounded-full object-cover"
+            />
+            <User v-else class="w-6 h-6" />
+          </button>
         </div>
       </div>
 
       <!-- Popular Products Section -->
-      <div v-if="productStore.popularProducts.length > 0" class="section mb-6">
-        <div class="d-flex justify-space-between align-center mb-3">
-          <h2 class="section-title font-weight-bold">Popular Product</h2>
+      <div v-if="productStore.popularProducts.length > 0" class="mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-gray-900">Popular Product</h2>
         </div>
 
         <!-- Loading state -->
-        <div v-if="loading" class="d-flex justify-center my-4">
-          <v-progress-circular indeterminate color="primary" />
+        <div v-if="loading" class="flex justify-center my-8">
+          <div
+            class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"
+          ></div>
         </div>
 
         <!-- Error state -->
-        <v-alert v-else-if="error" type="error" class="mb-4">{{ error }}</v-alert>
+        <div
+          v-else-if="error"
+          class="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center mb-4"
+        >
+          <AlertCircle class="w-5 h-5 text-red-500 mr-2" />
+          <span class="text-red-800 text-sm">{{ error }}</span>
+        </div>
 
         <!-- Popular products with horizontal scroll -->
-        <div v-else class="horizontal-scroll-container">
-          <div class="horizontal-scroll-content">
-            <v-card v-for="product in productStore.popularProducts.slice(0, 10)" :key="product.id"
-              class="product-card-horizontal" flat @click="navigateToDetails(product.id)">
-              <v-img :src="product.main_image || packagingImage" height="150" class="mb-2" cover></v-img>
+        <div v-else class="overflow-x-auto">
+          <div class="flex space-x-4 pb-2">
+            <div
+              v-for="product in productStore.popularProducts.slice(0, 10)"
+              :key="product.id"
+              class="card flex-shrink-0 w-40 cursor-pointer hover:shadow-md transition-shadow"
+              @click="navigateToDetails(product.id)"
+            >
+              <img
+                :src="product.main_image || packagingImage"
+                :alt="product.name"
+                class="w-full h-36 object-cover rounded-t-lg mb-2"
+              />
               <div class="px-2 pb-2">
-                <h3 class="text-subtitle-2 font-weight-medium mb-1 text-truncate text-capitalize">{{ product.name }}
+                <h3 class="text-sm font-medium mb-1 truncate capitalize">
+                  {{ product.name }}
                 </h3>
-                <p class="text-caption mb-1 text-truncate">{{ product.seller_name || 'weCare' }}</p>
-                <div class="d-flex justify-space-between align-center">
-                  <span class="text-subtitle-2 font-weight-bold">{{ formatApiPrice(product) }}</span>
+                <p class="text-xs text-gray-600 mb-1 truncate">
+                  {{ product.seller_name || "weCare" }}
+                </p>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm font-bold text-primary">{{
+                    formatApiPrice(product)
+                  }}</span>
                 </div>
               </div>
-            </v-card>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- New Arrivals Section -->
-      <div v-if="productStore.newArrivals.length > 0" class="section mb-6">
-        <div class="d-flex justify-space-between align-center mb-3">
-          <h2 class="section-title font-weight-bold">New Arrivals</h2>
+      <div v-if="productStore.newArrivals.length > 0" class="mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-gray-900">New Arrivals</h2>
         </div>
 
         <!-- Loading state -->
-        <div v-if="loading" class="d-flex justify-center my-4">
-          <v-progress-circular indeterminate color="primary" />
+        <div v-if="loading" class="flex justify-center my-8">
+          <div
+            class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"
+          ></div>
         </div>
 
         <!-- Error state -->
-        <v-alert v-else-if="error" type="error" class="mb-4">{{ error }}</v-alert>
+        <div
+          v-else-if="error"
+          class="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center mb-4"
+        >
+          <AlertCircle class="w-5 h-5 text-red-500 mr-2" />
+          <span class="text-red-800 text-sm">{{ error }}</span>
+        </div>
 
         <!-- New arrivals with horizontal scroll -->
-        <div v-else class="horizontal-scroll-container">
-          <div class="horizontal-scroll-content">
-            <v-card v-for="product in productStore.newArrivals.slice(0, 10)" :key="product.id"
-              class="product-card-bundle-horizontal" flat @click="navigateToDetails(product.id)">
-              <div class="d-flex">
-                <v-img :src="product.main_image || packagingImage" height="150" width="100"
-                  class="rounded-lg flex-shrink-0" cover></v-img>
-                <div class="px-3 py-2 d-flex flex-column justify-space-between flex-grow-1">
+        <div v-else class="space-y-3">
+          <div
+            v-for="product in productStore.newArrivals.slice(0, 10)"
+            :key="product.id"
+            class="card p-3 cursor-pointer hover:shadow-md transition-shadow"
+            @click="navigateToDetails(product.id)"
+          >
+            <div class="flex">
+              <img
+                :src="product.main_image || packagingImage"
+                :alt="product.name"
+                class="w-24 h-36 object-cover rounded-lg flex-shrink-0"
+              />
+              <div class="px-3 py-1 flex flex-col justify-between flex-grow">
+                <div>
+                  <h3
+                    class="text-base font-medium mb-1 line-clamp-2 capitalize"
+                  >
+                    {{ product.name }}
+                  </h3>
+                  <p class="text-xs text-gray-500 mb-2 truncate">
+                    {{ product.seller_name || "weCare" }}
+                  </p>
+                </div>
+                <div class="flex items-center justify-between">
                   <div>
-                    <h3 class="text-subtitle-1 font-weight-medium mb-1 text-truncate text-capitalize">{{ product.name }}
-                    </h3>
-                    <p class="text-caption text-grey mb-1 text-truncate">{{ product.seller_name || 'weCare' }}</p>
-                  </div>
-                  <div class="d-flex align-center justify-space-between">
-                    <div>
-                      <span v-if="product.original_price && product.original_price > product.price"
-                        class="text-caption text-decoration-line-through text-grey mr-1">{{ formatApiPrice({
-                          price:
-                            product.original_price
-                        }) }}</span>
-                      <span class="text-subtitle-2 font-weight-bold primary-color">{{ formatApiPrice(product) }}</span>
-                    </div>
+                    <span
+                      v-if="
+                        product.original_price &&
+                        product.original_price > product.price
+                      "
+                      class="text-xs line-through text-gray-400 mr-1"
+                    >
+                      {{ formatApiPrice({ price: product.original_price }) }}
+                    </span>
+                    <span class="text-sm font-bold text-primary">{{
+                      formatApiPrice(product)
+                    }}</span>
                   </div>
                 </div>
               </div>
-            </v-card>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Recommended Products Section -->
-      <div v-if="productStore.recommendedProducts.length > 0" class="section mb-6">
-        <div class="d-flex justify-space-between align-center mb-3">
-          <h2 class="section-title font-weight-bold">Recommended For You</h2>
+      <div v-if="productStore.recommendedProducts.length > 0" class="mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-gray-900">Recommended For You</h2>
         </div>
 
         <!-- Loading state -->
-        <div v-if="loading" class="d-flex justify-center my-4">
-          <v-progress-circular indeterminate color="primary" />
+        <div v-if="loading" class="flex justify-center my-8">
+          <div
+            class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"
+          ></div>
         </div>
 
         <!-- Error state -->
-        <v-alert v-else-if="error" type="error" class="mb-4">{{ error }}</v-alert>
+        <div
+          v-else-if="error"
+          class="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center mb-4"
+        >
+          <AlertCircle class="w-5 h-5 text-red-500 mr-2" />
+          <span class="text-red-800 text-sm">{{ error }}</span>
+        </div>
 
         <!-- Recommended products in 2x2 grid -->
-        <div v-else>
-          <v-row dense>
-            <v-col v-for="product in productStore.recommendedProducts.slice(0, 4)" :key="product.id" cols="6"
-              class="pa-1">
-              <v-card class="product-card-grid" flat @click="navigateToDetails(product.id)"
-                style="cursor: pointer; height: 100%;">
-                <v-img :src="product.main_image || packagingImage" height="120" class="mb-2" cover></v-img>
-                <div class="px-2 pb-2">
-                  <h3 class="text-caption font-weight-medium mb-1 text-truncate text-capitalize">{{ product.name }}</h3>
-                  <p class="text-caption mb-1 text-truncate text-grey">{{ product.seller_name || 'weCare' }}</p>
-                  <div class="d-flex justify-space-between align-center">
-                    <span class="text-subtitle-2 font-weight-bold primary-color">{{ formatApiPrice(product) }}</span>
-                  </div>
-                </div>
-              </v-card>
-            </v-col>
-          </v-row>
+        <div v-else class="grid grid-cols-2 gap-3">
+          <div
+            v-for="product in productStore.recommendedProducts.slice(0, 4)"
+            :key="product.id"
+            class="card cursor-pointer hover:shadow-md transition-shadow h-full"
+            @click="navigateToDetails(product.id)"
+          >
+            <img
+              :src="product.main_image || packagingImage"
+              :alt="product.name"
+              class="w-full h-30 object-cover rounded-t-lg mb-2"
+            />
+            <div class="px-2 pb-2">
+              <h3 class="text-xs font-medium mb-1 truncate capitalize">
+                {{ product.name }}
+              </h3>
+              <p class="text-xs text-gray-500 mb-1 truncate">
+                {{ product.seller_name || "weCare" }}
+              </p>
+              <div class="flex justify-between items-center">
+                <span class="text-sm font-bold text-primary">{{
+                  formatApiPrice(product)
+                }}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <!-- Bottom Navigation -->
-      <BottomNavigation />
-    </v-container>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue'
-import { useCartStore } from '@/stores/cart'
-import { useProductStore } from '@/stores/product'
-import { useRouter } from 'vue-router'
-import packagingImage from '@/assets/packaging_10471395.png'
-import BottomNavigation from '@/components/BottomNavigation.vue'
-import { useNotificationStore } from '@/stores/notification'
-import { useAuthStore } from '@/stores/auth'
-import { useCurrency } from '@/composables/useCurrency'
+import { onMounted, computed } from "vue";
+import { useCartStore } from "@/stores/cart";
+import { useProductStore } from "@/stores/product";
+import { useRouter } from "vue-router";
+import packagingImage from "@/assets/packaging_10471395.png";
+import BottomNavigation from "@/components/BottomNavigation.vue";
+import { useNotificationStore } from "@/stores/notification";
+import { useAuthStore } from "@/stores/auth";
+import { useCurrency } from "@/composables/useCurrency";
+import { Bell, User, AlertCircle } from "lucide-vue-next";
 
-const productStore = useProductStore()
-const cart = useCartStore()
-const router = useRouter()
-const notification = useNotificationStore()
-const auth = useAuthStore()
-const { formatApiPrice } = useCurrency()
+const productStore = useProductStore();
+const cart = useCartStore();
+const router = useRouter();
+const notification = useNotificationStore();
+const auth = useAuthStore();
+const { formatApiPrice } = useCurrency();
 
-const loading = computed(() => productStore.loading)
-const error = computed(() => productStore.error)
+const loading = computed(() => productStore.loading);
+const error = computed(() => productStore.error);
 
 const navigateToProfile = () => {
-  router.push({ name: 'Profile' })
-}
+  router.push({ name: "Profile" });
+};
+
+const navigateToNotification = () => {
+  router.push({ name: "Notification" });
+};
 
 const navigateToDetails = (productId) => {
-  router.push({ name: 'ProductDetails', params: { id: productId } })
-}
+  router.push({ name: "ProductDetails", params: { id: productId } });
+};
 
 onMounted(async () => {
-  console.log('Home page mounted - starting initialization')
+  console.log("Home page mounted - starting initialization");
 
   try {
     // Initialize cart state
-    cart.initCartState()
-    console.log('Cart state initialized')
+    cart.initCartState();
+    console.log("Cart state initialized");
 
     await Promise.all([
-      cart.fetchCart().then(() => console.log('Cart fetched')).catch(err => {
-        console.error('Cart fetch failed, continuing anyway:', err)
-      })
-    ])
+      cart
+        .fetchCart()
+        .then(() => console.log("Cart fetched"))
+        .catch((err) => {
+          console.error("Cart fetch failed, continuing anyway:", err);
+        }),
+    ]);
 
     // init notification store
-    await notification.init()
+    await notification.init();
 
-    console.log('Starting to fetch products...')
+    console.log("Starting to fetch products...");
 
     // Fetch popular products, new arrivals, and recommended products for home page
     await Promise.all([
       productStore.fetchPopularProducts().then(() => {
-        console.log('Popular products fetched:', productStore.popularProducts.length)
+        console.log(
+          "Popular products fetched:",
+          productStore.popularProducts.length
+        );
       }),
       productStore.fetchNewArrivals().then(() => {
-        console.log('New arrivals fetched:', productStore.newArrivals.length)
+        console.log("New arrivals fetched:", productStore.newArrivals.length);
       }),
-      productStore.fetchRecommendedProducts().then(() => {
-        console.log('Recommended products fetched:', productStore.recommendedProducts.length)
-      }).catch(err => {
-        console.error('Recommended products fetch failed, continuing anyway:', err)
-      })
-    ])
+      productStore
+        .fetchRecommendedProducts()
+        .then(() => {
+          console.log(
+            "Recommended products fetched:",
+            productStore.recommendedProducts.length
+          );
+        })
+        .catch((err) => {
+          console.error(
+            "Recommended products fetch failed, continuing anyway:",
+            err
+          );
+        }),
+    ]);
   } catch (error) {
-    console.error('Error during Home page initialization:', error)
+    console.error("Error during Home page initialization:", error);
   }
-})
-
-const navigateToNotification = () => {
-  router.push({ name: 'Notification' })
-}
+});
 </script>
 
 <style scoped>
 .home-page {
   background-color: #f8f9fa;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .section-title {
