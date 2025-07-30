@@ -1,137 +1,277 @@
 <template>
-  <div class="notification-page">
-    <v-container>
-      <!-- Header with title and actions -->
-      <div class="d-flex justify-space-between align-center mb-4">
-        <v-btn variant="text" @click="$router.back()">
-          <v-icon size="24">mdi-arrow-left</v-icon>
-          <h2 class="text-h6 font-weight-bold ml-2">Notifications</h2>
-        </v-btn>
-        <v-btn v-if="notifications.length > 0 && hasUnreadNotifications" color="primary" variant="text" size="small"
-          class="text-none" @click="handleMarkAllAsRead" :loading="markingAllAsRead">
-          Mark all as read
-        </v-btn>
-      </div>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pb-24">
+    <div class="p-4">
+      <!-- Modern Header -->
+      <AppHeader 
+        :show-back="true"
+        custom-title="Notifications"
+      >
+        <template #right-content>
+                     <button 
+             v-if="notifications.length > 0 && hasUnreadNotifications"
+             @click="handleMarkAllAsRead"
+             :disabled="markingAllAsRead"
+             class="px-4 py-2 text-white text-sm font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg"
+             style="background: linear-gradient(to right, #2563eb, #4f46e5);"
+             onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
+             onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
+           >
+            <Loader2 v-if="markingAllAsRead" class="w-4 h-4 animate-spin" />
+            <CheckCheck v-else class="w-4 h-4" />
+            <span>Mark all read</span>
+          </button>
+        </template>
+      </AppHeader>
 
       <!-- Unread count badge -->
-      <div v-if="hasUnreadNotifications" class="mb-4">
-        <v-chip color="primary" size="small">
-          {{ unreadCount }} unread notification{{ unreadCount === 1 ? '' : 's' }}
-        </v-chip>
+      <div v-if="hasUnreadNotifications" class="mb-6">
+        <div class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl border border-blue-200/50">
+          <div class="w-2 h-2 bg-blue-600 rounded-full mr-3 animate-pulse"></div>
+          <span class="text-sm font-semibold text-blue-800">
+            {{ unreadCount }} unread notification{{ unreadCount === 1 ? '' : 's' }}
+          </span>
+        </div>
       </div>
 
       <!-- Loading state -->
-      <div v-if="loading" class="text-center my-8">
-        <v-progress-circular indeterminate color="primary"></v-progress-circular>
-        <p class="mt-3 text-grey">Loading notifications...</p>
+      <div v-if="loading" class="text-center py-16">
+        <div class="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <Loader2 class="w-10 h-10 text-blue-600 animate-spin" />
+        </div>
+        <h3 class="text-xl font-semibold text-slate-800 mb-2">Loading Notifications</h3>
+        <p class="text-slate-600">Please wait while we fetch your notifications</p>
       </div>
 
       <!-- Error state -->
-      <v-alert v-if="error && !loading" type="error" variant="tonal" class="mb-4" closable @click:close="clearError">
-        {{ error }}
-      </v-alert>
+      <div v-else-if="error" class="mb-6 p-6 bg-red-50 border border-red-200 rounded-3xl shadow-sm">
+        <div class="flex items-center">
+          <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-4">
+            <AlertCircle class="w-5 h-5 text-red-600" />
+          </div>
+          <div class="flex-1">
+            <h4 class="font-semibold text-red-800 mb-1">Error Loading Notifications</h4>
+            <p class="text-red-700 text-sm">{{ error }}</p>
+          </div>
+          <button @click="clearError" class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-full flex items-center justify-center transition-colors">
+            <X class="w-4 h-4 text-red-600" />
+          </button>
+        </div>
+      </div>
 
       <!-- Notifications list -->
-      <div v-if="!loading && notifications.length > 0">
-        <v-expansion-panels v-model="expandedPanels" multiple variant="accordion">
-          <v-expansion-panel v-for="notification in notifications" :key="notification.id" :class="[
-            'notification-item',
-            { 'unread-notification': !notification.is_read }
-          ]">
-            <v-expansion-panel-title>
-              <div class="d-flex align-center justify-space-between w-100">
-                <div class="d-flex align-center">
-                  <!-- Notification icon based on type -->
-                  <v-icon :color="getNotificationIcon(notification.type).color" class="me-3" size="20">
-                    {{ getNotificationIcon(notification.type).icon }}
-                  </v-icon>
+      <div v-else-if="!loading && notifications.length > 0" class="space-y-4">
+        <div 
+          v-for="notification in notifications" 
+          :key="notification.id"
+          :class="[
+            'bg-white/90 backdrop-blur-sm rounded-3xl shadow-sm border transition-all duration-200 overflow-hidden cursor-pointer',
+            !notification.is_read 
+              ? 'border-blue-200/50 shadow-lg' 
+              : 'border-white/20 hover:shadow-md'
+          ]"
+          @click="toggleNotification(notification.id)"
+        >
+          <!-- Notification header (always visible) -->
+          <div class="p-6">
+            <div class="flex items-start justify-between">
+              <div class="flex items-start space-x-4 flex-1">
+                <!-- Notification icon -->
+                <div :class="[
+                  'w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0',
+                  getNotificationIcon(notification.type).bgClass
+                ]">
+                  <component 
+                    :is="getNotificationIcon(notification.type).icon" 
+                    class="w-6 h-6 text-white"
+                  />
+                </div>
 
-                  <!-- Title and unread indicator -->
-                  <div>
-                    <div class="d-flex align-center">
-                      <span class="text-subtitle-1 font-weight-medium">
-                        {{ notification.title }}
-                      </span>
-                      <v-chip v-if="!notification.is_read" color="primary" size="x-small" class="ml-2">
+                <!-- Notification content -->
+                <div class="flex-1 min-w-0 overflow-hidden">
+                  <div class="flex items-center space-x-3 mb-2">
+                    <h3 class="text-lg font-semibold text-slate-900 truncate flex-1 min-w-0">
+                      {{ notification.title }}
+                    </h3>
+                    <div v-if="!notification.is_read" class="flex items-center space-x-2 flex-shrink-0">
+                      <div class="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+                      <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
                         New
-                      </v-chip>
+                      </span>
                     </div>
-                    <div class="text-caption text-grey-darken-1">
+                  </div>
+                  
+                  <!-- Preview message (truncated) -->
+                  <p class="text-sm text-slate-600 mb-3 line-clamp-2">
+                    {{ notification.message }}
+                  </p>
+                  
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs text-slate-500 flex items-center">
+                      <Clock class="w-3 h-3 mr-1" />
                       {{ formatDate(notification.created_at) }}
+                    </span>
+                    
+                    <!-- Expand/collapse indicator -->
+                    <div class="flex items-center space-x-2">
+                      <button 
+                        v-if="!notification.is_read"
+                        @click.stop="handleMarkAsRead(notification.id)"
+                        :disabled="markingAsRead[notification.id]"
+                        class="w-8 h-8 bg-blue-50 hover:bg-blue-100 rounded-full flex items-center justify-center transition-colors disabled:opacity-50"
+                      >
+                        <Loader2 v-if="markingAsRead[notification.id]" class="w-4 h-4 text-blue-600 animate-spin" />
+                        <Check v-else class="w-4 h-4 text-blue-600" />
+                      </button>
+                      
+                      <!-- Expand/collapse arrow -->
+                      <div class="w-8 h-8 bg-slate-50 hover:bg-slate-100 rounded-full flex items-center justify-center transition-all duration-200">
+                        <ChevronDown 
+                          :class="[
+                            'w-4 h-4 text-slate-600 transition-transform duration-200',
+                            expandedNotifications.includes(notification.id) ? 'rotate-180' : ''
+                          ]"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                <!-- Mark as read button -->
-                <v-btn v-if="!notification.is_read" icon size="small" variant="text"
-                  @click.stop="handleMarkAsRead(notification.id)" :loading="markingAsRead[notification.id]">
-                  <v-icon size="18">mdi-check</v-icon>
-                  <v-tooltip activator="parent" location="top">
-                    Mark as read
-                  </v-tooltip>
-                </v-btn>
               </div>
-            </v-expansion-panel-title>
+            </div>
+          </div>
 
-            <v-expansion-panel-text>
-              <div class="notification-content">
-                <p class="text-body-2">{{ notification.message }}</p>
+          <!-- Expanded content (shown when clicked) -->
+          <transition
+            enter-active-class="transition-all duration-300 ease-out"
+            enter-from-class="opacity-0 max-h-0"
+            enter-to-class="opacity-100 max-h-96"
+            leave-active-class="transition-all duration-200 ease-in"
+            leave-from-class="opacity-100 max-h-96"
+            leave-to-class="opacity-0 max-h-0"
+          >
+            <div 
+              v-if="expandedNotifications.includes(notification.id)"
+              class="border-t border-slate-100 bg-slate-50/50"
+            >
+              <div class="p-6">
+                <!-- Full message content -->
+                <div class="mb-4">
+                  <h4 class="text-sm font-semibold text-slate-700 mb-2">Full Message:</h4>
+                  <p class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+                    {{ notification.message }}
+                  </p>
+                </div>
 
-                <!-- Reference link if available -->
-                <div v-if="notification.reference_type && notification.reference_id" class="mt-3">
-                  <v-btn :to="getNotificationLink(notification)" color="primary" variant="outlined" size="small" rounded
-                    class="text-none">
-                    View {{ notification.reference_type }}
-                  </v-btn>
+                <!-- Additional details -->
+                <div class="space-y-3">
+                  <!-- Notification type -->
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-slate-500">Type:</span>
+                    <span class="font-medium text-slate-700 capitalize">{{ notification.type }}</span>
+                  </div>
+
+                  <!-- Created date (full format) -->
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-slate-500">Created:</span>
+                    <span class="font-medium text-slate-700">{{ formatFullDate(notification.created_at) }}</span>
+                  </div>
+
+                  <!-- Read status -->
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-slate-500">Status:</span>
+                    <span :class="[
+                      'font-medium px-2 py-1 rounded-full text-xs',
+                      notification.is_read 
+                        ? 'bg-green-100 text-green-700' 
+                        : 'bg-blue-100 text-blue-700'
+                    ]">
+                      {{ notification.is_read ? 'Read' : 'Unread' }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="flex items-center justify-end space-x-3 mt-6 pt-4 border-t border-slate-200">
+                                     <button 
+                     v-if="notification.reference_type && notification.reference_id"
+                     @click.stop="navigateToReference(notification)"
+                     class="px-4 py-2 text-white text-sm font-semibold rounded-2xl transition-all duration-200 flex items-center space-x-2 shadow-lg"
+                     style="background: linear-gradient(to right, #2563eb, #4f46e5);"
+                     onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
+                     onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
+                   >
+                    <ArrowRight class="w-4 h-4" />
+                    <span>View {{ notification.reference_type }}</span>
+                  </button>
+                  
+                  <button 
+                    v-if="!notification.is_read"
+                    @click.stop="handleMarkAsRead(notification.id)"
+                    :disabled="markingAsRead[notification.id]"
+                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-2xl transition-all duration-200 flex items-center space-x-2"
+                  >
+                    <Loader2 v-if="markingAsRead[notification.id]" class="w-4 h-4 animate-spin" />
+                    <Check v-else class="w-4 h-4" />
+                    <span>Mark as Read</span>
+                  </button>
                 </div>
               </div>
-            </v-expansion-panel-text>
-          </v-expansion-panel>
-        </v-expansion-panels>
+            </div>
+          </transition>
+        </div>
 
         <!-- Load More Button -->
-        <div v-if="pagination.hasMore" class="text-center mt-6">
-          <v-btn color="primary" variant="text" @click="loadMoreNotifications" :loading="loadingMore">
-            Load more notifications
-          </v-btn>
+        <div v-if="pagination.hasMore" class="text-center pt-6">
+          <button 
+            @click="loadMoreNotifications"
+            :disabled="loadingMore"
+            class="px-8 py-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-3xl text-slate-700 font-semibold hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 mx-auto"
+          >
+            <Loader2 v-if="loadingMore" class="w-5 h-5 animate-spin" />
+            <span>{{ loadingMore ? 'Loading...' : 'Load more notifications' }}</span>
+          </button>
         </div>
 
         <!-- End of notifications -->
-        <div v-if="!pagination.hasMore && notifications.length > 0" class="text-center mt-6">
-          <v-divider class="mb-4"></v-divider>
-          <v-icon color="grey-lighten-1" size="24" class="mb-2">
-            mdi-check-circle-outline
-          </v-icon>
-          <p class="text-body-2 text-medium-emphasis">
+        <div v-if="!pagination.hasMore && notifications.length > 0" class="text-center py-12">
+          <div class="w-16 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full mx-auto mb-6"></div>
+          <CheckCircle class="w-8 h-8 text-slate-400 mx-auto mb-3" />
+          <p class="text-sm text-slate-600 font-medium">
             You've seen all {{ notifications.length }} notifications
           </p>
         </div>
       </div>
 
       <!-- Empty state -->
-      <div v-if="!loading && notifications.length === 0" class="text-center my-12">
-        <v-icon size="80" color="grey-lighten-2" class="mb-4">
-          mdi-bell-outline
-        </v-icon>
-        <h3 class="text-h6 font-weight-medium mb-2">No notifications yet</h3>
-        <p class="text-body-2 text-grey-darken-1">
-          You'll see order updates, promotions, and other important information here.
+      <div v-else-if="!loading && notifications.length === 0" class="text-center py-16">
+        <div class="w-32 h-32 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <Bell class="w-16 h-16 text-blue-600 opacity-60" />
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mb-2">No notifications yet</h3>
+        <p class="text-slate-600 max-w-md mx-auto">
+          You'll see order updates, promotions, and other important information here when they arrive.
         </p>
       </div>
-    </v-container>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useNotificationStore } from '@/stores/notification'
+import AppHeader from '@/components/AppHeader.vue'
+import { 
+  Bell, Check, CheckCheck, CheckCircle, Clock, AlertCircle, X, Loader2, ArrowRight,
+  ShoppingBag, AlertTriangle, Info, Package, ChevronDown
+} from 'lucide-vue-next'
 
+const router = useRouter()
 const notificationStore = useNotificationStore()
 
 // Local state
-const expandedPanels = ref([])
 const markingAsRead = ref({})
 const markingAllAsRead = ref(false)
+const expandedNotifications = ref([])
 
 // Computed properties from store
 const notifications = computed(() => notificationStore.notifications)
@@ -163,17 +303,36 @@ const formatDate = (dateString) => {
 
 const getNotificationIcon = (type) => {
   const icons = {
-    'order': { icon: 'mdi-shopping', color: 'blue' },
-    'alert': { icon: 'mdi-alert-circle', color: 'orange' },
-    'info': { icon: 'mdi-information', color: 'blue' },
-    'success': { icon: 'mdi-check-circle', color: 'green' },
-    'warning': { icon: 'mdi-alert', color: 'orange' }
+    'order': { 
+      icon: ShoppingBag, 
+      bgClass: 'bg-gradient-to-r from-blue-600 to-indigo-600'
+    },
+    'alert': { 
+      icon: AlertTriangle, 
+      bgClass: 'bg-gradient-to-r from-orange-500 to-red-500'
+    },
+    'info': { 
+      icon: Info, 
+      bgClass: 'bg-gradient-to-r from-blue-500 to-cyan-500'
+    },
+    'success': { 
+      icon: CheckCircle, 
+      bgClass: 'bg-gradient-to-r from-green-500 to-emerald-500'
+    },
+    'warning': { 
+      icon: AlertTriangle, 
+      bgClass: 'bg-gradient-to-r from-yellow-500 to-orange-500'
+    },
+    'product': { 
+      icon: Package, 
+      bgClass: 'bg-gradient-to-r from-purple-500 to-pink-500'
+    }
   }
   return icons[type] || icons.info
 }
 
-const getNotificationLink = (notification) => {
-  if (!notification.reference_type || !notification.reference_id) return null
+const navigateToReference = (notification) => {
+  if (!notification.reference_type || !notification.reference_id) return
 
   const linkMap = {
     'Order': `/order-status/${notification.reference_id}`,
@@ -181,7 +340,10 @@ const getNotificationLink = (notification) => {
     'Profile': '/profile'
   }
 
-  return linkMap[notification.reference_type] || null
+  const link = linkMap[notification.reference_type]
+  if (link) {
+    router.push(link)
+  }
 }
 
 const handleMarkAsRead = async (notificationId) => {
@@ -210,6 +372,30 @@ const loadMoreNotifications = async () => {
   await notificationStore.loadMoreNotifications()
 }
 
+// Accordion functionality
+const toggleNotification = (notificationId) => {
+  const index = expandedNotifications.value.indexOf(notificationId)
+  if (index > -1) {
+    expandedNotifications.value.splice(index, 1)
+  } else {
+    expandedNotifications.value.push(notificationId)
+  }
+}
+
+const formatFullDate = (dateString) => {
+  if (!dateString) return ''
+  
+  const date = new Date(dateString)
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
+}
+
 // Auto-refresh notifications every 30 seconds
 let refreshInterval = null
 
@@ -230,33 +416,10 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.notification-page {
-  padding-bottom: 100px;
-  /* Account for bottom navigation */
-}
-
-.notification-item {
-  margin-bottom: 8px;
-}
-
-.unread-notification {
-  border-left: 4px solid rgb(var(--v-theme-primary));
-}
-
-.notification-content {
-  padding: 16px 0;
-}
-
-.v-expansion-panel-title {
-  padding: 16px !important;
-}
-
-.v-expansion-panel-text {
-  padding: 0 16px 16px 16px !important;
-}
-
-/* Custom styling for unread notifications */
-.unread-notification .v-expansion-panel-title {
-  background-color: rgba(var(--v-theme-primary), 0.05);
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 </style>

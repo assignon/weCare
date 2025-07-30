@@ -1,228 +1,253 @@
 <template>
-  <div class="cart-page">
-    <v-container>
-      <!-- Updated header with centered title and icons -->
-      <div class="d-flex align-center justify-space-between mb-6">
-        <v-btn icon variant="text" @click="$router.push({ name: 'Home' })">
-          <v-icon>mdi-arrow-left</v-icon>
-        </v-btn>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pb-24">
+    <div class="p-4">
+      <!-- Header -->
+      <AppHeader 
+        :show-back="true" 
+        :back-route="{ name: 'Home' }"
+        custom-title="Cart Items"
+      >
+        <template #right-content>
+          <button 
+            v-if="cart.items.items && cart.items.items.length > 0"
+            @click="confirmClearCart"
+            class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-white/20 flex items-center justify-center"
+          >
+            <Trash2 class="w-5 h-5 text-red-500" />
+          </button>
+          <div v-else class="w-10"></div>
+        </template>
+      </AppHeader>
 
-        <h1 class="text-h5 font-weight-bold text-center">Cart Items</h1>
-
-        <v-btn icon variant="text" @click="confirmClearCart" v-if="cart.items.items && cart.items.items.length > 0">
-          <v-icon>mdi-trash-can-outline</v-icon>
-        </v-btn>
-        <div v-else style="width: 40px"></div> <!-- Spacer to maintain layout when cart is empty -->
-      </div>
-
-      <v-row v-if="cart.items.items && cart.items.items.length > 0">
+      <!-- Cart content -->
+      <div v-if="cart.items.items && cart.items.items.length > 0" class="space-y-6">
         <!-- Cart items -->
-        <v-col cols="12" md="8">
-          <v-card class="cart-items-container mb-4" flat>
-            <!-- Product group -->
-            <div v-for="product in groupedCartItems" :key="product.product_id"
-              class="cart-product-group pa-4 has-divider">
+        <div class="space-y-4">
+          <div 
+            v-for="product in groupedCartItems" 
+            :key="product.product_id"
+            class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm border border-white/20 overflow-hidden"
+          >
               <!-- Product header -->
-              <div class="d-flex align-center mb-3">
-                <div class="cart-item-image-container mr-4">
-                  <v-img :src="'http://localhost:8000' + product.main_image || 'https://via.placeholder.com/150'"
-                    width="100" height="100" class="cart-item-image" cover></v-img>
+            <div class="p-6 border-b border-gray-100">
+              <div class="flex items-start space-x-4">
+                <div class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0">
+                  <img 
+                    :src="'http://localhost:8000' + product.main_image || 'https://via.placeholder.com/150'"
+                    :alt="product.product_name"
+                    class="w-full h-full object-cover"
+                  />
                 </div>
 
-                <div class="flex-grow-1">
-                  <h3 class="text-subtitle-1 font-weight-medium mb-1 text-capitalize">{{ product.product_name }}</h3>
-                  <p class="text-caption text-grey mb-0">{{ product.seller_name || '---' }}</p>
-                  <p class="text-caption text-primary font-weight-bold">
-                    <v-icon size="x-small" color="primary" class="mr-1">mdi-truck-delivery</v-icon>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-lg font-semibold text-gray-900 capitalize mb-1">{{ product.product_name }}</h3>
+                  <p class="text-sm text-gray-500 mb-2">{{ product.seller_name || '---' }}</p>
+                  <div class="flex items-center text-blue-600 text-sm font-medium">
+                    <Truck class="w-4 h-4 mr-2" />
                     {{ product.delivery_info?.estimated_delivery_display || 'Standard Delivery' }}
-                  </p>
+                  </div>
+                </div>
                 </div>
               </div>
 
               <!-- Product variants -->
-              <div class="variants-container mt-3">
-                <div v-for="variant in product.variants" :key="variant.id"
-                  class="variant-item d-flex align-center justify-space-between py-2 px-3">
-                  <div class="d-flex align-center">
-                    <span class="text-body-2 mr-4 text-primary font-weight-bold">{{ variant.name }} ML</span>
-                    <span class="text-subtitle-2 font-weight-medium">{{ formatApiPrice({
-                      price: variant.price,
-                      currency_info: variant.currency_info }) }}</span>
+            <div class="p-6 space-y-4">
+              <div 
+                v-for="variant in product.variants" 
+                :key="variant.id"
+                class="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl border border-gray-100"
+              >
+                <div class="flex items-center space-x-4">
+                                     <div class="text-center">
+                     <span class="text-sm font-bold text-blue-600">{{ variant.name }} ML</span>
+                     <div class="text-lg font-semibold text-gray-900 mt-1">
+                       {{ formatApiPrice({
+                         price: variant.price * variant.quantity,
+                         currency_info: variant.currency_info 
+                       }) }}
+                     </div>
+                   </div>
                   </div>
 
-                  <div class="d-flex align-center">
-                    <div class="d-flex align-center quantity-controls mr-4">
-                      <v-btn variant="outlined" icon="mdi-minus" density="comfortable" size="small"
+                <div class="flex items-center space-x-3">
+                  <!-- Quantity controls -->
+                  <div class="flex items-center bg-white rounded-2xl shadow-sm border border-gray-200">
+                    <button 
+                      @click="updateVariantQuantity(variant.cart_item_id, variant.id, variant.quantity - 1, variant.stock)"
                         :disabled="variant.quantity <= 1"
-                        @click="updateVariantQuantity(variant.cart_item_id, variant.id, variant.quantity - 1, variant.stock)"></v-btn>
-                      <div class="quant mx-2 font-weight-bold">{{ variant.quantity }}</div>
-                      <v-btn variant="outlined" icon="mdi-plus" density="comfortable" size="small"
+                      class="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-gray-900 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <Minus class="w-4 h-4" />
+                    </button>
+                    <div class="w-12 text-center font-bold text-gray-900">{{ variant.quantity }}</div>
+                    <button 
+                      @click="updateVariantQuantity(variant.cart_item_id, variant.id, variant.quantity + 1, variant.stock)"
                         :disabled="variant.quantity >= (variant.stock || 0)"
-                        @click="updateVariantQuantity(variant.cart_item_id, variant.id, variant.quantity + 1, variant.stock)"></v-btn>
-                    </div>
-
-                    <v-btn icon="mdi-delete" variant="text" color="error" density="comfortable"
-                      @click="removeVariant(variant.cart_item_id)"></v-btn>
+                      class="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-gray-900 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <Plus class="w-4 h-4" />
+                    </button>
                   </div>
+
+                  <!-- Remove button -->
+                  <button 
+                    @click="removeVariant(variant.cart_item_id)"
+                    class="w-10 h-10 bg-red-50 hover:bg-red-100 rounded-2xl flex items-center justify-center transition-colors"
+                  >
+                    <Trash2 class="w-4 h-4 text-red-500" />
+                  </button>
                 </div>
               </div>
             </div>
-          </v-card>
+          </div>
+        </div>
 
           <!-- Continue shopping button -->
-          <div class="d-flex mb-6">
-            <v-btn variant="tonal" prepend-icon="mdi-arrow-left" @click="$router.push({ name: 'Home' })"
-              class="text-none text-primary">
+        <div class="flex justify-center">
+          <button 
+            @click="$router.push({ name: 'Home' })"
+            class="flex items-center px-6 py-3 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl text-blue-600 hover:bg-white hover:shadow-md transition-all duration-200"
+          >
+            <ArrowLeft class="w-4 h-4 mr-2" />
               Continue Shopping
-            </v-btn>
+          </button>
           </div>
-        </v-col>
 
         <!-- Order summary -->
-        <v-col cols="12" md="4">
-          <v-card class="order-summary pa-2" variant="text">
-            <h2 class="text-h6 font-weight-bold mb-4">Order Summary</h2>
+        <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm border border-white/20 p-6">
+          <h2 class="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
 
-            <div class="d-flex justify-space-between mb-2">
-              <span class="text-body-1">Items</span>
-              <span class="text-body-1">{{ formatApiPrice({
-                price: cart.items.total_amount || 0, currency_info:
-                  cart.items.currency_info }) }}</span>
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Items</span>
+              <span class="font-semibold text-gray-900">
+                {{ formatApiPrice({
+                  price: cart.items.total_amount || 0, 
+                  currency_info: cart.items.currency_info 
+                }) }}
+              </span>
             </div>
 
-            <div class="d-flex justify-space-between mb-2">
-              <span class="text-body-1">Shipping</span>
-              <span class="text-body-1">{{ formatApiPrice({ price: 0, currency_info: cart.items.currency_info })
-                }}</span>
+           
+
+            <div class="border-t border-gray-200 pt-4">
+              <div class="flex justify-between items-center">
+                <span class="text-lg font-bold text-gray-900">Total</span>
+                <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+                  {{ formatApiPrice({
+                    price: cart.items.total_amount || 0, 
+                    currency_info: cart.items.currency_info 
+                  }) }}
+                </span>
+              </div>
             </div>
-
-            <v-divider class="my-4"></v-divider>
-
-            <div class="d-flex justify-space-between mb-4">
-              <span class="text-subtitle-1 font-weight-bold">Total</span>
-              <span class="text-h6 font-weight-bold primary-color">{{ formatApiPrice({
-                price: cart.items.total_amount ||
-                  0, currency_info: cart.items.currency_info
-              })
-                }}</span>
-            </div>
-
-            <!-- Promo code -->
-            <!-- <v-text-field
-              label="Promo Code"
-              variant="outlined"
-              density="compact"
-              append-inner-icon="mdi-tag"
-              hide-details
-              class="mb-4"
-            ></v-text-field> -->
-
-            <!-- Secure checkout info -->
-            <!-- <div class="d-flex align-center justify-center mt-4">
-              <v-icon size="small" class="mr-1">mdi-lock</v-icon>
-              <span class="text-caption text-grey">Secure Checkout</span>
-            </div> -->
-
-            <!-- Payment methods -->
-            <!-- <div class="payment-methods d-flex justify-center mt-4">
-              <v-icon size="large" class="mx-1">mdi-credit-card</v-icon>
-              <v-icon size="large" class="mx-1">mdi-paypal</v-icon>
-              <v-icon size="large" class="mx-1">mdi-bank</v-icon>
-            </div> -->
-          </v-card>
-        </v-col>
-      </v-row>
-
-      <!-- Fixed checkout button for mobile -->
-      <div v-if="cart.items.items && cart.items.items.length > 0" class="fixed-checkout-button">
-        <v-btn color="primary" block :to="{ name: 'Checkout' }" size="large"
-          class="checkout-btn d-flex align-center justify-center" rounded>
-          <span>Proceed to Checkout</span>
-          <span> ({{ formatApiPrice({ price: cart.items.total_amount || 0, currency_info: cart.items.currency_info })
-            }})</span>
-        </v-btn>
+          </div>
+        </div>
       </div>
 
       <!-- Empty cart -->
-      <v-card v-else class="empty-cart pa-6 text-center" flat>
-        <v-icon size="x-large" color="grey-lighten-1" class="mb-4">mdi-cart-off</v-icon>
-        <h3 class="text-h5 mb-2">Your Cart is Empty</h3>
-        <p class="text-body-1 text-grey mb-6">Looks like you haven't added any items to your cart yet.</p>
-        <v-btn color="primary" size="large" class="text-none" rounded :to="{ name: 'Home' }">
+      <div v-else class="text-center py-20">
+        <div class="w-32 h-32 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6" style="background: linear-gradient(to right, #dbeafe, #e9d5ff);">
+          <ShoppingCart class="w-16 h-16 text-gray-400" />
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-3">Your Cart is Empty</h3>
+        <p class="text-gray-600 mb-8 max-w-md mx-auto">
+          Looks like you haven't added any items to your cart yet. Start shopping to discover amazing products!
+        </p>
+        <button 
+          @click="$router.push({ name: 'Home' })"
+          class="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+          style="background: linear-gradient(to right, #2563eb, #9333ea);"
+        >
           Start Shopping
-        </v-btn>
-      </v-card>
+        </button>
+      </div>
 
-      <!-- Suggested products -->
-      <!-- <div v-if="cart.items.length > 0" class="suggested-products mt-8">
-        <h2 class="text-h5 font-weight-medium mb-4">You Might Also Like</h2>
-        <v-row>
-          <v-col 
-            v-for="i in 4" 
-            :key="i" 
-            cols="6" sm="3"
+      <!-- Fixed checkout button for mobile -->
+      <div v-if="cart.items.items && cart.items.items.length > 0" class="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-t border-gray-200/50">
+        <div class="p-4">
+          <button 
+            @click="$router.push({ name: 'Checkout' })"
+            class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
+            style="background: linear-gradient(to right, #2563eb, #9333ea);"
           >
-            <v-card class="suggested-product-card" flat hover>
-              <v-img 
-                :src="`https://via.placeholder.com/300?text=Product ${i}`" 
-                height="160" 
-                cover
-              ></v-img>
-              <v-card-text class="pa-3">
-                <div class="text-subtitle-2 font-weight-medium text-truncate">Suggested Product {{ i }}</div>
-                <div class="d-flex justify-space-between align-center mt-1">
-                  <div class="text-subtitle-1 font-weight-bold primary-color">{{ formatApiPrice({ price: 19.99, currency_info: cart.items.currency_info }) }}</div>
-                  <v-btn 
-                    icon="mdi-cart-plus" 
-                    size="small" 
-                    color="primary" 
-                    variant="text"
-                  ></v-btn>
+            <span>Proceed to Checkout</span>
+            <span class="ml-2">({{ formatApiPrice({ 
+              price: cart.items.total_amount || 0, 
+              currency_info: cart.items.currency_info 
+            }) }})</span>
+          </button>
+        </div>
                 </div>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-      </div> -->
 
-      <!-- Add warning dialog -->
-      <v-dialog v-model="showWarningDialog" max-width="400">
-        <v-card>
-          <v-card-title class="text-h6">Unsaved Changes</v-card-title>
-          <v-card-text>
+      <!-- Warning dialog -->
+      <div 
+        v-if="showWarningDialog" 
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        @click="showWarningDialog = false"
+      >
+        <div 
+          class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl"
+          @click.stop
+        >
+          <div class="flex items-center mb-4">
+            <AlertTriangle class="w-6 h-6 text-yellow-500 mr-3" />
+            <h3 class="text-lg font-bold text-gray-900">Unsaved Changes</h3>
+          </div>
+          <p class="text-gray-600 mb-6">
             You have unsaved changes in your cart. Are you sure you want to leave this page?
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" variant="text" @click="showWarningDialog = false">
+          </p>
+          <div class="flex space-x-3">
+            <button 
+              @click="showWarningDialog = false"
+              class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-medium rounded-2xl hover:bg-gray-200 transition-colors"
+            >
               Stay
-            </v-btn>
-            <v-btn color="error" variant="text" @click="handleLeave">
+            </button>
+            <button 
+              @click="handleLeave"
+              class="flex-1 py-3 px-4 bg-red-500 text-white font-medium rounded-2xl hover:bg-red-600 transition-colors"
+            >
               Leave
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+            </button>
+          </div>
+        </div>
+      </div>
 
-      <!-- Add confirmation dialog for clearing cart -->
-      <v-dialog v-model="showClearCartDialog" max-width="400">
-        <v-card>
-          <v-card-title class="text-h6">Clear Cart</v-card-title>
-          <v-card-text>
+      <!-- Clear cart confirmation dialog -->
+      <div 
+        v-if="showClearCartDialog" 
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        @click="showClearCartDialog = false"
+      >
+        <div 
+          class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl"
+          @click.stop
+        >
+          <div class="flex items-center mb-4">
+            <Trash2 class="w-6 h-6 text-red-500 mr-3" />
+            <h3 class="text-lg font-bold text-gray-900">Clear Cart</h3>
+          </div>
+          <p class="text-gray-600 mb-6">
             Are you sure you want to remove all items from your cart?
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" variant="text" @click="showClearCartDialog = false">
+          </p>
+          <div class="flex space-x-3">
+            <button 
+              @click="showClearCartDialog = false"
+              class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-medium rounded-2xl hover:bg-gray-200 transition-colors"
+            >
               Cancel
-            </v-btn>
-            <v-btn color="error" variant="text" @click="clearCart">
+            </button>
+            <button 
+              @click="clearCart"
+              class="flex-1 py-3 px-4 bg-red-500 text-white font-medium rounded-2xl hover:bg-red-600 transition-colors"
+            >
               Clear Cart
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-container>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -231,6 +256,10 @@ import { useCartStore } from '@/stores/cart'
 import { useRouter } from 'vue-router'
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useCurrency } from '@/composables/useCurrency'
+import AppHeader from '@/components/AppHeader.vue'
+import { 
+  ArrowLeft, Trash2, Truck, Minus, Plus, ShoppingCart, AlertTriangle 
+} from 'lucide-vue-next'
 
 const cart = useCartStore()
 const router = useRouter()
@@ -347,116 +376,5 @@ const groupedCartItems = computed(() => {
 </script>
 
 <style scoped>
-.cart-page {
-  padding-bottom: 84px;
-  /* Increased to accommodate bottom fixed button */
-}
-
-.cart-items-container {
-  background-color: white;
-  border-radius: 8px;
-}
-
-.cart-product-group {
-  padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.cart-product-group:last-child {
-  border-bottom: none;
-}
-
-.cart-item-image {
-  border-radius: 8px;
-  border: 1px solid #f0f0f0;
-}
-
-.variants-container {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.variant-item {
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.variant-item:last-child {
-  border-bottom: none;
-}
-
-.quantity-controls {
-  background-color: white;
-  border-radius: 4px;
-  padding: 2px;
-}
-
-.quant {
-  min-width: 24px;
-  text-align: center;
-  font-weight: bold;
-}
-
-.primary-color {
-  color: var(--primary-color);
-}
-
-.fixed-checkout-button {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: white;
-  padding: 16px;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-}
-
-.checkout-btn {
-  text-transform: none;
-  font-weight: 600;
-}
-
-.order-summary {
-  background-color: white;
-  border-radius: 8px;
-  position: sticky;
-  top: 24px;
-}
-
-.empty-cart {
-  margin: 30vh auto;
-  max-width: 500px;
-}
-
-@media (max-width: 600px) {
-  .cart-product-group {
-    padding: 12px;
-  }
-
-  .cart-item-image-container {
-    margin-right: 12px;
-  }
-
-  .cart-item-image {
-    width: 80px;
-    height: 80px;
-  }
-
-  .variants-container {
-    margin-top: 12px;
-  }
-
-  .variant-item {
-    padding: 8px;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .variant-item .d-flex.align-center:last-child {
-    margin-top: 8px;
-    width: 100%;
-    justify-content: space-between;
-  }
-}
+/* Additional styles if needed */
 </style>

@@ -1,169 +1,228 @@
 <template>
-  <div class="explore-page">
-    <v-container class="pa-4 pb-24">
-      <!-- Header -->
-      <div class="d-flex align-center justify-space-between mb-5">
-        <h1 class="text-h5 font-weight-bold">weCare</h1>
-        <div class="d-flex">
-          <v-btn icon class="" variant="text" @click="navigateToNotification">
-            <v-badge v-if="notification.hasUnreadNotifications" :content="notification.unreadCount" color="error"
-              offset-x="1" offset-y="1">
-              <v-icon>mdi-bell-outline</v-icon>
-            </v-badge>
-            <v-icon v-else>mdi-bell-outline</v-icon>
-          </v-btn>
-          <v-btn icon class="" variant="text" @click="navigateToProfile">
-            <v-avatar size="32" color="primary" v-if="auth.user?.profile_picture">
-              <v-img :src="auth.user.profile_picture" alt="Profile" />
-            </v-avatar>
-            <v-icon v-else>mdi-account-circle-outline</v-icon>
-          </v-btn>
-        </div>
-      </div>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div class="p-4">
+      <!-- Enhanced Header -->
+      <AppHeader />
 
       <!-- Search bar -->
-      <v-expand-transition>
-        <div v-if="showSearch" class="mb-4">
-          <v-text-field v-model="search" label="Search products" prepend-inner-icon="mdi-magnify" variant="outlined"
-            density="compact" hide-details clearable @update:model-value="handleSearch" @click:clear="clearSearch"
-            @keyup="search.trim() === '' && clearSearch()" rounded="pill"></v-text-field>
+      <transition name="slide-down">
+        <div v-if="showSearch" class="mb-6">
+          <div class="relative group">
+            <Search class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+            <input
+              v-model="search"
+              type="text"
+              placeholder="Search for products..."
+              class="w-full pl-12 pr-12 py-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200 shadow-sm hover:shadow-md"
+              @input="handleSearch"
+              @keyup="search.trim() === '' && clearSearch()"
+            />
+            <button 
+              v-if="search" 
+              @click="clearSearch"
+              class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X class="w-5 h-5" />
+            </button>
+          </div>
         </div>
-      </v-expand-transition>
+      </transition>
 
       <!-- Filter section -->
-      <div class="filter-section mb-2">
-        <div class="d-flex justify-space-between align-center">
-          <v-btn variant="outlined" class="mr-2 filter-btn text-none" prepend-icon="mdi-filter-variant" rounded="pill"
-            @click="showFilterOptions = !showFilterOptions">
+      <div class="sticky top-0 z-10 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 pt-2 pb-4 mb-4">
+        <div class="flex justify-between items-center">
+          <button 
+            @click="showFilterOptions = !showFilterOptions"
+            class="flex items-center px-4 py-3 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200 shadow-sm"
+          >
+            <Filter class="w-4 h-4 mr-2" />
             Filter
-          </v-btn>
+          </button>
 
-          <div class="filter-chips-container">
-            <div class="d-flex overflow-x-auto">
-              <v-btn class="mr-2 text-none" color="primary" rounded="pill" @click="showAllProducts">
+          <div class="flex-1 ml-4 overflow-x-auto">
+            <div class="flex space-x-3">
+              <button 
+                @click="showAllProducts"
+                class="px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
+                style="background: linear-gradient(to right, #2563eb, #9333ea);"
+              >
                 All
-              </v-btn>
-              <v-btn v-for="category in productStore.categories" :key="category.id" class="mr-2 text-none"
-                :variant="productStore.selectedCategory === category.id ? 'elevated' : 'outlined'" rounded="pill"
-                color="primary" @click="filterByCategory(category.id)">
+              </button>
+              <button 
+                v-for="category in productStore.categories" 
+                :key="category.id"
+                @click="filterByCategory(category.id)"
+                :class="[
+                  'px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-200 whitespace-nowrap shadow-sm hover:shadow-md',
+                  productStore.selectedCategory === category.id 
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
+                    : 'bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white hover:border-blue-500/50'
+                ]"
+                :style="productStore.selectedCategory === category.id ? 'background: linear-gradient(to right, #2563eb, #9333ea);' : ''"
+              >
                 {{ category.name }}
-              </v-btn>
+              </button>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Filter options -->
-      <v-expand-transition>
-        <div v-if="showFilterOptions" class="filter-options mb-4 pa-3">
-          <div class="d-flex flex-column">
+      <transition name="slide-down">
+        <div v-if="showFilterOptions" class="mb-6 p-6 bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20">
+          <div class="space-y-6">
             <!-- Skin Type Filter -->
-            <div class="mb-4">
-              <span class="text-subtitle-2 mb-2 d-block">Filter by Skin Type:</span>
-              <v-select v-model="selectedSkinTypes" :items="productStore.skinTypes" item-title="name" item-value="id"
-                label="Select skin types" multiple chips variant="outlined" density="compact" hide-details clearable
-                @update:model-value="applySkinTypeFilter">
-                <template v-slot:chip="{ props, item }">
-                  <v-chip v-bind="props" :text="item.raw.name" size="small" color="primary" variant="outlined"></v-chip>
-                </template>
-              </v-select>
+            <div>
+              <label class="block text-sm font-semibold text-gray-800 mb-3">Filter by Skin Type</label>
+              <select 
+                v-model="selectedSkinTypes" 
+                multiple
+                @change="applySkinTypeFilter"
+                class="w-full p-4 bg-gray-50/50 border border-gray-200/50 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+              >
+                <option 
+                  v-for="skinType in productStore.skinTypes" 
+                  :key="skinType.id" 
+                  :value="skinType.id"
+                >
+                  {{ skinType.name }}
+                </option>
+              </select>
             </div>
 
             <!-- Skin Concern Filter -->
-            <div class="mb-4">
-              <span class="text-subtitle-2 mb-2 d-block">Filter by Skin Concern:</span>
-              <v-select v-model="selectedSkinConcerns" :items="productStore.skinConcerns" item-title="name"
-                item-value="id" label="Select skin concerns" multiple chips variant="outlined" density="compact"
-                hide-details clearable @update:model-value="applySkinConcernFilter">
-                <template v-slot:chip="{ props, item }">
-                  <v-chip v-bind="props" :text="item.raw.name" size="small" color="teal" variant="outlined"></v-chip>
-                </template>
-              </v-select>
+            <div>
+              <label class="block text-sm font-semibold text-gray-800 mb-3">Filter by Skin Concern</label>
+              <select 
+                v-model="selectedSkinConcerns" 
+                multiple
+                @change="applySkinConcernFilter"
+                class="w-full p-4 bg-gray-50/50 border border-gray-200/50 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+              >
+                <option 
+                  v-for="concern in productStore.skinConcerns" 
+                  :key="concern.id" 
+                  :value="concern.id"
+                >
+                  {{ concern.name }}
+                </option>
+              </select>
             </div>
 
             <!-- Product Type Filter -->
-            <div class="mb-4">
-              <span class="text-subtitle-2 mb-2 d-block">Filter by Product Type:</span>
-              <v-select v-model="selectedProductTypes" :items="productStore.productTypes" item-title="name"
-                item-value="id" label="Select product types" multiple chips variant="outlined" density="compact"
-                hide-details clearable @update:model-value="applyProductTypeFilter">
-                <template v-slot:chip="{ props, item }">
-                  <v-chip v-bind="props" :text="item.raw.name" size="small" color="purple" variant="outlined"></v-chip>
-                </template>
-              </v-select>
+            <div>
+              <label class="block text-sm font-semibold text-gray-800 mb-3">Filter by Product Type</label>
+              <select 
+                v-model="selectedProductTypes" 
+                multiple
+                @change="applyProductTypeFilter"
+                class="w-full p-4 bg-gray-50/50 border border-gray-200/50 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+              >
+                <option 
+                  v-for="productType in productStore.productTypes" 
+                  :key="productType.id" 
+                  :value="productType.id"
+                >
+                  {{ productType.name }}
+                </option>
+              </select>
             </div>
 
-            <div class="d-flex justify-end mt-2">
-              <v-btn color="primary" variant="text" @click="clearAllFilters" class="mr-2 text-none">
+            <div class="flex justify-end pt-2">
+              <button 
+                @click="clearAllFilters"
+                class="px-6 py-3 text-blue-600 hover:text-blue-700 font-semibold text-sm bg-blue-50/50 hover:bg-blue-100/50 rounded-2xl transition-all duration-200"
+              >
                 Clear All
-              </v-btn>
+              </button>
             </div>
           </div>
         </div>
-      </v-expand-transition>
+      </transition>
 
       <!-- All Products Section with Infinite Scroll -->
-      <div class="section mb-6">
-        <!-- <div class="d-flex justify-space-between align-center mb-3">
-          <h2 class="section-title font-weight-bold">{{ sectionTitle }}</h2>
-        </div> -->
-
+      <div class="mb-6">
         <!-- Loading state for initial load -->
-        <div v-if="loading && productStore.products.length === 0" class="d-flex justify-center my-4">
-          <v-progress-circular indeterminate color="primary" />
+        <div v-if="loading && productStore.products.length === 0" class="flex justify-center my-12">
+          <div class="relative">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-200" style="border-color: #dbeafe;"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent absolute top-0 left-0" style="border-color: #2563eb;"></div>
+          </div>
         </div>
 
         <!-- Error state -->
-        <v-alert v-else-if="error" type="error" class="mb-4">{{ error }}</v-alert>
+        <div v-else-if="error" class="mb-6 p-6 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-3xl">
+          <div class="flex items-center">
+            <AlertCircle class="w-6 h-6 text-red-500 mr-3" />
+            <span class="text-red-700 font-medium">{{ error }}</span>
+          </div>
+        </div>
 
         <!-- Products grid -->
-        <div v-else-if="filteredProducts.length > 0" class="products-grid mt-6">
-          <v-card v-for="product in filteredProducts" :key="product.id" class="product-card" flat
-            @click="navigateToDetails(product.id)">
-            <v-img :src="product.main_image || packagingImage" height="150" class="mb-2" cover></v-img>
-            <div class="px-2 pb-2">
-              <h3 class="text-subtitle-2 font-weight-medium mb-1 text-truncate text-capitalize">{{ product.name }}</h3>
-              <p class="text-caption mb-1 text-truncate">{{ product.seller_name || 'weCare' }}</p>
-              <div class="d-flex justify-space-between align-center">
-                <span class="text-subtitle-2 font-weight-bold">{{ formatApiPrice(product) }}</span>
+        <div v-else-if="filteredProducts.length > 0" class="grid grid-cols-2 gap-4 mt-6">
+          <div 
+            v-for="product in filteredProducts" 
+            :key="product.id" 
+            @click="navigateToDetails(product.id)"
+            class="group bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border border-white/20 hover:border-blue-500/20 transform hover:-translate-y-1"
+          >
+            <div class="aspect-square overflow-hidden relative">
+              <img 
+                :src="product.main_image || packagingImage" 
+                :alt="product.name"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
+            <div class="p-4">
+              <h3 class="font-semibold text-sm text-gray-900 mb-2 truncate capitalize leading-tight">{{ product.name }}</h3>
+              <p class="text-xs text-gray-500 mb-3 truncate">{{ product.seller_name || 'weCare' }}</p>
+              <div class="flex justify-between items-center">
+                <span class="font-bold text-lg text-gray-900">{{ formatApiPrice(product) }}</span>
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background: linear-gradient(to right, #2563eb, #9333ea);">
+                  <ArrowRight class="w-4 h-4 text-white" />
+                </div>
               </div>
             </div>
-          </v-card>
+          </div>
         </div>
 
         <!-- Infinite Scroll Loading -->
-        <div v-if="hasMoreProducts && productStore.products.length > 0" ref="loadMoreTrigger" class="text-center py-6">
-          <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
-          <p v-if="loadingMore" class="text-body-2 text-medium-emphasis mt-2">
+        <div v-if="hasMoreProducts && productStore.products.length > 0" ref="loadMoreTrigger" class="text-center py-8">
+          <div v-if="loadingMore" class="relative inline-block">
+            <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-200" style="border-color: #dbeafe;"></div>
+            <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent absolute top-0 left-0" style="border-color: #2563eb;"></div>
+          </div>
+          <p v-if="loadingMore" class="text-sm text-gray-600 mt-3 font-medium">
             Loading more products...
           </p>
         </div>
 
         <!-- End of Results -->
-        <div v-if="!hasMoreProducts && productStore.products.length > 0 && !loading" class="text-center py-8 mb-20">
-          <v-divider class="mb-4"></v-divider>
-          <v-icon color="grey-lighten-1" size="24" class="mb-2">
-            mdi-check-circle-outline
-          </v-icon>
-          <p class="text-body-2 text-medium-emphasis">
+        <div v-if="!hasMoreProducts && productStore.products.length > 0 && !loading" class="text-center py-12 mb-20">
+          <div class="w-16 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto mb-6" style="background: linear-gradient(to right, #2563eb, #9333ea);"></div>
+          <CheckCircle class="w-8 h-8 text-gray-400 mx-auto mb-3" />
+          <p class="text-sm text-gray-600 font-medium">
             That's all for now!
           </p>
-          <p class="text-caption text-medium-emphasis">
+          <p class="text-xs text-gray-500 mt-1">
             You've seen all {{ filteredProducts.length }} products
           </p>
         </div>
 
         <!-- No products state -->
-        <div v-else-if="!loading && filteredProducts.length === 0" class="empty-state text-center my-6">
-          <v-img :src="emptyBoxImage" width="200" height="200" contain class="mx-auto mb-4"></v-img>
-          <h3 class="text-h6 mb-2">No Products Available</h3>
-          <p class="text-body-2 text-grey">Check back soon for new products.</p>
+        <div v-else-if="!loading && filteredProducts.length === 0" class="text-center my-12">
+          <div class="w-32 h-32 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6" style="background: linear-gradient(to right, #dbeafe, #e9d5ff);">
+            <img :src="emptyBoxImage" alt="No products" class="w-20 h-20 opacity-60" />
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">No Products Available</h3>
+          <p class="text-sm text-gray-600">Check back soon for new products.</p>
         </div>
       </div>
 
       <!-- Bottom Navigation -->
       <BottomNavigation />
-    </v-container>
+    </div>
   </div>
 </template>
 
@@ -178,6 +237,10 @@ import BottomNavigation from '@/components/BottomNavigation.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useNotificationStore } from '@/stores/notification'
 import { useCurrency } from '@/composables/useCurrency'
+import AppHeader from '@/components/AppHeader.vue'
+import { 
+  Bell, User, Search, X, Filter, AlertCircle, CheckCircle, ShoppingBag, ArrowRight
+} from 'lucide-vue-next'
 
 const productStore = useProductStore()
 const cart = useCartStore()
@@ -185,7 +248,6 @@ const router = useRouter()
 const auth = useAuthStore()
 const notification = useNotificationStore()
 const { formatApiPrice } = useCurrency()
-
 
 // Search functionality
 const search = ref('')
@@ -304,8 +366,6 @@ const applyProductTypeFilter = async () => {
   // For now, we'll handle product type filtering locally since the API might not support it yet
   // You can extend the backend API to support product type filtering if needed
 }
-
-
 
 const clearAllFilters = async () => {
   selectedSkinTypes.value = []
@@ -433,95 +493,45 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.explore-page {
-  background-color: #f8f9fa;
-  font-family: 'Poppins', sans-serif;
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.filter-section {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background-color: #f8f9fa;
-  padding-top: 8px;
-  padding-bottom: 8px;
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
 }
 
-.filter-chips-container {
-  overflow-x: auto;
-  flex-grow: 1;
-  margin-left: 8px;
-}
-
-.filter-btn {
-  border: 1px solid #e0e0e0;
-  white-space: nowrap;
-}
-
-.filter-options {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.section-title {
-  font-size: 16px;
-}
-
-.primary-color {
-  color: #6b3aa5;
-}
-
-.product-card {
-  background-color: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-
-.products-grid .product-card {
-  width: 100%;
-  background-color: white;
-  border-radius: 12px;
-  overflow: hidden;
-  transition: transform 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.products-grid .product-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-@media (min-width: 600px) {
-  .products-grid {
+/* Responsive grid */
+@media (min-width: 640px) {
+  .grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (min-width: 960px) {
-  .products-grid {
+@media (min-width: 1024px) {
+  .grid {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
+/* Custom scrollbar for filter chips */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 4px;
 }
 
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
 
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: linear-gradient(to right, #2563eb, #9333ea);
+  border-radius: 2px;
+}
 
-.gap-2 {
-  gap: 8px;
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to right, #1d4ed8, #7c3aed);
 }
 </style>

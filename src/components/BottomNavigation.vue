@@ -1,53 +1,81 @@
 <template>
-  <v-bottom-navigation
-    v-model="activeTab"
-    class="bottom-nav"
-    color="primary"
-    height="70"
-    grow
-  >
-    <v-btn 
-      value="home" 
-      :to="{ name: 'Home' }"
-      exact
-    >
-      <v-icon>mdi-home-outline</v-icon>
-      <span>Home</span>
-    </v-btn>
-    
-    <v-btn 
-      value="explore" 
-      :to="{ name: 'Explore' }"
-    >
-      <v-icon>mdi-compass-outline</v-icon>
-      <span>Explore</span>
-    </v-btn>
-    
-    <v-btn 
-      value="orders" 
-      :to="{ name: 'Orders' }"
-    >
-      <v-icon>mdi-receipt-text-outline</v-icon>
-      <span>Orders</span>
-    </v-btn>
-    
-    <v-btn 
-      value="cart" 
-      :to="{ name: 'Cart' }"
-    >
-      <v-badge 
-        v-if="cart.cartItemCount > 0"
-        :content="cart.cartItemCount" 
-        color="error" 
-        offset-x="12" 
-        offset-y="12"
+  <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg">
+    <div class="flex items-center justify-around h-16">
+      <router-link 
+        :to="{ name: 'Home' }"
+        class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
+        :class="activeTab === 'home' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
       >
-        <v-icon>mdi-cart-outline</v-icon>
-      </v-badge>
-      <v-icon v-else>mdi-cart-outline</v-icon>
-      <span>Cart</span>
-    </v-btn>
-  </v-bottom-navigation>
+        <div class="relative">
+          <Home v-if="activeTab === 'home'" class="w-6 h-6 mb-1" />
+          <Home v-else class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+          <div 
+            v-if="activeTab === 'home'" 
+            class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
+            style="background: linear-gradient(to right, #2563eb, #9333ea);"
+          ></div>
+        </div>
+        <span class="font-medium">Home</span>
+      </router-link>
+      
+      <router-link 
+        :to="{ name: 'Explore' }"
+        class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
+        :class="activeTab === 'explore' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+      >
+        <div class="relative">
+          <Search v-if="activeTab === 'explore'" class="w-6 h-6 mb-1" />
+          <Search v-else class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+          <div 
+            v-if="activeTab === 'explore'" 
+            class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
+            style="background: linear-gradient(to right, #2563eb, #9333ea);"
+          ></div>
+        </div>
+        <span class="font-medium">Explore</span>
+      </router-link>
+      
+      <router-link 
+        :to="{ name: 'Orders' }"
+        class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
+        :class="activeTab === 'orders' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+      >
+        <div class="relative">
+          <Package v-if="activeTab === 'orders'" class="w-6 h-6 mb-1" />
+          <Package v-else class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+          <div 
+            v-if="activeTab === 'orders'" 
+            class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
+            style="background: linear-gradient(to right, #2563eb, #9333ea);"
+          ></div>
+        </div>
+        <span class="font-medium">Orders</span>
+      </router-link>
+      
+      <router-link 
+        :to="{ name: 'Cart' }"
+        class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
+        :class="activeTab === 'cart' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+      >
+        <div class="relative">
+          <ShoppingBag v-if="activeTab === 'cart'" class="w-6 h-6 mb-1" />
+          <ShoppingBag v-else class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+          <span 
+            v-if="cart.cartItemCount > 0"
+            class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-sm"
+          >
+            {{ cart.cartItemCount > 99 ? '99+' : cart.cartItemCount }}
+          </span>
+          <div 
+            v-if="activeTab === 'cart'" 
+            class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
+            style="background: linear-gradient(to right, #2563eb, #9333ea);"
+          ></div>
+        </div>
+        <span class="font-medium">Cart</span>
+      </router-link>
+    </div>
+  </nav>
 </template>
 
 <script setup>
@@ -55,6 +83,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useNotificationStore } from '@/stores/notification'
+import { Home, Search, Package, ShoppingBag } from 'lucide-vue-next'
 
 const route = useRoute()
 const cart = useCartStore()
@@ -97,23 +126,5 @@ watch(currentRouteName, updateActiveTab)
 </script>
 
 <style scoped>
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  border-top: 1px solid #e0e0e0;
-  background-color: white;
-}
-
-.v-btn {
-  flex-direction: column;
-  height: 100%;
-  font-size: 11px;
-}
-
-.v-btn .v-icon {
-  margin-bottom: 2px;
-}
+/* Additional styles if needed */
 </style> 

@@ -4,7 +4,7 @@
             <!-- Logo/Brand -->
             <div class="brand-section">
                 <div class="logo-container">
-                    <v-icon size="80" color="white" class="logo-icon">mdi-shopping</v-icon>
+                    <ShoppingBag class="logo-icon" size="80" color="white" />
                 </div>
                 <h1 class="brand-title">weCare</h1>
                 <p class="brand-subtitle">Your Skin Care Store</p>
@@ -12,8 +12,9 @@
 
             <!-- Loading Animation -->
             <!-- <div class="loading-section">
-                <v-progress-circular indeterminate size="48" width="4" color="white"
-                    class="loading-spinner"></v-progress-circular>
+                <div class="loading-spinner">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                </div>
                 <p class="loading-text">{{ loadingText }}</p>
             </div> -->
         </div>
@@ -29,6 +30,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { ShoppingBag } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -136,16 +138,33 @@ onMounted(async () => {
     flex: 1;
     text-align: center;
     z-index: 2;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
 }
 
 .brand-section {
     margin-bottom: 60px;
     animation: fadeInUp 1s ease-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
 .logo-container {
-    margin-bottom: 24px;
+    margin-bottom: 32px;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .logo-icon {
@@ -157,9 +176,11 @@ onMounted(async () => {
     font-size: 48px;
     font-weight: 700;
     color: white;
-    margin: 0 0 8px 0;
+    margin: 0 0 12px 0;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     letter-spacing: -1px;
+    text-align: center;
+    line-height: 1.1;
 }
 
 .brand-subtitle {
@@ -168,6 +189,8 @@ onMounted(async () => {
     margin: 0;
     font-weight: 300;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    line-height: 1.4;
 }
 
 .loading-section {
@@ -189,6 +212,7 @@ onMounted(async () => {
     font-weight: 400;
     min-height: 24px;
     transition: opacity 0.3s ease;
+    text-align: center;
 }
 
 .version-info {
@@ -197,6 +221,7 @@ onMounted(async () => {
     left: 50%;
     transform: translateX(-50%);
     z-index: 2;
+    text-align: center;
 }
 
 .version-text {
@@ -204,6 +229,7 @@ onMounted(async () => {
     color: rgba(255, 255, 255, 0.6);
     margin: 0;
     font-weight: 300;
+    text-align: center;
 }
 
 /* Animations */
@@ -275,8 +301,14 @@ onMounted(async () => {
         font-size: 16px;
     }
 
+    .logo-container {
+        width: 100px;
+        height: 100px;
+    }
+
     .logo-icon {
-        font-size: 64px !important;
+        width: 64px !important;
+        height: 64px !important;
     }
 
     .brand-section {
@@ -293,8 +325,14 @@ onMounted(async () => {
         font-size: 14px;
     }
 
+    .logo-container {
+        width: 80px;
+        height: 80px;
+    }
+
     .logo-icon {
-        font-size: 56px !important;
+        width: 56px !important;
+        height: 56px !important;
     }
 }
 

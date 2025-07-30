@@ -1,142 +1,201 @@
 <template>
-  <div class="home-page">
-    <v-container class="pa-4 pb-24">
-      <!-- Header -->
-      <div class="d-flex align-center justify-space-between mb-5">
-        <h1 class="text-h5 font-weight-bold">weCare</h1>
-        <div class="d-flex">
-          <v-btn icon class="" variant="text" @click="navigateToNotification">
-            <v-badge v-if="notification.hasUnreadNotifications" :content="notification.unreadCount" color="error"
-              offset-x="1" offset-y="1">
-              <v-icon>mdi-bell-outline</v-icon>
-            </v-badge>
-            <v-icon v-else>mdi-bell-outline</v-icon>
-          </v-btn>
-          <v-btn icon class="" variant="text" @click="navigateToProfile">
-            <v-avatar size="32" v-if="auth.user?.profile_picture">
-              <v-img :src="auth.user.profile_picture" alt="Profile" />
-            </v-avatar>
-            <v-icon v-else>mdi-account-circle-outline</v-icon>
-          </v-btn>
-        </div>
-      </div>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div class="p-4 pb-24">
+      <!-- Enhanced Header -->
+      <AppHeader />
 
       <!-- Popular Products Section -->
-      <div v-if="productStore.popularProducts.length > 0" class="section mb-6">
-        <div class="d-flex justify-space-between align-center mb-3">
-          <h2 class="section-title font-weight-bold">Popular Product</h2>
+      <div v-if="productStore.popularProducts.length > 0" class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 mb-1">Popular Products</h2>
+            <p class="text-sm text-slate-600">Trending items you'll love</p>
+          </div>
+          <div class="w-8 h-8 bg-gradient-to-r from-orange-400 to-red-400 rounded-full flex items-center justify-center">
+            <span class="text-white text-xs font-bold">🔥</span>
+          </div>
         </div>
 
         <!-- Loading state -->
-        <div v-if="loading" class="d-flex justify-center my-4">
-          <v-progress-circular indeterminate color="primary" />
+        <div v-if="loading" class="flex justify-center my-8">
+          <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full flex items-center justify-center">
+            <div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          </div>
         </div>
 
         <!-- Error state -->
-        <v-alert v-else-if="error" type="error" class="mb-4">{{ error }}</v-alert>
+        <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-2xl mb-4 flex items-center space-x-2">
+          <div class="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center">
+            <span class="text-red-600 text-xs">!</span>
+          </div>
+          <span class="text-sm">{{ error }}</span>
+        </div>
 
         <!-- Popular products with horizontal scroll -->
-        <div v-else class="horizontal-scroll-container">
-          <div class="horizontal-scroll-content">
-            <v-card v-for="product in productStore.popularProducts.slice(0, 10)" :key="product.id"
-              class="product-card-horizontal" flat @click="navigateToDetails(product.id)">
-              <v-img :src="product.main_image || packagingImage" height="150" class="mb-2" cover></v-img>
-              <div class="px-2 pb-2">
-                <h3 class="text-subtitle-2 font-weight-medium mb-1 text-truncate text-capitalize">{{ product.name }}
-                </h3>
-                <p class="text-caption mb-1 text-truncate">{{ product.seller_name || 'weCare' }}</p>
-                <div class="d-flex justify-space-between align-center">
-                  <span class="text-subtitle-2 font-weight-bold">{{ formatApiPrice(product) }}</span>
+        <div v-else class="overflow-x-auto overflow-y-hidden scrollbar-hide">
+          <div class="flex gap-4 pb-2">
+            <div 
+              v-for="product in productStore.popularProducts.slice(0, 10)" 
+              :key="product.id"
+              class="flex-shrink-0 w-44 bg-white/90 backdrop-blur-sm rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-white/30"
+              @click="navigateToDetails(product.id)"
+            >
+              <div class="relative">
+                <img 
+                  :src="product.main_image || packagingImage" 
+                  class="w-full h-40 object-cover" 
+                  alt="Product"
+                />
+                <div class="absolute top-2 right-2 w-6 h-6 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center">
+                  <span class="text-xs font-bold text-slate-700">🔥</span>
                 </div>
               </div>
-            </v-card>
+              <div class="p-3">
+                <h3 class="text-sm font-semibold mb-1 truncate capitalize text-slate-900">{{ product.name }}</h3>
+                <p class="text-xs text-slate-600 mb-2 truncate">{{ product.seller_name || 'weCare' }}</p>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    {{ formatApiPrice(product) }}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- New Arrivals Section -->
-      <div v-if="productStore.newArrivals.length > 0" class="section mb-6">
-        <div class="d-flex justify-space-between align-center mb-3">
-          <h2 class="section-title font-weight-bold">New Arrivals</h2>
+      <div v-if="productStore.newArrivals.length > 0" class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 mb-1">New Arrivals</h2>
+            <p class="text-sm text-slate-600">Fresh products just for you</p>
+          </div>
+          <div class="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center">
+            <span class="text-white text-xs font-bold">✨</span>
+          </div>
         </div>
 
         <!-- Loading state -->
-        <div v-if="loading" class="d-flex justify-center my-4">
-          <v-progress-circular indeterminate color="primary" />
+        <div v-if="loading" class="flex justify-center my-8">
+          <div class="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center">
+            <div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          </div>
         </div>
 
         <!-- Error state -->
-        <v-alert v-else-if="error" type="error" class="mb-4">{{ error }}</v-alert>
+        <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-2xl mb-4 flex items-center space-x-2">
+          <div class="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center">
+            <span class="text-red-600 text-xs">!</span>
+          </div>
+          <span class="text-sm">{{ error }}</span>
+        </div>
 
         <!-- New arrivals with horizontal scroll -->
-        <div v-else class="horizontal-scroll-container">
-          <div class="horizontal-scroll-content">
-            <v-card v-for="product in productStore.newArrivals.slice(0, 10)" :key="product.id"
-              class="product-card-bundle-horizontal" flat @click="navigateToDetails(product.id)">
-              <div class="d-flex">
-                <v-img :src="product.main_image || packagingImage" height="150" width="100"
-                  class="rounded-lg flex-shrink-0" cover></v-img>
-                <div class="px-3 py-2 d-flex flex-column justify-space-between flex-grow-1">
-                  <div>
-                    <h3 class="text-subtitle-1 font-weight-medium mb-1 text-truncate text-capitalize">{{ product.name }}
-                    </h3>
-                    <p class="text-caption text-grey mb-1 text-truncate">{{ product.seller_name || 'weCare' }}</p>
+        <div v-else class="overflow-x-auto overflow-y-hidden scrollbar-hide">
+          <div class="flex gap-4 pb-2">
+            <div 
+              v-for="product in productStore.newArrivals.slice(0, 10)" 
+              :key="product.id"
+              class="flex-shrink-0 w-72 h-40 bg-white/90 backdrop-blur-sm rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-white/30"
+              @click="navigateToDetails(product.id)"
+            >
+              <div class="flex h-full">
+                <div class="relative w-32 h-full flex-shrink-0">
+                  <img 
+                    :src="product.main_image || packagingImage" 
+                    class="w-full h-full object-cover" 
+                    alt="Product"
+                  />
+                  <div class="absolute top-2 left-2 w-6 h-6 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center">
+                    <span class="text-xs font-bold text-slate-700">✨</span>
                   </div>
-                  <div class="d-flex align-center justify-space-between">
+                </div>
+                <div class="p-4 flex flex-col justify-between flex-1">
+                  <div>
+                    <h3 class="text-sm font-semibold mb-1 truncate capitalize text-slate-900">{{ product.name }}</h3>
+                    <p class="text-xs text-slate-600 mb-2 truncate">{{ product.seller_name || 'weCare' }}</p>
+                  </div>
+                  <div class="flex items-center justify-between">
                     <div>
-                      <span v-if="product.original_price && product.original_price > product.price"
-                        class="text-caption text-decoration-line-through text-grey mr-1">{{ formatApiPrice({
-                          price:
-                            product.original_price
-                        }) }}</span>
-                      <span class="text-subtitle-2 font-weight-bold primary-color">{{ formatApiPrice(product) }}</span>
+                      <span 
+                        v-if="product.original_price && product.original_price > product.price"
+                        class="text-xs line-through text-slate-500 mr-2"
+                      >
+                        {{ formatApiPrice({ price: product.original_price }) }}
+                      </span>
+                      <span class="text-sm font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                        {{ formatApiPrice(product) }}
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
-            </v-card>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Recommended Products Section -->
-      <div v-if="productStore.recommendedProducts.length > 0" class="section mb-6">
-        <div class="d-flex justify-space-between align-center mb-3">
-          <h2 class="section-title font-weight-bold">Recommended For You</h2>
+      <div v-if="productStore.recommendedProducts.length > 0" class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 mb-1">Recommended For You</h2>
+            <p class="text-sm text-slate-600">Personalized picks just for you</p>
+          </div>
+          <div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+            <span class="text-white text-xs font-bold">💫</span>
+          </div>
         </div>
 
         <!-- Loading state -->
-        <div v-if="loading" class="d-flex justify-center my-4">
-          <v-progress-circular indeterminate color="primary" />
+        <div v-if="loading" class="flex justify-center my-8">
+          <div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+            <div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          </div>
         </div>
 
         <!-- Error state -->
-        <v-alert v-else-if="error" type="error" class="mb-4">{{ error }}</v-alert>
+        <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-2xl mb-4 flex items-center space-x-2">
+          <div class="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center">
+            <span class="text-red-600 text-xs">!</span>
+          </div>
+          <span class="text-sm">{{ error }}</span>
+        </div>
 
         <!-- Recommended products in 2x2 grid -->
         <div v-else>
-          <v-row dense>
-            <v-col v-for="product in productStore.recommendedProducts.slice(0, 4)" :key="product.id" cols="6"
-              class="pa-1">
-              <v-card class="product-card-grid" flat @click="navigateToDetails(product.id)"
-                style="cursor: pointer; height: 100%;">
-                <v-img :src="product.main_image || packagingImage" height="120" class="mb-2" cover></v-img>
-                <div class="px-2 pb-2">
-                  <h3 class="text-caption font-weight-medium mb-1 text-truncate text-capitalize">{{ product.name }}</h3>
-                  <p class="text-caption mb-1 text-truncate text-grey">{{ product.seller_name || 'weCare' }}</p>
-                  <div class="d-flex justify-space-between align-center">
-                    <span class="text-subtitle-2 font-weight-bold primary-color">{{ formatApiPrice(product) }}</span>
-                  </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div 
+              v-for="product in productStore.recommendedProducts.slice(0, 4)" 
+              :key="product.id"
+              class="bg-white/90 backdrop-blur-sm rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-white/30"
+              @click="navigateToDetails(product.id)"
+            >
+              <div class="relative">
+                <img 
+                  :src="product.main_image || packagingImage" 
+                  class="w-full h-32 object-cover" 
+                  alt="Product"
+                />
+                <div class="absolute top-2 right-2 w-6 h-6 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center">
+                  <span class="text-xs font-bold text-slate-700">💫</span>
                 </div>
-              </v-card>
-            </v-col>
-          </v-row>
+              </div>
+              <div class="p-3">
+                <h3 class="text-xs font-semibold mb-1 truncate capitalize text-slate-900">{{ product.name }}</h3>
+                <p class="text-xs text-slate-600 mb-2 truncate">{{ product.seller_name || 'weCare' }}</p>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    {{ formatApiPrice(product) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <!-- Bottom Navigation -->
-      <BottomNavigation />
-    </v-container>
+    </div>
   </div>
 </template>
 
@@ -146,10 +205,10 @@ import { useCartStore } from '@/stores/cart'
 import { useProductStore } from '@/stores/product'
 import { useRouter } from 'vue-router'
 import packagingImage from '@/assets/packaging_10471395.png'
-import BottomNavigation from '@/components/BottomNavigation.vue'
 import { useNotificationStore } from '@/stores/notification'
 import { useAuthStore } from '@/stores/auth'
 import { useCurrency } from '@/composables/useCurrency'
+import AppHeader from '@/components/AppHeader.vue'
 
 const productStore = useProductStore()
 const cart = useCartStore()
@@ -213,93 +272,59 @@ const navigateToNotification = () => {
 </script>
 
 <style scoped>
-.home-page {
-  background-color: #f8f9fa;
-  font-family: 'Poppins', sans-serif;
+/* Hide scrollbar for webkit browsers */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
 }
 
-.section-title {
-  font-size: 16px;
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
 }
 
-.primary-color {
-  color: #6b3aa5;
+/* Custom width for bundle cards */
+.w-70 {
+  width: 17.5rem;
 }
 
-.product-card-horizontal {
-  flex: 0 0 160px;
-  /* Fixed width */
-  width: 160px;
-  background-color: white;
-  border-radius: 12px;
-  overflow: hidden;
-  transition: transform 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+.h-30 {
+  height: 7.5rem;
 }
 
-.product-card-horizontal:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+/* Enhanced hover effects */
+.hover\:-translate-y-2:hover {
+  transform: translateY(-0.5rem);
 }
 
-.product-card-bundle-horizontal {
-  flex: 0 0 280px;
-  /* Fixed width for bundle cards */
-  width: 280px;
-  height: 150px;
-  background-color: white;
-  border-radius: 12px;
-  overflow: hidden;
-  transition: transform 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+/* Smooth transitions */
+.transition-all {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.product-card-bundle-horizontal:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+/* Glass morphism effect */
+.backdrop-blur-sm {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-/* Horizontal scroll containers */
-.horizontal-scroll-container {
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  /* Firefox */
-  -ms-overflow-style: none;
-  /* Internet Explorer 10+ */
+/* Enhanced shadows */
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-.horizontal-scroll-container::-webkit-scrollbar {
-  display: none;
-  /* WebKit */
+.shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-.horizontal-scroll-content {
-  display: flex;
-  gap: 12px;
-  padding-bottom: 4px;
+/* Gradient text animation */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-/* Grid product cards for recommended products */
-.product-card-grid {
-  background-color: white;
-  border-radius: 12px;
-  overflow: hidden;
-  transition: transform 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  min-height: 180px;
-}
-
-.product-card-grid:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* Make sure vertical scrolling is smooth */
-::-webkit-scrollbar {
-  height: 0;
-  width: 0;
-  display: none;
+.bg-gradient-to-r {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
 }
 </style>

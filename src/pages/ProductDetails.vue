@@ -1,193 +1,357 @@
 <template>
-  <div class="product-details-page">
-    <v-container class="pa-0 pb-24">
-      <!-- Top navigation bar -->
-      <div class="top-bar px-4 py-2 d-flex align-center">
-        <v-btn icon @click="$router.go(-1)" class="mr-2" variant="text">
-          <v-icon color="primary">mdi-arrow-left</v-icon>
-        </v-btn>
-        <v-spacer></v-spacer>
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 pb-24">
+    <!-- Top navigation bar -->
+    <div class="fixed top-0 left-0 right-0 z-50 px-4 py-3">
+      <div class="flex items-center justify-between">
+        <button 
+          @click="$router.go(-1)" 
+          class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-white/20 flex items-center justify-center"
+        >
+          <ArrowLeft class="w-5 h-5 text-gray-700" />
+        </button>
+        <div class="flex items-center space-x-2">
+          <button class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-white/20 flex items-center justify-center">
+            <Heart class="w-5 h-5 text-gray-700" />
+          </button>
+          <button class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-white/20 flex items-center justify-center">
+            <Share2 class="w-5 h-5 text-gray-700" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading skeleton -->
+    <div v-if="loading" class="pt-20 px-4">
+      <div class="animate-pulse">
+        <div class="bg-gray-200 rounded-3xl h-96 mb-6"></div>
+        <div class="space-y-4">
+          <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+          <div class="h-6 bg-gray-200 rounded w-1/2"></div>
+          <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error alert -->
+    <div v-if="error" class="pt-20 px-4 mb-4">
+      <div class="p-4 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-3xl">
+        <div class="flex items-center">
+          <AlertCircle class="w-5 h-5 text-red-500 mr-3" />
+          <span class="text-red-700 font-medium">{{ error }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product details -->
+    <div v-if="product" class="pt-20">
+      <!-- Product image carousel -->
+      <div class="relative mb-6">
+        <div class="aspect-square overflow-hidden">
+          <img 
+            v-if="product.image_1 == null && product.image_2 == null"
+            :src="product.main_image || packagingImage" 
+            :alt="product.name"
+            class="w-full h-full object-cover"
+          />
+          <div v-else class="relative">
+            <img 
+              :src="currentImage" 
+              :alt="product.name"
+              class="w-full h-full object-cover"
+            />
+            <!-- Image navigation dots -->
+            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+              <button 
+                v-for="(image, index) in productImages" 
+                :key="index"
+                @click="currentImageIndex = index"
+                :class="[
+                  'w-2 h-2 rounded-full transition-all duration-200',
+                  currentImageIndex === index 
+                    ? 'bg-white shadow-lg' 
+                    : 'bg-white/50 hover:bg-white/75'
+                ]"
+              ></button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Loading skeleton -->
-      <v-skeleton-loader v-if="loading" type="image, article" class="my-4" />
-
-      <!-- Error alert -->
-      <v-alert v-if="error" type="error" class="mb-4">{{ error }}</v-alert>
-
-      <!-- Product details -->
-      <div v-if="product" class="product-details">
-        <!-- Product image carousel -->
-        <div class="product-image-container">
-          <v-img :src="product.main_image || packagingImage" cover height="450"
-            v-if="product.image_1 == null && product.image_2 == null"></v-img>
-          <v-carousel :show-arrows="false" hide-delimiter-background height="450" delimiter-icon="mdi-circle" cycle
-            color="primary" interval="12000" v-else>
-            <v-carousel-item
-              v-for="(image, i) in [product.main_image, product.image_1, product.image_2, product.image_3] || []"
-              :key="i" :src="image" cover></v-carousel-item>
-          </v-carousel>
+      <!-- Product info -->
+      <div class="px-4 space-y-6">
+        <!-- Brand and stock status -->
+        <div class="flex justify-between items-center">
+          <div class="text-sm text-gray-500 font-medium">{{ product.seller_name || 'weCare' }}</div>
+          <div 
+            v-if="currentStock > 0" 
+            class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full"
+          >
+            {{ currentStock }} In Stock
+          </div>
+          <div 
+            v-else 
+            class="px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full"
+          >
+            Out of Stock
+          </div>
         </div>
 
-        <!-- Product info -->
-        <div class="product-info pa-4">
-          <div class="d-flex justify-space-between align-center mb-2">
-            <div class="brand text-caption text-grey">{{ product.seller_name || 'weCare' }}</div>
-            <v-chip color="success" size="x-small" class="text-caption" v-if="currentStock > 0">{{ currentStock }} In
-              Stock</v-chip>
-            <v-chip color="error" size="x-small" class="text-caption" v-else>Out of Stock</v-chip>
+        <!-- Product title -->
+        <h1 class="text-2xl font-bold text-gray-900 capitalize leading-tight">{{ product.name }}</h1>
+
+        <!-- Price -->
+        <div class="flex items-center justify-between">
+          <div class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+            {{ formatApiPrice({ price: currentPrice }) }}
+          </div>
+        </div>
+
+        <!-- Size and Quantity - Only show if in stock -->
+        <div v-if="product.variants && product.variants.length > 0" class="space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-gray-900">Size (ml)</h3>
           </div>
 
-          <h1 class="product-title text-h6 font-weight-bold mb-1 text-capitalize">{{ product.name }}</h1>
+          <!-- Size options -->
+          <div class="flex flex-wrap gap-3">
+            <button 
+              v-for="variant in product.variants" 
+              :key="variant.id"
+              @click="selectVariant(variant)"
+              :class="[
+                'px-4 py-3 rounded-2xl font-medium transition-all duration-200',
+                selectedVariant?.id === variant.id 
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
+                  : 'bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white hover:shadow-md'
+              ]"
+              :style="selectedVariant?.id === variant.id ? 'background: linear-gradient(to right, #2563eb, #9333ea);' : ''"
+            >
+              {{ variant.name }}
+            </button>
+          </div>
+        </div>
 
-          <div class="d-flex justify-space-between align-center mb-4">
-            <div class="price text-h5 font-weight-bold primary-color">{{ formatApiPrice({ price: currentPrice }) }}
-            </div>
+        <!-- Tab section -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-sm border border-white/20">
+          <!-- Tab headers -->
+          <div class="flex space-x-1 mb-6 bg-gray-100/50 rounded-2xl p-1">
+            <button 
+              @click="activeTab = 'description'"
+              :class="[
+                'flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all duration-200',
+                activeTab === 'description' 
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-gray-600 hover:text-gray-900'
+              ]"
+            >
+              Description
+            </button>
+            <button 
+              @click="activeTab = 'reviews'"
+              :class="[
+                'flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all duration-200',
+                activeTab === 'reviews' 
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-gray-600 hover:text-gray-900'
+              ]"
+            >
+              Reviews ({{ product.review_stats.count }})
+            </button>
+            <button 
+              @click="activeTab = 'how-to-use'"
+              :class="[
+                'flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all duration-200',
+                activeTab === 'how-to-use' 
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-gray-600 hover:text-gray-900'
+              ]"
+            >
+              How to use
+            </button>
           </div>
 
-          <!-- Size and Quantity - Only show if in stock -->
-          <div class="mt-6" v-if="product.variants && product.variants.length > 0">
-            <div class="d-flex justify-space-between align-center mb-2">
-              <h3 class="text-subtitle-2 font-weight-medium">Size (ml)</h3>
-            </div>
+          <!-- Tab content -->
+          <div class="space-y-6">
+            <!-- Description tab -->
+            <div v-if="activeTab === 'description'" class="space-y-6">
+              <p class="text-gray-700 leading-relaxed">{{ product.description || "No description available." }}</p>
 
-            <!-- Size options -->
-            <div class="size-options d-flex mb-4">
-              <v-btn v-for="variant in product.variants" :key="variant.id"
-                :variant="selectedVariant?.id === variant.id ? 'flat' : 'outlined'" class="size-btn mr-2"
-                :color="selectedVariant?.id === variant.id ? 'primary' : ''" @click="selectVariant(variant)">
-                {{ variant.name }}
-              </v-btn>
-            </div>
-          </div>
+              <div class="space-y-4">
+                <div>
+                  <h6 class="text-lg font-semibold text-gray-900 mb-2">Ingredients</h6>
+                  <p class="text-gray-700 leading-relaxed">{{ product.ingredients || "No ingredients available." }}</p>
+                </div>
 
-          <!-- Tab section -->
-          <v-tabs v-model="activeTab" bg-color="transparent" color="primary" grow>
-            <v-tab value="description" class="text-none">Description</v-tab>
-            <v-tab value="reviews" class="text-none">Reviews ({{ product.review_stats.count }})</v-tab>
-            <v-tab value="how-to-use" class="text-none">How to use</v-tab>
-          </v-tabs>
-
-          <v-window v-model="activeTab" class="mt-4">
-            <v-window-item value="description">
-              <p class="text-body-2">{{ product.description || "No description available." }}</p>
-
-              <h6 class="text-h6 font-weight-bold mb-1 mt-4">Ingredients</h6>
-              <p class="text-body-2">{{ product.ingredients || "No ingredients available." }}</p>
-
-              <h6 class="text-h6 font-weight-bold mb-1 mt-4">Benefits</h6>
-              <p class="text-body-2">{{ product.benefits || "No benefits available." }}</p>
+                <div>
+                  <h6 class="text-lg font-semibold text-gray-900 mb-2">Benefits</h6>
+                  <p class="text-gray-700 leading-relaxed">{{ product.benefits || "No benefits available." }}</p>
+                </div>
+              </div>
 
               <!-- Skin Types Section -->
-              <div v-if="product.suitable_for && product.suitable_for.length > 0" class="mt-4">
-                <h6 class="text-h6 font-weight-bold mb-2">Suitable for Skin Types</h6>
-                <div class="d-flex flex-wrap gap-2">
-                  <v-chip v-for="skinType in product.suitable_for" :key="skinType.id" class="text-body-2"
-                    variant="outlined" color="primary" size="small">
+              <div v-if="product.suitable_for && product.suitable_for.length > 0" class="space-y-3">
+                <h6 class="text-lg font-semibold text-gray-900">Suitable for Skin Types</h6>
+                <div class="flex flex-wrap gap-2">
+                  <span 
+                    v-for="skinType in product.suitable_for" 
+                    :key="skinType.id"
+                    class="px-3 py-2 bg-blue-50 text-blue-700 text-sm font-medium rounded-full border border-blue-200"
+                  >
                     {{ skinType.name }}
-                  </v-chip>
+                  </span>
                 </div>
               </div>
 
               <!-- Skin Concerns Section -->
-              <div v-if="product.skin_concerns && product.skin_concerns.length > 0" class="mt-4">
-                <h6 class="text-h6 font-weight-bold mb-2">Addresses Skin Concerns</h6>
-                <div class="d-flex flex-wrap gap-2">
-                  <v-chip v-for="concern in product.skin_concerns" :key="concern.id" class="text-body-2"
-                    variant="outlined" color="teal" size="small">
+              <div v-if="product.skin_concerns && product.skin_concerns.length > 0" class="space-y-3">
+                <h6 class="text-lg font-semibold text-gray-900">Addresses Skin Concerns</h6>
+                <div class="flex flex-wrap gap-2">
+                  <span 
+                    v-for="concern in product.skin_concerns" 
+                    :key="concern.id"
+                    class="px-3 py-2 bg-teal-50 text-teal-700 text-sm font-medium rounded-full border border-teal-200"
+                  >
                     {{ concern.name }}
-                  </v-chip>
+                  </span>
                 </div>
               </div>
 
               <!-- Product Types Section -->
-              <div v-if="product.product_types && product.product_types.length > 0" class="mt-4">
-                <h6 class="text-h6 font-weight-bold mb-2">Product Types</h6>
-                <div class="d-flex flex-wrap gap-2">
-                  <v-chip v-for="type in product.product_types" :key="type.id" class="text-body-2" variant="outlined"
-                    color="purple" size="small">
+              <div v-if="product.product_types && product.product_types.length > 0" class="space-y-3">
+                <h6 class="text-lg font-semibold text-gray-900">Product Types</h6>
+                <div class="flex flex-wrap gap-2">
+                  <span 
+                    v-for="type in product.product_types" 
+                    :key="type.id"
+                    class="px-3 py-2 bg-purple-50 text-purple-700 text-sm font-medium rounded-full border border-purple-200"
+                  >
                     {{ type.name }}
-                  </v-chip>
+                  </span>
                 </div>
               </div>
-            </v-window-item>
-
-            <v-window-item value="reviews">
-              <div class="reviews-section">
-                <div class="d-flex align-center mb-3">
-                  <v-rating :model-value="product.review_stats.avg_rating" color="amber" density="compact"
-                    half-increments readonly size="small"></v-rating>
-                  <span class="text-body-2 ml-2">({{ product.review_stats.count }} reviews)</span>
-                </div>
-
-                <!-- Sample reviews -->
-                <div class="review-item pa-3 mb-3 rounded" v-if="product.review_stats.count > 0">
-                  <div v-for="review in productStore.productReviews" :key="review.id">
-                    <div class="d-flex justify-space-between">
-                      <div class="font-weight-medium">{{ review.user_name }}</div>
-                      <div class="text-caption text-grey">{{ review.created_at }}</div>
-                    </div>
-                    <v-rating :model-value="review.rating" color="amber" density="compact" readonly size="x-small"
-                      class="my-1"></v-rating>
-                    <p class="text-caption">{{ review.comment }}</p>
-                  </div>
-                </div>
-                <div class="review-item pa-3 mb-3 rounded" v-else>
-                  <v-icon size="x-large" color="primary" class="mb-2">mdi-comment-quote-outline</v-icon>
-                  <p class="text-body-2">No reviews yet. Be the first to review this product.</p>
-                </div>
-              </div>
-            </v-window-item>
-
-            <v-window-item value="how-to-use">
-              <p class="text-body-2">{{ product.how_to_use }}</p>
-            </v-window-item>
-          </v-window>
-        </div>
-      </div>
-
-      <!-- Bottom fixed action buttons -->
-      <div v-if="product" class="bottom-actions-container">
-        <div class="bottom-actions-buttons">
-          <!-- Out of stock notification button -->
-          <v-btn v-if="currentStock <= 0" color="primary" class="text-none" block size="large" rounded
-            @click="requestRestockNotification" :loading="notificationStatus === 'loading'">
-            Keep Me Updated
-          </v-btn>
-
-          <!-- In stock action buttons -->
-          <div v-else class="d-flex align-center">
-            <div class="d-flex align-center mr-4">
-              <v-btn variant="outlined" icon="mdi-minus" density="comfortable" @click="decreaseQuantity"
-                class="quantity-btn font-weight-bold" color="primary"></v-btn>
-              <div class="quantity-display mx-1 font-weight-bold text-primary">{{ quantity }}</div>
-              <v-btn variant="outlined" icon="mdi-plus" density="comfortable" @click="increaseQuantity(currentStock)"
-                class="quantity-btn font-weight-bold" color="primary"></v-btn>
             </div>
 
-            <v-btn color="primary" rounded variant="outlined" class="flex-grow-1 text-none" size="large"
-              @click="addToCart">
-              <v-badge :content="cartItemsCount" color="error" class="mr-2">
-                <v-icon>mdi-cart</v-icon>
-              </v-badge>
-              Add to Cart
-            </v-btn>
+            <!-- Reviews tab -->
+            <div v-if="activeTab === 'reviews'" class="space-y-4">
+              <div class="flex items-center space-x-2 mb-4">
+                <div class="flex items-center">
+                  <Star v-for="i in 5" :key="i" class="w-5 h-5" :class="i <= Math.round(product.review_stats.avg_rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'" />
+                </div>
+                <span class="text-gray-600 font-medium">({{ product.review_stats.count }} reviews)</span>
+              </div>
 
-            <v-btn color="primary" class="ml-4" icon @click="goToCart">
-              <v-icon>mdi-basket-check</v-icon>
-            </v-btn>
+              <!-- Sample reviews -->
+              <div v-if="product.review_stats.count > 0" class="space-y-4">
+                <div 
+                  v-for="review in productStore.productReviews" 
+                  :key="review.id"
+                  class="p-4 bg-gray-50/50 rounded-2xl border border-gray-200/50"
+                >
+                  <div class="flex justify-between items-start mb-2">
+                    <div class="font-semibold text-gray-900">{{ review.user_name }}</div>
+                    <div class="text-xs text-gray-500">{{ review.created_at }}</div>
+                  </div>
+                  <div class="flex items-center mb-2">
+                    <Star v-for="i in 5" :key="i" class="w-4 h-4" :class="i <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'" />
+                  </div>
+                  <p class="text-sm text-gray-700">{{ review.comment }}</p>
+                </div>
+              </div>
+              <div v-else class="text-center py-8">
+                <MessageCircle class="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <p class="text-gray-600 font-medium">No reviews yet. Be the first to review this product.</p>
+              </div>
+            </div>
+
+            <!-- How to use tab -->
+            <div v-if="activeTab === 'how-to-use'" class="space-y-4">
+              <p class="text-gray-700 leading-relaxed">{{ product.how_to_use || "No usage instructions available." }}</p>
+            </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Snackbar for notifications -->
-      <v-snackbar v-model="showSnackbar" :color="snackbarColor" :timeout="3000" location="top" class="ml-4">
-        {{ snackbarText }}
-        <template v-slot:actions>
-          <v-btn variant="text" icon="mdi-close" @click="showSnackbar = false"></v-btn>
-        </template>
-      </v-snackbar>
-    </v-container>
+    <!-- Bottom fixed action buttons -->
+    <div v-if="product" class="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-t border-gray-200/50">
+      <div class="p-4">
+        <!-- Out of stock notification button -->
+        <button 
+          v-if="currentStock <= 0" 
+          @click="requestRestockNotification"
+          :disabled="notificationStatus === 'loading'"
+          class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+          style="background: linear-gradient(to right, #2563eb, #9333ea);"
+        >
+          <span v-if="notificationStatus === 'loading'" class="flex items-center justify-center">
+            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+            Registering...
+          </span>
+          <span v-else>Keep Me Updated</span>
+        </button>
+
+        <!-- In stock action buttons -->
+        <div v-else class="flex items-center space-x-3">
+          <div class="flex items-center bg-gray-100 rounded-2xl p-1">
+            <button 
+              @click="decreaseQuantity"
+              class="w-10 h-10 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors"
+            >
+              <Minus class="w-5 h-5" />
+            </button>
+            <div class="w-12 text-center font-bold text-gray-900">{{ quantity }}</div>
+            <button 
+              @click="increaseQuantity(currentStock)"
+              class="w-10 h-10 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors"
+            >
+              <Plus class="w-5 h-5" />
+            </button>
+          </div>
+
+          <button 
+            @click="addToCart"
+            class="flex-1 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
+            style="background: linear-gradient(to right, #2563eb, #9333ea);"
+          >
+            <ShoppingBag class="w-5 h-5 mr-2" />
+            Add to Cart
+          </button>
+
+          <button 
+            @click="goToCart"
+            class="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center hover:bg-gray-200 transition-colors relative"
+          >
+            <ShoppingCart class="w-6 h-6 text-gray-700" />
+            <span 
+              v-if="cartItemsCount > 0"
+              class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold"
+            >
+              {{ cartItemsCount > 99 ? '99+' : cartItemsCount }}
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Snackbar for notifications -->
+    <div 
+      v-if="showSnackbar" 
+      class="fixed top-4 left-4 right-4 z-50 p-4 rounded-2xl shadow-lg transition-all duration-300"
+      :class="snackbarColor === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'"
+    >
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <CheckCircle v-if="snackbarColor === 'success'" class="w-5 h-5 text-green-500 mr-3" />
+          <AlertCircle v-else class="w-5 h-5 text-red-500 mr-3" />
+          <span :class="snackbarColor === 'success' ? 'text-green-700' : 'text-red-700'" class="font-medium">
+            {{ snackbarText }}
+          </span>
+        </div>
+        <button @click="showSnackbar = false" class="text-gray-400 hover:text-gray-600">
+          <X class="w-5 h-5" />
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -199,6 +363,10 @@ import { useProductStore } from '@/stores/product'
 import { apiService } from '@/services/api'
 import { useCurrency } from '@/composables/useCurrency'
 import packagingImage from '@/assets/packaging_10471395.png'
+import { 
+  ArrowLeft, Heart, Share2, AlertCircle, Star, MessageCircle, 
+  Minus, Plus, ShoppingBag, ShoppingCart, CheckCircle, X 
+} from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
@@ -213,10 +381,22 @@ const notificationStatus = ref('')
 const showSnackbar = ref(false)
 const snackbarText = ref('')
 const snackbarColor = ref('success')
+const currentImageIndex = ref(0)
 
 const loading = computed(() => productStore.loading)
 const error = computed(() => productStore.error)
 const product = computed(() => productStore.currentProduct)
+
+// Computed property for product images
+const productImages = computed(() => {
+  if (!product.value) return []
+  return [product.value.main_image, product.value.image_1, product.value.image_2, product.value.image_3].filter(Boolean)
+})
+
+// Computed property for current image
+const currentImage = computed(() => {
+  return productImages.value[currentImageIndex.value] || packagingImage
+})
 
 const increaseQuantity = (productStock) => {
   if (quantity.value < productStock) {
@@ -370,97 +550,5 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.product-details-page {
-  background-color: white;
-  min-height: 100vh;
-  padding-bottom: 70px;
-  /* Add extra space for fixed buttons */
-}
-
-.top-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-}
-
-.product-image-container {
-  position: relative;
-  margin-bottom: 16px;
-}
-
-.product-title {
-  text-transform: capitalize;
-}
-
-.primary-color {
-  color: #6b3aa5;
-}
-
-.quantity-selector {
-  display: flex;
-  align-items: center;
-}
-
-.quantity-display {
-  min-width: 40px;
-  text-align: center;
-  font-weight: bold;
-}
-
-.size-btn {
-  min-width: 70px;
-  border-radius: 12px;
-}
-
-.review-item {
-  background-color: #f8f9fa;
-}
-
-.bottom-actions-container {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: white;
-  z-index: 100;
-  border-top: 1px solid #f0f0f0;
-}
-
-.bottom-actions-buttons {
-  padding: 16px;
-  max-width: 100%;
-  margin: 0 auto;
-}
-
-@media (min-width: 960px) {
-  .product-details {
-    display: flex;
-  }
-
-  .product-image-container {
-    flex: 1;
-    margin-bottom: 0;
-  }
-
-  .product-info {
-    flex: 1;
-  }
-
-  .bottom-actions-buttons {
-    max-width: 960px;
-  }
-}
-
-.quantity-btn {
-  min-width: 36px;
-  height: 36px;
-}
-
-.quantity-display {
-  min-width: 32px;
-  text-align: center;
-  font-weight: bold;
-}
+/* Additional styles if needed */
 </style>

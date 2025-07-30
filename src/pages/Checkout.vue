@@ -1,588 +1,916 @@
 <template>
-  <div class="checkout-page">
-    <v-container>
-      <!-- Header with back button and title -->
-      <div class="d-flex align-center justify-space-between mb-4">
-        <v-btn icon variant="text" @click="$router.push({ name: 'Cart' })">
-          <v-icon>mdi-arrow-left</v-icon>
-        </v-btn>
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 pb-24">
+    <div class="p-4">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
+        <button 
+          @click="$router.push({ name: 'Cart' })"
+          class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-white/20 flex items-center justify-center"
+        >
+          <ArrowLeft class="w-5 h-5 text-gray-700" />
+        </button>
 
-        <h1 class="text-h5 font-weight-bold text-center">Checkout</h1>
+        <h1 class="text-xl font-bold text-gray-900">Checkout</h1>
 
-        <div style="width: 40px"></div> <!-- Spacer to maintain layout -->
+        <div class="w-10"></div>
       </div>
 
       <!-- Checkout stepper -->
-      <v-stepper v-model="currentStep" class="mb-6 checkout-stepper">
-        <v-stepper-header>
-          <v-stepper-item :value="1" title="Address"></v-stepper-item>
-          <v-divider></v-divider>
-          <v-stepper-item :value="2" title="Delivery"></v-stepper-item>
-          <v-divider></v-divider>
-          <v-stepper-item :value="3" title="Payment"></v-stepper-item>
-        </v-stepper-header>
+      <div class="mb-6">
+        <!-- Stepper header -->
+        <div class="flex items-center justify-center mb-8">
+          <div class="flex items-center space-x-4">
+            <div class="flex flex-col items-center">
+              <div 
+                :class="[
+                  'w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm mb-1',
+                  currentStep >= 1 
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
+                    : 'border-2 border-gray-300 text-gray-500'
+                ]"
+                :style="currentStep >= 1 ? 'background: linear-gradient(to right, #2563eb, #9333ea);' : ''"
+              >
+                1
+              </div>
+              <span 
+                :class="[
+                  'text-xs font-medium',
+                  currentStep >= 1 ? 'text-gray-900' : 'text-gray-500'
+                ]"
+              >
+                Address
+              </span>
+            </div>
+            <div 
+              :class="[
+                'w-8 h-1 rounded-full',
+                currentStep >= 2 ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-gray-300'
+              ]"
+              :style="currentStep >= 2 ? 'background: linear-gradient(to right, #2563eb, #9333ea);' : ''"
+            ></div>
+            <div class="flex flex-col items-center">
+              <div 
+                :class="[
+                  'w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm mb-1',
+                  currentStep >= 2 
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
+                    : 'border-2 border-gray-300 text-gray-500'
+                ]"
+                :style="currentStep >= 2 ? 'background: linear-gradient(to right, #2563eb, #9333ea);' : ''"
+              >
+                2
+              </div>
+              <span 
+                :class="[
+                  'text-xs font-medium',
+                  currentStep >= 2 ? 'text-gray-900' : 'text-gray-500'
+                ]"
+              >
+                Delivery
+              </span>
+            </div>
+            <div 
+              :class="[
+                'w-8 h-1 rounded-full',
+                currentStep >= 3 ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-gray-300'
+              ]"
+              :style="currentStep >= 3 ? 'background: linear-gradient(to right, #2563eb, #9333ea);' : ''"
+            ></div>
+            <div class="flex flex-col items-center">
+              <div 
+                :class="[
+                  'w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm mb-1',
+                  currentStep >= 3 
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
+                    : 'border-2 border-gray-300 text-gray-500'
+                ]"
+                :style="currentStep >= 3 ? 'background: linear-gradient(to right, #2563eb, #9333ea);' : ''"
+              >
+                3
+              </div>
+              <span 
+                :class="[
+                  'text-xs font-medium',
+                  currentStep >= 3 ? 'text-gray-900' : 'text-gray-500'
+                ]"
+              >
+                Payment
+              </span>
+            </div>
+          </div>
+        </div>
 
-        <v-stepper-window>
+        <!-- Step content -->
+        <div class="space-y-6">
           <!-- Step 1: Address Selection -->
-          <v-stepper-window-item :value="1">
-            <div class="pa-2">
-              <h2 class="text-h6 font-weight-bold mb-4">Delivery to</h2>
+          <div v-if="currentStep === 1" class="space-y-6">
+            <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm border border-white/20 p-6">
+              <h2 class="text-xl font-bold text-gray-900 mb-6">Delivery Address</h2>
 
               <!-- Address list -->
-              <div v-if="!loading">
+              <div v-if="!loading" class="space-y-4">
                 <div v-if="addresses.length > 0">
-                  <v-card v-for="(address, index) in addresses" :key="index"
-                    :class="['mb-4', 'rounded-lg', 'address-card', { 'selected-address': selectedAddressIndex === index }]"
-                    elevation="1" @click="selectAddress(index)">
-                    <v-card-text class="pa-4">
-                      <div class="d-flex justify-space-between align-center">
-                        <div class="d-flex align-center flex-grow-1">
-                          <v-avatar color="primary" class="mr-3" size="24">
-                            <v-icon color="white" size="small">
-                              {{ address.type === 'home' ? 'mdi-home' : 'mdi-office-building' }}
-                            </v-icon>
-                          </v-avatar>
-                          <div class="flex-grow-1">
-                            <div class="d-flex align-center">
-                              <span class="text-subtitle-1 font-weight-medium mr-2">{{ address.address_label }}</span>
-                              <v-chip 
-                                v-if="address.latitude && address.longitude" 
-                                color="success" 
-                                size="x-small"
-                                variant="flat"
-                              >
-                                <v-icon size="x-small" class="mr-1">mdi-crosshairs-gps</v-icon>
-                                GPS
-                              </v-chip>
+                  <div 
+                    v-for="(address, index) in addresses" 
+                    :key="index"
+                    :class="[
+                      'p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 mb-3',
+                      selectedAddressIndex === index 
+                        ? 'border-blue-500 bg-blue-50/50' 
+                        : 'border-gray-200 bg-white/50 hover:border-gray-300'
+                    ]"
+                    @click="selectAddress(index)"
+                  >
+                    <div class="flex items-start justify-between">
+                      <div class="flex items-start space-x-3 flex-1">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center" style="background: linear-gradient(to right, #2563eb, #9333ea);">
+                          <Home v-if="address.type === 'home'" class="w-4 h-4 text-white" />
+                          <Building v-else class="w-4 h-4 text-white" />
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center space-x-2 mb-2">
+                            <span class="font-semibold text-gray-900">{{ address.address_label }}</span>
+                            <div v-if="address.latitude && address.longitude" class="flex items-center px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                              <MapPin class="w-3 h-3 mr-1" />
+                              GPS
                             </div>
                           </div>
+                          <div class="text-sm text-gray-600 space-y-1">
+                            <p>{{ address.phone }}</p>
+                            <p>{{ address.address_line1 }}</p>
+                            <p>{{ address.city }}, {{ address.state }} {{ address.postal_code }}</p>
                         </div>
-
-                        <v-btn icon variant="text" size="small" @click.stop="editAddress(index)">
-                          <v-icon>mdi-pencil</v-icon>
-                        </v-btn>
+                        </div>
                       </div>
 
-                      <div class="address-details text-body-2 text-grey-darken-1 mt-2">
-                        {{ address.phone }}<br>
-                        {{ address.address_line1 }}<br>
-                        {{ address.city }}, {{ address.state }} {{ address.postal_code }}
+                      <button 
+                        @click.stop="editAddress(index)"
+                        class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
+                      >
+                        <Edit class="w-4 h-4 text-gray-600" />
+                      </button>
                       </div>
 
                       <!-- Selected indicator -->
-                      <div v-if="selectedAddressIndex === index" class="selected-indicator">
-                        <v-icon color="primary">mdi-check-circle</v-icon>
+                    <div v-if="selectedAddressIndex === index" class="flex items-center justify-end mt-3">
+                      <div class="flex items-center text-blue-600 text-sm font-medium">
+                        <CheckCircle class="w-4 h-4 mr-1" />
+                        Selected
                       </div>
-                    </v-card-text>
-                  </v-card>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- No addresses state -->
-                <v-card v-else class="mb-4 pa-4 text-center" flat>
-                  <v-icon size="large" color="grey-lighten-1" class="mb-2">mdi-map-marker-off</v-icon>
-                  <p class="mb-0">No delivery addresses found</p>
-                </v-card>
+                <div v-else class="text-center py-12">
+                  <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <MapPinOff class="w-8 h-8 text-gray-400" />
+                  </div>
+                  <p class="text-gray-600">No delivery addresses found</p>
+                </div>
 
                 <!-- Add new address button -->
-                <v-btn color="primary" variant="outlined" block size="large" prepend-icon="mdi-plus"
-                  @click="showAddressDialog = true" class="mb-4 text-none">
+                <button 
+                  @click="showAddressDialog = true"
+                  class="w-full py-4 border-2 border-dashed border-gray-300 rounded-2xl text-gray-600 hover:border-gray-400 hover:text-gray-700 transition-all duration-200 flex items-center justify-center"
+                >
+                  <Plus class="w-5 h-5 mr-2" />
                   Add New Address
-                </v-btn>
+                </button>
               </div>
 
               <!-- Loading skeleton -->
-              <div v-else>
-                <v-skeleton-loader v-for="i in 2" :key="i" type="card" class="mb-4"></v-skeleton-loader>
+              <div v-else class="space-y-4">
+                <div v-for="i in 2" :key="i" class="animate-pulse">
+                  <div class="h-24 bg-gray-200 rounded-2xl"></div>
+                </div>
               </div>
 
               <!-- Continue button -->
-              <v-btn color="primary" block size="large" :disabled="selectedAddressIndex === null" @click="nextStep"
-                class="mt-4 text-none" rounded>
-                Continue
-              </v-btn>
+              <button 
+                :disabled="selectedAddressIndex === null"
+                @click="nextStep"
+                class="w-full mt-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                style="background: linear-gradient(to right, #2563eb, #9333ea);"
+              >
+                Continue to Delivery
+              </button>
             </div>
-          </v-stepper-window-item>
+          </div>
 
           <!-- Step 2: Delivery Information -->
-          <v-stepper-window-item :value="2">
-            <div class="pa-2">
-              <h2 class="text-h6 font-weight-bold mb-4">Delivery Information</h2>
+          <div v-if="currentStep === 2" class="space-y-6">
+            <!-- Delivery Address -->
+            <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm border border-white/20 p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-3">Delivery Address</h3>
+              <div v-if="selectedAddressIndex !== null" class="text-sm text-gray-600 space-y-1">
+                <p>{{ selectedAddress.name }}</p>
+                <p>{{ selectedAddress.address_line1 }}</p>
+                <p>{{ selectedAddress.city }}, {{ selectedAddress.state }} {{ selectedAddress.postal_code }}</p>
+                <p>{{ selectedAddress.country }}</p>
+                <p>{{ selectedAddress.phone }}</p>
+              </div>
+            </div>
 
-              <!-- Delivery Address -->
-              <v-card class="mb-4 rounded-lg" elevation="1">
-                <v-card-text class="pa-4">
-                  <p class="text-subtitle-1 font-weight-medium mb-1">Delivery Address</p>
-                  <div v-if="selectedAddressIndex !== null" class="text-body-2">
-                    <p class="mb-1">{{ selectedAddress.name }}</p>
-                    <p class="mb-1">{{ selectedAddress.address_line1 }}</p>
-                    <p class="mb-1">{{ selectedAddress.city }}, {{ selectedAddress.state }} {{
-                      selectedAddress.postal_code }}</p>
-                    <p class="mb-1">{{ selectedAddress.country }}</p>
-                    <p class="mb-0">{{ selectedAddress.phone }}</p>
+            <!-- Delivery Options -->
+            <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm border border-white/20 p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-6">Delivery Options</h3>
+              
+              <div class="space-y-4">
+                <!-- Default Delivery -->
+                <div 
+                  :class="[
+                    'p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200',
+                    deliveryOption === 'default' 
+                      ? 'border-blue-500 bg-blue-50/50' 
+                      : 'border-gray-200 bg-white/50 hover:border-gray-300'
+                  ]"
+                  @click="deliveryOption = 'default'"
+                >
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center" style="background: linear-gradient(to right, #2563eb, #9333ea);">
+                      <Truck class="w-5 h-5 text-white" />
+                    </div>
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between">
+                        <span class="font-semibold text-gray-900">Standard Delivery</span>
+                        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
+                          <div v-if="deliveryOption === 'default'" class="w-3 h-3 bg-blue-600 rounded-full"></div>
+                        </div>
+                      </div>
+                      <p class="text-sm text-gray-600 mt-1">{{ getDefaultDeliveryTime() }}</p>
+                    </div>
                   </div>
-                </v-card-text>
-              </v-card>
+                </div>
 
-              <!-- Delivery Options -->
-              <v-card class="mb-4 rounded-lg" elevation="1">
-                <v-card-text class="pa-4">
-                  
-                  <p class="text-subtitle-1 font-weight-bold mb-3">Delivery Options</p>
-                  
-                  <v-radio-group v-model="deliveryOption" class="mb-4">
-                    <!-- Default Delivery -->
-                    <v-card class="mb-3 delivery-option" 
-                      :class="{ 'selected-delivery': deliveryOption === 'default' }" 
-                      elevation="0" 
-                      @click="deliveryOption = 'default'">
-                      <div class="d-flex align-center pa-3">
-                        <v-avatar color="primary" size="32" class="mr-3">
-                          <v-icon color="white" size="small">mdi-truck-delivery</v-icon>
-                        </v-avatar>
-                        <div class="flex-grow-1">
-                          <div class="d-flex align-center">
-                            <span class="text-subtitle-2 font-weight-medium">Standard Delivery</span>
-                            <v-spacer></v-spacer>
-                            <v-radio value="default" hide-details color="primary"></v-radio>
-                          </div>
-                          <p class="text-caption text-grey-darken-1 mb-0">{{ getDefaultDeliveryTime() }}</p>
+                <!-- Express Delivery -->
+                <div 
+                  v-if="expressDeliveryAvailable"
+                  :class="[
+                    'p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200',
+                    deliveryOption === 'express' 
+                      ? 'border-green-500 bg-green-50/50' 
+                      : 'border-gray-200 bg-white/50 hover:border-gray-300'
+                  ]"
+                  @click="deliveryOption = 'express'"
+                >
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                      <Zap class="w-5 h-5 text-white" />
+                    </div>
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between">
+                        <span class="font-semibold text-gray-900">Express Delivery</span>
+                        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
+                          <div v-if="deliveryOption === 'express'" class="w-3 h-3 bg-green-500 rounded-full"></div>
                         </div>
                       </div>
-                    </v-card>
+                      <p class="text-sm text-gray-600 mt-1">{{ getExpressDeliveryTime() }}</p>
+                      <p v-if="expressDeliveryFee > 0" class="text-sm text-green-600 font-medium mt-1">
+                        +{{ formatApiPrice({ price: expressDeliveryFee, currency_info: cart.items.currency_info }) }} extra
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-                    <!-- Express Delivery -->
-                    <v-card v-if="expressDeliveryAvailable" class="mb-3 delivery-option" 
-                      :class="{ 'selected-delivery': deliveryOption === 'express' }" 
-                      elevation="0" 
-                      @click="deliveryOption = 'express'">
-                      <div class="d-flex align-center pa-3">
-                        <v-avatar color="success" size="32" class="mr-3">
-                          <v-icon color="white" size="small">mdi-lightning-bolt</v-icon>
-                        </v-avatar>
-                        <div class="flex-grow-1">
-                          <div class="d-flex align-center">
-                            <span class="text-subtitle-2 font-weight-medium">Express Delivery</span>
-                            <v-spacer></v-spacer>
-                            <v-radio value="express" hide-details color="primary"></v-radio>
-                          </div>
-                          <p class="text-caption text-grey-darken-1 mb-0">{{ getExpressDeliveryTime() }}</p>
-                          <p class="text-caption text-success mb-0" v-if="expressDeliveryFee > 0">
-                            +{{ formatApiPrice({ price: expressDeliveryFee, currency_info: cart.items.currency_info }) }} extra
-                          </p>
+                <!-- Custom Delivery -->
+                <div 
+                  :class="[
+                    'p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200',
+                    deliveryOption === 'custom' 
+                      ? 'border-orange-500 bg-orange-50/50' 
+                      : 'border-gray-200 bg-white/50 hover:border-gray-300'
+                  ]"
+                  @click="deliveryOption = 'custom'"
+                >
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                      <Calendar class="w-5 h-5 text-white" />
+                    </div>
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between">
+                        <span class="font-semibold text-gray-900">Custom Date & Time</span>
+                        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
+                          <div v-if="deliveryOption === 'custom'" class="w-3 h-3 bg-orange-500 rounded-full"></div>
                         </div>
                       </div>
-                    </v-card>
+                      <p class="text-sm text-gray-600 mt-1">Choose your preferred delivery date and time</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                    <!-- Custom Delivery -->
-                    <v-card class="mb-3 delivery-option" 
-                      :class="{ 'selected-delivery': deliveryOption === 'custom' }" 
-                      elevation="0" 
-                      @click="deliveryOption = 'custom'">
-                      <div class="d-flex align-center pa-3">
-                        <v-avatar color="warning" size="32" class="mr-3">
-                          <v-icon color="white" size="small">mdi-calendar-clock</v-icon>
-                        </v-avatar>
-                        <div class="flex-grow-1">
-                          <div class="d-flex align-center">
-                            <span class="text-subtitle-2 font-weight-medium">Custom Date & Time</span>
-                            <v-spacer></v-spacer>
-                            <v-radio value="custom" hide-details color="primary"></v-radio>
-                          </div>
-                          <p class="text-caption text-grey-darken-1 mb-0">Choose your preferred delivery date and time</p>
-                        </div>
-                      </div>
-                    </v-card>
-                  </v-radio-group>
-
-                  <!-- Custom Date & Time Selection -->
-                  <div v-if="deliveryOption === 'custom'" class="custom-delivery-section">
-                    <v-divider class="mb-4"></v-divider>
-                    
-                    <div class="mb-4">
-                      <p class="text-subtitle-2 font-weight-medium mb-2">Preferred Delivery Date</p>
-                      <v-date-picker
+              <!-- Custom Date & Time Selection -->
+              <div v-if="deliveryOption === 'custom'" class="mt-6 p-4 bg-gray-50/50 rounded-2xl border border-gray-200">
+                <div class="space-y-4">
+                    <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Delivery Date</label>
+                    <div class="relative">
+                      <input 
                         v-model="customDeliveryDate"
-                        :min="getMinDeliveryDate()"
-                        :max="getMaxDeliveryDate()"
-                        class="mb-2"
-                      ></v-date-picker>
+                        type="text"
+                        readonly
+                        @click="showDatePicker = true"
+                        :placeholder="customDeliveryDate ? formatDate(customDeliveryDate) : 'Select delivery date'"
+                        class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors cursor-pointer bg-white"
+                      />
+                      <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <Calendar class="h-5 w-5 text-gray-400" />
                     </div>
-
-                    <div class="mb-4">
-                      <p class="text-subtitle-2 font-weight-medium mb-2">Preferred Delivery Time</p>
-                      <v-select
-                        v-model="customDeliveryTime"
-                        :items="availableTimeSlots"
-                        item-title="label"
-                        item-value="value"
-                        label="Select time slot"
-                        variant="outlined"
-                        density="comfortable"
-                        :rules="[required]"
-                      ></v-select>
-                    </div>
-
-                    <v-alert
-                      v-if="customDeliveryFee > 0"
-                      type="info"
-                      variant="tonal"
-                      class="mb-4"
-                    >
-                      Custom delivery fee: {{ formatApiPrice({ price: customDeliveryFee, currency_info: cart.items.currency_info }) }}
-                    </v-alert>
                   </div>
-                </v-card-text>
-              </v-card>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Delivery Time</label>
+                    <select 
+                      v-model="customDeliveryTime"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    >
+                      <option value="">Select time slot</option>
+                      <option v-for="slot in availableTimeSlots" :key="slot.value" :value="slot.value">
+                        {{ slot.label }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div v-if="customDeliveryFee > 0" class="p-3 bg-blue-50 border border-blue-200 rounded-2xl">
+                    <div class="flex items-center text-blue-700">
+                      <Info class="w-4 h-4 mr-2" />
+                      <span class="text-sm font-medium">
+                        Custom delivery fee: {{ formatApiPrice({ price: customDeliveryFee, currency_info: cart.items.currency_info }) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
               <!-- Order summary -->
-              <v-card class="mb-4 rounded-lg" elevation="1">
-                <v-card-text class="pa-4">
-                  <p class="text-subtitle-1 font-weight-bold mb-3">Order Summary</p>
+            <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm border border-white/20 p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-6">Order Summary</h3>
 
                   <!-- Cart items list (up to 3) -->
-                  <div v-if="groupedCartItems.length > 0" class="cart-items-summary mb-4">
-                    <div v-for="(item, index) in displayedCartItems" :key="item.product_id"
-                      class="cart-item-row d-flex align-center py-2">
-                      <div class="cart-item-image-container mr-2">
-                        <v-img :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
-                          width="40" height="40" class="cart-item-image rounded" cover></v-img>
+              <div v-if="groupedCartItems.length > 0" class="space-y-4 mb-6">
+                <div 
+                  v-for="(item, index) in displayedCartItems" 
+                  :key="item.product_id"
+                  class="flex items-center space-x-3 p-3 bg-gray-50/50 rounded-2xl"
+                >
+                  <div class="w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0">
+                    <img 
+                      :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
+                      :alt="item.product_name"
+                      class="w-full h-full object-cover"
+                    />
                       </div>
-                      <div class="flex-grow-1 mr-3">
-                        <p class="text-body-2 text-truncate mb-0">{{ item.product_name }}</p>
-                        <p class="text-caption text-grey-darken-1 mb-0">
-                          {{ item.variants.length }} variant(s) · {{ getTotalQuantity(item) }} items <br>
-                          <span class="text-primary"><v-icon>mdi-truck-delivery</v-icon> {{
-                            getAdaptiveDeliveryDate(item) }}</span>
-                        </p>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-medium text-gray-900 truncate">{{ item.product_name }}</p>
+                    <p class="text-sm text-gray-600">
+                      {{ item.variants.length }} variant(s) · {{ getTotalQuantity(item) }} items
+                    </p>
+                    <div class="flex items-center text-blue-600 text-sm mt-1">
+                      <Truck class="w-3 h-3 mr-1" />
+                      {{ getAdaptiveDeliveryDate(item) }}
+                    </div>
                       </div>
                       <div class="text-right">
-                        <p class="text-body-2 font-weight-medium mb-0">{{ formatApiPrice({
+                    <p class="font-semibold text-gray-900">
+                      {{ formatApiPrice({
                           price: getItemTotal(item),
-                          currency_info: cart.items.currency_info }) }}</p>
+                        currency_info: cart.items.currency_info 
+                      }) }}
+                    </p>
                       </div>
                     </div>
 
                     <!-- View all button when more than 3 items -->
-                    <v-btn v-if="groupedCartItems.length > 3" variant="text" color="primary" block size="small"
-                      class="mt-2 text-none" @click="showCartItemsDialog = true">
+                <button 
+                  v-if="groupedCartItems.length > 3"
+                  @click="showCartItemsDialog = true"
+                  class="w-full py-3 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                >
                       View all {{ groupedCartItems.length }} items
-                    </v-btn>
+                </button>
                   </div>
 
-                  <!-- Items detail -->
-                  <div class="d-flex justify-space-between mb-2">
-                    <span class="text-body-2">Sub total</span>
-                    <span class="text-body-2">{{ formatApiPrice({
-                      price: cart.items?.total_amount || 0, currency_info:
-                        cart.items.currency_info }) }}</span>
+              <!-- Price breakdown -->
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Subtotal</span>
+                  <span class="font-semibold text-gray-900">
+                    {{ formatApiPrice({
+                      price: cart.items?.total_amount || 0, 
+                      currency_info: cart.items.currency_info 
+                    }) }}
+                  </span>
                   </div>
 
-                  <!-- Show delivery fee based on selected option -->
-                  <div v-if="deliveryOption === 'express'" class="d-flex justify-space-between mb-2">
-                    <span class="text-body-2">Express Delivery Fee</span>
-                    <span class="text-body-2 text-success">{{ formatApiPrice({
-                      price: expressDeliveryFee, currency_info:
-                        cart.items.currency_info }) }}</span>
+                <!-- Show delivery fee based on selected option -->
+                <div v-if="deliveryOption === 'express'" class="flex justify-between items-center">
+                  <span class="text-gray-600">Express Delivery Fee</span>
+                  <span class="font-semibold text-green-600">
+                    {{ formatApiPrice({
+                      price: expressDeliveryFee, 
+                      currency_info: cart.items.currency_info 
+                    }) }}
+                  </span>
                   </div>
 
-                  <div v-else class="d-flex justify-space-between mb-2">
-                    <span class="text-body-2">Delivery Fee</span>
-                    <span class="text-body-2">{{ formatApiPrice({
-                      price: shippingFee, currency_info:
-                        cart.items.currency_info }) }}</span>
-                  </div>
+                <div v-else class="flex justify-between items-center">
+                  <span class="text-gray-600">Delivery Fee</span>
+                  <span class="font-semibold text-gray-900">
+                    {{ formatApiPrice({
+                      price: shippingFee, 
+                      currency_info: cart.items.currency_info 
+                    }) }}
+                  </span>
+                </div>
 
-                  <v-divider class="my-3"></v-divider>
-
-                  <div class="d-flex justify-space-between">
-                    <span class="text-subtitle-1 font-weight-bold">Total</span>
-                    <span class="text-subtitle-1 font-weight-bold">{{ formatApiPrice({
+                <div class="border-t border-gray-200 pt-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-lg font-bold text-gray-900">Total</span>
+                    <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+                      {{ formatApiPrice({
                       price: totalAmount,
-                      currency_info: cart.items.currency_info }) }}</span>
+                        currency_info: cart.items.currency_info 
+                      }) }}
+                    </span>
                   </div>
-                </v-card-text>
-              </v-card>
-
-              <!-- Navigation buttons -->
-              <div class="d-flex">
-                <v-btn variant="outlined" class="mr-2 text-none" rounded color="secondary" @click="prevStep">
-                  Back
-                </v-btn>
-                <v-btn color="primary" class="text-none" rounded @click="nextStep">
-                  Continue
-                </v-btn>
+                </div>
               </div>
             </div>
-          </v-stepper-window-item>
+
+              <!-- Navigation buttons -->
+            <div class="flex space-x-3">
+              <button 
+                @click="prevStep"
+                class="flex-1 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+              >
+                Back
+              </button>
+              <button 
+                @click="nextStep"
+                class="flex-1 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                style="background: linear-gradient(to right, #2563eb, #9333ea);"
+              >
+                Next
+              </button>
+              </div>
+            </div>
 
           <!-- Step 3: Payment -->
-          <v-stepper-window-item :value="3">
-            <div class="pa-2">
-              <h2 class="text-h6 font-weight-bold mb-4">Payment Method</h2>
-
+          <div v-if="currentStep === 3" class="space-y-6">
               <!-- Summary for this step -->
-              <v-card class="mb-4 rounded-lg" elevation="1">
-                <v-card-text class="pa-4">
-                  <div class="d-flex align-center mb-3">
-                    <v-icon color="primary" class="mr-2">mdi-map-marker</v-icon>
+            <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm border border-white/20 p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
+              
+                            <div class="space-y-3">
+                <div class="flex items-center space-x-3">
+                  <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <MapPin class="w-4 h-4 text-blue-600" />
+                  </div>
                     <div>
-                      <p class="text-subtitle-2 font-weight-medium mb-0">Delivery Address</p>
-                      <p class="text-caption text-grey-darken-1 mb-0">
+                    <p class="text-sm font-medium text-gray-900">Delivery Address</p>
+                    <p class="text-xs text-gray-600">
                         {{ selectedAddress?.address_line1 }}, {{ selectedAddress?.city }}
                       </p>
                     </div>
                   </div>
 
-                  <div class="d-flex align-center mb-3">
-                    <v-icon color="primary" class="mr-2">mdi-truck-delivery</v-icon>
+                <div class="flex items-center space-x-3">
+                  <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <Truck class="w-4 h-4 text-green-600" />
+                  </div>
                     <div>
-                      <p class="text-subtitle-2 font-weight-medium mb-0">Delivery Option</p>
-                      <p class="text-caption text-grey-darken-1 mb-0">{{ getDeliveryOptionDisplay() }}</p>
+                    <p class="text-sm font-medium text-gray-900">Delivery Option</p>
+                    <p class="text-xs text-gray-600">{{ getDeliveryOptionDisplay() }}</p>
+                    </div>
+                </div>
+
+                <!-- Cart Items Summary -->
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                  <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                      <ShoppingBag class="w-4 h-4 text-purple-600" />
+                      </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-900">Order Items</p>
+                      <p class="text-xs text-gray-600">{{ groupedCartItems.length }} product{{ groupedCartItems.length > 1 ? 's' : '' }}</p>
                     </div>
                   </div>
-                </v-card-text>
-              </v-card>
-
-              <!-- Payment methods -->
-              <v-card class="mb-4 rounded-lg" elevation="1">
-                <v-card-text class="pa-4">
-                  <p class="text-subtitle-1 font-weight-bold mb-3">Payment Method</p>
-
-                  <v-radio-group v-model="paymentMethod">
-                    <!-- Credit Card -->
-                    <v-card class="mb-2 payment-option"
-                      :class="{ 'selected-payment': paymentMethod === 'mobile_money' }" elevation="0"
-                      @click="paymentMethod = 'mobile_money'">
-                      <div class="d-flex align-center pa-3">
-                        <v-avatar color="primary" size="32" class="mr-3">
-                          <v-icon color="white" size="small">mdi-cellphone</v-icon>
-                        </v-avatar>
-                        <span class="text-subtitle-2">Mobile Money</span>
-                        <v-spacer></v-spacer>
-                        <v-radio value="mobile_money" hide-details color="primary"></v-radio>
-                      </div>
-                    </v-card>
-
-                    <!-- PayPal -->
-                    <!-- <v-card 
-                      class="mb-2 payment-option" 
-                      :class="{ 'selected-payment': paymentMethod === 'paypal' }"
-                      elevation="0"
-                      @click="paymentMethod = 'paypal'"
+                  
+                  <!-- Cart items list -->
+                  <div class="space-y-3 max-h-48 overflow-y-auto">
+                    <div 
+                      v-for="item in groupedCartItems" 
+                      :key="item.product_id"
+                      class="flex items-center space-x-3 p-3 bg-gray-50/50 rounded-2xl border border-gray-100"
                     >
-                      <div class="d-flex align-center pa-3">
-                        <v-avatar color="blue" size="32" class="mr-3">
-                          <v-icon color="white">mdi-paypal</v-icon>
-                        </v-avatar>
-                        <span class="text-subtitle-2">PayPal</span>
-                        <v-spacer></v-spacer>
-                        <v-radio value="paypal" hide-details color="primary"></v-radio>
+                      <div class="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
+                        <img 
+                          :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
+                          :alt="item.product_name"
+                          class="w-full h-full object-cover"
+                        />
                       </div>
-                    </v-card> -->
-
-                    <!-- Google Pay -->
-                    <!-- <v-card 
-                      class="mb-2 payment-option" 
-                      :class="{ 'selected-payment': paymentMethod === 'google_pay' }"
-                      elevation="0"
-                      @click="paymentMethod = 'google_pay'"
-                    >
-                      <div class="d-flex align-center pa-3">
-                        <v-avatar color="green" size="32" class="mr-3">
-                          <v-icon color="white">mdi-google</v-icon>
-                        </v-avatar>
-                        <span class="text-subtitle-2">Google Pay</span>
-                        <v-spacer></v-spacer>
-                        <v-radio value="google_pay" hide-details color="primary"></v-radio>
+                      <div class="flex-1 min-w-0">
+                        <p class="font-medium text-gray-900 truncate text-sm">{{ item.product_name }}</p>
+                        <p class="text-xs text-gray-600">
+                          {{ item.variants.length }} variant{{ item.variants.length > 1 ? 's' : '' }} · {{ getTotalQuantity(item) }} item{{ getTotalQuantity(item) > 1 ? 's' : '' }}
+                        </p>
                       </div>
-                    </v-card> -->
-                  </v-radio-group>
-                </v-card-text>
-              </v-card>
-
-              <!-- Navigation and payment button -->
-              <div>
-                <div class="d-flex justify-space-between align-center mb-3">
-                  <span class="text-subtitle-1 font-weight-bold">Total</span>
-                  <span class="text-h6 font-weight-bold">{{ formatApiPrice({
-                    price: totalAmount, currency_info:
-                      cart.items.currency_info }) }}</span>
+                      <div class="text-right">
+                        <p class="font-semibold text-gray-900 text-sm">
+                          {{ formatApiPrice({
+                            price: getItemTotal(item),
+                            currency_info: cart.items.currency_info 
+                          }) }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-
-                <v-btn variant="outlined" @click="prevStep" class="mt-1 text-none" rounded color="secondary">
-                  Back
-                </v-btn>
-                <v-btn color="primary" :loading="processing" @click="placeOrder" class="mt-1 ml-2 text-none" rounded>
-                  Checkout
-                </v-btn>
               </div>
             </div>
-          </v-stepper-window-item>
-        </v-stepper-window>
-      </v-stepper>
+
+            <!-- Payment methods -->
+            <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm border border-white/20 p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-6">Payment Method</h3>
+
+              <div class="space-y-4">
+                <!-- Mobile Money -->
+                <div 
+                  :class="[
+                    'p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200',
+                    paymentMethod === 'mobile_money' 
+                      ? 'border-blue-500 bg-blue-50/50' 
+                      : 'border-gray-200 bg-white/50 hover:border-gray-300'
+                  ]"
+                  @click="paymentMethod = 'mobile_money'"
+                >
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center" style="background: linear-gradient(to right, #2563eb, #9333ea);">
+                      <Smartphone class="w-5 h-5 text-white" />
+                      </div>
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between">
+                        <span class="font-semibold text-gray-900">Mobile Money</span>
+                        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
+                          <div v-if="paymentMethod === 'mobile_money'" class="w-3 h-3 bg-blue-600 rounded-full"></div>
+                        </div>
+                      </div>
+                      <p class="text-sm text-gray-600 mt-1">Pay with your mobile money account</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment button -->
+            <div class="space-y-4">
+              <div class="flex justify-between items-center p-4 bg-gray-50/50 rounded-2xl">
+                <span class="text-lg font-bold text-gray-900">Total</span>
+                <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+                  {{ formatApiPrice({
+                    price: totalAmount, 
+                    currency_info: cart.items.currency_info 
+                  }) }}
+                </span>
+                </div>
+
+              <div class="flex space-x-3">
+                <button 
+                  @click="prevStep"
+                  class="flex-1 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+                >
+                  Back
+                </button>
+                <button 
+                  :loading="processing"
+                  @click="placeOrder"
+                  class="flex-1 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  style="background: linear-gradient(to right, #2563eb, #9333ea);"
+                >
+                  <span v-if="processing" class="flex items-center justify-center">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Processing...
+                  </span>
+                  <span v-else>Place Order</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Address dialog (for add/edit) -->
-      <v-dialog v-model="showAddressDialog" max-width="500" scrollable>
-        <v-card>
-          <v-card-title class="text-h6 pa-4">
+      <div 
+        v-if="showAddressDialog" 
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        @click="showAddressDialog = false"
+      >
+        <div 
+          class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+          @click.stop
+        >
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-gray-900">
             {{ editAddressIndex !== null ? 'Edit Address' : 'Add New Address' }}
-          </v-card-title>
+            </h3>
+            <button 
+              @click="showAddressDialog = false"
+              class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
+            >
+              <X class="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
 
-          <v-divider></v-divider>
+          <form @submit.prevent="saveAddress" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Address Label*</label>
+              <input 
+                v-model="addressForm.address_label"
+                type="text"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="e.g., Home, Office"
+              />
+            </div>
 
-          <v-card-text class="pa-4">
-            <v-form ref="formRef" v-model="formValid">
-              <v-text-field v-model="addressForm.address_label" label="Address Label*" variant="outlined"
-                density="comfortable" class="mb-3" :rules="[required]" persistent-hint></v-text-field>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Address Line 1*</label>
+              <input 
+                v-model="addressForm.address_line1"
+                type="text"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Street address"
+              />
+            </div>
 
-              <!-- <v-radio-group
-                v-model="addressForm.type"
-                class="mb-3"
-                inline
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Address Line 2</label>
+              <input 
+                v-model="addressForm.address_line2"
+                type="text"
+                class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Apartment, suite, etc."
+              />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">City*</label>
+                <input 
+                  v-model="addressForm.city"
+                  type="text"
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">State/Province</label>
+                <input 
+                  v-model="addressForm.state"
+                  type="text"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">ZIP/Postal Code</label>
+                <input 
+                  v-model="addressForm.postal_code"
+                  type="text"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Country*</label>
+                <select 
+                  v-model="addressForm.country"
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                >
+                  <option value="">Select country</option>
+                  <option v-for="country in countries" :key="country.name" :value="country.name">
+                    {{ country.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <input 
+                v-model="addressForm.default"
+                type="checkbox"
+                id="default-address"
+                class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label for="default-address" class="text-sm text-gray-700">Set as default address</label>
+            </div>
+
+            <div class="flex space-x-3 pt-4">
+              <button 
+                type="button"
+                @click="showAddressDialog = false"
+                class="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
               >
-                <v-radio value="home" label="Home" color="primary"></v-radio>
-                <v-radio value="office" label="Office" color="primary"></v-radio>
-              </v-radio-group> -->
-
-              <v-text-field v-model="addressForm.address_line1" label="Address Line 1*" variant="outlined"
-                density="comfortable" class="mb-3" :rules="[required]"></v-text-field>
-
-              <v-text-field v-model="addressForm.address_line2" label="Address Line 2" variant="outlined"
-                density="comfortable" class="mb-3"></v-text-field>
-
-              <!-- <v-text-field
-                v-model="addressForm.street"
-                label="Street Address*"
-                variant="outlined"
-                density="comfortable"
-                class="mb-3"
-                :rules="[required]"
-              ></v-text-field> -->
-
-              <v-row>
-                <v-col cols="6">
-                  <v-text-field v-model="addressForm.city" label="City*" variant="outlined" density="comfortable"
-                    :rules="[required]"></v-text-field>
-                </v-col>
-
-                <v-col cols="6">
-                  <v-text-field v-model="addressForm.state" label="State/Province" variant="outlined"
-                    density="comfortable"></v-text-field>
-                </v-col>
-              </v-row>
-
-              <v-row>
-                <v-col cols="6">
-                  <v-text-field v-model="addressForm.postal_code" label="ZIP/Postal Code" variant="outlined"
-                    density="comfortable"></v-text-field>
-                </v-col>
-
-                <v-col cols="6">
-                  <v-select
-                    v-model="addressForm.country"
-                    :items="countries"
-                    item-title="name"
-                    item-value="name"
-                    label="Country*"
-                    variant="outlined"
-                    density="comfortable"
-                    :rules="[required]"
-                    :loading="loadingCountries"
-                    :disabled="loadingCountries"
-                  ></v-select>
-                </v-col>
-              </v-row>
-
-              <v-checkbox v-model="addressForm.default" label="Set as default address" class="mt-2"
-                color="primary"></v-checkbox>
-            </v-form>
-          </v-card-text>
-
-          <v-divider></v-divider>
-
-          <v-card-actions class="pa-4">
-            <v-btn variant="text" @click="showAddressDialog = false">
               Cancel
-            </v-btn>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" @click="saveAddress" :loading="addressLoading" :disabled="!formValid">
-              Save
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
-      <!-- Snackbar for notifications -->
-      <v-snackbar v-model="showSnackbar" :color="snackbarColor" timeout="3000" location="top">
-        {{ snackbarText }}
-        <template v-slot:actions>
-          <v-btn variant="text" @click="showSnackbar = false">
-            Close
-          </v-btn>
-        </template>
-      </v-snackbar>
+              </button>
+              <button 
+                type="submit"
+                :disabled="!formValid || addressLoading"
+                class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200"
+                style="background: linear-gradient(to right, #2563eb, #9333ea);"
+              >
+                <span v-if="addressLoading" class="flex items-center justify-center">
+                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Saving...
+                </span>
+                <span v-else>Save Address</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
 
       <!-- Cart items dialog -->
-      <v-dialog v-model="showCartItemsDialog" max-width="500">
-        <v-card>
-          <v-card-title class="text-h6 pa-4">
-            Cart Items
-            <v-spacer></v-spacer>
-            <v-btn icon @click="showCartItemsDialog = false">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </v-card-title>
+      <div 
+        v-if="showCartItemsDialog" 
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        @click="showCartItemsDialog = false"
+      >
+        <div 
+          class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+          @click.stop
+        >
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-gray-900">Cart Items</h3>
+            <button 
+              @click="showCartItemsDialog = false"
+              class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
+            >
+              <X class="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
 
-          <v-divider></v-divider>
+          <div class="space-y-4">
+            <div 
+              v-for="item in groupedCartItems" 
+              :key="item.product_id"
+              class="p-4 bg-gray-50/50 rounded-2xl border border-gray-200"
+            >
+              <div class="flex items-start space-x-3">
+                <div class="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0">
+                  <img 
+                    :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
+                    :alt="item.product_name"
+                    class="w-full h-full object-cover"
+                  />
+                </div>
 
-          <v-card-text class="pa-4">
-            <div v-for="item in groupedCartItems" :key="item.product_id"
-              class="cart-item-row d-flex align-items-start py-3 border-bottom">
-              <div class="cart-item-image-container mr-3">
-                <v-img :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'" width="60"
-                  height="60" class="cart-item-image rounded" cover></v-img>
+                <div class="flex-1 min-w-0">
+                  <p class="font-semibold text-gray-900 mb-1">{{ item.product_name }}</p>
+                  <p class="text-sm text-gray-600 mb-2">{{ item.seller_name || 'Unknown Seller' }}</p>
+                  <div class="flex items-center text-blue-600 text-sm mb-3">
+                    <Truck class="w-3 h-3 mr-1" />
+                    {{ getAdaptiveDeliveryDate(item) }}
               </div>
 
-              <div class="flex-grow-1">
-                <p class="text-subtitle-2 font-weight-medium mb-1">{{ item.product_name }}</p>
-                <p class="text-caption text-grey-darken-1 mb-2">{{ item.seller_name || 'Unknown Seller' }}</p>
-                <p class="text-caption text-grey-darken-1 mb-2 text-primary">{{
-                  getAdaptiveDeliveryDate(item)
-                }}</p>
-
                 <!-- Variants -->
-                <div v-for="variant in item.variants" :key="variant.id"
-                  class="variant-row d-flex justify-space-between align-center py-1">
+                  <div class="space-y-2">
+                    <div 
+                      v-for="variant in item.variants" 
+                      :key="variant.id"
+                      class="flex justify-between items-center py-2 px-3 bg-white rounded-xl border border-gray-100"
+                    >
                   <div>
-                    <span class="text-caption font-weight-medium">{{ variant.name }} ML</span>
-                    <span class="text-caption text-grey-darken-1 mx-2">×</span>
-                    <span class="text-caption font-weight-medium">{{ variant.quantity }}</span>
+                        <span class="text-sm font-medium text-blue-600">{{ variant.name }} ML</span>
+                        <span class="text-sm text-gray-500 mx-2">×</span>
+                        <span class="text-sm font-medium">{{ variant.quantity }}</span>
                   </div>
-                  <span class="text-caption">{{ formatApiPrice({
-                    price: variant.price * variant.quantity, currency_info:
-                      cart.items.currency_info }) }}</span>
+                      <span class="text-sm font-semibold text-gray-900">
+                        {{ formatApiPrice({
+                          price: variant.price * variant.quantity, 
+                          currency_info: cart.items.currency_info 
+                        }) }}
+                      </span>
+                    </div>
                 </div>
               </div>
 
-              <div class="text-right ml-3">
-                <p class="text-body-2 font-weight-medium mb-0">{{ formatApiPrice({
+                <div class="text-right">
+                  <p class="font-semibold text-gray-900">
+                    {{ formatApiPrice({
                   price: getItemTotal(item),
-                  currency_info:
-                  cart.items.currency_info }) }}</p>
+                      currency_info: cart.items.currency_info 
+                    }) }}
+                  </p>
               </div>
             </div>
-          </v-card-text>
+            </div>
+          </div>
 
-          <v-divider></v-divider>
-
-          <v-card-actions class="pa-4">
-            <v-spacer></v-spacer>
-            <v-btn color="primary" variant="text" @click="showCartItemsDialog = false" class="text-none">
+          <div class="flex justify-end pt-4">
+            <button 
+              @click="showCartItemsDialog = false"
+              class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+              style="background: linear-gradient(to right, #2563eb, #9333ea);"
+            >
               Close
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Date Picker Modal -->
+      <div 
+        v-if="showDatePicker" 
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        @click="showDatePicker = false"
+      >
+        <div 
+          class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl"
+          @click.stop
+        >
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-gray-900">Select Delivery Date</h3>
+            <button 
+              @click="showDatePicker = false"
+              class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
+            >
+              <X class="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <div class="grid grid-cols-7 gap-2 text-center">
+              <!-- Day headers -->
+              <div class="text-sm font-semibold text-gray-600 py-2">Sun</div>
+              <div class="text-sm font-semibold text-gray-600 py-2">Mon</div>
+              <div class="text-sm font-semibold text-gray-600 py-2">Tue</div>
+              <div class="text-sm font-semibold text-gray-600 py-2">Wed</div>
+              <div class="text-sm font-semibold text-gray-600 py-2">Thu</div>
+              <div class="text-sm font-semibold text-gray-600 py-2">Fri</div>
+              <div class="text-sm font-semibold text-gray-600 py-2">Sat</div>
+              
+              <!-- Calendar days -->
+              <div 
+                v-for="day in getCalendarDays()" 
+                :key="day.date"
+                :class="[
+                  'p-2 rounded-lg cursor-pointer transition-colors text-sm',
+                  day.isCurrentMonth 
+                    ? day.isDisabled 
+                      ? 'text-gray-300 cursor-not-allowed' 
+                      : day.isSelected 
+                        ? 'bg-blue-600 text-white' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                    : 'text-gray-300'
+                ]"
+                @click="day.isCurrentMonth && !day.isDisabled ? selectDate(day.date) : null"
+              >
+                {{ day.dayNumber }}
+              </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-4">
+              <button 
+                @click="previousMonth"
+                class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ChevronLeft class="w-5 h-5 text-gray-600" />
+              </button>
+              <span class="text-lg font-semibold text-gray-900">{{ getCurrentMonthYear() }}</span>
+              <button 
+                @click="nextMonth"
+                class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ChevronRight class="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+
+            <div class="flex space-x-3 pt-4">
+              <button 
+                @click="showDatePicker = false"
+                class="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+              >
+                Cancel
+              </button>
+              <button 
+                @click="confirmDateSelection"
+                class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+                style="background: linear-gradient(to right, #2563eb, #9333ea);"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Location Confirmation Dialog -->
       <LocationConfirmationDialog
@@ -591,7 +919,7 @@
         @locationConfirmed="handleLocationConfirmed"
         @locationSkipped="handleLocationSkipped"
       />
-    </v-container>
+    </div>
   </div>
 </template>
 
@@ -603,6 +931,10 @@ import { apiService } from '@/services/api'
 import { useCurrency } from '@/composables/useCurrency'
 import { useLocationConfirmation } from '@/composables/useLocationConfirmation'
 import LocationConfirmationDialog from '@/components/LocationConfirmationDialog.vue'
+import { 
+  ArrowLeft, Home, Building, MapPin, MapPinOff, Edit, CheckCircle, Plus, 
+  Truck, Zap, Calendar, Info, Smartphone, X, ChevronLeft, ChevronRight, ShoppingBag 
+} from 'lucide-vue-next'
 
 const router = useRouter()
 const cart = useCartStore()
@@ -650,10 +982,10 @@ const addressLoading = ref(false)
 const editAddressIndex = ref(null)
 const showAddressDialog = ref(false)
 const formRef = ref(null)
-const formValid = ref(false)
 
 // Success state
 const showCartItemsDialog = ref(false)
+const showDatePicker = ref(false)
 
 // Snackbar state
 const showSnackbar = ref(false)
@@ -674,9 +1006,13 @@ const addressForm = ref({
   default: false
 })
 
-// Validation rules
-const required = v => !!v || 'This field is required'
-const phoneRule = v => /^\+?[0-9\s-]{10,15}$/.test(v) || 'Please enter a valid phone number'
+// Form validation computed property
+const formValid = computed(() => {
+  return addressForm.value.address_label && 
+         addressForm.value.address_line1 && 
+         addressForm.value.city && 
+         addressForm.value.country
+})
 
 // Computed
 const totalAmount = computed(() => {
@@ -765,29 +1101,29 @@ const averageDeliveryTime = computed(() => {
   groupedCartItems.value.forEach(item => {
     const deliveryText = getAdaptiveDeliveryDate(item);
 
-    // Try to extract delivery time range (e.g., "3-5" from "3-5 business days")
-    const rangeMatch = deliveryText.match(/(\d+)-(\d+)/);
-    if (rangeMatch) {
-      // For ranges, use the maximum value for worst-case calculation
-      const maxDays = parseInt(rangeMatch[2]);
+      // Try to extract delivery time range (e.g., "3-5" from "3-5 business days")
+      const rangeMatch = deliveryText.match(/(\d+)-(\d+)/);
+      if (rangeMatch) {
+        // For ranges, use the maximum value for worst-case calculation
+        const maxDays = parseInt(rangeMatch[2]);
 
-      if (!isNaN(maxDays)) {
-        totalDays += maxDays;
-        itemCount++;
-        // Update farthest delivery date if this is longer
-        farthestDays = Math.max(farthestDays, maxDays);
-      }
-    } else {
-      // Try to find a single number (e.g., "3 business days")
-      const singleMatch = deliveryText.match(/(\d+)/);
-      if (singleMatch) {
-        const days = parseInt(singleMatch[1]);
-
-        if (!isNaN(days)) {
-          totalDays += days;
+        if (!isNaN(maxDays)) {
+          totalDays += maxDays;
           itemCount++;
           // Update farthest delivery date if this is longer
-          farthestDays = Math.max(farthestDays, days);
+          farthestDays = Math.max(farthestDays, maxDays);
+        }
+      } else {
+        // Try to find a single number (e.g., "3 business days")
+        const singleMatch = deliveryText.match(/(\d+)/);
+        if (singleMatch) {
+          const days = parseInt(singleMatch[1]);
+
+          if (!isNaN(days)) {
+            totalDays += days;
+            itemCount++;
+            // Update farthest delivery date if this is longer
+            farthestDays = Math.max(farthestDays, days);
         }
       }
     }
@@ -1148,11 +1484,6 @@ const showSuccess = (message) => {
   showSnackbar.value = true
 }
 
-// Monitor form validation changes
-watch(formValid, (newValue) => {
-  console.log('Form validation changed:', newValue);
-});
-
 // Watch dialog visibility changes
 watch(showAddressDialog, (isOpen) => {
   if (isOpen) {
@@ -1261,9 +1592,9 @@ const getDeliveryDateRange = () => {
             totalDays += days;
             itemCount++;
             farthestDays = Math.max(farthestDays, days);
-          }
         }
       }
+    }
   });
 
   if (itemCount === 0) {
@@ -1333,17 +1664,61 @@ const getExpressDeliveryTime = () => {
 
 
 const getMinDeliveryDate = () => {
+  // Find the product with the farthest delivery date
+  if (!groupedCartItems.value || groupedCartItems.value.length === 0) {
+    // Fallback to tomorrow if no items
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  }
+
+  let farthestDays = 0;
+  let farthestDate = null;
+
+  // Check each product's delivery info
+  groupedCartItems.value.forEach(item => {
+    const deliveryText = item.delivery_info?.estimated_delivery_display || 'Standard Delivery';
+    
+    // Try to extract delivery time range (e.g., "3-5" from "3-5 business days")
+    const rangeMatch = deliveryText.match(/(\d+)-(\d+)/);
+    if (rangeMatch) {
+      // For ranges, use the maximum value for worst-case calculation
+      const maxDays = parseInt(rangeMatch[2]);
+      if (!isNaN(maxDays) && maxDays > farthestDays) {
+        farthestDays = maxDays;
+        farthestDate = addBusinessDays(new Date(), maxDays);
+      }
+    } else {
+      // Try to find a single number (e.g., "3 business days")
+      const singleMatch = deliveryText.match(/(\d+)/);
+      if (singleMatch) {
+        const days = parseInt(singleMatch[1]);
+        if (!isNaN(days) && days > farthestDays) {
+          farthestDays = days;
+          farthestDate = addBusinessDays(new Date(), days);
+        }
+      }
+    }
+  });
+
+  // If we found a farthest date, use it
+  if (farthestDate) {
+    return formatDateAsYYYYMMDD(farthestDate)
+  }
+  
+  // Fallback to tomorrow if we can't parse any delivery dates
   const now = new Date();
   const tomorrow = new Date(now);
   tomorrow.setDate(tomorrow.getDate() + 1);
-  return tomorrow.toISOString().split('T')[0];
+  return formatDateAsYYYYMMDD(tomorrow)
 };
 
 const getMaxDeliveryDate = () => {
   const now = new Date();
   const maxDate = new Date(now);
   maxDate.setDate(maxDate.getDate() + 30); // Allow up to 30 days in the future
-  return maxDate.toISOString().split('T')[0];
+  return formatDateAsYYYYMMDD(maxDate)
 };
 
 const availableTimeSlots = [
@@ -1410,12 +1785,11 @@ const getAdaptiveDeliveryDate = (item) => {
   }
 };
 
-// Initialize custom delivery date to tomorrow if not set
+// Initialize custom delivery date to standard delivery date if not set
 const initializeCustomDeliveryDate = () => {
   if (!customDeliveryDate.value) {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    customDeliveryDate.value = tomorrow.toISOString().split('T')[0];
+    // Use the minimum delivery date (which is based on standard delivery)
+    customDeliveryDate.value = getMinDeliveryDate();
   }
 };
 
@@ -1465,116 +1839,98 @@ watch(expressDeliveryAvailable, (isAvailable) => {
     deliveryOption.value = 'default';
   }
 });
+
+// Date picker state
+const currentMonth = ref(new Date())
+const selectedDateInPicker = ref(null)
+
+// Date picker functions
+const getCalendarDays = () => {
+  const year = currentMonth.value.getFullYear()
+  const month = currentMonth.value.getMonth()
+  
+  const firstDay = new Date(year, month, 1)
+  const lastDay = new Date(year, month + 1, 0)
+  const startDate = new Date(firstDay)
+  startDate.setDate(startDate.getDate() - firstDay.getDay())
+  
+  const days = []
+  const minDate = new Date(getMinDeliveryDate())
+  const maxDate = new Date(getMaxDeliveryDate())
+  
+  for (let i = 0; i < 42; i++) {
+    const date = new Date(startDate)
+    date.setDate(startDate.getDate() + i)
+    
+    const isCurrentMonth = date.getMonth() === month
+    const isDisabled = date < minDate || date > maxDate
+    const isSelected = selectedDateInPicker.value && 
+      date.toDateString() === selectedDateInPicker.value.toDateString()
+    
+    days.push({
+      date: date,
+      dayNumber: date.getDate(),
+      isCurrentMonth,
+      isDisabled,
+      isSelected
+    })
+  }
+  
+  return days
+}
+
+const getCurrentMonthYear = () => {
+  return currentMonth.value.toLocaleDateString('en-US', { 
+    month: 'long', 
+    year: 'numeric' 
+  })
+}
+
+const previousMonth = () => {
+  currentMonth.value = new Date(
+    currentMonth.value.getFullYear(),
+    currentMonth.value.getMonth() - 1,
+    1
+  )
+}
+
+const nextMonth = () => {
+  currentMonth.value = new Date(
+    currentMonth.value.getFullYear(),
+    currentMonth.value.getMonth() + 1,
+    1
+  )
+}
+
+const selectDate = (date) => {
+  selectedDateInPicker.value = date
+}
+
+const confirmDateSelection = () => {
+  if (selectedDateInPicker.value) {
+    customDeliveryDate.value = formatDateAsYYYYMMDD(selectedDateInPicker.value)
+  }
+  showDatePicker.value = false
+}
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', { 
+    weekday: 'short', 
+    month: 'short', 
+    day: 'numeric' 
+  })
+}
+
+// Helper function to format date as YYYY-MM-DD using local timezone
+const formatDateAsYYYYMMDD = (date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 </script>
 
 <style scoped>
-.checkout-page {
-  padding-bottom: 64px;
-}
-
-.checkout-stepper {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.address-card {
-  position: relative;
-  cursor: pointer;
-  border: 1px solid #e0e0e0;
-  transition: all 0.2s ease;
-}
-
-.address-card:hover {
-  border-color: #7C3AED;
-}
-
-.selected-address {
-  border: 2px solid #7C3AED;
-  background-color: #FFFDE7;
-}
-
-.selected-indicator {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-}
-
-.payment-option {
-  cursor: pointer;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  margin-bottom: 8px;
-}
-
-.payment-option:hover {
-  border-color: #7C3AED;
-}
-
-.selected-payment {
-  border: 2px solid #7C3AED;
-  background-color: #FFFDE7;
-}
-
-.delivery-option {
-  cursor: pointer;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  margin-bottom: 8px;
-}
-
-.delivery-option:hover {
-  border-color: #7C3AED;
-}
-
-.selected-delivery {
-  border: 2px solid #7C3AED;
-  background-color: #FFFDE7;
-}
-
-
-
-.custom-delivery-section {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 16px;
-  margin-top: 16px;
-}
-
-@media (max-width: 600px) {
-  .v-stepper-header {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-  }
-}
-
-.cart-items-summary {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.cart-item-row {
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.cart-item-row:last-child {
-  border-bottom: none;
-}
-
-.cart-item-image {
-  border: 1px solid #f0f0f0;
-  object-fit: cover;
-}
-
-.border-bottom {
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.variant-row {
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  padding: 0 8px;
-  margin-bottom: 2px;
-}
+/* Additional styles if needed */
 </style>

@@ -1,460 +1,504 @@
 <template>
-  <div class="order-status-page">
-    <v-container>
-      <!-- Header -->
-      <div class="d-flex align-center mb-1">
-        <v-btn icon="mdi-arrow-left" variant="text" @click="$router.back()" class="me-3" />
-        <div class="flex-grow-1">
-          <h1 class="text-h6 font-weight-bold">Order #{{ orderId }}</h1>
-          <p v-if="order" class="text-body-1 text-caption text-medium-emphasis mb-0 text-primary">
-            Placed on {{ formatDate(order.created_at) }}
-          </p>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pb-24">
+    <div class="p-4">
+      <!-- Modern Header -->
+      <div class="mb-4">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center space-x-3">
+            <button 
+              @click="$router.back()"
+              class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-white/20 flex items-center justify-center"
+            >
+              <ArrowLeft class="w-5 h-5 text-slate-700" />
+            </button>
+            <div>
+              <h1 class="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                Order #{{ orderId }}
+              </h1>
+              <p v-if="order" class="text-slate-600 text-sm mt-0.5 flex items-center">
+                <Calendar class="w-3 h-3 mr-1" />
+                Placed on {{ formatDate(order.created_at) }}
+              </p>
+            </div>
+          </div>
+          
+          <!-- Status Badge -->
+          <div v-if="order" 
+               :class="[
+                 'px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1 shadow-sm',
+                 getStatusClasses(order.status)
+               ]"
+          >
+            <component :is="getStatusIcon(order.status)" class="w-3 h-3" />
+            <span>{{ formatStatus(order.status) }}</span>
+          </div>
         </div>
-        <v-chip v-if="order" :color="getStatusColor(order.status)"
-          :variant="order.status === 'delivered' ? 'flat' : 'outlined'" size="small">
-          <v-icon start :icon="getStatusIcon(order.status)" />
-          {{ formatStatus(order.status) }}
-        </v-chip>
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="text-center py-12">
-        <v-progress-circular indeterminate color="primary" size="64" />
-        <p class="mt-4 text-body-1">Loading order details...</p>
+      <div v-if="loading" class="text-center py-16">
+        <div class="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg" 
+             style="background: linear-gradient(to right, #dbeafe, #e0e7ff);">
+          <Loader2 class="w-10 h-10 text-blue-600 animate-spin" />
+        </div>
+        <h3 class="text-xl font-semibold text-slate-800 mb-2">Loading Order Details</h3>
+        <p class="text-slate-600">Please wait while we fetch your order information</p>
       </div>
 
       <!-- Error State -->
-      <v-alert v-if="error" type="error" class="mb-4" closable @click:close="error = null">
-        {{ error }}
-      </v-alert>
+      <div v-if="error" class="mb-6 p-6 bg-red-50 border border-red-200 rounded-3xl shadow-sm">
+        <div class="flex items-center">
+          <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-4">
+            <AlertCircle class="w-5 h-5 text-red-600" />
+          </div>
+          <div class="flex-1">
+            <h4 class="font-semibold text-red-800 mb-1">Error Loading Order</h4>
+            <p class="text-red-700 text-sm">{{ error }}</p>
+          </div>
+          <button @click="error = null" class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-full flex items-center justify-center transition-colors">
+            <X class="w-4 h-4 text-red-600" />
+          </button>
+        </div>
+      </div>
 
       <!-- Order Content -->
-      <div v-if="!loading && order">
-        <v-row>
-          <!-- Main Content -->
-          <v-col cols="12" lg="8">
+      <div v-if="!loading && order" class="space-y-4">
             <!-- Order Notes -->
-            <v-card v-if="order.notes" class="mb-6" elevation="1">
-              <v-card-title class="d-flex align-center">
-                <v-icon class="me-2">mdi-note-text</v-icon>
-                Order Notes
-              </v-card-title>
-              <v-card-text>
-                <v-alert type="info" variant="tonal" v-if="order.status !== 'wrong_delivery'">
-                  {{ order.notes }}
-                </v-alert>
-                <v-alert type="warning" variant="tonal" v-if="order.status === 'wrong_delivery'">
-                  <p>
-                    <strong>Note:</strong> Between 3 working days, one of our driver will come and collect the items.
-                    From there, you will be refunded the full amount of the order or the correct items will be delivered
-                    to you.
-                  </p>
-                </v-alert>
-              </v-card-text>
-            </v-card>
+        <div v-if="order.notes" class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-4">
+          <div class="flex items-center space-x-2 mb-3">
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <FileText class="w-4 h-4 text-blue-600" />
+            </div>
+            <h3 class="text-base font-semibold text-slate-900">Order Notes</h3>
+          </div>
+          <div v-if="order.status !== 'wrong_delivery'" class="p-4 bg-blue-50 border border-blue-200 rounded-2xl">
+            <p class="text-slate-700">{{ order.notes }}</p>
+          </div>
+          <div v-if="order.status === 'wrong_delivery'" class="p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+            <div class="flex items-start space-x-3">
+              <AlertTriangle class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p class="font-semibold text-amber-800 mb-2">Wrong Delivery Reported</p>
+                <p class="text-amber-700 text-sm">
+                  Between 3 working days, one of our drivers will come and collect the items. 
+                  From there, you will be refunded the full amount of the order or the correct items will be delivered to you.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-            <!-- Delivery Confirmation Button for delivered_no_confirmation status -->
-            <div class="d-flex gap-3 mb-6 justify-end" v-if="order.status === 'delivered_no_confirmation'">
-              <v-btn color="success" class="text-none" variant="flat" size="small"
-                @click="showDeliveryConfirmDialog = true" :loading="updatingStatus" rounded>
-                <v-icon start>mdi-check</v-icon>
-                Confirm Delivery
-              </v-btn>
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap gap-2 justify-end">
+          <!-- Delivery Confirmation Button -->
+          <button 
+            v-if="order.status === 'delivered_no_confirmation'"
+            @click="showDeliveryConfirmDialog = true"
+            :disabled="updatingStatus"
+            class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1 shadow-sm text-sm"
+          >
+            <Loader2 v-if="updatingStatus" class="w-3 h-3 animate-spin" />
+            <CheckCircle v-else class="w-3 h-3" />
+            <span>Confirm Delivery</span>
+          </button>
+
+          <!-- Wrong Delivery Report Button -->
+          <button 
+            v-if="order.status === 'delivered' && canReportWrongDelivery"
+            @click="showWrongDeliveryDialog = true"
+            :disabled="updatingStatus"
+            class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1 shadow-sm text-sm"
+          >
+            <AlertTriangle class="w-3 h-3" />
+            <span>Report Wrong Delivery</span>
+          </button>
+        </div>
+
+        <!-- Order Items -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-4">
+          <div class="flex items-center space-x-2 mb-3">
+            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+              <Package class="w-4 h-4 text-purple-600" />
+            </div>
+            <h3 class="text-base font-semibold text-slate-900">Order Items</h3>
+          </div>
+          
+          <div class="space-y-3">
+            <div 
+              v-for="(item, index) in order.items" 
+              :key="index"
+              class="flex items-start space-x-3 p-3 bg-slate-50/50 rounded-xl border border-slate-100"
+            >
+              <div class="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
+                <img 
+                  v-if="item.product?.main_image" 
+                  :src="item.product.main_image" 
+                  :alt="item.product?.name"
+                  class="w-full h-full object-cover"
+                />
+                <div v-else class="w-full h-full bg-slate-200 flex items-center justify-center">
+                  <Package class="w-6 h-6 text-slate-400" />
+                </div>
             </div>
 
-            <!-- On Hold Order Actions -->
-            <div class="d-flex gap-3 mb-6 justify-end" v-if="order.status === 'on_hold'">
-              <v-btn color="error" class="text-none mr-3" variant="outlined" size="small" @click="confirmCancelOrder"
-                :loading="updatingStatus" rounded>
-                <v-icon start>mdi-cancel</v-icon>
-                Cancel Order
-              </v-btn>
-              <v-btn color="success" class="text-none" variant="flat" size="small" @click="confirmProceedOrder"
-                :loading="updatingStatus" rounded>
-                <v-icon start>mdi-play</v-icon>
-                Proceed with Order
-              </v-btn>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-semibold text-slate-900 truncate">
+                  {{ item.product?.name || 'Product' }}
+                </h4>
+                <p class="text-xs text-slate-600 mt-1">
+                  Variant: {{ item.product_variant?.name || 'Standard' }} ML
+                </p>
+                <p class="text-xs text-slate-600">
+                  Quantity: {{ item.quantity }}
+                </p>
+              </div>
+
+              <div class="text-right">
+                <p class="text-sm font-semibold text-slate-900">
+                  {{ formatApiPrice({ price: item.price * item.quantity, currency_info: item.currency_info }) }}
+                </p>
+              </div>
+            </div>
+          </div>
             </div>
 
-            <!-- Wrong Delivery Button for delivered orders (within 24h) -->
-            <div class="d-flex gap-3 mb-6 justify-end" v-if="order.status === 'delivered' && canReportWrongDelivery">
-              <v-btn color="warning" class="text-none" size="small" @click="showWrongDeliveryDialog = true"
-                :loading="updatingStatus" rounded>
-                <v-icon start>mdi-alert-circle</v-icon>
-                Report Wrong Delivery
-              </v-btn>
+        <!-- Delivery Information -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-4">
+          <div class="flex items-center space-x-2 mb-3">
+            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+              <Truck class="w-4 h-4 text-green-600" />
+            </div>
+            <h3 class="text-base font-semibold text-slate-900">Delivery Information</h3>
             </div>
 
-            <!-- Order Status Timeline -->
-            <v-card class="mb-6" elevation="1">
-              <v-card-title class="d-flex align-center">
-                <v-icon class="me-2">mdi-timeline-clock</v-icon>
-                Order Timeline
-              </v-card-title>
-              <v-card-text>
-                <OrderStatusTimeline :order="order" />
-              </v-card-text>
-            </v-card>
+          <div class="space-y-2">
+            <div class="flex items-center space-x-2 text-sm">
+              <MapPin class="w-3 h-3 text-slate-500" />
+              <span class="text-slate-700">{{ order.shipping_address }}</span>
+            </div>
+            <div v-if="order.expected_delivery_time" class="flex items-center space-x-2 text-sm">
+              <Clock class="w-3 h-3 text-slate-500" />
+              <span class="text-slate-700">Expected: {{ formatDeliveryTime(order.expected_delivery_time) }}</span>
+            </div>
+          </div>
+        </div>
 
-            <!-- Order Items -->
-            <v-card class="mb-6" elevation="1">
-              <v-card-title class="d-flex align-center">
-                <v-icon class="me-2">mdi-package-variant</v-icon>
-                Order Items ({{ order.items?.length || 0 }})
-              </v-card-title>
-              <v-card-text>
-                <div v-for="(item, index) in order.items" :key="index" class="order-item"
-                  :class="{ 'border-bottom': index < order.items.length - 1 }">
-                  <v-row align="center">
-                    <v-col cols="auto">
-                      <v-avatar size="80" rounded="lg">
-                        <v-img v-if="item.product?.main_image" :src="item.product.main_image" :alt="item.product?.name"
-                          cover />
-                        <v-icon v-else size="40" color="grey-lighten-1">
-                          mdi-package-variant
-                        </v-icon>
-                      </v-avatar>
-                    </v-col>
-
-                    <v-col>
-                      <h3 class="text-h6 font-weight-medium mb-1">
+        <!-- Order Summary -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-4">
+          <div class="flex items-center space-x-2 mb-3">
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <Receipt class="w-4 h-4 text-blue-600" />
+            </div>
+            <h3 class="text-base font-semibold text-slate-900">Order Summary</h3>
+          </div>
+          
+          <div class="space-y-3">
+            <!-- Product Breakdown -->
+            <div v-if="order.items && order.items.length > 0" class="space-y-2">
+              <h4 class="text-xs font-semibold text-slate-700 mb-2">Product Details:</h4>
+              <div class="space-y-2 max-h-32 overflow-y-auto">
+                <div 
+                  v-for="(item, index) in order.items" 
+                  :key="index"
+                  class="p-2 bg-slate-50/50 rounded-lg border border-slate-100"
+                >
+                  <div class="flex items-start space-x-2">
+                    <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                      <img 
+                        v-if="item.product?.main_image" 
+                        :src="item.product.main_image" 
+                        :alt="item.product?.name"
+                        class="w-full h-full object-cover"
+                      />
+                      <div v-else class="w-full h-full bg-slate-200 flex items-center justify-center">
+                        <Package class="w-4 h-4 text-slate-400" />
+                      </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h5 class="text-xs font-semibold text-slate-900 truncate">
                         {{ item.product?.name || 'Product' }}
-                      </h3>
-                      <p v-if="item.product?.description" class="text-body-2 text-medium-emphasis mb-2">
-                        {{ truncateText(item.product.description, 100) }}
-                      </p>
-                      <div class="d-flex align-center gap-4">
-                        <v-chip size="small" variant="outlined">
-                          Qty: {{ item.quantity }}
-                        </v-chip>
-                        <div class="d-flex align-items-center">
-                          <v-chip size="small" variant="outlined" color="primary" class="ml-2">
-                            {{ formatApiPrice({ price: item.price, currency_info: item.currency_info }) }} each
-                          </v-chip>
+                      </h5>
+                      <div class="space-y-0.5 mt-1">
+                        <div class="flex justify-between items-center text-xs">
+                          <span class="text-slate-600">Variant:</span>
+                          <span class="font-medium text-slate-900">{{ item.product_variant?.name || 'Standard' }} ML</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                          <span class="text-slate-600">Quantity:</span>
+                          <span class="font-medium text-slate-900">{{ item.quantity }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                          <span class="text-slate-600">Price:</span>
+                          <span class="font-medium text-slate-900">
+                            {{ formatApiPrice({ price: item.price, currency_info: order.currency_info }) }} each
+                          </span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs font-semibold text-slate-900 pt-0.5 border-t border-slate-200">
+                          <span>Subtotal:</span>
+                          <span>{{ formatApiPrice({ price: item.price * item.quantity, currency_info: order.currency_info }) }}</span>
                         </div>
                       </div>
-                    </v-col>
-
-                    <v-col cols="auto" class="text-right">
-                      <h3 class="text-h6 font-weight-bold text-primary">
-                        {{ formatApiPrice({ price: item.price * item.quantity, currency_info: item.currency_info }) }}
-                      </h3>
-                      <v-btn v-if="item.product?.id" variant="flat" rounded size="small" color="secondary"
-                        class="text-none" @click="goToProduct(item.product.id)">
-                        View Product
-                      </v-btn>
-                    </v-col>
-                  </v-row>
+                    </div>
+                  </div>
                 </div>
-              </v-card-text>
-            </v-card>
-
-            <!-- Delivery Information -->
-            <v-card v-if="order.shipping_address || order.expected_delivery_date || order.expected_delivery_time" class="mb-6" elevation="1">
-              <v-card-title class="d-flex align-center">
-                <v-icon class="me-2">mdi-truck-delivery</v-icon>
-                Delivery Information
-              </v-card-title>
-              <v-card-text>
-                <v-row>
-                  <v-col v-if="order.shipping_address" cols="12" md="6">
-                    <h4 class="text-subtitle-1 font-weight-medium mb-2">
-                      Delivery Address
-                    </h4>
-                    <p class="text-body-2">{{ order.shipping_address }}</p>
-                  </v-col>
-
-                  <v-col v-if="order.expected_delivery_date || order.expected_delivery_time" cols="12" md="6">
-                    <h4 class="text-subtitle-1 font-weight-medium mb-2">
-                      Expected Delivery
-                    </h4>
-                    <div v-if="order.expected_delivery_date" class="mb-2">
-                      <p class="text-body-2">
-                        <strong>Date:</strong> {{ formatDate(order.expected_delivery_date) }}
-                      </p>
-                    </div>
-                    <div v-if="order.expected_delivery_time" class="mb-2">
-                      <p class="text-body-2">
-                        <strong>Time:</strong> {{ formatDeliveryTime(order.expected_delivery_time) }}
-                      </p>
-                    </div>
-                  </v-col>
-                </v-row>
-
-                <!-- Delivery Option Information -->
-                <v-row v-if="order.delivery_option" class="mt-4">
-                  <v-col cols="12">
-                    <h4 class="text-subtitle-1 font-weight-medium mb-2">
-                      Delivery Option
-                    </h4>
-                    <div class="d-flex align-center gap-3">
-                      <v-chip 
-                        :color="getDeliveryOptionColor(order.delivery_option)" 
-                        variant="tonal" 
-                        size="small"
-                      >
-                        <v-icon start :icon="getDeliveryOptionIcon(order.delivery_option)"></v-icon>
-                        {{ getDeliveryOptionDisplay(order.delivery_option) }}
-                      </v-chip>
-                      <v-chip 
-                        v-if="order.express_delivery" 
-                        color="warning" 
-                        variant="tonal" 
-                        size="small"
-                      >
-                        <v-icon start>mdi-flash</v-icon>
-                        Express Delivery
-                      </v-chip>
-                    </div>
-                  </v-col>
-                </v-row>
-
-                <!-- Custom Delivery Details -->
-                <v-row v-if="order.delivery_option === 'custom' && (order.custom_delivery_date || order.custom_delivery_time)" class="mt-4">
-                  <v-col cols="12">
-                    <h4 class="text-subtitle-1 font-weight-medium mb-2">
-                      Custom Delivery Details
-                    </h4>
-                    <div class="d-flex gap-4">
-                      <div v-if="order.custom_delivery_date">
-                        <p class="text-body-2">
-                          <strong>Requested Date:</strong> {{ formatDate(order.custom_delivery_date) }}
-                        </p>
-                      </div>
-                      <div v-if="order.custom_delivery_time">
-                        <p class="text-body-2">
-                          <strong>Requested Time:</strong> {{ formatDeliveryTime(order.custom_delivery_time) }}
-                        </p>
-                      </div>
-                    </div>
-                  </v-col>
-                </v-row>
-
-                <v-alert v-if="order.notes" type="info" variant="tonal" class="mt-4">
-                  <strong>Note:</strong> {{ order.notes }}
-                </v-alert>
-              </v-card-text>
-            </v-card>
-          </v-col>
-
-          <!-- Sidebar -->
-          <v-col cols="12" lg="4">
-            <!-- Order Summary -->
-            <v-card class="mb-6" elevation="1">
-              <v-card-title>Order Summary</v-card-title>
-              <v-card-text>
-                <div class="order-summary">
-                  <div class="d-flex justify-space-between mb-2">
-                    <span>Subtotal:</span>
-                    <span>{{ formatApiPrice({ price: calculateSubtotal(), currency_info: order.currency_info })
-                      }}</span>
+              </div>
+            </div>
+            
+            <!-- Price Summary -->
+            <div class="space-y-2 pt-2 border-t border-slate-200">
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-slate-600">Subtotal</span>
+                <span class="font-semibold text-slate-900">
+                  {{ formatApiPrice({ price: order.total_amount - (order.delivery_fee || 0), currency_info: order.currency_info }) }}
+                </span>
                   </div>
-                  <div v-if="order.delivery_fee" class="d-flex justify-space-between mb-2">
-                    <span>Delivery Fee:</span>
-                    <span>{{ formatApiPrice({ price: order.delivery_fee, currency_info: order.currency_info }) }}</span>
+              <div v-if="order.delivery_fee" class="flex justify-between items-center text-sm">
+                <span class="text-slate-600">Delivery Fee</span>
+                <span class="font-semibold text-slate-900">
+                  {{ formatApiPrice({ price: order.delivery_fee, currency_info: order.currency_info }) }}
+                </span>
                   </div>
-                  <v-divider class="my-3" />
-                  <div class="d-flex justify-space-between">
-                    <span class="font-weight-bold">Total:</span>
-                    <span class="font-weight-bold text-h6 text-primary">
+              <div class="flex justify-between items-center pt-2 border-t border-slate-200">
+                <span class="text-base font-bold text-slate-900">Total</span>
+                <span class="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text">
                       {{ formatApiPrice({ price: order.total_amount, currency_info: order.currency_info }) }}
                     </span>
                   </div>
                 </div>
-              </v-card-text>
-            </v-card>
+          </div>
+        </div>
 
             <!-- Payment Information -->
-            <v-card v-if="order.payment" class="mb-6" elevation="1">
-              <v-card-title>Payment Information</v-card-title>
-              <v-card-text>
-                <div class="payment-info">
-                  <div class="d-flex justify-space-between mb-2">
-                    <span>Payment Method:</span>
-                    <span class="text-capitalize">{{ order.payment.payment_method?.replace('_', ' ') }}</span>
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-4">
+          <div class="flex items-center space-x-2 mb-3">
+            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+              <CreditCard class="w-4 h-4 text-green-600" />
+            </div>
+            <h3 class="text-base font-semibold text-slate-900">Payment Information</h3>
+          </div>
+          
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-slate-600">Method:</span>
+              <span class="font-medium text-slate-900 capitalize">
+                {{ order.payment.payment_method?.replace('_', ' ') }}
+              </span>
                   </div>
-                  <div class="d-flex justify-space-between mb-2">
-                    <span>Transaction ID:</span>
-                    <span class="text-caption">{{ order.payment.transaction_id || 'N/A' }}</span>
+            
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-slate-600">Status:</span>
+              <span class="font-medium text-slate-900 capitalize">
+                {{ order.payment.payment_status?.replace('_', ' ') }}
+              </span>
                   </div>
-                  <div class="d-flex justify-space-between">
-                    <span>Status:</span>
-                    <v-chip :color="order.payment.status === 'paid' ? 'success' : 'warning'" size="small"
-                      variant="flat">
-                      {{ order.payment.status }}
-                    </v-chip>
                   </div>
                 </div>
-              </v-card-text>
-            </v-card>
 
-            <!-- Seller Information -->
-            <v-card v-if="order.seller" class="mb-6" elevation="1">
-              <v-card-title>Seller Information</v-card-title>
-              <v-card-text>
-                <div class="seller-info">
-                  <h4 class="text-subtitle-1 font-weight-medium mb-2">
-                    {{ order.seller.business_name || order.seller.first_name + ' ' + order.seller.last_name }}
-                  </h4>
-                  <p v-if="order.seller.email" class="text-body-2 mb-1">
-                    <v-icon size="small" class="me-1">mdi-email</v-icon>
-                    {{ order.seller.email }}
-                  </p>
-                  <p v-if="order.seller.phone_number" class="text-body-2">
-                    <v-icon size="small" class="me-1">mdi-phone</v-icon>
-                    {{ order.seller.phone_number }}
-                  </p>
+        <!-- Order Timeline -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-4">
+          <div class="flex items-center space-x-2 mb-3">
+            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+              <Clock class="w-4 h-4 text-purple-600" />
+            </div>
+            <h3 class="text-base font-semibold text-slate-900">Order Timeline</h3>
                 </div>
-              </v-card-text>
-            </v-card>
+          
+          <OrderStatusTimeline :order="order" />
+        </div>
 
-            <!-- Actions -->
-            <v-card elevation="1">
-              <v-card-title>Actions</v-card-title>
-              <v-card-text>
-                <div class="d-flex flex-column gap-3">
-                  <v-btn v-if="canCancelOrder(order.status)" color="error" variant="outlined" block
-                    @click="showCancelDialog = true">
-                    <v-icon start>mdi-cancel</v-icon>
-                    Cancel Order
-                  </v-btn>
+        <!-- Action Buttons -->
+        <div class="space-y-2">
+          <!-- Cancel Order Button -->
+          <button 
+            v-if="order && canCancel(order.status)"
+            @click="showCancelConfirmDialog = true"
+            class="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-sm flex items-center justify-center space-x-1 text-sm"
+          >
+            <X class="w-3 h-3" />
+            <span>Cancel Order</span>
+          </button>
 
-                  <!-- Wrong Delivery Button for delivered status (within 24 hours) -->
-                  <v-btn v-if="canReportWrongDelivery" color="warning" block @click="showWrongDeliveryDialog = true"
-                    class="text-none mb-4" rounded>
-                    <v-icon start>mdi-alert-circle</v-icon>
-                    Report Wrong Delivery
-                  </v-btn>
-
-                  <v-btn v-if="canReorder(order.status)" color="primary" variant="flat" block @click="reorderItems"
-                    class="text-none" rounded>
-                    <v-icon start>mdi-repeat</v-icon>
-                    Reorder Items
-                  </v-btn>
-
-                  <!-- <v-btn color="primary" variant="outlined" block @click="downloadInvoice">
-                    <v-icon start>mdi-download</v-icon>
-                    Download Invoice
-                  </v-btn> -->
-
-                  <!-- <v-btn variant="text" block @click="contactSupport">
-                    <v-icon start>mdi-help-circle</v-icon>
-                    Contact Support
-                  </v-btn> -->
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
+          <!-- Reorder Items Button -->
+          <button 
+            v-if="order && canReorder(order.status)"
+            @click="reorderItems"
+            class="w-full px-4 py-2 text-white font-semibold rounded-xl transition-all duration-200 shadow-sm flex items-center justify-center space-x-1 hover:shadow-md text-sm"
+            style="background: linear-gradient(to right, #2563eb, #4f46e5);"
+            onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
+            onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
+          >
+            <RefreshCw class="w-3 h-3" />
+            <span>Reorder Items</span>
+          </button>
+        </div>
       </div>
-      <!-- Cancel Order Dialog -->
-      <v-dialog v-model="showCancelDialog" max-width="500">
-        <v-card>
-          <v-card-title>Cancel Order</v-card-title>
-          <v-card-text>
-            <p class="mb-4">Are you sure you want to cancel this order?</p>
-            <v-textarea v-model="cancelReason" label="Reason for cancellation (optional)" variant="outlined" rows="3" />
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer />
-            <v-btn @click="showCancelDialog = false">Cancel</v-btn>
-            <v-btn color="error" @click="cancelOrder" class="text-none">Confirm Cancellation</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+    </div>
 
-      <!-- Delivery Confirmation Dialog -->
-      <v-dialog v-model="showDeliveryConfirmDialog" max-width="500">
-        <v-card>
-          <v-card-title class="text-h6">Confirm Delivery</v-card-title>
-          <v-card-text>
-            <p class="mb-3">Are you sure you want to confirm delivery for Order #{{ orderId }}?</p>
-            <p class="text-body-2 text-medium-emphasis">This will mark the order as delivered and complete the order
-              process.</p>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer />
-            <v-btn color="grey" variant="text" @click="showDeliveryConfirmDialog = false">
-              Cancel
-            </v-btn>
-            <v-btn color="success" variant="flat" @click="executeDeliveryConfirmation" :loading="updatingStatus">
-              Confirm Delivery
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+    <!-- Enhanced Cancel Order Confirmation Dialog -->
+    <div 
+      v-if="showCancelConfirmDialog" 
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      @click="showCancelConfirmDialog = false"
+    >
+      <div 
+        class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+        @click.stop
+      >
+        <div class="flex items-center mb-6">
+          <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mr-4">
+            <AlertTriangle class="w-7 h-7 text-red-600" />
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-900">Cancel Order</h3>
+            <p class="text-slate-600 text-sm">Order #{{ orderId }}</p>
+          </div>
+        </div>
+        <p class="text-slate-700 mb-6">Are you sure you want to cancel this order? This action cannot be undone.</p>
+        <div class="flex space-x-4">
+          <button 
+            @click="showCancelConfirmDialog = false"
+            class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
+          >
+            Keep Order
+          </button>
+          <button 
+            @click="executeCancelOrder"
+            :disabled="updatingStatus"
+            class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          >
+            <Loader2 v-if="updatingStatus" class="w-4 h-4 animate-spin" />
+            <X v-else class="w-4 h-4" />
+            <span>Cancel Order</span>
+          </button>
+        </div>
+      </div>
+    </div>
 
-      <!-- Wrong Delivery Dialog -->
-      <v-dialog v-model="showWrongDeliveryDialog" max-width="500">
-        <v-card>
-          <v-card-title class="text-h6">Report Wrong Delivery</v-card-title>
-          <v-card-text>
-            <v-alert type="warning" variant="tonal" class="mb-4">
-              <strong>Note:</strong> This action can only be performed within 24 hours of delivery.
-            </v-alert>
-            <p class="mb-3">Are you sure you want to report this delivery as incorrect for Order #{{ orderId }}?</p>
-            <p class="text-body-2 text-medium-emphasis mb-4">This will change the order status to "Wrong Delivery" and
-              notify the seller to take appropriate action.</p>
-            <v-textarea v-model="wrongDeliveryReason" label="Reason for wrong delivery report (optional)"
-              variant="outlined" rows="3" placeholder="Please describe what was wrong with the delivery..." />
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer />
-            <v-btn color="grey" variant="text" @click="showWrongDeliveryDialog = false">
-              Cancel
-            </v-btn>
-            <v-btn color="warning" variant="flat" rounded class="text-none" @click="executeWrongDeliveryReport"
-              :loading="updatingStatus">
-              Report Wrong Delivery
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+    <!-- Enhanced Proceed Order Confirmation Dialog -->
+    <div 
+      v-if="showProceedConfirmDialog" 
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      @click="showProceedConfirmDialog = false"
+    >
+      <div 
+        class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+        @click.stop
+      >
+        <div class="flex items-center mb-6">
+          <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mr-4">
+            <Play class="w-7 h-7 text-green-600" />
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-900">Proceed with Order</h3>
+            <p class="text-slate-600 text-sm">Order #{{ orderId }}</p>
+          </div>
+        </div>
+        <p class="text-slate-700 mb-6">Are you sure you want to proceed with this order? It will be moved to pending status.</p>
+        <div class="flex space-x-4">
+          <button 
+            @click="showProceedConfirmDialog = false"
+            class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
+          >
+            Keep on Hold
+          </button>
+          <button 
+            @click="executeProceedOrder"
+            :disabled="updatingStatus"
+            class="flex-1 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          >
+            <Loader2 v-if="updatingStatus" class="w-4 h-4 animate-spin" />
+            <Play v-else class="w-4 h-4" />
+            <span>Proceed</span>
+          </button>
+                </div>
+      </div>
+    </div>
 
-      <!-- Cancel Order Confirmation Dialog (for on_hold orders) -->
-      <v-dialog v-model="showCancelConfirmDialog" max-width="500">
-        <v-card>
-          <v-card-title class="text-h6">Cancel Order</v-card-title>
-          <v-card-text>
-            <p class="mb-3">Are you sure you want to cancel Order #{{ orderId }}?</p>
-            <p class="text-body-2 text-medium-emphasis">This action cannot be undone. The order will be marked
-              as cancelled.</p>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer />
-            <v-btn color="grey" variant="text" @click="showCancelConfirmDialog = false">
-              Cancel
-            </v-btn>
-            <v-btn color="error" variant="flat" @click="executeCancelOrder" :loading="updatingStatus" class="text-none"
-              rounded>
-              Cancel Order
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+    <!-- Enhanced Delivery Confirmation Dialog -->
+    <div 
+      v-if="showDeliveryConfirmDialog" 
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      @click="showDeliveryConfirmDialog = false"
+    >
+      <div 
+        class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+        @click.stop
+      >
+        <div class="flex items-center mb-6">
+          <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+            <CheckCircle class="w-7 h-7 text-blue-600" />
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-900">Confirm Delivery</h3>
+            <p class="text-slate-600 text-sm">Order #{{ orderId }}</p>
+          </div>
+        </div>
+        <p class="text-slate-700 mb-6">Please confirm that you have received your order. This will mark the order as delivered.</p>
+        <div class="flex space-x-4">
+          <button 
+            @click="showDeliveryConfirmDialog = false"
+            class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
+          >
+            Not Yet
+          </button>
+          <button 
+            @click="executeDeliveryConfirmation"
+            :disabled="updatingStatus"
+            class="flex-1 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          >
+            <Loader2 v-if="updatingStatus" class="w-4 h-4 animate-spin" />
+            <CheckCircle v-else class="w-4 h-4" />
+            <span>Confirm Delivery</span>
+          </button>
+        </div>
+      </div>
+    </div>
 
-      <!-- Proceed Order Confirmation Dialog (for on_hold orders) -->
-      <v-dialog v-model="showProceedConfirmDialog" max-width="500">
-        <v-card>
-          <v-card-title class="text-h6">Proceed with Order</v-card-title>
-          <v-card-text>
-            <p class="mb-3">Are you sure you want to proceed with Order #{{ orderId }}?</p>
-            <p class="text-body-2 text-medium-emphasis">The order will be moved to pending status and processing
-              will begin.</p>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer />
-            <v-btn color="grey" variant="text" @click="showProceedConfirmDialog = false">
+    <!-- Enhanced Wrong Delivery Dialog -->
+    <div 
+      v-if="showWrongDeliveryDialog" 
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      @click="showWrongDeliveryDialog = false"
+    >
+      <div 
+        class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+        @click.stop
+      >
+        <div class="flex items-center mb-6">
+          <div class="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mr-4">
+            <AlertTriangle class="w-7 h-7 text-amber-600" />
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-900">Report Wrong Delivery</h3>
+            <p class="text-slate-600 text-sm">Order #{{ orderId }}</p>
+          </div>
+        </div>
+        <p class="text-slate-700 mb-4">Please describe what was wrong with your delivery:</p>
+        <textarea 
+          v-model="wrongDeliveryReason"
+          placeholder="Describe the issue with your delivery..."
+          class="w-full p-4 border border-slate-300 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors resize-none"
+          rows="4"
+        ></textarea>
+        <div class="flex space-x-4 mt-6">
+          <button 
+            @click="showWrongDeliveryDialog = false"
+            class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
+          >
               Cancel
-            </v-btn>
-            <v-btn color="success" variant="flat" @click="executeProceedOrder" :loading="updatingStatus"
-              class="text-none" rounded>
-              Confirm Proceed
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-container>
+          </button>
+          <button 
+            @click="executeWrongDeliveryReport"
+            :disabled="updatingStatus"
+            class="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          >
+            <Loader2 v-if="updatingStatus" class="w-4 h-4 animate-spin" />
+            <AlertTriangle v-else class="w-4 h-4" />
+            <span>Report Issue</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -464,6 +508,11 @@ import { useRoute, useRouter } from 'vue-router'
 import { apiService } from '@/services/api'
 import OrderStatusTimeline from '@/components/OrderStatusTimeline.vue'
 import { useCurrency } from '@/composables/useCurrency'
+import { 
+  ArrowLeft, Calendar, Loader2, AlertCircle, X, FileText, AlertTriangle, 
+  CheckCircle, Play, Clock, Package, Eye, Truck, MapPin, Zap, Receipt, 
+  CreditCard, Store, Mail, Phone, RefreshCw, Download
+} from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
@@ -481,6 +530,7 @@ const showProceedConfirmDialog = ref(false)
 const cancelReason = ref('')
 const wrongDeliveryReason = ref('')
 const updatingStatus = ref(false)
+const downloadingInvoice = ref(false)
 
 // Computed
 const orderId = computed(() => route.params.id)
@@ -517,13 +567,7 @@ const calculateSubtotal = () => {
   return order.value.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
 }
 
-const canCancelOrder = (status) => {
-  return ['pending', 'ready_to_pickup'].includes(status)
-}
 
-const canReorder = (status) => {
-  return ['delivered', 'cancelled'].includes(status)
-}
 
 const cancelOrder = async () => {
   try {
@@ -555,29 +599,119 @@ const reorderItems = async () => {
 }
 
 const downloadInvoice = async () => {
+  downloadingInvoice.value = true
   try {
     await apiService.downloadOrderInvoice(orderId.value)
   } catch (err) {
     console.error('Error downloading invoice:', err)
     error.value = 'Failed to download invoice. Please try again.'
+  } finally {
+    downloadingInvoice.value = false
   }
-}
-
-const contactSupport = () => {
-  // Implement support contact
-  console.log('Contact support for order:', orderId.value)
 }
 
 const goToProduct = (productId) => {
   router.push({ name: 'ProductDetails', params: { id: productId } })
 }
 
-// Order status update functionality
+const truncateText = (text, maxLength) => {
+  if (!text) return ''
+  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const formatDeliveryTime = (timeString) => {
+  if (!timeString) return ''
+  return timeString.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
+}
+
+const formatStatus = (status) => {
+  return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+}
+
+const getStatusClasses = (status) => {
+  const classes = {
+    all: 'bg-blue-100 text-blue-700',
+    active: 'bg-yellow-100 text-yellow-700',
+    pending: 'bg-orange-100 text-orange-700',
+    processing: 'bg-blue-100 text-blue-700',
+    ready_for_pickup: 'bg-purple-100 text-purple-700',
+    picked_up: 'bg-indigo-100 text-indigo-700',
+    delivered_no_confirmation: 'bg-amber-100 text-amber-700',
+    delivered: 'bg-green-100 text-green-700',
+    cancelled: 'bg-red-100 text-red-700',
+    on_hold: 'bg-yellow-100 text-yellow-700',
+    not_received: 'bg-yellow-100 text-yellow-700',
+    not_returned: 'bg-yellow-100 text-yellow-700',
+    returned: 'bg-yellow-100 text-yellow-700',
+    rescheduled: 'bg-blue-100 text-blue-700',
+    wrong_delivery: 'bg-red-100 text-red-700',
+    assigned_to_admin: 'bg-blue-100 text-blue-700',
+    assigned_to_driver: 'bg-blue-100 text-blue-700'
+  }
+  return classes[status] || 'bg-gray-100 text-gray-700'
+}
+
+const getStatusIcon = (status) => {
+  const icons = {
+    pending: Clock,
+    processing: Package,
+    ready_for_pickup: CheckCircle,
+    picked_up: Truck,
+    delivered_no_confirmation: CheckCircle,
+    delivered: CheckCircle,
+    cancelled: X,
+    on_hold: AlertTriangle
+  }
+  return icons[status] || Package
+}
+
+const getDeliveryOptionDisplay = (option) => {
+  const displays = {
+    default: 'Standard Delivery',
+    express: 'Express Delivery',
+    custom: 'Custom Delivery'
+  }
+  return displays[option] || 'Standard Delivery'
+}
+
+const getDeliveryOptionClasses = (option) => {
+  const classes = {
+    default: 'bg-blue-100 text-blue-700',
+    express: 'bg-green-100 text-green-700',
+    custom: 'bg-orange-100 text-orange-700'
+  }
+  return classes[option] || 'bg-blue-100 text-blue-700'
+}
+
+const getDeliveryOptionIcon = (option) => {
+  const icons = {
+    default: Truck,
+    express: Zap,
+    custom: Clock
+  }
+  return icons[option] || Truck
+}
+
+// Update order status method
 const updateOrderStatus = async (newStatus) => {
   try {
     updatingStatus.value = true
-    await apiService.updateOrderStatus(orderId.value, { status: newStatus })
-
+    await apiService.updateOrderStatus(orderId.value, {
+      status: newStatus,
+      notes: `Status updated to ${newStatus}`
+    })
     // Reload order to get updated status
     await loadOrder()
   } catch (err) {
@@ -586,103 +720,6 @@ const updateOrderStatus = async (newStatus) => {
   } finally {
     updatingStatus.value = false
   }
-}
-
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-const formatStatus = (status) => {
-  return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-}
-
-const truncateText = (text, length) => {
-  if (!text) return ''
-  return text.length > length ? text.substring(0, length) + '...' : text
-}
-
-const getStatusColor = (status) => {
-  const colors = {
-    pending: 'orange',
-    processing: 'blue',
-    ready_for_pickup: 'purple',
-    picked_up: 'indigo',
-    delivered_no_confirmation: 'amber',
-    delivered: 'success',
-    wrong_delivery: 'red',
-    cancelled: 'error'
-  }
-  return colors[status] || 'grey'
-}
-
-const getStatusIcon = (status) => {
-  const icons = {
-    pending: 'mdi-clock-outline',
-    processing: 'mdi-package-variant',
-    ready_for_pickup: 'mdi-package-check',
-    picked_up: 'mdi-truck',
-    delivered_no_confirmation: 'mdi-check-clock',
-    delivered: 'mdi-check-circle',
-    wrong_delivery: 'mdi-alert-circle',
-    cancelled: 'mdi-close-circle'
-  }
-  return icons[status] || 'mdi-package-variant-closed'
-}
-
-const getDefaultStatusNote = (status) => {
-  const notes = {
-    pending: 'Order has been placed and is awaiting processing',
-    processing: 'Order is being prepared by the seller',
-    ready_for_pickup: 'Order is ready for pickup by delivery driver',
-    picked_up: 'Order has been picked up and is on the way',
-    delivered: 'Order has been successfully delivered'
-  }
-  return notes[status] || ''
-}
-
-// Delivery option helper functions
-const formatDeliveryTime = (timeSlot) => {
-  const timeMap = {
-    'morning': 'Morning (8:00 AM - 12:00 PM)',
-    'afternoon': 'Afternoon (12:00 PM - 4:00 PM)',
-    'evening': 'Evening (4:00 PM - 8:00 PM)'
-  }
-  return timeMap[timeSlot] || timeSlot
-}
-
-const getDeliveryOptionDisplay = (option) => {
-  const options = {
-    'default': 'Standard Delivery',
-    'express': 'Express Delivery',
-    'custom': 'Custom Date & Time'
-  }
-  return options[option] || option
-}
-
-const getDeliveryOptionColor = (option) => {
-  const colors = {
-    'default': 'primary',
-    'express': 'warning',
-    'custom': 'info'
-  }
-  return colors[option] || 'grey'
-}
-
-const getDeliveryOptionIcon = (option) => {
-  const icons = {
-    'default': 'mdi-truck-delivery',
-    'express': 'mdi-flash',
-    'custom': 'mdi-calendar-clock'
-  }
-  return icons[option] || 'mdi-truck-delivery'
 }
 
 // Confirmation methods for on_hold orders
@@ -745,38 +782,20 @@ const executeWrongDeliveryReport = async () => {
   }
 }
 
+// Helper methods for conditional button visibility
+const canCancel = (status) => {
+  return ['pending', 'on_hold', 'ready_for_pickup'].includes(status)
+}
+
+const canReorder = (status) => {
+  return ['delivered', 'cancelled', 'not_received', 'wrong_delivery'].includes(status)
+}
+
 onMounted(() => {
   loadOrder()
 })
 </script>
 
 <style scoped>
-.order-status-page {
-  padding-bottom: 64px;
-}
-
-.order-item {
-  padding: 16px 0;
-}
-
-.border-bottom {
-  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-}
-
-.order-summary,
-.payment-info,
-.seller-info {
-  line-height: 1.6;
-}
-
-.order-summary .v-divider {
-  margin: 12px 0;
-}
-
-@media (max-width: 960px) {
-  .order-item .v-col:last-child {
-    text-align: left !important;
-    margin-top: 16px;
-  }
-}
+/* Additional styles if needed */
 </style>

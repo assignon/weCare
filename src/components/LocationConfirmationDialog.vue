@@ -1,216 +1,205 @@
 <template>
-  <v-dialog 
-    v-model="show" 
-    max-width="400" 
-    persistent
-    :class="{ 'location-dialog-animate': animateDialog }"
+  <div 
+    v-if="show" 
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+    :class="{ 'animate-in': animateDialog }"
   >
-    <v-card>
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
       <!-- Initial Question Step -->
-      <div v-if="currentStep === 'question'">
-        <v-card-title class="text-h6 text-center pa-4">
-          <v-icon size="large" color="primary" class="mb-2">mdi-map-marker-question</v-icon>
-          <div>Location Confirmation</div>
-        </v-card-title>
+      <div v-if="currentStep === 'question'" class="p-6">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4" style="background: linear-gradient(to right, #2563eb, #9333ea);">
+            <MapPin class="w-8 h-8 text-white" />
+          </div>
+          <h3 class="text-xl font-bold text-gray-900">Location Confirmation</h3>
+        </div>
         
-        <v-card-text class="text-center pa-4">
-          <p class="text-body-1 mb-4">
+        <div class="text-center mb-6">
+          <p class="text-gray-700 mb-4">
             Are you currently at this address right now?
           </p>
-          <div class="address-preview pa-3 rounded bg-grey-lighten-4">
-            <v-icon small class="mr-2">mdi-map-marker</v-icon>
-            <span class="text-body-2">{{ addressSummary }}</span>
+          <div class="p-4 bg-gray-50 rounded-2xl border-l-4 border-blue-500">
+            <div class="flex items-center text-gray-700">
+              <MapPin class="w-4 h-4 mr-2 text-blue-600" />
+              <span class="text-sm">{{ addressSummary }}</span>
+            </div>
           </div>
-          <p class="text-caption text-grey mt-3">
+          <p class="text-xs text-gray-500 mt-3">
             This helps us provide better delivery services
           </p>
-        </v-card-text>
+        </div>
         
-        <v-card-actions class="pa-4">
-          <div class="w-100">
-            <v-btn 
-              variant="outlined" 
+        <div class="space-y-3">
+          <button 
               @click="handleNo"
               :disabled="loading"
-              block
-              class="mb-3"
-              size="large"
+            class="w-full py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-gray-400 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               No, I'm not there
-            </v-btn>
-            <v-btn 
-              color="primary" 
+          </button>
+          <button 
               @click="handleYes"
               :disabled="loading"
-              block
-              size="large"
+            class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+            style="background: linear-gradient(to right, #2563eb, #9333ea);"
             >
               Yes, I'm here now
-            </v-btn>
+          </button>
           </div>
-        </v-card-actions>
       </div>
       
       <!-- Location Permission Step -->
-      <div v-else-if="currentStep === 'permission'">
-        <v-card-title class="text-h6 text-center pa-4">
-          <v-icon size="large" color="orange" class="mb-2">mdi-crosshairs-gps</v-icon>
-          <div>Location Access</div>
-        </v-card-title>
+      <div v-else-if="currentStep === 'permission'" class="p-6">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Crosshair class="w-8 h-8 text-white" />
+          </div>
+          <h3 class="text-xl font-bold text-gray-900">Location Access</h3>
+        </div>
         
-        <v-card-text class="text-center pa-4">
-          <p class="text-body-1 mb-4">
+        <div class="text-center mb-6">
+          <p class="text-gray-700 mb-4">
             We need access to your location to save precise GPS coordinates for this address.
           </p>
-          <div class="benefits-list text-left mb-4">
-            <div class="d-flex align-center mb-2">
-              <v-icon size="small" color="success" class="mr-2">mdi-check-circle</v-icon>
-              <span class="text-body-2">Faster delivery location</span>
+          <div class="text-left mb-4 max-w-xs mx-auto">
+            <div class="flex items-center mb-2">
+              <CheckCircle class="w-4 h-4 text-green-600 mr-2" />
+              <span class="text-sm text-gray-700">Faster delivery location</span>
             </div>
-            <div class="d-flex align-center mb-2">
-              <v-icon size="small" color="success" class="mr-2">mdi-check-circle</v-icon>
-              <span class="text-body-2">More accurate address</span>
+            <div class="flex items-center mb-2">
+              <CheckCircle class="w-4 h-4 text-green-600 mr-2" />
+              <span class="text-sm text-gray-700">More accurate address</span>
             </div>
-            <div class="d-flex align-center">
-              <v-icon size="small" color="success" class="mr-2">mdi-check-circle</v-icon>
-              <span class="text-body-2">Better driver navigation</span>
+            <div class="flex items-center">
+              <CheckCircle class="w-4 h-4 text-green-600 mr-2" />
+              <span class="text-sm text-gray-700">Better driver navigation</span>
             </div>
           </div>
-          <p class="text-caption text-grey">
+          <p class="text-xs text-gray-500">
             Your location data is only used for delivery purposes
           </p>
-        </v-card-text>
+        </div>
         
-        <v-card-actions class="pa-4">
-          <div class="w-100">
-            <v-btn 
-              variant="outlined" 
+        <div class="space-y-3">
+          <button 
               @click="handleSkipLocation"
               :disabled="loading"
-              block
-              class="mb-3"
-              size="large"
+            class="w-full py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-gray-400 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               Skip for now
-            </v-btn>
-            <v-btn 
-              color="primary" 
+          </button>
+          <button 
               @click="requestLocation"
-              :loading="loading"
-              block
-              size="large"
-              prepend-icon="mdi-crosshairs-gps"
+            :disabled="loading"
+            class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
+            style="background: linear-gradient(to right, #2563eb, #9333ea);"
             >
-              <template v-if="loading">
-                Getting Location...
-              </template>
-              <template v-else>
-                Grant Location Access
-              </template>
-            </v-btn>
-            <p class="text-caption text-grey mt-3 text-center">
+            <Crosshair class="w-4 h-4 mr-2" />
+            <span v-if="loading">Getting Location...</span>
+            <span v-else>Grant Location Access</span>
+          </button>
+          <p class="text-xs text-gray-500 text-center">
               👆 Clicking this button will prompt your browser to request location permission
             </p>
           </div>
-        </v-card-actions>
       </div>
       
       <!-- Loading Step -->
-      <div v-else-if="currentStep === 'loading'">
-        <v-card-title class="text-h6 text-center pa-4">
-          <v-icon size="large" color="primary" class="mb-2 rotate-icon">mdi-crosshairs-gps</v-icon>
-          <div>Getting Your Location</div>
-        </v-card-title>
+      <div v-else-if="currentStep === 'loading'" class="p-6">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin" style="background: linear-gradient(to right, #2563eb, #9333ea);">
+            <Crosshair class="w-8 h-8 text-white" />
+          </div>
+          <h3 class="text-xl font-bold text-gray-900">Getting Your Location</h3>
+        </div>
         
-        <v-card-text class="text-center pa-4">
-          <v-progress-circular 
-            indeterminate 
-            color="primary" 
-            size="64"
-            class="mb-4"
-          ></v-progress-circular>
-          <p class="text-body-2">
+        <div class="text-center">
+          <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p class="text-gray-700 mb-2">
             Please wait while we get your GPS coordinates...
           </p>
-          <p class="text-caption text-grey mt-2">
+          <p class="text-xs text-gray-500">
             Make sure location services are enabled
           </p>
-        </v-card-text>
+        </div>
       </div>
       
       <!-- Success Step -->
-      <div v-else-if="currentStep === 'success'">
-        <v-card-title class="text-h6 text-center pa-4">
-          <v-icon size="large" color="success" class="mb-2">mdi-check-circle</v-icon>
-          <div>Location Saved</div>
-        </v-card-title>
+      <div v-else-if="currentStep === 'success'" class="p-6">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle class="w-8 h-8 text-white" />
+          </div>
+          <h3 class="text-xl font-bold text-gray-900">Location Saved</h3>
+        </div>
         
-        <v-card-text class="text-center pa-4">
-          <p class="text-body-1 mb-4">
+        <div class="text-center mb-6">
+          <p class="text-gray-700 mb-4">
             Great! Your GPS coordinates have been saved.
           </p>
-          <div class="coordinates-info pa-3 rounded bg-success-lighten-5">
-            <div class="text-body-2 mb-1">
+          <div class="p-4 bg-green-50 rounded-2xl border-l-4 border-green-500">
+            <div class="text-sm text-gray-700 mb-1">
               <strong>Latitude:</strong> {{ coordinates.latitude?.toFixed(6) }}
             </div>
-            <div class="text-body-2">
+            <div class="text-sm text-gray-700">
               <strong>Longitude:</strong> {{ coordinates.longitude?.toFixed(6) }}
             </div>
           </div>
-          <p class="text-caption text-grey mt-3">
+          <p class="text-xs text-gray-500 mt-3">
             This will help our drivers find you more easily
           </p>
-        </v-card-text>
+        </div>
         
-        <v-card-actions class="pa-4">
-          <v-btn 
-            color="success" 
+        <button 
             @click="close"
-            block
+          class="w-full py-4 bg-green-500 text-white font-semibold rounded-2xl hover:bg-green-600 transition-all duration-200"
           >
             Continue
-          </v-btn>
-        </v-card-actions>
+        </button>
       </div>
       
       <!-- Error Step -->
-      <div v-else-if="currentStep === 'error'">
-        <v-card-title class="text-h6 text-center pa-4">
-          <v-icon size="large" color="error" class="mb-2">mdi-alert-circle</v-icon>
-          <div>Location Error</div>
-        </v-card-title>
+      <div v-else-if="currentStep === 'error'" class="p-6">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle class="w-8 h-8 text-white" />
+          </div>
+          <h3 class="text-xl font-bold text-gray-900">Location Error</h3>
+        </div>
         
-        <v-card-text class="text-center pa-4">
-          <p class="text-body-2 mb-4 text-left whitespace-pre-line">
+        <div class="text-center mb-6">
+          <p class="text-sm text-gray-700 mb-4 text-left whitespace-pre-line">
             {{ errorMessage }}
           </p>
-        </v-card-text>
+        </div>
         
-        <v-card-actions class="pa-4">
-          <v-btn 
-            variant="outlined" 
+        <div class="space-y-3">
+          <button 
             @click="handleSkipLocation"
-            block
-            class="mb-2"
+            class="w-full py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
           >
             Skip for now
-          </v-btn>
-          <v-btn 
-            color="primary" 
+          </button>
+          <button 
             @click="requestLocation"
-            :loading="loading"
-            block
+            :disabled="loading"
+            class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+            style="background: linear-gradient(to right, #2563eb, #9333ea);"
           >
-            Try Again
-          </v-btn>
-        </v-card-actions>
+            <span v-if="loading">Getting Location...</span>
+            <span v-else>Try Again</span>
+          </button>
+        </div>
       </div>
-    </v-card>
-  </v-dialog>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { 
+  MapPin, Crosshair, CheckCircle, AlertCircle 
+} from 'lucide-vue-next'
 
 // Props
 const props = defineProps({
@@ -293,7 +282,6 @@ const requestLocation = async () => {
     showError('Geolocation is not supported by this browser')
     return
   }
-
 
   // First, check permission status if available
   if (navigator.permissions) {
@@ -398,7 +386,7 @@ defineExpose({
 </script>
 
 <style scoped>
-.location-dialog-animate {
+.animate-in {
   animation: slideIn 0.3s ease-out;
 }
 
@@ -411,41 +399,6 @@ defineExpose({
     transform: translateY(0);
     opacity: 1;
   }
-}
-
-.rotate-icon {
-  animation: rotate 2s linear infinite;
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.address-preview {
-  border-left: 4px solid rgb(var(--v-theme-primary));
-}
-
-.benefits-list {
-  max-width: 250px;
-  margin: 0 auto;
-}
-
-.coordinates-info {
-  border-left: 4px solid rgb(var(--v-theme-success));
-}
-
-.error-help {
-  border-left: 4px solid rgb(var(--v-theme-error));
-}
-
-.error-help ul {
-  margin: 0;
-  padding-left: 20px;
 }
 
 .whitespace-pre-line {

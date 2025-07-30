@@ -65,10 +65,7 @@ export function setupAuthInterceptors(axiosInstance) {
         '/accounts/password/reset/',
         '/accounts/register/',
         '/auth/token/',
-        '/auth/token/refresh/',
-        '/products/skin-types/',
-        '/products/skin-concerns/',
-        '/products/product-types/'
+        '/auth/token/refresh/'
       ]
       
       // Check both the relative URL and the full URL
@@ -102,10 +99,7 @@ export function setupAuthInterceptors(axiosInstance) {
         '/accounts/password/reset/',
         '/accounts/register/',
         '/auth/token/',
-        '/auth/token/refresh/',
-        '/products/skin-types/',
-        '/products/skin-concerns/',
-        '/products/product-types/'
+        '/auth/token/refresh/'
       ]
       
       const requestUrl = originalRequest.url || ''

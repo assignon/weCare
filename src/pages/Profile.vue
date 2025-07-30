@@ -1,155 +1,270 @@
 <template>
-  <div class="profile-page">
-    <v-container>
-      <!-- Header with back button and title -->
-      <div class="d-flex align-center justify-space-between mb-5">
-        <v-btn icon variant="text" @click="$router.go(-1)">
-          <v-icon>mdi-arrow-left</v-icon>
-        </v-btn>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pb-24">
+    <div class="p-4">
+      <!-- Modern Header -->
+      <AppHeader 
+        :show-back="true"
+        custom-title="My Profile"
+      />
 
-        <h1 class="text-h5 font-weight-bold text-center">My Profile</h1>
+      <!-- Profile Summary Card -->
+      <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6 mb-6">
+        <div class="flex items-center space-x-4">
+          <!-- Profile Avatar -->
+          <div class="relative">
+            <div class="w-20 h-20 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center shadow-lg">
+              <img 
+                v-if="user && user.profile_picture" 
+                :src="user.profile_picture" 
+                :alt="user.first_name || user.email"
+                class="w-full h-full object-cover"
+              />
+              <span v-else class="text-2xl font-bold text-slate-700">{{ userInitials }}</span>
+            </div>
+            <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+              <Camera class="w-3 h-3 text-white" />
+            </div>
+          </div>
 
-        <div style="width: 40px"></div> <!-- Spacer to maintain layout -->
+          <!-- User Info -->
+          <div class="flex-1 min-w-0">
+            <h2 class="text-xl font-bold text-slate-900 truncate">
+              {{ user.first_name || user.last_name || user.email }}
+            </h2>
+            <p class="text-sm text-slate-600">@{{ userHandle }}</p>
+            <div class="flex items-center space-x-2 mt-2">
+              <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span class="text-xs text-slate-500">Active</span>
+            </div>
+          </div>
+
+          <!-- Edit Profile Button -->
+          <button 
+            @click="$router.push({ name: 'EditProfile' })"
+            class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 flex items-center space-x-2 shadow-lg"
+            style="background: linear-gradient(to right, #2563eb, #4f46e5);"
+            onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
+            onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
+          >
+            <Edit3 class="w-4 h-4" />
+            <span>Edit</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Profile summary -->
-      <v-card class="mb-6 rounded-lg" elevation="0">
-        <div class="d-flex align-center pa-4">
-          <div class="profile-avatar-wrapper mr-4 position-relative">
-            <v-avatar size="75" color="grey-lighten-3">
-              <v-img v-if="user && user.profile_picture" :src="user.profile_picture" cover></v-img>
-              <span v-else class="text-h5">{{ userInitials }}</span>
-            </v-avatar>
+      <!-- Profile Menu -->
+      <div class="space-y-4">
+        <!-- Profile Settings Section -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 overflow-hidden">
+          <div class="p-4 border-b border-slate-100">
+            <h3 class="text-lg font-semibold text-slate-900">Profile Settings</h3>
           </div>
-
-          <div>
-            <div class="text-h6 font-weight-bold">{{ user.first_name || user.last_name || user.email }}</div>
-            <div class="text-subtitle-2 text-grey">@{{ userHandle }}</div>
-          </div>
-
-          <v-spacer></v-spacer>
-
-          <v-btn color="primary" variant="outlined" class="text-none" rounded size="small"
-            :to="{ name: 'EditProfile' }">
-            Edit Profile
-          </v-btn>
-        </div>
-      </v-card>
-
-      <!-- Menu items -->
-      <v-list class="menu-list rounded-lg pa-2 mb-4" flat>
-        <!-- Edit Profile -->
-        <v-list-item :to="{ name: 'EditProfile' }" class="rounded-lg mb-2" color="red">
-          <template v-slot:prepend>
-            <v-icon color="primary" size="large">mdi-account-edit</v-icon>
-          </template>
-
-          <v-list-item-title>Edit Profile</v-list-item-title>
-
-          <template v-slot:append>
-            <v-icon color="primary">mdi-chevron-right</v-icon>
-          </template>
-        </v-list-item>
-
-        <!-- Skin Profile -->
-        <v-list-item :to="{ name: 'SkinProfile' }" class="rounded-lg mb-2" color="grey-lighten-5">
-          <template v-slot:prepend>
-            <v-icon color="primary" size="large">mdi-face-woman-shimmer</v-icon>
-          </template>
-
-          <v-list-item-title>Skin Profile</v-list-item-title>
-
-          <template v-slot:append>
-            <v-icon color="primary">mdi-chevron-right</v-icon>
-          </template>
-        </v-list-item>
-
-        <!-- Addresses -->
-        <v-list-item :to="{ name: 'Addresses' }" class="rounded-lg mb-2" color="grey-lighten-5">
-          <template v-slot:prepend>
-            <v-icon color="primary" size="large">mdi-map-marker</v-icon>
-          </template>
-
-          <v-list-item-title>Addresses</v-list-item-title>
-
-          <template v-slot:append>
-            <v-icon color="primary">mdi-chevron-right</v-icon>
-          </template>
-        </v-list-item>
-
-        <!-- Language -->
-        <v-list-item @click="showLanguageDialog = true" class="rounded-lg mb-2" color="grey-lighten-5">
-          <template v-slot:prepend>
-            <v-icon color="primary" size="large">mdi-translate</v-icon>
-          </template>
-
-          <v-list-item-title>Language</v-list-item-title>
-
-          <template v-slot:append>
-            <span class="text-caption text-grey">{{ currentLanguageName }}</span>
-            <v-icon color="primary">mdi-chevron-right</v-icon>
-          </template>
-        </v-list-item>
-      </v-list>
-
-      <!-- Logout button -->
-      <v-list class="menu-list rounded-lg pa-2" elevation="1">
-        <v-list-item @click="confirmLogout" class="rounded-lg" color="grey-lighten-5">
-          <template v-slot:prepend>
-            <v-avatar color="error" size="32" class="profile-icon">
-              <v-icon color="white" size="18">mdi-logout</v-icon>
-            </v-avatar>
-          </template>
-
-          <v-list-item-title class="text-error">Log out</v-list-item-title>
-
-          <template v-slot:append>
-            <v-icon color="error">mdi-chevron-right</v-icon>
-          </template>
-        </v-list-item>
-      </v-list>
-
-
-
-      <!-- Language selection dialog -->
-      <v-dialog v-model="showLanguageDialog" max-width="300">
-        <v-card>
-          <v-card-title class="text-h6 pb-1">Select Language</v-card-title>
-          <v-card-subtitle>Current: {{ currentLanguageName }}</v-card-subtitle>
-          <v-card-text>
-            <div v-if="loadingLanguages" class="text-center py-4">
-              <v-progress-circular indeterminate size="24"></v-progress-circular>
-              <p class="text-caption mt-2">Loading languages...</p>
+          
+          <!-- Edit Profile -->
+          <button 
+            @click="$router.push({ name: 'EditProfile' })"
+            class="w-full p-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors"
+          >
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <User class="w-5 h-5 text-blue-600" />
+              </div>
+              <div class="text-left">
+                <p class="font-semibold text-slate-900">Edit Profile</p>
+                <p class="text-sm text-slate-600">Update your personal information</p>
+              </div>
             </div>
-            <v-radio-group v-else v-model="selectedLanguage">
-              <v-radio v-for="lang in languages" :key="lang.id" :value="lang.id" :label="lang.name"></v-radio>
-            </v-radio-group>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" text @click="showLanguageDialog = false" class="text-none">Cancel</v-btn>
-            <v-btn color="primary" class="text-none" @click="changeLanguage" :disabled="loadingLanguages">
-              Save
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+            <ChevronRight class="w-5 h-5 text-slate-400" />
+          </button>
 
-      <!-- Logout confirmation dialog -->
-      <v-dialog v-model="showLogoutDialog" max-width="300">
-        <v-card>
-          <v-card-title class="text-h6">Log Out</v-card-title>
-          <v-card-text>
-            Are you sure you want to log out?
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" text @click="showLogoutDialog = false">Cancel</v-btn>
-            <v-btn color="error" @click="logout">Log Out</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-container>
+          <!-- Skin Profile -->
+          <button 
+            @click="$router.push({ name: 'SkinProfile' })"
+            class="w-full p-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors border-t border-slate-100"
+          >
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                <Sparkles class="w-5 h-5 text-purple-600" />
+              </div>
+              <div class="text-left">
+                <p class="font-semibold text-slate-900">Skin Profile</p>
+                <p class="text-sm text-slate-600">Manage your skin preferences</p>
+              </div>
+            </div>
+            <ChevronRight class="w-5 h-5 text-slate-400" />
+          </button>
+
+          <!-- Addresses -->
+          <button 
+            @click="$router.push({ name: 'Addresses' })"
+            class="w-full p-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors border-t border-slate-100"
+          >
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                <MapPin class="w-5 h-5 text-green-600" />
+              </div>
+              <div class="text-left">
+                <p class="font-semibold text-slate-900">Addresses</p>
+                <p class="text-sm text-slate-600">Manage your delivery addresses</p>
+              </div>
+            </div>
+            <ChevronRight class="w-5 h-5 text-slate-400" />
+          </button>
+        </div>
+
+        <!-- Preferences Section -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 overflow-hidden">
+          <div class="p-4 border-b border-slate-100">
+            <h3 class="text-lg font-semibold text-slate-900">Preferences</h3>
+          </div>
+          
+          <!-- Language -->
+          <button 
+            @click="showLanguageDialog = true"
+            class="w-full p-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors"
+          >
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+                <Globe class="w-5 h-5 text-orange-600" />
+              </div>
+              <div class="text-left">
+                <p class="font-semibold text-slate-900">Language</p>
+                <p class="text-sm text-slate-600">{{ currentLanguageName }}</p>
+              </div>
+            </div>
+            <ChevronRight class="w-5 h-5 text-slate-400" />
+          </button>
+        </div>
+
+        <!-- Account Section -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 overflow-hidden">
+          <div class="p-4 border-b border-slate-100">
+            <h3 class="text-lg font-semibold text-slate-900">Account</h3>
+          </div>
+          
+          <!-- Logout -->
+          <button 
+            @click="confirmLogout"
+            class="w-full p-4 flex items-center justify-between hover:bg-red-50/50 transition-colors"
+          >
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+                <LogOut class="w-5 h-5 text-red-600" />
+              </div>
+              <div class="text-left">
+                <p class="font-semibold text-red-600">Log Out</p>
+                <p class="text-sm text-slate-600">Sign out of your account</p>
+              </div>
+            </div>
+            <ChevronRight class="w-5 h-5 text-red-400" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Language Selection Dialog -->
+      <div 
+        v-if="showLanguageDialog" 
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        @click="showLanguageDialog = false"
+      >
+        <div 
+          class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl"
+          @click.stop
+        >
+          <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center mr-4">
+              <Globe class="w-6 h-6 text-orange-600" />
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-slate-900">Select Language</h3>
+              <p class="text-slate-600 text-sm">Current: {{ currentLanguageName }}</p>
+            </div>
+          </div>
+
+          <div v-if="loadingLanguages" class="text-center py-8">
+            <div class="w-12 h-12 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Loader2 class="w-6 h-6 text-blue-600 animate-spin" />
+            </div>
+            <p class="text-slate-600">Loading languages...</p>
+          </div>
+
+          <div v-else class="space-y-3 max-h-64 overflow-y-auto">
+            <label 
+              v-for="lang in languages" 
+              :key="lang.id"
+              class="flex items-center p-3 rounded-2xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
+            >
+              <input 
+                type="radio" 
+                :value="lang.id" 
+                v-model="selectedLanguage"
+                class="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+              />
+              <span class="ml-3 font-medium text-slate-900">{{ lang.name }}</span>
+            </label>
+          </div>
+
+          <div class="flex space-x-3 mt-6">
+            <button 
+              @click="showLanguageDialog = false"
+              class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
+            >
+              Cancel
+            </button>
+            <button 
+              @click="changeLanguage"
+              :disabled="loadingLanguages"
+              class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg"
+              style="background: linear-gradient(to right, #2563eb, #4f46e5);"
+              onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
+              onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
+            >
+              <Loader2 v-if="loadingLanguages" class="w-4 h-4 animate-spin" />
+              <Check v-else class="w-4 h-4" />
+              <span>Save</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logout Confirmation Dialog -->
+      <div 
+        v-if="showLogoutDialog" 
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        @click="showLogoutDialog = false"
+      >
+        <div 
+          class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl"
+          @click.stop
+        >
+          <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center mr-4">
+              <LogOut class="w-6 h-6 text-red-600" />
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-slate-900">Log Out</h3>
+              <p class="text-slate-600 text-sm">Are you sure you want to log out?</p>
+            </div>
+          </div>
+
+          <div class="flex space-x-3">
+            <button 
+              @click="showLogoutDialog = false"
+              class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
+            >
+              Cancel
+            </button>
+            <button 
+              @click="logout"
+              class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-2xl transition-all duration-200 flex items-center justify-center space-x-2"
+            >
+              <LogOut class="w-4 h-4" />
+              <span>Log Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -158,6 +273,11 @@ import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { ref, computed, onMounted } from 'vue'
 import { apiService } from '@/services/api'
+import AppHeader from '@/components/AppHeader.vue'
+import { 
+  User, Edit3, Sparkles, MapPin, Globe, LogOut, ChevronRight, 
+  Camera, Loader2, Check
+} from 'lucide-vue-next'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -247,8 +367,6 @@ const fetchProfileData = async () => {
   }
 }
 
-
-
 // Load languages on mount
 onMounted(async () => {
   await Promise.all([
@@ -261,8 +379,6 @@ onMounted(async () => {
     selectedLanguage.value = user.default_language.id
   }
 })
-
-
 
 // Fetch available languages
 const fetchLanguages = async () => {
@@ -301,6 +417,8 @@ const logout = () => {
 // Change language function
 const changeLanguage = async () => {
   try {
+    loadingLanguages.value = true
+    
     // Update user's default language
     const updatePayload = {
       default_language: selectedLanguage.value
@@ -317,60 +435,12 @@ const changeLanguage = async () => {
     console.log(`Language changed to: ${selectedLanguage.value}`)
   } catch (error) {
     console.error('Failed to update language:', error)
+  } finally {
+    loadingLanguages.value = false
   }
 }
 </script>
 
 <style scoped>
-.profile-page {
-  padding-bottom: 64px;
-}
-
-.profile-avatar-wrapper {
-  position: relative;
-}
-
-.profile-edit-badge {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background-color: var(--v-primary-base, #1976d2);
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid white;
-}
-
-.menu-list {
-  background-color: white;
-}
-
-.profile-icon {
-  font-size: 16px;
-}
-
-.skin-profile-summary {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 16px;
-}
-
-.profile-item {
-  padding: 8px 0;
-}
-
-.profile-item:not(:last-child) {
-  border-bottom: 1px solid #e9ecef;
-}
-
-.gap-1 {
-  gap: 4px;
-}
-
-.gap-2 {
-  gap: 8px;
-}
+/* Additional styles if needed */
 </style>

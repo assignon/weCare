@@ -1,112 +1,281 @@
 <template>
-  <div class="edit-profile-page">
-    <v-container>
-      <!-- Header with back button and title -->
-      <div class="d-flex align-center justify-space-between mb-5">
-        <v-btn icon variant="text" @click="$router.go(-1)">
-          <v-icon>mdi-arrow-left</v-icon>
-        </v-btn>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pb-24">
+    <div class="p-4">
+      <!-- Modern Header -->
+      <AppHeader 
+        :show-back="true"
+        custom-title="Edit Profile"
+      />
 
-        <h1 class="text-h5 font-weight-bold text-center">Edit Profile</h1>
-
-        <div style="width: 40px"></div> <!-- Spacer to maintain layout -->
+      <!-- Loading state for initial data -->
+      <div v-if="initialLoading" class="text-center py-16">
+        <div class="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <Loader2 class="w-10 h-10 text-blue-600 animate-spin" />
+        </div>
+        <h3 class="text-xl font-semibold text-slate-800 mb-2">Loading Profile</h3>
+        <p class="text-slate-600">Please wait while we fetch your information</p>
       </div>
 
-      <!-- Profile form -->
-      <v-form ref="form" v-model="formValid" @submit.prevent="submitForm">
-        <!-- Loading state for initial data -->
-        <div v-if="initialLoading" class="text-center py-8">
-          <v-progress-circular indeterminate color="primary" size="48"></v-progress-circular>
-          <p class="text-subtitle-1 mt-4">Loading profile information...</p>
+      <!-- Form content -->
+      <form v-else @submit.prevent="submitForm" class="space-y-6">
+        <!-- Profile Picture Section -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6">
+          <div class="text-center">
+            <div class="relative inline-block">
+              <div class="w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center shadow-lg mx-auto">
+                <img 
+                  v-if="formData.profile_picture" 
+                  :src="formData.profile_picture" 
+                  :alt="formData.first_name || 'Profile'"
+                  class="w-full h-full object-cover"
+                />
+                <span v-else class="text-3xl font-bold text-slate-700">{{ userInitials }}</span>
+              </div>
+              <button 
+                type="button"
+                @click="openFileInput"
+                class="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center shadow-lg border-2 border-white hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
+                style="background: linear-gradient(to right, #2563eb, #4f46e5);"
+                onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
+                onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
+              >
+                <Camera class="w-4 h-4 text-white" />
+              </button>
+              <input 
+                type="file" 
+                ref="fileInput" 
+                accept="image/*" 
+                class="hidden" 
+                @change="handleFileUpload" 
+              />
+            </div>
+            <p class="text-sm text-slate-600 mt-3">Tap to change profile picture</p>
+          </div>
         </div>
 
-        <!-- Form content -->
-        <div v-else>
-          <!-- Profile Picture -->
-          <div class="text-center mb-6">
-            <div class="profile-avatar-wrapper d-inline-block position-relative">
-              <v-avatar size="100" color="grey-lighten-3">
-                <v-img v-if="formData.profile_picture" :src="formData.profile_picture" cover></v-img>
-                <span v-else class="text-h4">{{ userInitials }}</span>
-              </v-avatar>
-              <div class="profile-edit-badge" @click="openFileInput">
-                <v-icon size="small" color="white">mdi-camera</v-icon>
-              </div>
-              <input type="file" ref="fileInput" accept="image/*" class="d-none" @change="handleFileUpload" />
+        <!-- Personal Information Section -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6">
+          <div class="flex items-center space-x-3 mb-6">
+            <div class="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
+              <User class="w-4 h-4 text-blue-600" />
             </div>
-            <p class="text-subtitle-1 mt-2">Change Profile Picture</p>
+            <h3 class="text-lg font-semibold text-slate-900">Personal Information</h3>
           </div>
 
-          <!-- Form Fields -->
-          <v-card class="mb-4 pa-4 rounded-lg" elevation="1">
-            <v-text-field v-model="formData.first_name" label="First Name" variant="outlined" density="comfortable"
-              class="mb-3"></v-text-field>
+          <div class="space-y-4">
+            <!-- First Name -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">First Name</label>
+              <input 
+                v-model="formData.first_name"
+                type="text"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                placeholder="Enter your first name"
+              />
+            </div>
 
-            <v-text-field v-model="formData.last_name" label="Last Name" variant="outlined" density="comfortable"
-              class="mb-3"></v-text-field>
+            <!-- Last Name -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Last Name</label>
+              <input 
+                v-model="formData.last_name"
+                type="text"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                placeholder="Enter your last name"
+              />
+            </div>
 
-            <v-text-field v-model="formData.email" label="Email*" variant="outlined" density="comfortable" class="mb-3"
-              :rules="[required, emailRule]" type="email" persistent-hint></v-text-field>
+            <!-- Email -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Email Address <span class="text-red-500">*</span>
+              </label>
+              <input 
+                v-model="formData.email"
+                type="email"
+                required
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                placeholder="Enter your email address"
+              />
+              <p class="text-xs text-slate-500 mt-1">We'll send a verification email if you change this</p>
+            </div>
 
-            <v-text-field v-model="formData.phone_number" label="Phone Number*" variant="outlined" density="comfortable"
-              class="mb-3" :rules="[required, phoneRule]"></v-text-field>
+            <!-- Phone Number -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Phone Number <span class="text-red-500">*</span>
+              </label>
+              <input 
+                v-model="formData.phone_number"
+                type="tel"
+                required
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                placeholder="Enter your phone number"
+              />
+            </div>
 
-            <!-- <v-textarea v-model="formData.address" label="Address (Optional)" variant="outlined" density="comfortable"
-              rows="3" class="mb-3" hint="Your primary address" persistent-hint></v-textarea> -->
-
-            <v-select v-model="formData.default_language" :items="languages" item-title="name" item-value="id"
-              label="Preferred Language" variant="outlined" density="comfortable" class="mb-3"
-              :loading="loadingLanguages" :disabled="loadingLanguages" clearable></v-select>
-          </v-card>
-
-          <!-- Password section -->
-          <v-card class="mb-6 pa-4 rounded-lg" elevation="1">
-            <p class="text-subtitle-1 font-weight-bold mb-3">Change Password (Optional)</p>
-            <p class="text-caption mb-3 text-grey-darken-1">Leave these fields empty if you don't want to change your
-              password</p>
-
-            <v-text-field v-model="formData.new_password" label="New Password" variant="outlined" density="comfortable"
-              class="mb-3" type="password" :rules="formData.new_password ? [passwordRule] : []"
-              autocomplete="new-password"></v-text-field>
-
-            <v-text-field v-model="formData.confirm_password" label="Confirm New Password" variant="outlined"
-              density="comfortable" class="mb-3" type="password"
-              :rules="formData.new_password ? [passwordMatchRule] : []" autocomplete="new-password"></v-text-field>
-          </v-card>
-
-          <!-- Current password confirmation -->
-          <v-card class="mb-6 pa-4 rounded-lg" elevation="1">
-            <p class="text-subtitle-1 font-weight-bold mb-3">Confirm Changes</p>
-            <p class="text-caption mb-3">Please enter your current password to save changes</p>
-
-            <v-text-field v-model="formData.current_password" label="Current Password" variant="outlined"
-              density="comfortable" class="mb-3" type="password" :rules="[currentPasswordRequired]"
-              autocomplete="current-password"></v-text-field>
-          </v-card>
-
-          <!-- Submit button -->
-          <v-btn color="primary" block size="large" type="submit" :loading="loading"
-            :disabled="!hasChangesToSave" class="text-none rounded-lg">
-            {{ saveButtonText }}
-          </v-btn>
+            <!-- Language Preference -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Preferred Language</label>
+              <select 
+                v-model="formData.default_language"
+                :disabled="loadingLanguages"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+              >
+                <option value="">Select a language</option>
+                <option 
+                  v-for="lang in languages" 
+                  :key="lang.id" 
+                  :value="lang.id"
+                >
+                  {{ lang.name }}
+                </option>
+              </select>
+              <div v-if="loadingLanguages" class="flex items-center space-x-2 mt-2">
+                <Loader2 class="w-4 h-4 text-blue-600 animate-spin" />
+                <span class="text-xs text-slate-500">Loading languages...</span>
+              </div>
+            </div>
+          </div>
         </div>
-      </v-form>
 
-      <!-- Snackbar for notifications -->
-      <v-snackbar v-model="showSnackbar" :color="snackbarColor" timeout="3000" location="top">
-        {{ snackbarText }}
-        <template v-slot:actions>
-          <v-btn variant="text" @click="showSnackbar = false">
-            Close
-          </v-btn>
-        </template>
-      </v-snackbar>
+        <!-- Password Change Section -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6">
+          <div class="flex items-center space-x-3 mb-6">
+            <div class="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center">
+              <Lock class="w-4 h-4 text-green-600" />
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900">Change Password</h3>
+          </div>
+          <p class="text-sm text-slate-600 mb-4">Leave these fields empty if you don't want to change your password</p>
+
+          <div class="space-y-4">
+            <!-- New Password -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">New Password</label>
+              <div class="relative">
+                <input 
+                  v-model="formData.new_password"
+                  :type="showNewPassword ? 'text' : 'password'"
+                  class="w-full px-4 py-3 pr-12 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                  placeholder="Enter new password"
+                  autocomplete="new-password"
+                />
+                <button 
+                  type="button"
+                  @click="showNewPassword = !showNewPassword"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  <Eye v-if="showNewPassword" class="w-5 h-5" />
+                  <EyeOff v-else class="w-5 h-5" />
+                </button>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">Must be at least 8 characters long</p>
+            </div>
+
+            <!-- Confirm Password -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Confirm New Password</label>
+              <div class="relative">
+                <input 
+                  v-model="formData.confirm_password"
+                  :type="showConfirmPassword ? 'text' : 'password'"
+                  class="w-full px-4 py-3 pr-12 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                  placeholder="Confirm new password"
+                  autocomplete="new-password"
+                />
+                <button 
+                  type="button"
+                  @click="showConfirmPassword = !showConfirmPassword"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  <Eye v-if="showConfirmPassword" class="w-5 h-5" />
+                  <EyeOff v-else class="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Current Password Confirmation -->
+        <div v-if="hasChangesToSave" class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6">
+          <div class="flex items-center space-x-3 mb-6">
+            <div class="w-8 h-8 bg-amber-100 rounded-xl flex items-center justify-center">
+              <Shield class="w-4 h-4 text-amber-600" />
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900">Confirm Changes</h3>
+          </div>
+          <p class="text-sm text-slate-600 mb-4">Please enter your current password to save changes</p>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Current Password</label>
+            <div class="relative">
+              <input 
+                v-model="formData.current_password"
+                :type="showCurrentPassword ? 'text' : 'password'"
+                required
+                class="w-full px-4 py-3 pr-12 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                placeholder="Enter your current password"
+                autocomplete="current-password"
+              />
+              <button 
+                type="button"
+                @click="showCurrentPassword = !showCurrentPassword"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <Eye v-if="showCurrentPassword" class="w-5 h-5" />
+                <EyeOff v-else class="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit"
+          :disabled="!hasChangesToSave || loading"
+          class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
+          style="background: linear-gradient(to right, #2563eb, #4f46e5);"
+          onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
+          onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
+        >
+          <Loader2 v-if="loading" class="w-5 h-5 animate-spin" />
+          <Save v-else class="w-5 h-5" />
+          <span>{{ saveButtonText }}</span>
+        </button>
+      </form>
+
+      <!-- Success/Error Toast -->
+      <div 
+        v-if="showSnackbar"
+        :class="[
+          'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-2xl shadow-lg max-w-sm w-full',
+          snackbarColor === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        ]"
+      >
+        <div class="flex items-center space-x-3">
+          <CheckCircle v-if="snackbarColor === 'success'" class="w-5 h-5 flex-shrink-0" />
+          <AlertCircle v-else class="w-5 h-5 flex-shrink-0" />
+          <p class="text-sm font-medium">{{ snackbarText }}</p>
+          <button 
+            @click="showSnackbar = false"
+            class="ml-auto text-white/80 hover:text-white"
+          >
+            <X class="w-4 h-4" />
+          </button>
+        </div>
+      </div>
 
       <!-- Email Verification Dialog -->
-      <EmailVerificationDialog v-model="showEmailVerificationDialog" :new-email="pendingEmailChange"
-        :expires-in-minutes="2" @verified="onEmailVerified" @cancelled="onEmailVerificationCancelled"
-        @resend="onEmailVerificationResend" />
-    </v-container>
+      <EmailVerificationDialog 
+        v-model="showEmailVerificationDialog" 
+        :new-email="pendingEmailChange"
+        :expires-in-minutes="2" 
+        @verified="onEmailVerified" 
+        @cancelled="onEmailVerificationCancelled"
+        @resend="onEmailVerificationResend" 
+      />
+    </div>
   </div>
 </template>
 
@@ -116,20 +285,28 @@ import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { apiService } from '@/services/api'
 import EmailVerificationDialog from '@/components/EmailVerificationDialog.vue'
+import AppHeader from '@/components/AppHeader.vue'
+import { 
+  User, Camera, Lock, Shield, Save, Loader2, CheckCircle, AlertCircle, X,
+  Eye, EyeOff
+} from 'lucide-vue-next'
 
 const auth = useAuthStore()
 const router = useRouter()
 const user = auth.user
 
 // Form refs and state
-const form = ref(null)
 const fileInput = ref(null)
-const formValid = ref(false)
 const loading = ref(false)
 const initialLoading = ref(true)
 const profilePictureFile = ref(null)
 const languages = ref([])
 const loadingLanguages = ref(false)
+
+// Password visibility toggles
+const showNewPassword = ref(false)
+const showConfirmPassword = ref(false)
+const showCurrentPassword = ref(false)
 
 // Snackbar state
 const showSnackbar = ref(false)
@@ -146,26 +323,12 @@ const formData = ref({
   last_name: '',
   email: '',
   phone_number: '',
-  // address: '',
   profile_picture: null,
   new_password: '',
   confirm_password: '',
   current_password: '',
   default_language: null
 })
-
-// Validation rules
-const required = v => !!v || 'This field is required'
-const emailRule = v => /.+@.+\..+/.test(v) || 'Please enter a valid email'
-const phoneRule = v => /^\+?[0-9\s-]{10,15}$/.test(v) || 'Please enter a valid phone number'
-const passwordRule = v => v.length >= 8 || 'Password must be at least 8 characters'
-const passwordMatchRule = v => v === formData.value.new_password || 'Passwords do not match'
-const currentPasswordRequired = v => {
-  // Only require current password if we're making changes or changing password
-  const hasProfileChanges = hasFormChanges.value
-  const hasPasswordChange = formData.value.new_password
-  return (hasProfileChanges || hasPasswordChange) ? (!!v || 'Current password is required to save changes') : true
-}
 
 // Initialize form data from user
 onMounted(async () => {
@@ -201,7 +364,6 @@ const loadUserData = async () => {
       formData.value.last_name = userData.last_name || ''
       formData.value.email = userData.email || ''
       formData.value.phone_number = userData.phone_number || ''
-      // formData.value.address = userData.address || ''
       formData.value.profile_picture = userData.profile_picture || null
       formData.value.default_language = userData.default_language?.id || null
 
@@ -228,7 +390,6 @@ const hasFormChanges = computed(() => {
     formData.value.last_name !== (userData.last_name || '') ||
     formData.value.email !== (userData.email || '') ||
     formData.value.phone_number !== (userData.phone_number || '') ||
-    // formData.value.address !== (userData.address || '') ||
     formData.value.default_language !== (userData.default_language?.id || null) ||
     !!profilePictureFile.value
   )
@@ -246,7 +407,7 @@ const userInitials = computed(() => {
 const saveButtonText = computed(() => {
   const hasProfileChanges = hasFormChanges.value
   const hasPasswordChange = formData.value.new_password
-  if (!hasProfileChanges) {
+  if (!hasProfileChanges && !hasPasswordChange) {
     return 'No Changes to Save'
   } else if (hasProfileChanges && hasPasswordChange) {
     return 'Save Profile & Password'
@@ -341,14 +502,24 @@ const checkPendingEmailVerification = async () => {
 
 // Form submission
 const submitForm = async () => {
-  // if (!formValid.value) return
-
   const hasProfileChanges = hasFormChanges.value
   const hasPasswordChange = formData.value.new_password
 
   // Check if there are any changes to save
   if (!hasProfileChanges && !hasPasswordChange) {
     showError('No changes detected. Please modify some fields before saving.')
+    return
+  }
+
+  // Validate password match if changing password
+  if (hasPasswordChange && formData.value.new_password !== formData.value.confirm_password) {
+    showError('New passwords do not match')
+    return
+  }
+
+  // Validate password length if changing password
+  if (hasPasswordChange && formData.value.new_password.length < 8) {
+    showError('Password must be at least 8 characters long')
     return
   }
 
@@ -362,7 +533,6 @@ const submitForm = async () => {
         last_name: formData.value.last_name,
         email: formData.value.email,
         phone_number: formData.value.phone_number,
-        // address: formData.value.address || null,
         default_language: formData.value.default_language
       }
 
@@ -438,26 +608,5 @@ const showError = (message) => {
 </script>
 
 <style scoped>
-.edit-profile-page {
-  padding-bottom: 64px;
-}
-
-.profile-avatar-wrapper {
-  position: relative;
-}
-
-.profile-edit-badge {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
-  background-color: var(--v-primary-base, #1976d2);
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid white;
-  cursor: pointer;
-}
+/* Additional styles if needed */
 </style>

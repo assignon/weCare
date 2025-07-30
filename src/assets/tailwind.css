@@ -1,0 +1,234 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles to maintain Vuetify-like appearance */
+@layer components {
+    .btn {
+        @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200;
+    }
+
+    .btn-primary {
+        @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+    }
+
+    .btn-secondary {
+        @apply bg-grey-100 text-grey-700 hover:bg-grey-200 focus:ring-grey-500;
+    }
+
+    .btn-success {
+        @apply bg-success-600 text-white hover:bg-success-700 focus:ring-success-500;
+    }
+
+    .btn-warning {
+        @apply bg-warning-600 text-white hover:bg-warning-700 focus:ring-warning-500;
+    }
+
+    .btn-error {
+        @apply bg-error-600 text-white hover:bg-error-700 focus:ring-error-500;
+    }
+
+    .btn-outlined {
+        @apply border-grey-300 text-grey-700 bg-white hover:bg-grey-50 focus:ring-primary-500;
+    }
+
+    .btn-text {
+        @apply text-primary-600 hover:bg-primary-50 focus:ring-primary-500;
+    }
+
+    .card {
+        @apply bg-white rounded-lg shadow-sm border border-grey-200;
+    }
+
+    .card-elevated {
+        @apply bg-white rounded-lg shadow-md border border-grey-200;
+    }
+
+    .input {
+        @apply block w-full px-3 py-2 border border-grey-300 rounded-md shadow-sm placeholder-grey-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500;
+    }
+
+    .select {
+        @apply block w-full px-3 py-2 border border-grey-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500;
+    }
+
+    .textarea {
+        @apply block w-full px-3 py-2 border border-grey-300 rounded-md shadow-sm placeholder-grey-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500;
+    }
+
+    .checkbox {
+        @apply h-4 w-4 text-primary-600 focus:ring-primary-500 border-grey-300 rounded;
+    }
+
+    .radio {
+        @apply h-4 w-4 text-primary-600 focus:ring-primary-500 border-grey-300;
+    }
+
+    .alert {
+        @apply p-4 rounded-md border;
+    }
+
+    .alert-info {
+        @apply bg-blue-50 border-blue-200 text-blue-800;
+    }
+
+    .alert-success {
+        @apply bg-green-50 border-green-200 text-green-800;
+    }
+
+    .alert-warning {
+        @apply bg-yellow-50 border-yellow-200 text-yellow-800;
+    }
+
+    .alert-error {
+        @apply bg-red-50 border-red-200 text-red-800;
+    }
+
+    .chip {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    }
+
+    .chip-primary {
+        @apply bg-primary-100 text-primary-800;
+    }
+
+    .chip-success {
+        @apply bg-green-100 text-green-800;
+    }
+
+    .chip-warning {
+        @apply bg-yellow-100 text-yellow-800;
+    }
+
+    .chip-error {
+        @apply bg-red-100 text-red-800;
+    }
+
+    .divider {
+        @apply border-t border-grey-200;
+    }
+
+    .spacer {
+        @apply flex-1;
+    }
+
+    .text-truncate {
+        @apply overflow-hidden text-ellipsis whitespace-nowrap;
+    }
+
+    .text-body-1 {
+        @apply text-base leading-6;
+    }
+
+    .text-body-2 {
+        @apply text-sm leading-5;
+    }
+
+    .text-caption {
+        @apply text-xs leading-4;
+    }
+
+    .text-subtitle-1 {
+        @apply text-lg font-medium leading-6;
+    }
+
+    .text-subtitle-2 {
+        @apply text-base font-medium leading-5;
+    }
+
+    .text-h1 {
+        @apply text-4xl font-light leading-tight;
+    }
+
+    .text-h2 {
+        @apply text-3xl font-light leading-tight;
+    }
+
+    .text-h3 {
+        @apply text-2xl font-light leading-tight;
+    }
+
+    .text-h4 {
+        @apply text-xl font-light leading-tight;
+    }
+
+    .text-h5 {
+        @apply text-lg font-light leading-tight;
+    }
+
+    .text-h6 {
+        @apply text-base font-light leading-tight;
+    }
+
+    .font-weight-light {
+        @apply font-light;
+    }
+
+    .font-weight-regular {
+        @apply font-normal;
+    }
+
+    .font-weight-medium {
+        @apply font-medium;
+    }
+
+    .font-weight-bold {
+        @apply font-bold;
+    }
+
+    .text-primary {
+        @apply text-primary-600;
+    }
+
+    .text-success {
+        @apply text-success-600;
+    }
+
+    .text-warning {
+        @apply text-warning-600;
+    }
+
+    .text-error {
+        @apply text-error-600;
+    }
+
+    .text-grey-darken-1 {
+        @apply text-grey-600;
+    }
+
+    .text-grey-darken-2 {
+        @apply text-grey-700;
+    }
+
+    .bg-primary {
+        @apply bg-primary-600;
+    }
+
+    .bg-success {
+        @apply bg-success-600;
+    }
+
+    .bg-warning {
+        @apply bg-warning-600;
+    }
+
+    .bg-error {
+        @apply bg-error-600;
+    }
+
+    .border-primary {
+        @apply border-primary-600;
+    }
+
+    .border-success {
+        @apply border-success-600;
+    }
+
+    .border-warning {
+        @apply border-warning-600;
+    }
+
+    .border-error {
+        @apply border-error-600;
+    }
+}

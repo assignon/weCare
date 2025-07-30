@@ -1,302 +1,388 @@
 <template>
-  <div class="addresses-page">
-    <v-container>
-      <!-- Header with back button and title -->
-      <div class="d-flex align-center justify-space-between mb-5">
-        <v-btn icon variant="text" @click="$router.go(-1)">
-          <v-icon>mdi-arrow-left</v-icon>
-        </v-btn>
-        
-        <h1 class="text-h5 font-weight-bold text-center">My Addresses</h1>
-        
-        <div style="width: 40px"></div> <!-- Spacer to maintain layout -->
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pb-24">
+    <div class="p-4">
+      <!-- Modern Header -->
+      <AppHeader 
+        :show-back="true"
+        custom-title="My Addresses"
+      />
+
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-16">
+        <div class="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <Loader2 class="w-10 h-10 text-blue-600 animate-spin" />
+        </div>
+        <h3 class="text-xl font-semibold text-slate-800 mb-2">Loading Your Addresses</h3>
+        <p class="text-slate-600">Please wait while we fetch your delivery addresses</p>
       </div>
-      
-      <!-- Address list -->
-      <div v-if="addresses.length > 0">
-        <v-card
-          v-for="(address, index) in addresses"
-          :key="index"
-          class="mb-4 rounded-lg"
-          elevation="1"
-        >
-          <v-card-text class="pa-4">
-            <div class="d-flex justify-space-between align-center mb-2">
-              <div class="d-flex align-center">
-                <v-icon 
-                  color="primary" 
-                  class="mr-2"
-                  icon="mdi-map-marker"
-                ></v-icon>
-                <span class="text-subtitle-1 font-weight-medium">{{ address.address_label || 'Address' }}</span>
+
+      <!-- Content -->
+      <div v-else class="space-y-6">
+        <!-- Address List -->
+        <div v-if="addresses.length > 0" class="space-y-4">
+          <div 
+            v-for="(address, index) in addresses" 
+            :key="index"
+            class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6"
+          >
+            <!-- Address Header -->
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center">
+                  <MapPin class="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-slate-900">{{ address.address_label || 'Address' }}</h3>
+                  <p class="text-sm text-slate-600">Delivery location</p>
+                </div>
               </div>
               
-              <div class="d-flex align-center">
-                <v-chip 
+              <div class="flex items-center space-x-2">
+                <span 
                   v-if="address.latitude && address.longitude" 
-                  color="success" 
-                  size="x-small"
-                  variant="flat"
-                  class="mr-2"
+                  class="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full flex items-center space-x-1"
                 >
-                  <v-icon size="x-small" class="mr-1">mdi-crosshairs-gps</v-icon>
-                  GPS
-                </v-chip>
-                <v-chip 
+                  <Navigation class="w-3 h-3" />
+                  <span>GPS</span>
+                </span>
+                <span 
                   v-if="address.is_default" 
-                  color="primary" 
-                  size="small"
-                  variant="flat"
+                  class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full"
                 >
                   Default
-                </v-chip>
+                </span>
               </div>
             </div>
             
-            <div class="address-details text-body-2 text-grey-darken-1 mb-3">
-              {{ address.address_line1 }}<br>
-              <span v-if="address.address_line2">{{ address.address_line2 }}<br></span>
-              {{ address.city }}, {{ address.state }} {{ address.postal_code }}<br>
-              {{ address.country }}
+            <!-- Address Details -->
+            <div class="bg-slate-50/50 rounded-2xl p-4 mb-4">
+              <div class="text-sm text-slate-700 space-y-1">
+                <p class="font-medium">{{ address.address_line1 }}</p>
+                <p v-if="address.address_line2" class="text-slate-600">{{ address.address_line2 }}</p>
+                <p class="text-slate-600">
+                  {{ address.city }}{{ address.state ? `, ${address.state}` : '' }} {{ address.postal_code }}
+                </p>
+                <p class="text-slate-600">{{ address.country }}</p>
+              </div>
             </div>
             
-            <div class="d-flex justify-space-between align-center">
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-between">
               <div>
-                <v-btn 
+                <button 
                   v-if="!address.is_default" 
-                  variant="text" 
-                  color="primary" 
-                  size="small"
-                  class="text-none"
                   @click="setAsDefault(address.id)"
-                  :loading="loading"
+                  :disabled="loading"
+                  class="px-4 py-2 text-blue-600 hover:text-blue-700 font-semibold text-sm bg-blue-50 hover:bg-blue-100 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                 >
-                  Set as Default
-                </v-btn>
+                  <Loader2 v-if="loading" class="w-4 h-4 animate-spin" />
+                  <Star v-else class="w-4 h-4" />
+                  <span>Set as Default</span>
+                </button>
               </div>
               
-              <div class="d-flex">
-                <v-btn 
-                  icon 
-                  variant="text" 
-                  color="primary"
-                  size="small"
+              <div class="flex items-center space-x-2">
+                <button 
                   @click="editAddress(index)"
+                  class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-2xl flex items-center justify-center transition-all duration-200"
                 >
-                  <v-icon>mdi-pencil</v-icon>
-                </v-btn>
+                  <Edit3 class="w-4 h-4 text-slate-600" />
+                </button>
                 
-                <v-btn 
-                  icon 
-                  variant="text" 
-                  color="error"
-                  size="small"
+                <button 
                   @click="confirmDeleteAddress(index)"
                   :disabled="address.is_default"
+                  class="w-10 h-10 bg-red-100 hover:bg-red-200 rounded-2xl flex items-center justify-center transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
+                  <Trash2 class="w-4 h-4 text-red-600" />
+                </button>
               </div>
             </div>
-          </v-card-text>
-        </v-card>
+          </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div v-else class="text-center py-16">
+          <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <MapPinOff class="w-10 h-10 text-slate-400" />
+          </div>
+          <h3 class="text-xl font-semibold text-slate-800 mb-2">No Addresses Yet</h3>
+          <p class="text-slate-600 mb-6">Add your delivery address to make your checkout process faster.</p>
+        </div>
+        
+        <!-- Add New Address Button -->
+        <button 
+          @click="addNewAddress"
+          class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-3xl transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg"
+          style="background: linear-gradient(to right, #2563eb, #4f46e5);"
+          onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
+          onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
+        >
+          <Plus class="w-5 h-5" />
+          <span>Add New Address</span>
+        </button>
       </div>
-      
-      <!-- Empty state -->
-      <v-card v-else class="empty-addresses pa-6 text-center mb-6" flat>
-        <v-icon size="x-large" color="grey-lighten-1" class="mb-4">mdi-map-marker-off</v-icon>
-        <h3 class="text-h5 mb-2">No Addresses Yet</h3>
-        <p class="text-body-1 text-grey mb-6">Add your delivery address to make your checkout process faster.</p>
-      </v-card>
-      
-      <!-- Add new address button -->
-      <v-btn 
-        color="primary" 
-        block 
-        size="large"
-        prepend-icon="mdi-plus"
-        rounded
-        @click="addNewAddress"
-        class="text-none mb-4"
-      >
-        Add New Address
-      </v-btn>
-      
-      <!-- Address dialog (for add/edit) -->
-      <v-dialog v-model="showAddressDialog" max-width="500" scrollable>
-        <v-card>
-          <v-card-title class="text-h6 pa-4">
-            {{ editIndex !== null ? 'Edit Address' : 'Add New Address' }}
-          </v-card-title>
-          
-          <v-divider></v-divider>
-          
-          <v-card-text class="pa-4">
-            <v-form ref="formRef" v-model="formValid">
-              <v-text-field
-                v-model="addressForm.address_label"
-                label="Address Label*"
-                variant="outlined"
-                density="comfortable"
-                class="mb-3"
-                :rules="[required]"
-                hint="E.g. Home, Office, Parent's House"
-                persistent-hint
-              ></v-text-field>
-              
-              <v-text-field
-                v-model="addressForm.address_line1"
-                label="Street Address*"
-                variant="outlined"
-                density="comfortable"
-                class="mb-3"
-                :rules="[required]"
-              ></v-text-field>
-              
-              <v-text-field
-                v-model="addressForm.address_line2"
-                label="Address Line 2 (Optional)"
-                variant="outlined"
-                density="comfortable"
-                class="mb-3"
-                hint="Apartment, suite, unit, building, floor, etc."
-                persistent-hint
-              ></v-text-field>
-              
-              <v-row>
-                <v-col cols="6">
-                  <v-text-field
-                    v-model="addressForm.city"
-                    label="City*"
-                    variant="outlined"
-                    density="comfortable"
-                    :rules="[required]"
-                  ></v-text-field>
-                </v-col>
-                
-                <v-col cols="6">
-                  <v-text-field
-                    v-model="addressForm.state"
-                    label="State/Province"
-                    variant="outlined"
-                    density="comfortable"
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-              
-              <v-row>
-                <v-col cols="6">
-                  <v-text-field
-                    v-model="addressForm.postal_code"
-                    label="ZIP/Postal Code"
-                    variant="outlined"
-                    density="comfortable"
-                  ></v-text-field>
-                </v-col>
-                
-                <v-col cols="6">
-                  <v-select
-                    v-model="addressForm.country"
-                    :items="countries"
-                    item-title="name"
-                    item-value="name"
-                    label="Country*"
-                    variant="outlined"
-                    density="comfortable"
-                    :rules="[required]"
-                    :loading="loadingCountries"
-                    :disabled="loadingCountries"
-                  ></v-select>
-                </v-col>
-              </v-row>
-              
-              <v-checkbox
-                v-model="addressForm.is_default"
-                label="Set as default address"
-                class="mt-2"
-              ></v-checkbox>
-            </v-form>
-          </v-card-text>
-          
-          <v-divider></v-divider>
-          
-          <v-card-actions class="pa-4">
-            <v-btn 
-              variant="text" 
-              @click="showAddressDialog = false"
-            >
-              Cancel
-            </v-btn>
-            <v-spacer></v-spacer>
-            <v-btn 
-              color="primary" 
-              @click="saveAddress"
-              :loading="loading"
-              :disabled="!formValid"
-            >
-              Save
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      
-      <!-- Delete confirmation dialog -->
-      <v-dialog v-model="showDeleteDialog" max-width="400">
-        <v-card>
-          <v-card-title class="text-h6">Delete Address</v-card-title>
-          <v-card-text>
-            Are you sure you want to delete this address?
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" variant="text" @click="showDeleteDialog = false">
-              Cancel
-            </v-btn>
-            <v-btn color="error" @click="deleteAddress">
-              Delete
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      
-      <!-- Location Confirmation Dialog -->
-      <LocationConfirmationDialog
-        v-model="showLocationDialog"
-        :address="currentAddress"
-        @locationConfirmed="handleLocationConfirmed"
-        @locationSkipped="handleLocationSkipped"
-      />
-      
-      <!-- Snackbar for notifications -->
-      <v-snackbar
-        v-model="showSnackbar"
-        :color="snackbarColor"
-        timeout="3000"
-        location="top"
-      >
-        {{ snackbarText }}
-        <template v-slot:actions>
-          <v-btn
-            variant="text"
-            @click="showSnackbar = false"
+    </div>
+
+    <!-- Address Dialog (for add/edit) -->
+    <div 
+      v-if="showAddressDialog" 
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    >
+      <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+        <!-- Dialog Header -->
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center">
+              <MapPin class="w-5 h-5 text-blue-600" />
+            </div>
+            <h2 class="text-xl font-bold text-slate-900">
+              {{ editIndex !== null ? 'Edit Address' : 'Add New Address' }}
+            </h2>
+          </div>
+          <button 
+            @click="showAddressDialog = false"
+            class="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center transition-all duration-200"
           >
-            Close
-          </v-btn>
-        </template>
-      </v-snackbar>
-    </v-container>
+            <X class="w-4 h-4 text-slate-600" />
+          </button>
+        </div>
+
+        <!-- Form -->
+        <form @submit.prevent="saveAddress" class="space-y-4">
+          <!-- Address Label -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">
+              Address Label *
+            </label>
+            <input 
+              v-model="addressForm.address_label"
+              type="text"
+              required
+              placeholder="E.g. Home, Office, Parent's House"
+              class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            />
+          </div>
+
+          <!-- Street Address -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">
+              Street Address *
+            </label>
+            <input 
+              v-model="addressForm.address_line1"
+              type="text"
+              required
+              placeholder="Enter your street address"
+              class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            />
+          </div>
+
+          <!-- Address Line 2 -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">
+              Address Line 2 (Optional)
+            </label>
+            <input 
+              v-model="addressForm.address_line2"
+              type="text"
+              placeholder="Apartment, suite, unit, building, floor, etc."
+              class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            />
+          </div>
+
+          <!-- City and State Row -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                City *
+              </label>
+              <input 
+                v-model="addressForm.city"
+                type="text"
+                required
+                placeholder="City"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                State/Province
+              </label>
+              <input 
+                v-model="addressForm.state"
+                type="text"
+                placeholder="State"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              />
+            </div>
+          </div>
+
+          <!-- Postal Code and Country Row -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                ZIP/Postal Code
+              </label>
+              <input 
+                v-model="addressForm.postal_code"
+                type="text"
+                placeholder="Postal code"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Country *
+              </label>
+              <select 
+                v-model="addressForm.country"
+                required
+                :disabled="loadingCountries"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              >
+                <option value="" disabled>Select country</option>
+                <option 
+                  v-for="country in countries" 
+                  :key="country.name" 
+                  :value="country.name"
+                >
+                  {{ country.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Default Address Checkbox -->
+          <div class="flex items-center space-x-3 pt-2">
+            <input 
+              v-model="addressForm.is_default"
+              type="checkbox"
+              id="default-address"
+              class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+            />
+            <label for="default-address" class="text-sm text-slate-700">
+              Set as default address
+            </label>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex space-x-3 pt-6 border-t border-slate-200">
+            <button 
+              type="button"
+              @click="showAddressDialog = false"
+              class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit"
+              :disabled="loading || !isFormValid"
+              class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg"
+              style="background: linear-gradient(to right, #2563eb, #4f46e5);"
+              onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
+              onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
+            >
+              <Loader2 v-if="loading" class="w-4 h-4 animate-spin" />
+              <Save v-else class="w-4 h-4" />
+              <span>Save</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Dialog -->
+    <div 
+      v-if="showDeleteDialog" 
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    >
+      <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl">
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="w-10 h-10 bg-red-100 rounded-2xl flex items-center justify-center">
+            <AlertTriangle class="w-5 h-5 text-red-600" />
+          </div>
+          <h2 class="text-xl font-bold text-slate-900">Delete Address</h2>
+        </div>
+        
+        <p class="text-slate-600 mb-6">
+          Are you sure you want to delete this address? This action cannot be undone.
+        </p>
+        
+        <div class="flex space-x-3">
+          <button 
+            @click="showDeleteDialog = false"
+            class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
+          >
+            Cancel
+          </button>
+          <button 
+            @click="deleteAddress"
+            :disabled="loading"
+            class="flex-1 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg"
+            style="background: linear-gradient(to right, #dc2626, #db2777);"
+            onmouseover="this.style.background='linear-gradient(to right, #b91c1c, #be185d)'"
+            onmouseout="this.style.background='linear-gradient(to right, #dc2626, #db2777)'"
+          >
+            <Loader2 v-if="loading" class="w-4 h-4 animate-spin" />
+            <Trash2 v-else class="w-4 h-4" />
+            <span>Delete</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Location Confirmation Dialog -->
+    <LocationConfirmationDialog
+      v-model="showLocationDialog"
+      :address="currentAddress"
+      @locationConfirmed="handleLocationConfirmed"
+      @locationSkipped="handleLocationSkipped"
+    />
+
+    <!-- Success Toast -->
+    <div 
+      v-if="showSuccessMessage" 
+      class="fixed bottom-4 left-4 right-4 z-50 bg-green-500 text-white p-4 rounded-2xl shadow-lg flex items-center space-x-3"
+    >
+      <CheckCircle class="w-5 h-5 flex-shrink-0" />
+      <span class="flex-1">{{ successMessage }}</span>
+      <button @click="showSuccessMessage = false" class="text-white/80 hover:text-white">
+        <X class="w-4 h-4" />
+      </button>
+    </div>
+
+    <!-- Error Toast -->
+    <div 
+      v-if="showErrorMessage" 
+      class="fixed bottom-4 left-4 right-4 z-50 bg-red-500 text-white p-4 rounded-2xl shadow-lg flex items-center space-x-3"
+    >
+      <AlertCircle class="w-5 h-5 flex-shrink-0" />
+      <span class="flex-1">{{ errorMessage }}</span>
+      <button @click="showErrorMessage = false" class="text-white/80 hover:text-white">
+        <X class="w-4 h-4" />
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiService } from '@/services/api'
+import { useAuthStore } from '@/stores/auth'
+import AppHeader from '@/components/AppHeader.vue'
 import LocationConfirmationDialog from '@/components/LocationConfirmationDialog.vue'
+import { 
+  MapPin, MapPinOff, Plus, Edit3, Trash2, Star, Save, X, Loader2, 
+  CheckCircle, AlertCircle, AlertTriangle, Navigation
+} from 'lucide-vue-next'
 
 const router = useRouter()
+const auth = useAuthStore()
 
-// Reactive data
+// State
+const loading = ref(false)
 const addresses = ref([])
 const countries = ref([])
 const loadingCountries = ref(false)
@@ -307,12 +393,9 @@ const addressForm = ref({
   city: '',
   state: '',
   postal_code: '',
-  country: '', // Will be set after countries are loaded
+  country: 'Togo',
   is_default: false
 })
-const formRef = ref(null)
-const formValid = ref(false)
-const loading = ref(false)
 const editIndex = ref(null)
 const editingAddressId = ref(null)
 const deleteIndex = ref(null)
@@ -326,14 +409,19 @@ const pendingAddressData = ref(null)
 const pendingAddressId = ref(null)
 const pendingAction = ref(null) // 'create', 'update', 'set_default'
 
-// Snackbar state
-const showSnackbar = ref(false)
-const snackbarText = ref('')
-const snackbarColor = ref('success')
+// Messages
+const showSuccessMessage = ref(false)
+const showErrorMessage = ref(false)
+const successMessage = ref('')
+const errorMessage = ref('')
 
-// Validation rules
-const required = v => !!v || 'This field is required'
-const phoneRule = v => /^\+?[0-9\s-]{10,15}$/.test(v) || 'Please enter a valid phone number'
+// Computed properties
+const isFormValid = computed(() => {
+  return addressForm.value.address_label && 
+         addressForm.value.address_line1 && 
+         addressForm.value.city && 
+         addressForm.value.country
+})
 
 // Fetch addresses on mount
 onMounted(async () => {
@@ -410,7 +498,7 @@ const editAddress = (index) => {
 
 // Save address (add or update)
 const saveAddress = async () => {
-  if (!formValid.value) return
+  if (!isFormValid.value) return
   
   const addressData = { ...addressForm.value }
   
@@ -462,11 +550,11 @@ const performAddressSave = async (addressData, coordinates = null) => {
     if (editingAddressId.value) {
       // Update existing address
       savedAddress = await apiService.updateAddress(editingAddressId.value, addressData)
-      snackbarText.value = 'Address updated successfully'
+      successMessage.value = 'Address updated successfully'
     } else {
       // Create new address
       savedAddress = await apiService.createAddress(addressData)
-      snackbarText.value = 'Address added successfully'
+      successMessage.value = 'Address added successfully'
     }
     
     // If setting as default, make API call to set default
@@ -481,8 +569,7 @@ const performAddressSave = async (addressData, coordinates = null) => {
     await fetchAddresses()
     
     // Show success message
-    snackbarColor.value = 'success'
-    showSnackbar.value = true
+    showSuccessMessage.value = true
     
     // Close dialog
     showAddressDialog.value = false
@@ -515,9 +602,8 @@ const deleteAddress = async () => {
     await apiService.deleteAddress(address.id)
     
     // Show success message
-    snackbarColor.value = 'success'
-    snackbarText.value = 'Address deleted successfully'
-    showSnackbar.value = true
+    successMessage.value = 'Address deleted successfully'
+    showSuccessMessage.value = true
     
     // Refresh addresses list
     await fetchAddresses()
@@ -585,9 +671,8 @@ const performSetAsDefault = async (id, coordinates = null) => {
     console.log('Set default response:', response)
     
     // Show success message
-    snackbarColor.value = 'success'
-    snackbarText.value = 'Default address updated successfully'
-    showSnackbar.value = true
+    successMessage.value = 'Default address updated successfully'
+    showSuccessMessage.value = true
     
     // Refresh addresses list to get updated data
     await fetchAddresses()
@@ -653,21 +738,16 @@ const clearPendingData = () => {
   showLocationDialog.value = false
 }
 
-// Show error in snackbar
+// Show error in toast
 const showError = (message) => {
-  snackbarColor.value = 'error'
-  snackbarText.value = message
-  showSnackbar.value = true
+  errorMessage.value = message
+  showErrorMessage.value = true
+  setTimeout(() => {
+    showErrorMessage.value = false
+  }, 5000)
 }
 </script>
 
 <style scoped>
-.addresses-page {
-  padding-bottom: 64px;
-}
-
-.empty-addresses {
-  margin: 30px auto;
-  max-width: 500px;
-}
+/* Additional styles if needed */
 </style> 

@@ -1,66 +1,160 @@
 <template>
-  <div class="auth-page">
-    <div class="auth-container">
-      <div class="auth-content">
-        <h1 class="auth-title">Reset Password</h1>
-        <p class="auth-subtitle">Enter your new password below.</p>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-xs">
+      <div class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-6">
+        <!-- Header Section -->
+        <div class="text-center mb-6">
+          <div class="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg" style="background: linear-gradient(to right, #3b82f6, #9333ea);">
+            <Lock class="w-7 h-7 text-white" />
+          </div>
+          <h1 class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text mb-1">Reset Password</h1>
+          <p class="text-gray-600 text-xs">Enter your new password below.</p>
+        </div>
 
-        <v-form ref="form" v-model="isFormValid" @submit.prevent="onResetPassword" class="w-100">
-          <v-alert v-if="alert" :type="alertType" class="mb-4" variant="tonal" density="compact" closable>
-            {{ alert }}
-          </v-alert>
 
-          <div v-if="isValidCode === false && !loading" class="text-center">
-            <v-icon size="64" color="error" class="mb-4">mdi-alert-circle</v-icon>
-            <h3 class="mb-4">Invalid Reset Link</h3>
-            <p class="mb-4">This password reset link is invalid or has expired. Please request a new one.</p>
-            <v-btn color="primary" :to="{ name: 'ForgotPassword' }" class="mr-2 text-none">Request New Link</v-btn>
-            <v-btn color="secondary" :to="{ name: 'Login' }" class="text-none">Back to Login</v-btn>
+        <form @submit.prevent="onResetPassword" class="space-y-4">
+          <!-- Alert -->
+          <div v-if="alert" :class="['alert', alertType === 'success' ? 'alert-success' : 'alert-error']">
+            <CheckCircle v-if="alertType === 'success'" class="w-5 h-5" />
+            <XCircle v-else class="w-5 h-5" />
+            <span>{{ alert }}</span>
           </div>
 
-          <div v-else-if="loading || isValidCode === null" class="text-center">
-            <v-progress-circular indeterminate size="64" class="mb-4"></v-progress-circular>
-            <p>Validating reset link...</p>
+          <!-- Invalid Code State -->
+          <div v-if="isValidCode === false && !loading" class="text-center space-y-4">
+            <AlertCircle class="w-16 h-16 text-red-500 mx-auto" />
+            <h3 class="text-xl font-semibold text-gray-900">Invalid Reset Link</h3>
+            <p class="text-gray-600">This password reset link is invalid or has expired. Please request a new one.</p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+              <router-link :to="{ name: 'ForgotPassword' }" class="inline-flex items-center justify-center px-4 py-2 h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl" style="background: linear-gradient(to right, #2563eb, #9333ea);">
+                Request New Link
+              </router-link>
+              <router-link :to="{ name: 'Login' }" class="inline-flex items-center justify-center px-4 py-2 h-12 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-blue-500 hover:text-blue-600 transition-all duration-200 transform hover:scale-[1.02]">
+                Back to Login
+              </router-link>
+            </div>
           </div>
 
-          <div v-else-if="isValidCode === true">
-            <div class="input-field">
-              <v-text-field v-model="password" label="New Password" :rules="passwordRules"
-                :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-                @click:append-inner="showPassword = !showPassword" variant="outlined" class="mb-4"
-                autocomplete="new-password" prepend-inner-icon="mdi-lock" hide-details="auto" width="100%" />
+          <!-- Loading State -->
+          <div v-else-if="loading || isValidCode === null" class="text-center space-y-4">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto"></div>
+            <p class="text-gray-600">Validating reset link...</p>
+          </div>
+
+          <!-- Valid Code State -->
+          <div v-else-if="isValidCode === true" class="space-y-4">
+            <!-- New Password field -->
+            <div class="space-y-1">
+              <label for="password" class="block text-sm font-medium text-gray-700">New Password</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock class="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="password"
+                  v-model="password"
+                  :type="showPassword ? 'text' : 'password'"
+                  required
+                  class="input pl-10 pr-10 h-12"
+                  placeholder="Enter your new password"
+                  autocomplete="new-password"
+                />
+                <button
+                  type="button"
+                  @click="showPassword = !showPassword"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  <Eye v-if="!showPassword" class="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  <EyeOff v-else class="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                </button>
+              </div>
             </div>
 
-            <div class="input-field">
-              <v-text-field v-model="confirmPassword" label="Confirm New Password" :rules="confirmPasswordRules"
-                :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-                @click:append-inner="showPassword = !showPassword" variant="outlined" class="mb-4"
-                autocomplete="new-password" prepend-inner-icon="mdi-lock" hide-details="auto" width="100%" />
+            <!-- Confirm Password field -->
+            <div class="space-y-1">
+              <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock class="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="confirmPassword"
+                  v-model="confirmPassword"
+                  :type="showPassword ? 'text' : 'password'"
+                  required
+                  class="input pl-10 pr-10 h-12"
+                  placeholder="Confirm your new password"
+                  autocomplete="new-password"
+                />
+                <button
+                  type="button"
+                  @click="showPassword = !showPassword"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  <Eye v-if="!showPassword" class="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  <EyeOff v-else class="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                </button>
+              </div>
             </div>
 
-            <v-btn block color="#1a2233" type="submit" :loading="loading" :disabled="!isFormValid" class="auth-btn">
-              Reset Password
-            </v-btn>
+            <!-- Validation Errors -->
+            <div v-if="validationErrors.length > 0" class="space-y-2">
+              <div class="bg-red-50 border border-red-200 rounded-md p-3">
+                <div class="flex">
+                  <XCircle class="h-5 w-5 text-red-400" />
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+                    <div class="mt-2 text-sm text-red-700">
+                      <ul class="list-disc pl-5 space-y-1">
+                        <li v-for="error in validationErrors" :key="error">{{ error }}</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit button -->
+            <button
+              type="submit"
+              :disabled="loading"
+              class="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+              style="background: linear-gradient(to right, #2563eb, #9333ea);"
+            >
+              <span v-if="loading" class="flex items-center justify-center">
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Resetting Password...
+              </span>
+              <span v-else>Reset Password</span>
+            </button>
+            
+
           </div>
 
-          <div class="text-center auth-link">
-            Remember your password? <router-link :to="{ name: 'Login' }">Sign In</router-link>
+          <!-- Login link -->
+          <div class="text-center text-gray-600">
+            Remember your password? 
+            <router-link :to="{ name: 'Login' }" class="text-blue-600 hover:text-blue-700 font-medium">
+              Sign In
+            </router-link>
           </div>
-        </v-form>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { apiService } from '@/services/api'
+import { 
+  Lock, Eye, EyeOff, CheckCircle, XCircle, AlertCircle 
+} from 'lucide-vue-next'
 
 const router = useRouter()
 const route = useRoute()
-const form = ref(null)
-const isFormValid = ref(false)
+
 const password = ref('')
 const confirmPassword = ref('')
 const showPassword = ref(false)
@@ -69,22 +163,55 @@ const alertType = ref('success')
 const loading = ref(true) // Start with loading true while validating
 const isValidCode = ref(null) // Start with null to indicate unknown state
 
-const passwordRules = [
-  v => !!v || 'Password is required',
-  v => v.length >= 8 || 'Password must be at least 8 characters',
-  v => /[A-Z]/.test(v) || 'Password must contain at least one uppercase letter',
-  v => /[a-z]/.test(v) || 'Password must contain at least one lowercase letter',
-  v => /[0-9]/.test(v) || 'Password must contain at least one number'
-]
+// Form validation
+const isFormValid = computed(() => {
+  return password.value && 
+         confirmPassword.value && 
+         password.value === confirmPassword.value &&
+         password.value.length >= 8 &&
+         /[A-Z]/.test(password.value) &&
+         /[a-z]/.test(password.value) &&
+         /[0-9]/.test(password.value)
+})
 
-const confirmPasswordRules = [
-  v => !!v || 'Confirm password is required',
-  v => v === password.value || 'Passwords must match'
-]
+// Validation errors
+const validationErrors = computed(() => {
+  const errors = []
+  
+  if (!password.value) {
+    errors.push('Password is required')
+  } else {
+    if (password.value.length < 8) {
+      errors.push('Password must be at least 8 characters long')
+    }
+    if (!/[A-Z]/.test(password.value)) {
+      errors.push('Password must contain at least one uppercase letter')
+    }
+    if (!/[a-z]/.test(password.value)) {
+      errors.push('Password must contain at least one lowercase letter')
+    }
+    if (!/[0-9]/.test(password.value)) {
+      errors.push('Password must contain at least one number')
+    }
+  }
+  
+  if (!confirmPassword.value) {
+    errors.push('Please confirm your password')
+  } else if (password.value !== confirmPassword.value) {
+    errors.push('Passwords do not match')
+  }
+  
+  if (isValidCode.value === false) {
+    errors.push('Reset link is invalid or has expired')
+  }
+  
+  return errors
+})
+
+
 
 const validateResetCode = async () => {
   const code = route.params.code
-  // get route params value
   console.log('route.params==============', route.params.code)
 
   if (!code) {
@@ -134,7 +261,14 @@ const validateResetCode = async () => {
 }
 
 const onResetPassword = async () => {
-  if (!isFormValid.value || isValidCode.value !== true) return
+  console.log('🔍 [RESET PAGE] onResetPassword called')
+  console.log('🔍 [RESET PAGE] validationErrors:', validationErrors.value)
+  
+  // Check for validation errors
+  if (validationErrors.value.length > 0) {
+    console.log('🔍 [RESET PAGE] Validation errors found, not proceeding')
+    return
+  }
 
   loading.value = true
   alert.value = ''
@@ -156,7 +290,6 @@ const onResetPassword = async () => {
     // Clear form
     password.value = ''
     confirmPassword.value = ''
-    form.value?.resetValidation()
 
     // Redirect to login after 2 seconds
     setTimeout(() => {

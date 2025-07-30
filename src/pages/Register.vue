@@ -1,88 +1,275 @@
 <template>
-  <div class="auth-page">
-    <div class="auth-container">
-      <!-- <div class="auth-illustration">
-        <img src="/src/assets/images/register-illustration.svg" alt="Register illustration" />
-      </div> -->
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+    <div class="w-11/12">
+      <!-- Header Section -->
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg" style="background: linear-gradient(to right, #3b82f6, #9333ea);">
+          <User class="w-7 h-7 text-white" />
+        </div>
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text mb-1">
+          Join weCare
+        </h1>
+        <p class="text-gray-600 text-xs">Create your account to get started</p>
+      </div>
 
-      <div class="auth-content">
-        <h1 class="auth-title">Register</h1>
-        <p class="auth-subtitle">Please register to login.</p>
+        <form @submit.prevent="onRegister" class="space-y-4">
 
-        <v-form ref="form" v-model="isFormValid" @submit.prevent="onRegister" class="w-100">
-          <v-alert v-if="authStore.error" type="error" class="mb-4" variant="tonal" density="compact" closable>
-            {{ authStore.error }}
-          </v-alert>
 
-          <div class="input-field">
-            <v-text-field v-model="formData.email" label="Email"
-              :rules="[v => !!v || 'Email is required', v => /.+@.+\..+/.test(v) || 'Email must be valid']"
-              variant="outlined" autocomplete="email" prepend-inner-icon="mdi-email" hide-details="auto"
-              width="100%"></v-text-field>
+                    <!-- Step 1 -->
+          <div v-if="currentStep === 1" class="space-y-4">
+            <!-- Error alert -->
+            <div v-if="authStore.error" class="alert alert-error">
+              <XCircle class="w-4 h-4" />
+              <span>{{ authStore.error }}</span>
+            </div>
+
+            <!-- Email field -->
+            <div class="space-y-1">
+              <!-- <label for="email" class="block text-sm font-semibold text-gray-700">Email Address</label> -->
+              <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                </div>
+                <input
+                  id="email"
+                  v-model="formData.email"
+                  type="email"
+                  required
+                  class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter your email"
+                  autocomplete="email"
+                />
+              </div>
+            </div>
+
+            <!-- Password field -->
+            <div class="space-y-1">
+              <!-- <label for="password" class="block text-sm font-semibold text-gray-700">Password</label> -->
+              <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                </div>
+                <input
+                  id="password"
+                  v-model="formData.password"
+                  :type="showPassword ? 'text' : 'password'"
+                  required
+                  class="input pl-10 pr-10 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Create a strong password"
+                  autocomplete="new-password"
+                />
+                <button
+                  type="button"
+                  @click="showPassword = !showPassword"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600 transition-colors"
+                >
+                  <Eye v-if="!showPassword" class="h-4 w-4 text-gray-400" />
+                  <EyeOff v-else class="h-4 w-4 text-gray-400" />
+                </button>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">Must be at least 8 characters with uppercase, lowercase, and number</p>
+            </div>
+
+            <!-- Confirm Password field -->
+            <div class="space-y-1">
+              <!-- <label for="password_confirm" class="block text-sm font-semibold text-gray-700">Confirm Password</label> -->
+              <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                </div>
+                <input
+                  id="password_confirm"
+                  v-model="formData.password_confirm"
+                  :type="showPassword ? 'text' : 'password'"
+                  required
+                  class="input pl-10 pr-10 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Confirm your password"
+                  autocomplete="new-password"
+                />
+                <button
+                  type="button"
+                  @click="showPassword = !showPassword"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600 transition-colors"
+                >
+                  <Eye v-if="!showPassword" class="h-4 w-4 text-gray-400" />
+                  <EyeOff v-else class="h-4 w-4 text-gray-400" />
+                </button>
+              </div>
+            </div>
+
+            <!-- Next button -->
+            <button
+              type="button"
+              @click="nextStep"
+              :disabled="!isStep1Valid"
+              class="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+              style="background: linear-gradient(to right, #2563eb, #9333ea);"
+            >
+              <span class="flex items-center justify-center">
+                <span class="mr-2">Next</span>
+                <ArrowRight class="w-4 h-4" />
+              </span>
+            </button>
           </div>
 
-          <div class="input-field">
-            <v-text-field v-model="formData.mobile" label="Mobile Number"
-              :rules="[v => !!v || 'Mobile number is required']" variant="outlined" autocomplete="tel"
-              prepend-inner-icon="mdi-cellphone" hide-details="auto" width="100%"></v-text-field>
-          </div>
-          <div class="input-field">
-            <v-text-field v-model="formData.password" label="Password" :rules="passwordRules"
-              :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-              @click:append-inner="showPassword = !showPassword" variant="outlined" autocomplete="new-password"
-              prepend-inner-icon="mdi-lock" hide-details="auto" width="100%"></v-text-field>
-          </div>
-          <div class="input-field">
-            <v-text-field v-model="formData.password_confirm" label="Confirm Password" :rules="confirmPasswordRules"
-              :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-              @click:append-inner="showPassword = !showPassword" variant="outlined" autocomplete="new-password"
-              prepend-inner-icon="mdi-lock" hide-details="auto" width="100%"></v-text-field>
+          <!-- Step 2 -->
+          <div v-if="currentStep === 2" class="space-y-4">
+            <!-- Mobile field -->
+            <div class="space-y-1">
+              <!-- <label for="mobile" class="block text-sm font-semibold text-gray-700">Mobile Number</label> -->
+              <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Phone class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                </div>
+                <input
+                  id="mobile"
+                  v-model="formData.mobile"
+                  type="tel"
+                  required
+                  class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter your mobile number"
+                  autocomplete="tel"
+                />
+              </div>
+            </div>
+
+            <!-- Country field -->
+            <div class="space-y-1">
+              <!-- <label for="country" class="block text-sm font-semibold text-gray-700">Country</label> -->
+              <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Globe class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                </div>
+                <select
+                  id="country"
+                  v-model="formData.country"
+                  required
+                  :disabled="loadingCountries"
+                  class="select pl-10 pr-8 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select your country</option>
+                  <option
+                    v-for="country in countries"
+                    :key="country.id"
+                    :value="country.id"
+                  >
+                    {{ country.name }}
+                  </option>
+                </select>
+                <div v-if="loadingCountries" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Language field -->
+            <div class="space-y-1">
+              <!-- <label for="language" class="block text-sm font-semibold text-gray-700">Preferred Language</label> -->
+              <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <MessageCircle class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                </div>
+                <select
+                  id="language"
+                  v-model="formData.default_language"
+                  :disabled="loadingLanguages"
+                  class="select pl-10 pr-8 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select your preferred language</option>
+                  <option
+                    v-for="language in languages"
+                    :key="language.id"
+                    :value="language.id"
+                  >
+                    {{ language.name }}
+                  </option>
+                </select>
+                <div v-if="loadingLanguages" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Navigation buttons -->
+            <div class="flex space-x-3">
+              <button
+                type="button"
+                @click="prevStep"
+                class="flex-1 h-12 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-blue-500 hover:text-blue-600 transition-all duration-200 transform hover:scale-[1.02]"
+              >
+                <span class="flex items-center justify-center">
+                  <ArrowLeft class="w-4 h-4 mr-2" />
+                  Back
+                </span>
+              </button>
+              <button
+                type="submit"
+                :disabled="authStore.loading || !isFormValid"
+                class="flex-1 h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                style="background: linear-gradient(to right, #2563eb, #9333ea);"
+              >
+                <span v-if="authStore.loading" class="flex items-center justify-center">
+                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Creating Account...
+                </span>
+                <span v-else class="flex items-center justify-center">
+                  <User class="w-4 h-4 mr-2" />
+                  Create Account
+                </span>
+              </button>
+            </div>
           </div>
 
-          <div class="input-field">
-            <v-select v-model="formData.country" :items="countries" item-title="name" item-value="id" label="Country"
-              :rules="[v => !!v || 'Country is required']" variant="outlined" prepend-inner-icon="mdi-earth"
-              hide-details="auto" width="100%" :loading="loadingCountries" :disabled="loadingCountries"></v-select>
+          <!-- Divider -->
+          <div class="relative my-4">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-gray-300"></div>
+            </div>
+            <div class="relative flex justify-center text-xs">
+              <span class="px-2 bg-gray-100 text-gray-500">Already have an account?</span>
+            </div>
           </div>
 
-          <div class="input-field">
-            <v-select v-model="formData.default_language" :items="languages" item-title="name" item-value="id"
-              label="Preferred Language" variant="outlined" prepend-inner-icon="mdi-translate" hide-details="auto"
-              width="100%" :loading="loadingLanguages" :disabled="loadingLanguages"></v-select>
+          <!-- Login link -->
+          <div class="text-center">
+            <router-link :to="{ name: 'Login' }" class="inline-flex items-center justify-center w-full h-12 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-blue-500 hover:text-blue-600 transition-all duration-200 transform hover:scale-[1.02]">
+              <Lock class="w-4 h-4 mr-2" />
+              Sign In
+            </router-link>
           </div>
-
-          <v-btn block color="#1a2233" type="submit" :loading="authStore.loading" :disabled="!isFormValid"
-            class="auth-btn">
-            Sign Up
-          </v-btn>
-
-          <div class="text-center auth-link">
-            Already have account? <router-link :to="{ name: 'Login' }">Sign In</router-link>
-          </div>
-        </v-form>
+        <!-- Footer -->
+        <div class="text-center mt-6">
+          <p class="text-xs text-gray-500">
+            By creating an account, you agree to our 
+            <a href="#" class="text-blue-600 hover:text-blue-700 font-medium">Terms of Service</a> 
+            and 
+            <a href="#" class="text-blue-600 hover:text-blue-700 font-medium">Privacy Policy</a>
+          </p>
+        </div>
+      </form>
       </div>
     </div>
-  </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { apiService } from '@/services/api'
+import { 
+  Mail, Phone, Lock, Eye, EyeOff, Globe, MessageCircle, XCircle, User, ArrowRight, ArrowLeft
+} from 'lucide-vue-next'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
-const form = ref(null)
-const isFormValid = ref(false)
+
 const showPassword = ref(false)
 const languages = ref([])
 const loadingLanguages = ref(false)
 const countries = ref([])
 const loadingCountries = ref(false)
-
-// Remove beauty profile handling since goals will be set after registration
+const currentStep = ref(1)
 
 const formData = ref({
   email: '',
@@ -95,18 +282,24 @@ const formData = ref({
   default_language: null
 })
 
-const passwordRules = [
-  v => !!v || 'Password is required',
-  v => v.length >= 8 || 'Password must be at least 8 characters',
-  v => /[A-Z]/.test(v) || 'Password must contain at least one uppercase letter',
-  v => /[a-z]/.test(v) || 'Password must contain at least one lowercase letter',
-  v => /[0-9]/.test(v) || 'Password must contain at least one number'
-]
+// Step 1 validation
+const isStep1Valid = computed(() => {
+  return formData.value.email && 
+         formData.value.password && 
+         formData.value.password_confirm && 
+         formData.value.password === formData.value.password_confirm &&
+         formData.value.password.length >= 8 &&
+         /[A-Z]/.test(formData.value.password) &&
+         /[a-z]/.test(formData.value.password) &&
+         /[0-9]/.test(formData.value.password)
+})
 
-const confirmPasswordRules = [
-  v => !!v || 'Confirm password is required',
-  v => v === formData.value.password || 'Passwords must match'
-]
+// Form validation
+const isFormValid = computed(() => {
+  return isStep1Valid.value && 
+         formData.value.mobile && 
+         formData.value.country
+})
 
 // Fetch available countries
 const fetchCountries = async () => {
@@ -142,6 +335,17 @@ const fetchLanguages = async () => {
   } finally {
     loadingLanguages.value = false
   }
+}
+
+// Step navigation
+const nextStep = () => {
+  if (isStep1Valid.value) {
+    currentStep.value = 2
+  }
+}
+
+const prevStep = () => {
+  currentStep.value = 1
 }
 
 const onRegister = async () => {

@@ -1,28 +1,50 @@
 <template>
-  <v-snackbar v-model="show" :color="snackbarColor" :timeout="currentNotification?.timeout || 5000"
-    :persistent="currentNotification?.persistent || false" location="top left" :multi-line="isMultiLine"
-    :vertical="isVertical" class="global-snackbar">
-    <div class="d-flex align-center">
-      <v-icon :icon="snackbarIcon" class="mr-3" />
-      <div class="flex-grow-1">
-        <div class="font-weight-medium mb-1" v-if="currentNotification?.title">
-          {{ currentNotification.title }}
+  <Transition
+    enter-active-class="transition ease-out duration-300"
+    enter-from-class="transform translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+    enter-to-class="transform translate-y-0 opacity-100 sm:translate-x-0"
+    leave-active-class="transition ease-in duration-200"
+    leave-from-class="transform translate-y-0 opacity-100 sm:translate-x-0"
+    leave-to-class="transform translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+  >
+    <div
+      v-if="show"
+      class="fixed top-4 left-4 z-50 max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden"
+    >
+      <div class="p-4">
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <component :is="snackbarIcon" class="h-6 w-6" :class="iconColorClass" />
+          </div>
+          <div class="ml-3 w-0 flex-1 pt-0.5">
+            <p v-if="currentNotification?.title" class="text-sm font-medium text-grey-900 mb-1">
+              {{ currentNotification.title }}
+            </p>
+            <p class="text-sm text-grey-500">
+              {{ currentNotification?.message }}
+            </p>
+          </div>
+          <div class="ml-4 flex flex-shrink-0">
+            <button
+              @click="closeSnackbar"
+              class="bg-white rounded-md inline-flex text-grey-400 hover:text-grey-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            >
+              <span class="sr-only">Close</span>
+              <X class="h-5 w-5" />
+            </button>
+          </div>
         </div>
-        <div class="text-body-2">
-          {{ currentNotification?.message }}
+        <div v-if="hasAction" class="mt-4 flex space-x-3">
+          <button
+            @click="handleAction"
+            class="bg-white rounded-md text-sm font-medium text-primary-600 hover:text-primary-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+          >
+            {{ actionText }}
+          </button>
         </div>
       </div>
     </div>
-
-    <template v-slot:actions>
-      <v-btn variant="text" icon="mdi-close" size="small" @click="closeSnackbar" />
-
-      <!-- Action button for certain notification types -->
-      <v-btn v-if="hasAction" variant="text" size="small" @click="handleAction">
-        {{ actionText }}
-      </v-btn>
-    </template>
-  </v-snackbar>
+  </Transition>
 </template>
 
 <script setup>
@@ -50,12 +72,22 @@ const snackbarColor = computed(() => {
 
 const snackbarIcon = computed(() => {
   const iconMap = {
-    'success': 'mdi-check-circle',
-    'info': 'mdi-information',
-    'warning': 'mdi-alert',
-    'error': 'mdi-alert-circle'
+    'success': 'CheckCircle',
+    'info': 'Info',
+    'warning': 'AlertTriangle',
+    'error': 'AlertCircle'
   }
-  return iconMap[currentNotification.value?.severity] || 'mdi-information'
+  return iconMap[currentNotification.value?.severity] || 'Info'
+})
+
+const iconColorClass = computed(() => {
+  const colorMap = {
+    'success': 'text-success-600',
+    'info': 'text-blue-600',
+    'warning': 'text-warning-600',
+    'error': 'text-error-600'
+  }
+  return colorMap[currentNotification.value?.severity] || 'text-blue-600'
 })
 
 const isMultiLine = computed(() => {
@@ -153,16 +185,5 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.global-snackbar {
-  z-index: 10000 !important;
-}
-
-:deep(.v-snackbar__wrapper) {
-  min-width: 300px;
-  max-width: 500px;
-}
-
-:deep(.v-snackbar__content) {
-  padding: 16px !important;
-}
+/* Additional styles if needed */
 </style>

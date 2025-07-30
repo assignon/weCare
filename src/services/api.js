@@ -141,23 +141,17 @@ export const apiService = {
   
   // Skin Types
   getSkinTypes() {
-    // Use public API instance to allow unauthenticated access
-    const publicApi = createPublicApi()
-    return publicApi.get('/products/skin-types/')
+    return api.get('/products/skin-types/')
   },
 
   // Skin Concerns
   getSkinConcerns() {
-    // Use public API instance to allow unauthenticated access
-    const publicApi = createPublicApi()
-    return publicApi.get('/products/skin-concerns/')
+    return api.get('/products/skin-concerns/')
   },
 
   // Product Types
   getProductTypes() {
-    // Use public API instance to allow unauthenticated access
-    const publicApi = createPublicApi()
-    return publicApi.get('/products/product-types/')
+    return api.get('/products/product-types/')
   },
 
   // Countries
@@ -368,39 +362,49 @@ export const apiService = {
   validateResetCode(code) {
     // Use public API instance to avoid auth issues
     const resetApi = createPublicApi()
-    return resetApi.get(`/accounts/password/reset/validate/${code}/`)
+    return resetApi.get(`/accounts/validate-reset-code/${code}/`)
   },
 
   confirmPasswordReset(code, password) {
     // Use public API instance to avoid auth issues
     const resetApi = createPublicApi()
-    return resetApi.post('/accounts/password/reset/confirm/', { code, password })
+    console.log('🔍 [API] confirmPasswordReset called with:', { code, password })
+    console.log('🔍 [API] Making request to:', '/accounts/password/reset_password_confirm/')
+    return resetApi.post('/accounts/password/reset_password_confirm/', { code, password })
+      .then(response => {
+        console.log('🔍 [API] confirmPasswordReset success:', response)
+        return response
+      })
+      .catch(error => {
+        console.error('🔍 [API] confirmPasswordReset error:', error)
+        throw error
+      })
   },
 
   // Profile Management
   changePassword(passwordData) {
-    return api.put('/accounts/password/change/', passwordData)
+    return api.put('/accounts/password/change_password/', passwordData)
   },
 
   // Email Verification
   requestEmailChange(newEmail) {
-    return api.post('/accounts/password/email/request-change/', { new_email: newEmail })
+    return api.post('/accounts/send-verification-email/', { new_email: newEmail })
   },
 
   verifyEmailChange(code) {
-    return api.post('/accounts/password/email/verify-change/', { code })
+    return api.post('/accounts/verify-email-code/', { code })
   },
 
   getEmailVerificationStatus() {
-    return api.get('/accounts/password/email/verification-status/')
+    return api.get('/accounts/email-verification-status/')
   },
 
   invalidateExpiredEmailVerification() {
-    return api.post('/accounts/password/email/invalidate-expired/')
+    return api.post('/accounts/invalidate-expired-verification/')
   },
 
   cancelEmailVerification() {
-    return api.post('/accounts/password/email/cancel-verification/')
+    return api.post('/accounts/cancel-email-verification/')
   },
 
   // Address Management  
