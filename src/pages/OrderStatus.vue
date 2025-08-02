@@ -278,20 +278,27 @@
           </div>
           
           <div class="space-y-2">
-            <div class="flex justify-between items-center text-sm">
+            <div v-if="order.payment" class="flex justify-between items-center text-sm">
               <span class="text-slate-600">Method:</span>
               <span class="font-medium text-slate-900 capitalize">
-                {{ order.payment.payment_method?.replace('_', ' ') }}
+                {{ order.payment.payment_method?.replace('_', ' ') || 'Not specified' }}
               </span>
-                  </div>
+            </div>
             
-            <div class="flex justify-between items-center text-sm">
+            <div v-if="order.payment" class="flex justify-between items-center text-sm">
               <span class="text-slate-600">Status:</span>
               <span class="font-medium text-slate-900 capitalize">
-                {{ order.payment.payment_status?.replace('_', ' ') }}
+                {{ order.payment.payment_status?.replace('_', ' ') || 'Not specified' }}
               </span>
-                  </div>
-                  </div>
+            </div>
+            
+            <div v-if="!order.payment" class="text-center py-4">
+              <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                <CreditCard class="w-6 h-6 text-slate-400" />
+              </div>
+              <p class="text-slate-500 text-sm">No payment information available</p>
+            </div>
+          </div>
                 </div>
 
         <!-- Order Timeline -->
