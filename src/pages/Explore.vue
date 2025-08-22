@@ -71,70 +71,140 @@
       <transition name="slide-down">
         <div v-if="showFilterOptions" class="mb-6 p-6 bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20">
           <div class="space-y-6">
-            <!-- Skin Type Filter -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-800 mb-3">Filter by Skin Type</label>
-              <select 
-                v-model="selectedSkinTypes" 
-                multiple
-                @change="applySkinTypeFilter"
-                class="w-full p-4 bg-gray-50/50 border border-gray-200/50 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
-              >
-                <option 
-                  v-for="skinType in productStore.skinTypes" 
-                  :key="skinType.id" 
-                  :value="skinType.id"
+            <!-- Dynamic attribute filters (from CategoryAttributeTemplate by store category) -->
+            <div v-if="storeAttributeTemplates.length > 0" class="space-y-6">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base font-semibold text-gray-900">Filters</h3>
+                <span class="text-xs text-gray-500">Personalized for your selected store</span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div v-for="tpl in storeAttributeTemplates" :key="tpl.id" class="bg-gray-50/50 rounded-2xl p-4 border border-gray-200/50">
+                  <label class="block text-sm font-semibold text-gray-800 mb-3">{{ tpl.label }}</label>
+                  <!-- Select / Multiselect as chips -->
+                  <div v-if="tpl.field_type === 'select' || tpl.field_type === 'multiselect'">
+                    <div class="flex flex-wrap gap-2">
+                      <button
+                        v-for="opt in (tpl.choices || [])"
+                        :key="opt"
+                        type="button"
+                        @click="toggleChoice(tpl, opt)"
+                        :class="[
+                          'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
+                          isSelected(tpl, opt)
+                            ? 'text-white border-transparent shadow-sm'
+                            : 'text-gray-700 border-gray-200 hover:border-blue-400'
+                        ]"
+                        :style="isSelected(tpl, opt) ? 'background: linear-gradient(to right, #2563eb, #9333ea);' : ''"
+                      >
+                        {{ opt }}
+                      </button>
+                    </div>
+                  </div>
+                  <!-- Boolean toggle -->
+                  <div v-else-if="tpl.field_type === 'boolean'" class="flex items-center justify-between">
+                    <span class="text-sm text-gray-700">Enable</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" class="sr-only peer" :checked="getBoolean(tpl)" @change="toggleBoolean(tpl)" />
+                      <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 transition-colors"></div>
+                      <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                    </label>
+                  </div>
+                  <!-- Text / Number input -->
+                  <div v-else>
+                    <input
+                      :type="tpl.field_type === 'number' || tpl.field_type === 'decimal' ? 'number' : 'text'"
+                      class="w-full p-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50"
+                      :placeholder="tpl.help_text || 'Type to filter'"
+                      v-model="dynamicFilters[tpl.id]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between pt-2">
+                <button 
+                  @click="clearDynamicFilters"
+                  class="px-6 py-3 text-blue-600 hover:text-blue-700 font-semibold text-sm bg-blue-50/50 hover:bg-blue-100/50 rounded-2xl transition-all duration-200"
                 >
-                  {{ skinType.name }}
-                </option>
-              </select>
+                  Clear All
+                </button>
+                <button 
+                  @click="applyDynamicFilters"
+                  class="px-6 py-3 text-white font-semibold text-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200"
+                  style="background: linear-gradient(to right, #2563eb, #9333ea);"
+                >
+                  Apply
+                </button>
+              </div>
             </div>
 
-            <!-- Skin Concern Filter -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-800 mb-3">Filter by Skin Concern</label>
-              <select 
-                v-model="selectedSkinConcerns" 
-                multiple
-                @change="applySkinConcernFilter"
-                class="w-full p-4 bg-gray-50/50 border border-gray-200/50 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
-              >
-                <option 
-                  v-for="concern in productStore.skinConcerns" 
-                  :key="concern.id" 
-                  :value="concern.id"
+            <!-- Fallback default filters when no templates available -->
+            <div v-else class="space-y-6">
+              <!-- Skin Type Filter -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-800 mb-3">Filter by Skin Type</label>
+                <select 
+                  v-model="selectedSkinTypes" 
+                  multiple
+                  @change="applySkinTypeFilter"
+                  class="w-full p-4 bg-gray-50/50 border border-gray-200/50 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
                 >
-                  {{ concern.name }}
-                </option>
-              </select>
-            </div>
+                  <option 
+                    v-for="skinType in productStore.skinTypes" 
+                    :key="skinType.id" 
+                    :value="skinType.id"
+                  >
+                    {{ skinType.name }}
+                  </option>
+                </select>
+              </div>
 
-            <!-- Product Type Filter -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-800 mb-3">Filter by Product Type</label>
-              <select 
-                v-model="selectedProductTypes" 
-                multiple
-                @change="applyProductTypeFilter"
-                class="w-full p-4 bg-gray-50/50 border border-gray-200/50 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
-              >
-                <option 
-                  v-for="productType in productStore.productTypes" 
-                  :key="productType.id" 
-                  :value="productType.id"
+              <!-- Skin Concern Filter -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-800 mb-3">Filter by Skin Concern</label>
+                <select 
+                  v-model="selectedSkinConcerns" 
+                  multiple
+                  @change="applySkinConcernFilter"
+                  class="w-full p-4 bg-gray-50/50 border border-gray-200/50 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
                 >
-                  {{ productType.name }}
-                </option>
-              </select>
-            </div>
+                  <option 
+                    v-for="concern in productStore.skinConcerns" 
+                    :key="concern.id" 
+                    :value="concern.id"
+                  >
+                    {{ concern.name }}
+                  </option>
+                </select>
+              </div>
 
-            <div class="flex justify-end pt-2">
-              <button 
-                @click="clearAllFilters"
-                class="px-6 py-3 text-blue-600 hover:text-blue-700 font-semibold text-sm bg-blue-50/50 hover:bg-blue-100/50 rounded-2xl transition-all duration-200"
-              >
-                Clear All
-              </button>
+              <!-- Product Type Filter -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-800 mb-3">Filter by Product Type</label>
+                <select 
+                  v-model="selectedProductTypes" 
+                  multiple
+                  @change="applyProductTypeFilter"
+                  class="w-full p-4 bg-gray-50/50 border border-gray-200/50 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                >
+                  <option 
+                    v-for="productType in productStore.productTypes" 
+                    :key="productType.id" 
+                    :value="productType.id"
+                  >
+                    {{ productType.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="flex justify-end pt-2">
+                <button 
+                  @click="clearAllFilters"
+                  class="px-6 py-3 text-blue-600 hover:text-blue-700 font-semibold text-sm bg-blue-50/50 hover:bg-blue-100/50 rounded-2xl transition-all duration-200"
+                >
+                  Clear All
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -238,6 +308,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useNotificationStore } from '@/stores/notification'
 import { useCurrency } from '@/composables/useCurrency'
 import AppHeader from '@/components/AppHeader.vue'
+import apiService from '@/services/api'
 import { 
   Bell, User, Search, X, Filter, AlertCircle, CheckCircle, ShoppingBag, ArrowRight
 } from 'lucide-vue-next'
@@ -260,6 +331,93 @@ const selectedSkinTypes = ref([])
 const selectedSkinConcerns = ref([])
 const selectedProductTypes = ref([])
 const isFiltering = ref(false)
+
+// Dynamic store attribute templates and selections
+const storeAttributeTemplates = ref([])
+const dynamicFilters = ref({}) // key: template.id, value: string | string[] | boolean
+
+const loadStoreAttributeTemplates = async () => {
+  const defaultStore = sessionStorage.getItem('defaultStore')
+  if (!defaultStore) {
+    storeAttributeTemplates.value = []
+    dynamicFilters.value = {}
+    return
+  }
+  try {
+    const { data } = await apiService.getStoreAttributesByStoreCategory({ store_category_id: defaultStore })
+    const templates = data?.templates || []
+    storeAttributeTemplates.value = templates.filter(t => t.is_filterable && t.is_active)
+    // Initialize dynamicFilters for multiselect/select as arrays
+    const init = {}
+    storeAttributeTemplates.value.forEach(tpl => {
+      if (tpl.field_type === 'multiselect') init[tpl.id] = []
+      else if (tpl.field_type === 'boolean') init[tpl.id] = false
+      else init[tpl.id] = ''
+    })
+    dynamicFilters.value = init
+  } catch (e) {
+    console.warn('Failed to load store attribute templates:', e)
+    storeAttributeTemplates.value = []
+    dynamicFilters.value = {}
+  }
+}
+
+const isSelected = (tpl, opt) => {
+  const val = dynamicFilters.value[tpl.id]
+  if (tpl.field_type === 'multiselect') return Array.isArray(val) && val.includes(opt)
+  if (tpl.field_type === 'select') return val === opt
+  return false
+}
+
+const toggleChoice = (tpl, opt) => {
+  if (tpl.field_type === 'multiselect') {
+    const arr = Array.isArray(dynamicFilters.value[tpl.id]) ? [...dynamicFilters.value[tpl.id]] : []
+    const idx = arr.indexOf(opt)
+    if (idx >= 0) arr.splice(idx, 1)
+    else arr.push(opt)
+    dynamicFilters.value[tpl.id] = arr
+  } else if (tpl.field_type === 'select') {
+    dynamicFilters.value[tpl.id] = dynamicFilters.value[tpl.id] === opt ? '' : opt
+  }
+}
+
+const getBoolean = (tpl) => {
+  return !!dynamicFilters.value[tpl.id]
+}
+
+const toggleBoolean = (tpl) => {
+  dynamicFilters.value[tpl.id] = !dynamicFilters.value[tpl.id]
+}
+
+const clearDynamicFilters = () => {
+  Object.keys(dynamicFilters.value).forEach(key => {
+    const tpl = storeAttributeTemplates.value.find(t => String(t.id) === String(key))
+    if (!tpl) return
+    if (tpl.field_type === 'multiselect') dynamicFilters.value[key] = []
+    else if (tpl.field_type === 'boolean') dynamicFilters.value[key] = false
+    else dynamicFilters.value[key] = ''
+  })
+}
+
+const applyDynamicFilters = async () => {
+  // Backend support for attribute-based filtering may be added later.
+  // Build query params as attr_<templateId>=value[] for server-side filtering
+  isFiltering.value = true
+  const defaultStore = sessionStorage.getItem('defaultStore')
+  const params = defaultStore ? { store_category: defaultStore, page_size: 24 } : { page_size: 24 }
+  Object.entries(dynamicFilters.value).forEach(([templateId, val]) => {
+    const key = `attr_${templateId}`
+    if (Array.isArray(val)) {
+      if (val.length > 0) params[key] = JSON.stringify(val)
+    } else if (typeof val === 'boolean') {
+      if (val === true) params[key] = 'true'
+    } else if (val) {
+      params[key] = String(val)
+    }
+  })
+  const hasMore = await productStore.fetchProducts(params)
+  hasMoreProducts.value = hasMore
+}
 
 // Infinite scroll for all products
 const loadingMore = ref(false)
@@ -445,6 +603,42 @@ const setupInfiniteScroll = () => {
   })
 }
 
+// Storage event handler for default store changes
+const handleStorageChange = async (e) => {
+  if (e.key === 'defaultStore') {
+    // Refresh categories and products when default store changes
+    await productStore.refreshCategoriesForStore()
+    await loadStoreAttributeTemplates()
+    
+    const newStoreId = e.newValue
+    if (newStoreId) {
+      try {
+        const hasMore = await productStore.fetchProducts({ store_category: newStoreId, page_size: 24 })
+        hasMoreProducts.value = hasMore
+      } catch (err) {
+        console.warn('Failed to refresh products for new store:', err)
+      }
+    }
+  }
+}
+
+// Watch for default store changes to refresh categories
+watch(() => sessionStorage.getItem('defaultStore'), async (newStoreId, oldStoreId) => {
+  if (newStoreId !== oldStoreId) {
+    // Refresh categories when default store changes
+    await productStore.refreshCategoriesForStore()
+    await loadStoreAttributeTemplates()
+    
+    // Also refresh products with the new store filter
+    try {
+      const hasMore = await productStore.fetchProducts({ store_category: newStoreId, page_size: 24 })
+      hasMoreProducts.value = hasMore
+    } catch (e) {
+      console.warn('Failed to refresh products for new store:', e)
+    }
+  }
+}, { immediate: false })
+
 // Watch for products changes to re-setup infinite scroll
 watch(() => productStore.products, () => {
   if (productStore.products.length > 0 && !isSearching.value && !isFiltering.value) {
@@ -472,14 +666,31 @@ onMounted(async () => {
     // init notification store
     await notification.init()
 
-    // Fetch products
-    const hasMoreFromInitialLoad = await productStore.fetchProducts()
-    hasMoreProducts.value = hasMoreFromInitialLoad
+    // Load dynamic attribute templates for current default store category
+    await loadStoreAttributeTemplates()
+
+    // Fetch products filtered by default store category if set
+    const defaultStore = sessionStorage.getItem('defaultStore')
+    if (defaultStore) {
+      try {
+        const hasMoreFromInitialLoad = await productStore.fetchProducts({ store_category: defaultStore, page_size: 24 })
+        hasMoreProducts.value = hasMoreFromInitialLoad
+      } catch (e) {
+        const hasMoreFromInitialLoad = await productStore.fetchProducts()
+        hasMoreProducts.value = hasMoreFromInitialLoad
+      }
+    } else {
+      const hasMoreFromInitialLoad = await productStore.fetchProducts()
+      hasMoreProducts.value = hasMoreFromInitialLoad
+    }
 
     // Setup infinite scroll after initial load
     nextTick(() => {
       setupInfiniteScroll()
     })
+
+    // Add storage event listener to handle changes from other tabs
+    window.addEventListener('storage', handleStorageChange)
   } catch (error) {
     console.error('Error during Explore page initialization:', error)
   }
@@ -489,6 +700,9 @@ onUnmounted(() => {
   if (observer) {
     observer.disconnect()
   }
+  
+  // Remove storage event listener
+  window.removeEventListener('storage', handleStorageChange)
 })
 </script>
 

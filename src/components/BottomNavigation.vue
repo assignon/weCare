@@ -24,8 +24,8 @@
         :class="activeTab === 'explore' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
       >
         <div class="relative">
-          <Search v-if="activeTab === 'explore'" class="w-6 h-6 mb-1" />
-          <Search v-else class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+          <Telescope v-if="activeTab === 'explore'" class="w-6 h-6 mb-1" />
+          <Telescope v-else class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
           <div 
             v-if="activeTab === 'explore'" 
             class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
@@ -74,16 +74,56 @@
         </div>
         <span class="font-medium">Cart</span>
       </router-link>
+
+             <!-- Store selector -->
+       <button 
+         @click="openStoreDialog"
+         class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
+         :class="activeTab === 'store' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+         type="button"
+       >
+                   <div class="relative">
+            <component :is="defaultStoreIcon" v-if="activeTab === 'store'" class="w-6 h-6 mb-1" />
+            <component :is="defaultStoreIcon" v-else class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+           <div 
+             v-if="activeTab === 'store'" 
+             class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
+             style="background: linear-gradient(to right, #2563eb, #9333ea);"
+           ></div>
+         </div>
+         <span class="font-medium">Store</span>
+       </button>
     </div>
   </nav>
+
+  <!-- Store category floating selector -->
+  <div v-if="showStoreDialog" class="fixed inset-0 z-[60]">
+    <div class="absolute inset-0 bg-black/50" @click="closeStoreDialog"></div>
+    <div class="absolute right-4 bottom-20 space-y-3 flex flex-col items-end">
+      <button
+        v-for="cat in storeCategories"
+        :key="cat.id"
+        @click="selectStore(cat.id)"
+                 class="flex items-center space-x-3 p-3 rounded-full shadow-lg hover:shadow-xl transition-all"
+         :class="isDefault(cat.id) ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' : 'bg-white'"
+         :style="isDefault(cat.id) ? 'background: linear-gradient(to right, #2563eb, #9333ea);' : 'background: white;'"
+      >
+        <div class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center">
+          <component :is="getCategoryIcon(cat.name)" class="w-4 h-4 text-slate-600" />
+        </div>
+        <span class="font-medium text-slate-800" :style="isDefault(cat.id) ? 'color: white;' : 'color: black;'">{{ cat.name }}</span>
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useNotificationStore } from '@/stores/notification'
-import { Home, Search, Package, ShoppingBag } from 'lucide-vue-next'
+import { Home, Telescope, Package, ShoppingBag, Store, Sparkles, Shirt, Pill, Sofa, Monitor, Car } from 'lucide-vue-next'
+import apiService from '@/services/api'
 
 const route = useRoute()
 const cart = useCartStore()
@@ -115,6 +155,16 @@ onMounted(async () => {
     
     // Initialize notification store
     await notification.init()
+    
+    // Load store categories to ensure default store icon is displayed
+    if (sessionStorage.getItem('defaultStore')) {
+      try {
+        const resp = await apiService.getStoreCategories({ is_active: true })
+        storeCategories.value = resp.data?.results || resp.data || []
+      } catch (e) {
+        console.warn('Failed to load store categories on mount:', e)
+      }
+    }
   } catch (error) {
     console.error('Error initializing bottom navigation stores:', error)
   }
@@ -123,6 +173,89 @@ onMounted(async () => {
 // Watch for route changes
 import { watch } from 'vue'
 watch(currentRouteName, updateActiveTab)
+
+// Listen for sessionStorage changes
+const handleStorageChange = (e) => {
+  if (e.key === 'defaultStore') {
+    // Force reactivity update when defaultStore changes
+    if (storeCategories.value.length > 0) {
+      // Trigger reactivity by updating the array reference
+      storeCategories.value = [...storeCategories.value]
+    }
+  }
+}
+
+onMounted(() => {
+  // Add event listener for storage changes
+  window.addEventListener('storage', handleStorageChange)
+})
+
+// Clean up event listener
+onUnmounted(() => {
+  window.removeEventListener('storage', handleStorageChange)
+})
+
+// Store dialog state
+const showStoreDialog = ref(false)
+const storeCategories = ref([])
+
+const openStoreDialog = async () => {
+  activeTab.value = 'store'
+  try {
+    if (storeCategories.value.length === 0) {
+      const resp = await apiService.getStoreCategories({ is_active: true })
+      storeCategories.value = resp.data?.results || resp.data || []
+    }
+    showStoreDialog.value = true
+  } catch (e) {
+    console.warn('Failed to load store categories:', e)
+    showStoreDialog.value = true
+  }
+}
+
+const closeStoreDialog = () => {
+  showStoreDialog.value = false
+  updateActiveTab()
+}
+
+const isDefault = (id) => String(sessionStorage.getItem('defaultStore') || '') === String(id)
+
+const selectStore = (id) => {
+  sessionStorage.setItem('defaultStore', String(id))
+  showStoreDialog.value = false
+  // Force reactivity update
+  if (storeCategories.value.length > 0) {
+    storeCategories.value = [...storeCategories.value]
+  }
+  // Reload to refresh product feeds with selected category
+  location.reload()
+}
+
+const getCategoryIcon = (categoryName) => {
+  const iconMap = {
+    'Beauty': Sparkles,
+    'Fashion': Shirt,
+    'Pharmacy': Pill,
+    'Furniture': Sofa,
+    'Electronics': Monitor,
+    'Automobile': Car
+  }
+  return iconMap[categoryName] || Store
+}
+
+const getDefaultStoreIcon = () => {
+  const defaultStoreId = sessionStorage.getItem('defaultStore')
+  if (defaultStoreId && storeCategories.value.length > 0) {
+    const defaultCategory = storeCategories.value.find(cat => String(cat.id) === String(defaultStoreId))
+    if (defaultCategory) {
+      return getCategoryIcon(defaultCategory.name)
+    }
+  }
+  return Store
+}
+
+// Reactive computed property for the default store icon
+const defaultStoreIcon = computed(() => getDefaultStoreIcon())
 </script>
 
 <style scoped>

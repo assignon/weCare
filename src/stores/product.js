@@ -52,27 +52,36 @@ export const useProductStore = defineStore('product', () => {
     error.value = null
     
     try {
+      const defaultStore = sessionStorage.getItem('defaultStore')
+
+      // Build params to send
+      const baseParams = { ...(params || {}) }
       if (searchQuery.value) {
-        params.search = searchQuery.value
+        baseParams.search = searchQuery.value
       }
       
-      if (selectedCategory.value) {
-        params.category = selectedCategory.value
+      // Map category filter depending on endpoint
+      const categoryId = selectedCategory.value
+      
+      if (!baseParams.page) {
+        baseParams.page = append ? pagination.value.page + 1 : 1
       }
+      baseParams.page_size = pagination.value.pageSize
       
       if (selectedSkinTypes.value && selectedSkinTypes.value.length > 0) {
-        // For now, send only the first skin type to the API
-        // and filter the rest locally in the component
-        params.suitable_for = selectedSkinTypes.value[0]
+        baseParams.suitable_for = selectedSkinTypes.value[0]
       }
       
-      // Add pagination params
-      if (!params.page) {
-        params.page = append ? pagination.value.page + 1 : 1
+      // Always use shopper 'all' endpoint; pass store_id when available
+      const allParams = { ...baseParams }
+      if (categoryId) {
+        // Backend expects 'categories' filter for M2M
+        allParams.categories = categoryId
       }
-      params.page_size = pagination.value.pageSize
-      
-      const response = await apiService.getProducts(params)
+      if (defaultStore) {
+        allParams.store_category = defaultStore
+      }
+      const response = await apiService.getProducts(allParams)
       
       const newProducts = response.data.results || response.data
       
@@ -130,7 +139,15 @@ export const useProductStore = defineStore('product', () => {
   
   const fetchCategories = async () => {
     try {
-      const response = await apiService.getCategories()
+      // Get default store from session storage to filter categories
+      const defaultStore = sessionStorage.getItem('defaultStore')
+      const params = {}
+      
+      if (defaultStore) {
+        params.store_id = defaultStore
+      }
+      
+      const response = await apiService.getCategories(params)
       categories.value = response.data.results || response.data
       return categories.value
     } catch (err) {
@@ -186,10 +203,10 @@ export const useProductStore = defineStore('product', () => {
     }
   }
   
-  const fetchPopularProducts = async () => {
+  const fetchPopularProducts = async (params = {}) => {
     try {
-      // Assuming the API has a way to fetch popular products
-      const response = await apiService.getPopularProducts()
+      // Forward optional params (e.g., store_id)
+      const response = await apiService.getPopularProducts(params)
       popularProducts.value = response.data.results || response.data
       return popularProducts.value
     } catch (err) {
@@ -198,10 +215,10 @@ export const useProductStore = defineStore('product', () => {
     }
   }
   
-  const fetchNewArrivals = async () => {
+  const fetchNewArrivals = async (params = {}) => {
     try {
-      // Assuming the API has a way to fetch new arrivals
-      const response = await apiService.getNewArrivals()
+      // Forward optional params (e.g., store_id)
+      const response = await apiService.getNewArrivals(params)
       newArrivals.value = response.data.results || response.data
       return newArrivals.value
     } catch (err) {
@@ -274,6 +291,14 @@ export const useProductStore = defineStore('product', () => {
     }
   }
   
+  const refreshCategoriesForStore = async () => {
+    try {
+      await fetchCategories()
+    } catch (err) {
+      console.error('Failed to refresh categories for store:', err)
+    }
+  }
+  
   return {
     // State
     products,
@@ -318,6 +343,7 @@ export const useProductStore = defineStore('product', () => {
     filterBySkinTypes,
     clearFilters,
     goToPage,
-    fetchProductReviews
+    fetchProductReviews,
+    refreshCategoriesForStore
   }
 }) 

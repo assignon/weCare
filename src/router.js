@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import apiService from '@/services/api'
 
 const routes = [
   { path: '/splash', name: 'SplashScreen', component: () => import('@/pages/SplashScreen.vue') },
@@ -7,6 +8,7 @@ const routes = [
   { path: '/', name: 'Home', component: () => import('@/pages/Home.vue'), meta: { requiresAuth: true } },
   { path: '/orders', name: 'Orders', component: () => import('@/pages/Orders.vue'), meta: { requiresAuth: true } },
   { path: '/explore', name: 'Explore', component: () => import('@/pages/Explore.vue'), meta: { requiresAuth: true } },
+  // { path: '/explore', name: 'Explore', component: () => import('@/pages/EnhancedExplore.vue'), meta: { requiresAuth: true } },
   { path: '/cart', name: 'Cart', component: () => import('@/pages/Cart.vue'), meta: { requiresAuth: true } },
  
   { path: '/register', name: 'Register', component: () => import('@/pages/Register.vue') },
@@ -14,6 +16,8 @@ const routes = [
   { path: '/forgot-password', name: 'ForgotPassword', component: () => import('@/pages/ForgotPassword.vue') },
   { path: '/reset-password/:code', name: 'ResetPassword', component: () => import('@/pages/ResetPassword.vue') },
   { path: '/product/:id', name: 'ProductDetails', component: () => import('@/pages/ProductDetails.vue'), meta: { requiresAuth: true } },
+  // { path: '/stores', name: 'StoreDirectory', component: () => import('@/pages/StoreDirectory.vue'), meta: { requiresAuth: true } },
+  // { path: '/store/:id', name: 'StoreDetails', component: () => import('@/pages/StoreDetails.vue'), meta: { requiresAuth: true } },
   { path: '/order-status/:id', name: 'OrderStatus', component: () => import('@/pages/OrderStatus.vue'), meta: { requiresAuth: true } },
   { path: '/profile', name: 'Profile', component: () => import('@/pages/Profile.vue'), meta: { requiresAuth: true } },
   { path: '/profile/edit', name: 'EditProfile', component: () => import('@/pages/EditProfile.vue'), meta: { requiresAuth: true } },
@@ -42,6 +46,8 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore()
+  
+  // After auth check, ensure default store category selection exists
   
   // Check if this is a fresh app load (no previous route)
   const isFreshLoad = !from.name && to.name !== 'SplashScreen'
@@ -92,6 +98,20 @@ router.beforeEach(async (to, from, next) => {
           query: { redirect: to.fullPath } 
         })
       }
+    }
+    try {
+      // Fetch active store categories
+      const resp = await apiService.getStoreCategories({ is_active: true })
+      const categories = resp.data?.results || resp.data || []
+      const defaultStore = sessionStorage.getItem('defaultStore')
+      // if (!defaultStore) {
+      //   // Temporarily pick the first as default; UI dialog can be added in Home.vue
+      //   if (categories.length > 0) {
+      //     sessionStorage.setItem('defaultStore', categories[0].id)
+      //   }
+      // }
+    } catch (e) {
+      console.warn('Could not fetch store categories for shopper:', e)
     }
   }
   

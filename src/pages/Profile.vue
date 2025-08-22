@@ -134,6 +134,23 @@
             </div>
             <ChevronRight class="w-5 h-5 text-slate-400" />
           </button>
+
+          <!-- Default Store (Store Category) -->
+          <button 
+            @click="openDefaultStoreDialog"
+            class="w-full p-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors border-t border-slate-100"
+          >
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <Store class="w-5 h-5 text-blue-600" />
+              </div>
+              <div class="text-left">
+                <p class="font-semibold text-slate-900">Default Store</p>
+                <p class="text-sm text-slate-600">{{ defaultStoreLabel }}</p>
+              </div>
+            </div>
+            <ChevronRight class="w-5 h-5 text-slate-400" />
+          </button>
         </div>
 
         <!-- Account Section -->
@@ -227,6 +244,56 @@
         </div>
       </div>
 
+      <!-- Default Store Selection Dialog -->
+      <div 
+        v-if="showDefaultStoreDialog" 
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        @click="showDefaultStoreDialog = false"
+      >
+        <div 
+          class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl"
+          @click.stop
+        >
+          <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mr-4">
+              <Store class="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-slate-900">Select Default Store</h3>
+              <p class="text-slate-600 text-sm">Choose your preferred store category</p>
+            </div>
+          </div>
+
+          <div v-if="loadingStoreCategories" class="text-center py-8">
+            <div class="w-12 h-12 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Loader2 class="w-6 h-6 text-blue-600 animate-spin" />
+            </div>
+            <p class="text-slate-600">Loading store categories...</p>
+          </div>
+
+          <div v-else class="flex flex-wrap gap-2 max-h-64 overflow-y-auto">
+            <button
+              v-for="cat in storeCategories"
+              :key="cat.id"
+              @click="setDefaultStore(cat.id)"
+              class="px-4 py-2 rounded-full border text-sm"
+              :class="String(cat.id) === String(defaultStoreId) ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-white border-slate-200 text-slate-800'"
+            >
+              {{ cat.name }}
+            </button>
+          </div>
+
+          <div class="flex space-x-3 mt-6">
+            <button 
+              @click="showDefaultStoreDialog = false"
+              class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Logout Confirmation Dialog -->
       <div 
         v-if="showLogoutDialog" 
@@ -276,7 +343,7 @@ import { apiService } from '@/services/api'
 import AppHeader from '@/components/AppHeader.vue'
 import { 
   User, Edit3, Sparkles, MapPin, Globe, LogOut, ChevronRight, 
-  Camera, Loader2, Check
+  Camera, Loader2, Check, Store
 } from 'lucide-vue-next'
 
 const auth = useAuthStore()
@@ -289,6 +356,12 @@ const showLogoutDialog = ref(false)
 const selectedLanguage = ref('')
 const languages = ref([])
 const loadingLanguages = ref(false)
+
+// Default store selection state
+const showDefaultStoreDialog = ref(false)
+const storeCategories = ref([])
+const loadingStoreCategories = ref(false)
+const defaultStoreId = ref(sessionStorage.getItem('defaultStore') || '')
 
 // Skin profile states
 const loadingProfile = ref(false)
@@ -341,6 +414,14 @@ const currentLanguageName = computed(() => {
   return user.default_language.name
 })
 
+const defaultStoreLabel = computed(() => {
+  const currentId = String(defaultStoreId.value || '')
+  const found = storeCategories.value.find(c => String(c.id) === currentId)
+  if (found) return found.name
+  if (!currentId) return 'Not set'
+  return `Category #${currentId}`
+})
+
 const hasProfileData = computed(() => {
   return profileData.value.skin_type ||
     (profileData.value.skin_concerns && profileData.value.skin_concerns.length > 0) ||
@@ -371,7 +452,8 @@ const fetchProfileData = async () => {
 onMounted(async () => {
   await Promise.all([
     fetchLanguages(),
-    fetchProfileData()
+    fetchProfileData(),
+    ensureStoreCategories()
   ])
 
   // Set current language as selected
@@ -401,6 +483,33 @@ const fetchLanguages = async () => {
   } finally {
     loadingLanguages.value = false
   }
+}
+// Default store dialog handlers
+const ensureStoreCategories = async () => {
+  try {
+    loadingStoreCategories.value = true
+    const resp = await apiService.getStoreCategories({ is_active: true })
+    storeCategories.value = resp.data?.results || resp.data || []
+  } catch (e) {
+    console.warn('Failed to load store categories:', e)
+  } finally {
+    loadingStoreCategories.value = false
+  }
+}
+
+const openDefaultStoreDialog = async () => {
+  if (storeCategories.value.length === 0) {
+    await ensureStoreCategories()
+  }
+  showDefaultStoreDialog.value = true
+}
+
+const setDefaultStore = (id) => {
+  defaultStoreId.value = String(id)
+  sessionStorage.setItem('defaultStore', defaultStoreId.value)
+  showDefaultStoreDialog.value = false
+  // Reload to apply filtering across the app
+  location.reload()
 }
 
 // Confirm logout

@@ -212,133 +212,91 @@
               </div>
             </div>
 
-            <!-- Delivery Options -->
+            <!-- Product Delivery Options -->
             <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm border border-white/20 p-6">
               <h3 class="text-lg font-semibold text-gray-900 mb-6">Delivery Options</h3>
               
-              <div class="space-y-4">
-                <!-- Default Delivery -->
-                <div 
-                  :class="[
-                    'p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200',
-                    deliveryOption === 'default' 
-                      ? 'border-blue-500 bg-blue-50/50' 
-                      : 'border-gray-200 bg-white/50 hover:border-gray-300'
-                  ]"
-                  @click="deliveryOption = 'default'"
-                >
-                  <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center" style="background: linear-gradient(to right, #2563eb, #9333ea);">
-                      <Truck class="w-5 h-5 text-white" />
-                    </div>
-                    <div class="flex-1">
-                      <div class="flex items-center justify-between">
-                        <span class="font-semibold text-gray-900">Standard Delivery</span>
-                        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
-                          <div v-if="deliveryOption === 'default'" class="w-3 h-3 bg-blue-600 rounded-full"></div>
-                        </div>
-                      </div>
-                      <p class="text-sm text-gray-600 mt-1">{{ getDefaultDeliveryTime() }}</p>
-                    </div>
+              <!-- Default delivery information -->
+              <div class="p-4 rounded-2xl border-2 border-blue-500 bg-blue-50/50 mb-6">
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center" style="background: linear-gradient(to right, #2563eb, #9333ea);">
+                    <Truck class="w-5 h-5 text-white" />
                   </div>
-                </div>
-
-                <!-- Express Delivery -->
-                <div 
-                  v-if="expressDeliveryAvailable"
-                  :class="[
-                    'p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200',
-                    deliveryOption === 'express' 
-                      ? 'border-green-500 bg-green-50/50' 
-                      : 'border-gray-200 bg-white/50 hover:border-gray-300'
-                  ]"
-                  @click="deliveryOption = 'express'"
-                >
-                  <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                      <Zap class="w-5 h-5 text-white" />
-                    </div>
-                    <div class="flex-1">
-                      <div class="flex items-center justify-between">
-                        <span class="font-semibold text-gray-900">Express Delivery</span>
-                        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
-                          <div v-if="deliveryOption === 'express'" class="w-3 h-3 bg-green-500 rounded-full"></div>
-                        </div>
-                      </div>
-                      <p class="text-sm text-gray-600 mt-1">{{ getExpressDeliveryTime() }}</p>
-                      <p v-if="expressDeliveryFee > 0" class="text-sm text-green-600 font-medium mt-1">
-                        +{{ formatApiPrice({ price: expressDeliveryFee, currency_info: cart.items.currency_info }) }} extra
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Custom Delivery -->
-                <div 
-                  :class="[
-                    'p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200',
-                    deliveryOption === 'custom' 
-                      ? 'border-orange-500 bg-orange-50/50' 
-                      : 'border-gray-200 bg-white/50 hover:border-gray-300'
-                  ]"
-                  @click="deliveryOption = 'custom'"
-                >
-                  <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-                      <Calendar class="w-5 h-5 text-white" />
-                    </div>
-                    <div class="flex-1">
-                      <div class="flex items-center justify-between">
-                        <span class="font-semibold text-gray-900">Custom Date & Time</span>
-                        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
-                          <div v-if="deliveryOption === 'custom'" class="w-3 h-3 bg-orange-500 rounded-full"></div>
-                        </div>
-                      </div>
-                      <p class="text-sm text-gray-600 mt-1">Choose your preferred delivery date and time</p>
-                    </div>
+                  <div class="flex-1">
+                    <span class="font-semibold text-gray-900">Standard Delivery</span>
+                    <p class="text-sm text-gray-600 mt-1">{{ getDefaultDeliveryTime() }}</p>
+                    <p class="text-xs text-blue-600 mt-1">Each product has its own delivery date. Customize individual products below.</p>
                   </div>
                 </div>
               </div>
 
-              <!-- Custom Date & Time Selection -->
-              <div v-if="deliveryOption === 'custom'" class="mt-6 p-4 bg-gray-50/50 rounded-2xl border border-gray-200">
-                <div class="space-y-4">
-                    <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Delivery Date</label>
-                    <div class="relative">
-                      <input 
-                        v-model="customDeliveryDate"
-                        type="text"
-                        readonly
-                        @click="showDatePicker = true"
-                        :placeholder="customDeliveryDate ? formatDate(customDeliveryDate) : 'Select delivery date'"
-                        class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors cursor-pointer bg-white"
+              <!-- Products with delivery options -->
+              <div class="space-y-4">
+                <div 
+                  v-for="item in groupedCartItems" 
+                  :key="item.product_id"
+                  class="p-4 rounded-2xl border border-gray-200 bg-white/50"
+                >
+                  <div class="flex items-start space-x-3">
+                    <!-- Product image -->
+                    <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+                      <img 
+                        :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
+                        :alt="item.product_name"
+                        class="w-full h-full object-cover"
                       />
-                      <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                        <Calendar class="h-5 w-5 text-gray-400" />
                     </div>
-                  </div>
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Delivery Time</label>
-                    <select 
-                      v-model="customDeliveryTime"
-                      class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    >
-                      <option value="">Select time slot</option>
-                      <option v-for="slot in availableTimeSlots" :key="slot.value" :value="slot.value">
-                        {{ slot.label }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <div v-if="customDeliveryFee > 0" class="p-3 bg-blue-50 border border-blue-200 rounded-2xl">
-                    <div class="flex items-center text-blue-700">
-                      <Info class="w-4 h-4 mr-2" />
-                      <span class="text-sm font-medium">
-                        Custom delivery fee: {{ formatApiPrice({ price: customDeliveryFee, currency_info: cart.items.currency_info }) }}
-                      </span>
+                    
+                    <!-- Product info and delivery options -->
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                          <h4 class="font-medium text-gray-900">{{ item.product_name }}</h4>
+                          <p class="text-sm text-gray-600">{{ getTotalQuantity(item) }} items</p>
+                          <div class="flex items-center text-blue-600 text-sm mt-1">
+                            <Truck class="w-3 h-3 mr-1" />
+                            {{ getAdaptiveDeliveryDate(item) }}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Delivery option links at bottom -->
+                      <div class="mt-4 flex items-center space-x-3">
+                        <!-- Express delivery option -->
+                        <button
+                          v-if="isExpressEligibleItem(item)"
+                          @click="toggleExpressForProduct(item.product_id)"
+                          :class="[
+                            'flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border-2',
+                            expressProductIds.has(item.product_id)
+                              ? 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100'
+                              : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-green-50 hover:border-green-200 hover:text-green-600'
+                          ]"
+                        >
+                          <span class="w-4 h-4 mr-2 flex items-center justify-center rounded-full text-xs" :class="expressProductIds.has(item.product_id) ? 'bg-green-200 text-green-800' : 'bg-gray-200 text-gray-600'">
+                            <span v-if="expressProductIds.has(item.product_id)">✓</span>
+                            <span v-else>⚡</span>
+                          </span>
+                          Express Delivery
+                        </button>
+                        
+                        <!-- Custom delivery option -->
+                        <button
+                          @click="openCustomDeliveryModal(item)"
+                          :class="[
+                            'flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border-2',
+                            customDates[item.product_id]
+                              ? 'bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100'
+                              : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600'
+                          ]"
+                        >
+                          <span class="w-4 h-4 mr-2 flex items-center justify-center rounded-full text-xs" :class="customDates[item.product_id] ? 'bg-orange-200 text-orange-800' : 'bg-gray-200 text-gray-600'">
+                            <span v-if="customDates[item.product_id]">✓</span>
+                            <span v-else>📅</span>
+                          </span>
+                          Custom Delivery
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -405,22 +363,34 @@
                   </span>
                   </div>
 
-                <!-- Show delivery fee based on selected option -->
-                <div v-if="deliveryOption === 'express'" class="flex justify-between items-center">
-                  <span class="text-gray-600">Express Delivery Fee</span>
-                  <span class="font-semibold text-green-600">
-                    {{ formatApiPrice({
-                      price: expressDeliveryFee, 
-                      currency_info: cart.items.currency_info 
-                    }) }}
-                  </span>
-                  </div>
-
-                <div v-else class="flex justify-between items-center">
-                  <span class="text-gray-600">Delivery Fee</span>
+                <!-- Base delivery fee -->
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Base Delivery Fee</span>
                   <span class="font-semibold text-gray-900">
                     {{ formatApiPrice({
                       price: shippingFee, 
+                      currency_info: cart.items.currency_info 
+                    }) }}
+                  </span>
+                </div>
+
+                <!-- Express delivery fees -->
+                <div v-if="expressProductIds.size > 0" class="flex justify-between items-center">
+                  <span class="text-gray-600">Express Delivery ({{ expressProductIds.size }} items)</span>
+                  <span class="font-semibold text-green-600">
+                    {{ formatApiPrice({
+                      price: expressProductIds.size * 500, 
+                      currency_info: cart.items.currency_info 
+                    }) }}
+                  </span>
+                </div>
+
+                <!-- Custom delivery fees -->
+                <div v-if="Object.keys(customDates).length > 0" class="flex justify-between items-center">
+                  <span class="text-gray-600">Custom Delivery ({{ Object.keys(customDates).length }} items)</span>
+                  <span class="font-semibold text-orange-600">
+                    {{ formatApiPrice({
+                      price: Object.keys(customDates).length * 300, 
                       currency_info: cart.items.currency_info 
                     }) }}
                   </span>
@@ -518,6 +488,10 @@
                         <p class="text-xs text-gray-600">
                           {{ item.variants.length }} variant{{ item.variants.length > 1 ? 's' : '' }} · {{ getTotalQuantity(item) }} item{{ getTotalQuantity(item) > 1 ? 's' : '' }}
                         </p>
+                        <div class="flex items-center text-blue-600 text-xs mt-1">
+                          <Truck class="w-3 h-3 mr-1" />
+                          {{ getAdaptiveDeliveryDate(item) }}
+                        </div>
                       </div>
                       <div class="text-right">
                         <p class="font-semibold text-gray-900 text-sm">
@@ -827,9 +801,71 @@
       </div>
 
       <!-- Custom Date Picker Modal -->
+      <!-- Express Selection Dialog -->
+      <div v-if="showExpressDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click="showExpressDialog = false">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto" @click.stop>
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-gray-900">Select Express Items</h3>
+            <button @click="showExpressDialog = false" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors">
+              <X class="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
+          <div class="space-y-3">
+            <div v-for="item in expressEligibleItems" :key="item.product_id" class="flex items-center justify-between p-3 rounded-xl border">
+              <div class="flex items-center space-x-3">
+                <img :src="'http://localhost:8000' + item.main_image" class="w-10 h-10 rounded-lg object-cover" />
+                <div>
+                  <p class="text-sm font-medium text-gray-900">{{ item.product_name }}</p>
+                  <p class="text-xs text-gray-500">{{ getTotalQuantity(item) }} items</p>
+                </div>
+              </div>
+              <input type="checkbox" :checked="expressProductIds.has(item.product_id)" @change="toggleExpress(item.product_id)" />
+            </div>
+          </div>
+          <div class="flex justify-end pt-4">
+            <button @click="confirmExpressSelection" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200" style="background: linear-gradient(to right, #2563eb, #9333ea);">
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Per-Item Dates Dialog -->
+      <div v-if="showCustomDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click="showCustomDialog = false">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto" @click.stop>
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-gray-900">Select Custom Dates</h3>
+            <button @click="showCustomDialog = false" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors">
+              <X class="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
+          <div class="space-y-4">
+             <div v-for="item in customDateItems" :key="item.product_id" class="p-3 rounded-xl border space-y-2">
+              <div class="flex items-center space-x-3">
+                <img :src="'http://localhost:8000' + item.main_image" class="w-10 h-10 rounded-lg object-cover" />
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-gray-900">{{ item.product_name }}</p>
+                  <p class="text-xs text-gray-500">Min: {{ minDateForItem(item) }}</p>
+                </div>
+              </div>
+               <div class="relative">
+                 <input type="date" :min="minDateForItem(item)" :max="getMaxDeliveryDate()" v-model="customDates[item.product_id]" class="w-full px-3 py-2 pr-10 border rounded-xl" />
+                 <button type="button" @click="openItemDatePicker(item)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                   <Calendar class="w-4 h-4" />
+                 </button>
+               </div>
+            </div>
+          </div>
+          <div class="flex justify-end pt-4">
+            <button @click="confirmCustomSelection" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200" style="background: linear-gradient(to right, #2563eb, #9333ea);">
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
       <div 
         v-if="showDatePicker" 
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
         @click="showDatePicker = false"
       >
         <div 
@@ -912,6 +948,86 @@
         </div>
       </div>
 
+      <!-- Product Custom Delivery Modal -->
+      <div v-if="showProductDeliveryModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click="showProductDeliveryModal = false">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl" @click.stop>
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-gray-900">Custom Delivery</h3>
+            <button @click="showProductDeliveryModal = false" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors">
+              <X class="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
+          
+          <div v-if="selectedProductForDelivery" class="space-y-6">
+            <!-- Product info -->
+            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl">
+              <div class="w-12 h-12 rounded-lg overflow-hidden">
+                <img 
+                  :src="'http://localhost:8000' + selectedProductForDelivery.main_image || 'https://via.placeholder.com/150'"
+                  :alt="selectedProductForDelivery.product_name"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <h4 class="font-medium text-gray-900">{{ selectedProductForDelivery.product_name }}</h4>
+                <p class="text-sm text-gray-600">Standard: {{ getAdaptiveDeliveryDate(selectedProductForDelivery) }}</p>
+              </div>
+            </div>
+            
+            <!-- Date selection -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Custom Delivery Date</label>
+              <div class="relative">
+                <input 
+                  v-model="productCustomDate"
+                  type="text"
+                  readonly
+                  @click="openDatePickerForProduct"
+                  :placeholder="productCustomDate ? formatDate(productCustomDate) : 'Select delivery date'"
+                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors cursor-pointer bg-white"
+                />
+                <button type="button" @click="openDatePickerForProduct" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-auto">
+                  <Calendar class="h-5 w-5 text-gray-400" />
+                </button>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">Must be after {{ getAdaptiveDeliveryDate(selectedProductForDelivery) }}</p>
+            </div>
+            
+            <!-- Time slot selection -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Time Slot</label>
+              <select 
+                v-model="productCustomTime"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              >
+                <option value="">Select time slot</option>
+                <option value="morning">Morning (8:00 AM - 12:00 PM)</option>
+                <option value="afternoon">Afternoon (12:00 PM - 4:00 PM)</option>
+                <option value="evening">Evening (4:00 PM - 8:00 PM)</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Actions -->
+          <div class="flex space-x-3 mt-6">
+            <button 
+              @click="showProductDeliveryModal = false"
+              class="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+            >
+              Cancel
+            </button>
+            <button 
+              @click="confirmProductCustomDelivery"
+              :disabled="!productCustomDate || !productCustomTime"
+              class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              style="background: linear-gradient(to right, #2563eb, #9333ea);"
+            >
+              Confirm
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Location Confirmation Dialog -->
       <LocationConfirmationDialog
         v-model="locationConfirmation.showLocationDialog.value"
@@ -948,12 +1064,16 @@ const paymentMethod = ref('mobile_money')
 const processing = ref(false)
 const shippingFee = ref(0)
 
-// Delivery options
-const deliveryOption = ref('default')
-const customDeliveryDate = ref(null)
-const customDeliveryTime = ref(null)
+// Delivery options (now all per-product based)
+const customDeliveryDate = ref(null) // Legacy - kept for existing functionality
+const customDeliveryTime = ref(null) // Legacy - kept for existing functionality
 const expressDeliveryFee = ref(500) // 500 FCFA extra for express
 const customDeliveryFee = ref(300) // 300 FCFA extra for custom delivery
+// Per-item delivery overrides state
+const showExpressDialog = ref(false)
+const showCustomDialog = ref(false)
+const expressProductIds = ref(new Set())
+const customDates = ref({})
 
 // Computed property to ensure date is in correct format
 const formattedCustomDeliveryDate = computed(() => {
@@ -991,6 +1111,12 @@ const formRef = ref(null)
 const showCartItemsDialog = ref(false)
 const showDatePicker = ref(false)
 
+// Product-specific delivery modal state
+const showProductDeliveryModal = ref(false)
+const selectedProductForDelivery = ref(null)
+const productCustomDate = ref(null)
+const productCustomTime = ref(null)
+
 // Snackbar state
 const showSnackbar = ref(false)
 const snackbarText = ref('')
@@ -1021,31 +1147,23 @@ const formValid = computed(() => {
 // Computed
 const totalAmount = computed(() => {
   const subtotal = cart.items.total_amount || 0
-  let deliveryFee = 0
+  let deliveryFee = shippingFee.value // Base delivery fee
   
-  // Calculate delivery fee based on option
-  if (deliveryOption.value === 'express') {
-    // Express: only express fee (no base fee)
-    deliveryFee = expressDeliveryFee.value
-  } else if (deliveryOption.value === 'custom') {
-    // Custom: same as standard delivery
-    deliveryFee = shippingFee.value
-  } else {
-    // Default: standard delivery fee
-    deliveryFee = shippingFee.value
-  }
+  // Add express delivery fees for selected express products
+  const expressCount = expressProductIds.value.size
+  const expressFeePerProduct = 500 // 500 FCFA per express product
+  deliveryFee += expressCount * expressFeePerProduct
+  
+  // Add custom delivery fees for products with custom dates
+  const customCount = Object.keys(customDates.value).length
+  const customFeePerProduct = 300 // 300 FCFA per custom product
+  deliveryFee += customCount * customFeePerProduct
   
   return subtotal + deliveryFee
 })
 
-// Computed property for express delivery availability (reactive)
-const expressDeliveryAvailable = computed(() => {
-  const now = new Date();
-  const currentHour = now.getHours();
-  const currentTime = now.toLocaleTimeString();
-  const isAvailable = currentHour < 20; // Available only before 8 PM
-  return isAvailable;
-})
+// Placeholder; defined properly after expressEligibleItems
+let expressDeliveryAvailable = null
 
 const selectedAddress = computed(() => {
   if (selectedAddressIndex.value === null) return null
@@ -1183,11 +1301,6 @@ onMounted(async () => {
 
   // Initialize delivery fee for default option
   await calculateDeliveryFee('default');
-  
-  // Ensure express delivery is not selected if it's not available
-  if (deliveryOption.value === 'express' && !expressDeliveryAvailable.value) {
-    deliveryOption.value = 'default';
-  }
 })
 
 // Fetch addresses from API
@@ -1356,13 +1469,7 @@ const placeOrder = async () => {
     return
   }
 
-  // Validate custom delivery option
-  if (deliveryOption.value === 'custom') {
-    if (!customDeliveryDate.value || !customDeliveryTime.value) {
-      showError('Please select both delivery date and time for custom delivery')
-      return
-    }
-  }
+  // Custom delivery validation is now handled per-product in the modal
 
 
 
@@ -1384,9 +1491,12 @@ const placeOrder = async () => {
       shipping_address: `${selectedAddress.value.address_line1}, ${selectedAddress.value.city}, ${selectedAddress.value.state} ${selectedAddress.value.postal_code}, ${selectedAddress.value.country}`,
       total_amount: totalAmount.value,
       notes: `Payment method: ${paymentMethod.value}`,
-      // Include delivery information
-      delivery_option: deliveryOption.value,
-      delivery_fee: deliveryOption.value === 'express' ? expressDeliveryFee.value : shippingFee.value,
+      // Include delivery information (default for all products, overridden by per-item settings)
+      delivery_option: 'default',
+      delivery_fee: totalAmount.value - (cart.items.total_amount || 0), // Total delivery fees
+      // Per-item delivery overrides
+      express_item_product_ids: Array.from(expressProductIds.value),
+      custom_item_dates: customDates.value,
       // Include payment data for processing
       payment_data: {
         payment_method: paymentMethod.value,
@@ -1395,11 +1505,7 @@ const placeOrder = async () => {
       }
     }
 
-    // Add custom delivery details if applicable
-    if (deliveryOption.value === 'custom' && formattedCustomDeliveryDate.value && customDeliveryTime.value) {
-      orderData.custom_delivery_date = formattedCustomDeliveryDate.value;
-      orderData.custom_delivery_time = customDeliveryTime.value;
-    }
+    // Custom delivery dates are now handled per-product via custom_item_dates
 
     // Call order creation API
     const response = await apiService.createOrder(orderData)
@@ -1750,52 +1856,40 @@ const getDeliveryOptionDisplay = () => {
   }
 };
 
-// Function to get adaptive delivery date for each product based on selected delivery option
+// Function to get adaptive delivery date for each product based on per-product delivery options
 const getAdaptiveDeliveryDate = (item) => {
-  switch (deliveryOption.value) {
-    case 'default':
-      // Show default delivery date of the product
-      return item.delivery_info?.estimated_delivery_display || 'Standard Delivery';
-      
-    case 'express':
-      // Show current date for express delivery
-      const now = new Date();
-      const currentHour = now.getHours();
-      
-      if (currentHour >= 20) { // After 8 PM
-        // Can only deliver next day
-        const tomorrow = new Date(now);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const options = { weekday: 'short', month: 'short', day: 'numeric' };
-        return `Express Delivery - ${tomorrow.toLocaleDateString('en-US', options)}`;
-      } else {
-        // Can deliver same day if ordered before 8 PM
-        const options = { weekday: 'short', month: 'short', day: 'numeric' };
-        return `Express Delivery - ${now.toLocaleDateString('en-US', options)}`;
-      }
-      
-    case 'custom':
-      // Show selected date and time for custom delivery
-      if (customDeliveryDate.value && customDeliveryTime.value) {
-        const date = new Date(customDeliveryDate.value);
-        const options = { weekday: 'short', month: 'short', day: 'numeric' };
-        const timeSlot = availableTimeSlots.find(slot => slot.value === customDeliveryTime.value);
-        return `Custom Delivery - ${date.toLocaleDateString('en-US', options)} ${timeSlot?.label || ''}`;
-      }
-      return 'Custom Delivery - Date and time to be selected';
-      
-    default:
-      return item.delivery_info?.estimated_delivery_display || 'Standard Delivery';
+  const productId = item.product_id;
+  
+  // Check if this product has express delivery selected
+  if (expressProductIds.value.has(productId)) {
+    const now = new Date();
+    const currentHour = now.getHours();
+    
+    if (currentHour >= 20) { // After 8 PM
+      // Can only deliver next day
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const options = { weekday: 'short', month: 'short', day: 'numeric' };
+      return `Express - ${tomorrow.toLocaleDateString('en-US', options)}`;
+    } else {
+      // Can deliver same day if ordered before 8 PM
+      const options = { weekday: 'short', month: 'short', day: 'numeric' };
+      return `Express - ${now.toLocaleDateString('en-US', options)}`;
+    }
   }
+  
+  // Check if this product has custom delivery selected
+  if (customDates.value[productId]) {
+    const date = new Date(customDates.value[productId]);
+    const options = { weekday: 'short', month: 'short', day: 'numeric' };
+    return `Custom - ${date.toLocaleDateString('en-US', options)}`;
+  }
+  
+  // Default: show product's standard delivery date
+  return item.delivery_info?.estimated_delivery_display || 'Standard Delivery';
 };
 
-// Initialize custom delivery date to standard delivery date if not set
-const initializeCustomDeliveryDate = () => {
-  if (!customDeliveryDate.value) {
-    // Use the minimum delivery date (which is based on standard delivery)
-    customDeliveryDate.value = getMinDeliveryDate();
-  }
-};
+// Custom delivery dates are now handled per-product in the modal
 
 // Function to calculate delivery fee based on option
 const calculateDeliveryFee = async (option) => {
@@ -1820,33 +1914,15 @@ const calculateDeliveryFee = async (option) => {
   }
 };
 
-// Watch delivery option changes
-watch(deliveryOption, async (newOption) => {
-  if (newOption === 'custom') {
-    initializeCustomDeliveryDate();
-  }
-  
-  // If express delivery is selected but not available, switch to default
-  if (newOption === 'express' && !expressDeliveryAvailable.value) {
-    deliveryOption.value = 'default';
-    return;
-  }
-  
-  // Calculate delivery fee for the selected option
-  await calculateDeliveryFee(newOption);
-});
+// No longer need order-level delivery option watch since all delivery is per-product
 
-// Watch for express delivery availability changes
-watch(expressDeliveryAvailable, (isAvailable) => {
-  // If express delivery becomes unavailable and it's currently selected, switch to default
-  if (!isAvailable && deliveryOption.value === 'express') {
-    deliveryOption.value = 'default';
-  }
-});
+// Express delivery is now handled per-product, no need for order-level watches
 
 // Date picker state
 const currentMonth = ref(new Date())
 const selectedDateInPicker = ref(null)
+// Track which product (if any) is selecting a custom date via the dialog
+const currentCustomProductId = ref(null)
 
 // Date picker functions
 const getCalendarDays = () => {
@@ -1859,17 +1935,61 @@ const getCalendarDays = () => {
   startDate.setDate(startDate.getDate() - firstDay.getDay())
   
   const days = []
-  const minDate = new Date(getMinDeliveryDate())
-  const maxDate = new Date(getMaxDeliveryDate())
+  
+  // Get the appropriate standard delivery date
+  let standardDeliveryDateStr
+  if (selectedProductForDelivery.value && showProductDeliveryModal.value) {
+    // Use product-specific delivery date when in product modal
+    standardDeliveryDateStr = selectedProductForDelivery.value.delivery_info?.estimated_delivery_date
+    if (!standardDeliveryDateStr) {
+      // Fallback to parsing from display text
+      const deliveryText = selectedProductForDelivery.value.delivery_info?.estimated_delivery_display || '3-5 business days'
+      const match = deliveryText.match(/(\d+)-?(\d+)?/)
+      const days = match ? parseInt(match[2] || match[1]) : 3
+      const futureDate = new Date()
+      futureDate.setDate(futureDate.getDate() + days)
+      standardDeliveryDateStr = formatDateAsYYYYMMDD(futureDate)
+    }
+  } else {
+    // Use global minimum delivery date for other cases
+    standardDeliveryDateStr = getMinDeliveryDate()
+  }
+  
+  // Parse it properly to avoid timezone issues
+  const standardDeliveryDate = parseDateYMD(standardDeliveryDateStr)
+  
+  // Create minimum date (day after standard delivery) at midnight
+  const minDate = new Date(standardDeliveryDate.getFullYear(), standardDeliveryDate.getMonth(), standardDeliveryDate.getDate() + 1, 0, 0, 0, 0)
+  
+  // Debug logging (temporary)
+  console.log('Debug Date Picker:')
+  console.log('- Standard delivery date string:', standardDeliveryDateStr)
+  console.log('- Standard delivery date parsed:', standardDeliveryDate)
+  console.log('- Minimum selectable date (day after):', minDate)
+  console.log('- Minimum selectable date formatted:', formatDateAsYYYYMMDD(minDate))
+  
+  // Create maximum date at midnight
+  const maxDeliveryDateStr = getMaxDeliveryDate()
+  const maxDeliveryDate = parseDateYMD(maxDeliveryDateStr)
+  const maxDate = new Date(maxDeliveryDate.getFullYear(), maxDeliveryDate.getMonth(), maxDeliveryDate.getDate(), 23, 59, 59, 999)
   
   for (let i = 0; i < 42; i++) {
     const date = new Date(startDate)
     date.setDate(startDate.getDate() + i)
     
+    // Create comparison date at midnight to avoid time component issues
+    const dateAtMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0)
+    
     const isCurrentMonth = date.getMonth() === month
-    const isDisabled = date < minDate || date > maxDate
+    // Disable dates that are before minimum date (dates on or before standard delivery)
+    const isDisabled = dateAtMidnight < minDate || dateAtMidnight > maxDate
     const isSelected = selectedDateInPicker.value && 
       date.toDateString() === selectedDateInPicker.value.toDateString()
+    
+    // Debug logging for first few dates (temporary)
+    if (i < 10 && isCurrentMonth) {
+      console.log(`Date ${formatDateAsYYYYMMDD(dateAtMidnight)}: disabled=${isDisabled}, minDate=${formatDateAsYYYYMMDD(minDate)}, comparison=${dateAtMidnight < minDate}`)
+    }
     
     days.push({
       date: date,
@@ -1912,9 +2032,39 @@ const selectDate = (date) => {
 
 const confirmDateSelection = () => {
   if (selectedDateInPicker.value) {
-    customDeliveryDate.value = formatDateAsYYYYMMDD(selectedDateInPicker.value)
+    const formatted = formatDateAsYYYYMMDD(selectedDateInPicker.value)
+    if (currentCustomProductId.value) {
+      // If called from the product-specific modal, update the product date
+      if (showProductDeliveryModal.value && selectedProductForDelivery.value) {
+        productCustomDate.value = formatted
+      } else {
+        // Otherwise, update the global custom dates
+        customDates.value[currentCustomProductId.value] = formatted
+      }
+    } else {
+      customDeliveryDate.value = formatted
+    }
   }
+  // Reset dialog state
+  currentCustomProductId.value = null
   showDatePicker.value = false
+}
+
+// Open the custom date dialog for a specific item
+const openItemDatePicker = (item) => {
+  currentCustomProductId.value = item.product_id
+  // If there is an existing date for the item, preselect it
+  const existing = customDates.value[item.product_id]
+  selectedDateInPicker.value = existing ? new Date(existing) : null
+  // Align the calendar to this item's minimum date
+  try {
+    const md = minDateForItem(item)
+    const d = parseDateYMD(md)
+    if (d instanceof Date && !isNaN(d)) {
+      currentMonth.value = new Date(d.getFullYear(), d.getMonth(), 1)
+    }
+  } catch (e) { /* noop */ }
+  showDatePicker.value = true
 }
 
 const formatDate = (dateString) => {
@@ -1933,6 +2083,177 @@ const formatDateAsYYYYMMDD = (date) => {
   const day = String(date.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
 }
+
+// Safe parser for YYYY-MM-DD as local date to avoid timezone drift
+const parseDateYMD = (ymd) => {
+  if (!ymd || typeof ymd !== 'string') return null
+  const parts = ymd.split('-')
+  if (parts.length !== 3) return null
+  const [y, m, d] = parts.map(p => parseInt(p, 10))
+  if (!y || !m || !d) return null
+  return new Date(y, m - 1, d)
+}
+
+// Express/custom dialogs helpers
+// Helpers to detect truthy express flags across possible formats
+const isTruthyExpress = (val) => {
+  return val === true || val === 1 || val === '1' || val === 'true' || val === 'True'
+}
+
+const isExpressEligibleItem = (item) => {
+  if (!item) return false
+  // Note: delivery_info may not include express flag in your API; skip relying on it
+  // Check direct flag on item if present
+  if (isTruthyExpress(item.express_delivery)) return true
+  // Check variants if any carry the flag
+  if (Array.isArray(item.variants) && item.variants.some(v => isTruthyExpress(v?.express_delivery))) return true
+  return false
+}
+
+const expressEligibleItems = computed(() => {
+  return groupedCartItems.value.filter(isExpressEligibleItem)
+})
+
+const customDateItems = computed(() => {
+  // Show all items that are NOT selected for express
+  return groupedCartItems.value.filter(item => !expressProductIds.value.has(item.product_id))
+})
+
+const toggleExpress = (productId) => {
+  if (expressProductIds.value.has(productId)) {
+    expressProductIds.value.delete(productId)
+  } else {
+    expressProductIds.value.add(productId)
+    // Remove any custom date previously set for this product
+    if (customDates.value[productId]) delete customDates.value[productId]
+  }
+}
+
+const confirmExpressSelection = () => {
+  showExpressDialog.value = false
+  // Express items are now tracked per-product, no need to set order-level option
+  // After express selection (especially when user chose custom earlier), open custom selection for the rest
+  showCustomDialog.value = true
+}
+
+const minDateForItem = (item) => {
+  // Enforce min date strictly after the standard delivery date
+  const est = item.delivery_info?.estimated_delivery_date
+  if (est) {
+    const d = parseDateYMD(est)
+    d.setDate(d.getDate() + 1) // next day after standard
+    return formatDateAsYYYYMMDD(d)
+  }
+  // Fallback: use delivery_days when available
+  const dd = item.delivery_info?.delivery_days
+  if (typeof dd === 'number') {
+    const d = new Date()
+    d.setDate(d.getDate() + dd + 1)
+    return formatDateAsYYYYMMDD(d)
+  }
+  // Legacy fallback: parse from display text and add one business day beyond max
+  let days = 3
+  const text = item.delivery_info?.estimated_delivery_display || ''
+  const range = text.match(/(\d+)-(\d+)/)
+  if (range) {
+    days = parseInt(range[2]) || 3
+  } else {
+    const single = text.match(/(\d+)/)
+    if (single) days = parseInt(single[1]) || 3
+  }
+  const d = addBusinessDays(new Date(), days + 1)
+  return formatDateAsYYYYMMDD(d)
+}
+
+const confirmCustomSelection = () => {
+  showCustomDialog.value = false
+}
+
+// Product-specific delivery functions
+const toggleExpressForProduct = (productId) => {
+  if (expressProductIds.value.has(productId)) {
+    expressProductIds.value.delete(productId)
+  } else {
+    expressProductIds.value.add(productId)
+    // Remove custom date if express is selected
+    if (customDates.value[productId]) {
+      delete customDates.value[productId]
+    }
+  }
+}
+
+const openCustomDeliveryModal = (product) => {
+  selectedProductForDelivery.value = product
+  // Pre-populate if there's already a custom date set
+  if (customDates.value[product.product_id]) {
+    productCustomDate.value = customDates.value[product.product_id]
+  } else {
+    productCustomDate.value = null
+  }
+  productCustomTime.value = null
+  showProductDeliveryModal.value = true
+}
+
+const confirmProductCustomDelivery = () => {
+  if (selectedProductForDelivery.value && productCustomDate.value && productCustomTime.value) {
+    const productId = selectedProductForDelivery.value.product_id
+    
+    // Set custom date
+    customDates.value[productId] = productCustomDate.value
+    
+    // Remove from express if it was selected
+    if (expressProductIds.value.has(productId)) {
+      expressProductIds.value.delete(productId)
+    }
+    
+    // Close modal
+    showProductDeliveryModal.value = false
+    selectedProductForDelivery.value = null
+    productCustomDate.value = null
+    productCustomTime.value = null
+  }
+}
+
+const getMinDateForProduct = (product) => {
+  // Get the minimum date as day after standard delivery
+  return minDateForItem(product)
+}
+
+const openDatePickerForProduct = () => {
+  if (selectedProductForDelivery.value) {
+    // Set the product context for the date picker
+    currentCustomProductId.value = selectedProductForDelivery.value.product_id
+    
+    // Pre-populate the date picker if there's already a selected date
+    if (productCustomDate.value) {
+      selectedDateInPicker.value = new Date(productCustomDate.value)
+    } else {
+      selectedDateInPicker.value = null
+    }
+    
+    // Set up the calendar for the product's minimum date
+    try {
+      const minDate = getMinDateForProduct(selectedProductForDelivery.value)
+      const d = parseDateYMD(minDate)
+      if (d instanceof Date && !isNaN(d)) {
+        currentMonth.value = new Date(d.getFullYear(), d.getMonth(), 1)
+      }
+    } catch (e) {
+      // Fallback to current month
+      currentMonth.value = new Date()
+    }
+    
+    showDatePicker.value = true
+  }
+}
+
+// Now that expressEligibleItems exists, define expressDeliveryAvailable
+expressDeliveryAvailable = computed(() => {
+  const now = new Date()
+  const currentHour = now.getHours()
+  const hasExpressProducts = expressEligibleItems.value.length > 0
+  return hasExpressProducts && currentHour < 20
+})
 </script>
 
 <style scoped>

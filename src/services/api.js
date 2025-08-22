@@ -107,15 +107,22 @@ export const apiService = {
   
   // Products
   getProducts(params = {}) {
-    return api.get('/products/shopper/products/all/', { params })
+    // Shopper list endpoint
+    return api.get('/products/shopper/products/', { params })
   },
 
-  getPopularProducts() {
-    return api.get('/products/shopper/products/popular/')
+  getPopularProducts(params = {}) {
+    return api.get('/products/shopper/products/popular/', { params })
   },
 
-  getNewArrivals() {
-    return api.get('/products/shopper/products/new_arrivals/')
+  getNewArrivals(params = {}) {
+    return api.get('/products/shopper/products/new_arrivals/', { params })
+  },
+
+  // Products by store
+  getProductsByStore(storeId, params = {}) {
+    if (!storeId) throw new Error('storeId is required')
+    return api.get('/products/products/by_store/', { params: { store_id: storeId, ...params } })
   },
 
   getRecommendedProducts() {
@@ -135,8 +142,8 @@ export const apiService = {
   },
   
   // Categories
-  getCategories() {
-    return api.get('/products/categories/')
+  getCategories(params = {}) {
+    return api.get('/products/categories/', { params })
   },
   
   // Skin Types
@@ -427,6 +434,330 @@ export const apiService = {
   // Language Management
   getLanguages() {
     return api.get('/accounts/languages/')
+  },
+
+  // Store Management (exposed under products namespace)
+  getStores(params = {}) {
+    return api.get('/products/stores/', { params })
+  },
+
+  getStore(id) {
+    return api.get(`/products/stores/${id}/`)
+  },
+
+  getStoreCategories(params = {}) {
+    return api.get('/products/store-categories/', { params })
+  },
+
+  followStore(storeId) {
+    return api.post(`/stores/stores/${storeId}/follow/`)
+  },
+
+  unfollowStore(storeId) {
+    return api.post(`/stores/stores/${storeId}/unfollow/`)
+  },
+
+  // Product Categories (for multistore filtering)
+  getProductCategories(params = {}) {
+    return api.get('/products/product-categories/', { params })
+  },
+
+  // Store Attribute Templates (dynamic filters per store category)
+  getStoreAttributesByStoreCategory(params = {}) {
+    // expects: { store_category_id }
+    return api.get('/products/store-attributes/by_store_category/', { params })
+  },
+
+  // Enhanced Search & Discovery
+  getSearchSuggestions(query) {
+    return api.get('/products/search/suggestions/', { 
+      params: { q: query } 
+    })
+  },
+
+  searchProducts(params = {}) {
+    return api.get('/products/search/', { params })
+  },
+
+  getProductsByCategory(categoryId, params = {}) {
+    return api.get(`/products/categories/${categoryId}/products/`, { params })
+  },
+
+  getTrendingProducts(params = {}) {
+    return api.get('/products/trending/', { params })
+  },
+
+  getFeaturedProducts(params = {}) {
+    return api.get('/products/featured/', { params })
+  },
+
+  getPersonalizedRecommendations(params = {}) {
+    return api.get('/products/recommendations/personalized/', { params })
+  },
+
+  getSimilarProducts(productId, params = {}) {
+    return api.get(`/products/products/${productId}/similar/`, { params })
+  },
+
+  getAlsoBoughtProducts(productId, params = {}) {
+    return api.get(`/products/products/${productId}/also-bought/`, { params })
+  },
+
+  getRecentlyViewedProducts(params = {}) {
+    return api.get('/products/recently-viewed/', { params })
+  },
+
+  recordProductView(productId) {
+    return api.post(`/products/products/${productId}/view/`)
+  },
+
+  // Advanced Filtering
+  getFilterOptions(params = {}) {
+    return api.get('/products/filters/', { params })
+  },
+
+  getBrandsList(params = {}) {
+    return api.get('/products/brands/', { params })
+  },
+
+  getTopSellingProducts(params = {}) {
+    return api.get('/products/top-selling/', { params })
+  },
+
+  getProductsByPriceRange(minPrice, maxPrice, params = {}) {
+    return api.get('/products/search/', { 
+      params: { 
+        price_min: minPrice, 
+        price_max: maxPrice,
+        ...params 
+      } 
+    })
+  },
+
+  getProductsByRating(minRating, params = {}) {
+    return api.get('/products/search/', { 
+      params: { 
+        min_rating: minRating,
+        ...params 
+      } 
+    })
+  },
+
+  // AI Recommendations & Insights
+  getRecommendationInsights(params = {}) {
+    return api.get('/products/recommendations/insights/', { params })
+  },
+
+  trackRecommendationConversion(data) {
+    return api.post('/products/recommendations/track/', data)
+  },
+
+  submitRecommendationFeedback(data) {
+    return api.post('/products/recommendations/feedback/', data)
+  },
+
+  submitAIInsightsFeedback(data) {
+    return api.post('/products/recommendations/insights-feedback/', data)
+  },
+
+  updateUserPreferences(preferences) {
+    return api.put('/accounts/preferences/', preferences)
+  },
+
+  getUserRecommendationProfile() {
+    return api.get('/accounts/recommendation-profile/')
+  },
+
+  // Smart Search & Filters
+  getSmartFilters(params = {}) {
+    return api.get('/products/smart-filters/', { params })
+  },
+
+  getAutoCompleteSearch(query) {
+    return api.get('/products/search/autocomplete/', {
+      params: { q: query }
+    })
+  },
+
+  getVisualSearch(imageData) {
+    const formData = new FormData()
+    formData.append('image', imageData)
+    return api.post('/products/search/visual/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+
+  getVoiceSearch(audioData) {
+    const formData = new FormData()
+    formData.append('audio', audioData)
+    return api.post('/products/search/voice/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+
+  // Enhanced Cart & Checkout
+  applyPromoCode(data) {
+    return api.post('/orders/cart/apply-promo/', data)
+  },
+
+  removePromoCode() {
+    return api.delete('/orders/cart/remove-promo/')
+  },
+
+  getShippingOptions(addressData) {
+    return api.post('/orders/shipping/calculate/', addressData)
+  },
+
+  validateAddress(addressData) {
+    return api.post('/accounts/addresses/validate/', addressData)
+  },
+
+  saveForLater(cartItemId) {
+    return api.post(`/orders/cart/${cartItemId}/save-for-later/`)
+  },
+
+  moveBackToCart(savedItemId) {
+    return api.post(`/orders/saved-items/${savedItemId}/move-to-cart/`)
+  },
+
+  getSavedItems() {
+    return api.get('/orders/saved-items/')
+  },
+
+  removeSavedItem(savedItemId) {
+    return api.delete(`/orders/saved-items/${savedItemId}/`)
+  },
+
+  estimateDeliveryTime(data) {
+    return api.post('/orders/delivery/estimate/', data)
+  },
+
+  getPaymentMethods() {
+    return api.get('/payments/methods/')
+  },
+
+  savePaymentMethod(paymentData) {
+    return api.post('/payments/methods/', paymentData)
+  },
+
+  processPayment(paymentData) {
+    return api.post('/payments/process/', paymentData)
+  },
+
+  verifyPayment(paymentId) {
+    return api.get(`/payments/${paymentId}/verify/`)
+  },
+
+  // Order Management
+  getOrderTracking(orderId) {
+    return api.get(`/orders/orders/${orderId}/tracking/`)
+  },
+
+  requestOrderCancellation(orderId, reason) {
+    return api.post(`/orders/orders/${orderId}/cancel/`, { reason })
+  },
+
+  requestRefund(orderId, data) {
+    return api.post(`/orders/orders/${orderId}/refund/`, data)
+  },
+
+  rateOrder(orderId, rating, review) {
+    return api.post(`/orders/orders/${orderId}/rate/`, { rating, review })
+  },
+
+  // Review Management
+  submitProductReview(formData) {
+    return api.post('/products/reviews/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+
+  markReviewHelpful(reviewId) {
+    return api.post(`/products/reviews/${reviewId}/helpful/`)
+  },
+
+  removeReviewHelpful(reviewId) {
+    return api.delete(`/products/reviews/${reviewId}/helpful/`)
+  },
+
+  reportReview(reviewId, reason) {
+    return api.post(`/products/reviews/${reviewId}/report/`, { reason })
+  },
+
+  updateReview(reviewId, reviewData) {
+    return api.put(`/products/reviews/${reviewId}/`, reviewData)
+  },
+
+  deleteReview(reviewId) {
+    return api.delete(`/products/reviews/${reviewId}/`)
+  },
+
+  getReviewsByUser(userId, params = {}) {
+    return api.get(`/products/reviews/user/${userId}/`, { params })
+  },
+
+  getReviewsByStore(storeId, params = {}) {
+    return api.get(`/products/reviews/store/${storeId}/`, { params })
+  },
+
+  // Social Features
+  shareProduct(productId, platform, data = {}) {
+    return api.post(`/products/products/${productId}/share/`, {
+      platform,
+      ...data
+    })
+  },
+
+  shareReview(reviewId, platform, data = {}) {
+    return api.post(`/products/reviews/${reviewId}/share/`, {
+      platform,
+      ...data
+    })
+  },
+
+  shareStore(storeId, platform, data = {}) {
+    return api.post(`/stores/stores/${storeId}/share/`, {
+      platform,
+      ...data
+    })
+  },
+
+  // User Social Interactions
+  getUserActivityFeed(params = {}) {
+    return api.get('/accounts/activity-feed/', { params })
+  },
+
+  getUserSocialStats(userId = null) {
+    const endpoint = userId ? `/accounts/users/${userId}/social-stats/` : '/accounts/social-stats/'
+    return api.get(endpoint)
+  },
+
+  getFollowedStoresActivity(params = {}) {
+    return api.get('/stores/followed/activity/', { params })
+  },
+
+  // Review Analytics (for stores)
+  getReviewAnalytics(storeId, params = {}) {
+    return api.get(`/stores/stores/${storeId}/review-analytics/`, { params })
+  },
+
+  // Moderation (for stores to respond to reviews)
+  respondToReview(reviewId, response) {
+    return api.post(`/products/reviews/${reviewId}/respond/`, { response })
+  },
+
+  updateReviewResponse(reviewId, response) {
+    return api.put(`/products/reviews/${reviewId}/response/`, { response })
+  },
+
+  deleteReviewResponse(reviewId) {
+    return api.delete(`/products/reviews/${reviewId}/response/`)
   }
 }
 
