@@ -261,7 +261,7 @@
                       </div>
                       
                       <!-- Delivery option links at bottom -->
-                      <div class="mt-4 flex items-center space-x-3">
+                      <div class="mt-4 flex items-center justify-center space-x-3">
                         <!-- Express delivery option -->
                         <button
                           v-if="isExpressEligibleItem(item)"
@@ -277,7 +277,7 @@
                             <span v-if="expressProductIds.has(item.product_id)">✓</span>
                             <span v-else>⚡</span>
                           </span>
-                          Express Delivery
+                          Express
                         </button>
                         
                         <!-- Custom delivery option -->
@@ -294,7 +294,7 @@
                             <span v-if="customDates[item.product_id]">✓</span>
                             <span v-else>📅</span>
                           </span>
-                          Custom Delivery
+                          Custom
                         </button>
                       </div>
                     </div>
@@ -363,9 +363,11 @@
                   </span>
                   </div>
 
-                <!-- Base delivery fee -->
-                <div class="flex justify-between items-center">
-                  <span class="text-gray-600">Base Delivery Fee</span>
+                <!-- Base delivery fee (standard/custom delivery) -->
+                <div v-if="expressProductIds.size === 0" class="flex justify-between items-center">
+                  <span class="text-gray-600">
+                    {{ Object.keys(customDates).length > 0 ? 'Custom Delivery' : 'Standard Delivery' }}
+                  </span>
                   <span class="font-semibold text-gray-900">
                     {{ formatApiPrice({
                       price: shippingFee, 
@@ -374,27 +376,18 @@
                   </span>
                 </div>
 
-                <!-- Express delivery fees -->
+                <!-- Express delivery info (replaces standard delivery) -->
                 <div v-if="expressProductIds.size > 0" class="flex justify-between items-center">
                   <span class="text-gray-600">Express Delivery ({{ expressProductIds.size }} items)</span>
-                  <span class="font-semibold text-green-600">
+                  <span class="font-semibold text-blue-600">
                     {{ formatApiPrice({
-                      price: expressProductIds.size * 500, 
+                      price: expressDeliveryFee, 
                       currency_info: cart.items.currency_info 
                     }) }}
                   </span>
                 </div>
 
-                <!-- Custom delivery fees -->
-                <div v-if="Object.keys(customDates).length > 0" class="flex justify-between items-center">
-                  <span class="text-gray-600">Custom Delivery ({{ Object.keys(customDates).length }} items)</span>
-                  <span class="font-semibold text-orange-600">
-                    {{ formatApiPrice({
-                      price: Object.keys(customDates).length * 300, 
-                      currency_info: cart.items.currency_info 
-                    }) }}
-                  </span>
-                </div>
+                <!-- Custom delivery has no additional fees (same as standard delivery) -->
 
                 <div class="border-t border-gray-200 pt-3">
                   <div class="flex justify-between items-center">
@@ -1146,20 +1139,30 @@ const formValid = computed(() => {
 
 // Computed
 const totalAmount = computed(() => {
-  const subtotal = cart.items.total_amount || 0
-  let deliveryFee = shippingFee.value // Base delivery fee
+  const subtotal = Number(cart.items.total_amount) || 0
+  let deliveryFee = Number(shippingFee.value) || 0 // Base delivery fee (standard)
   
-  // Add express delivery fees for selected express products
-  const expressCount = expressProductIds.value.size
-  const expressFeePerProduct = 500 // 500 FCFA per express product
-  deliveryFee += expressCount * expressFeePerProduct
+  // Use the correct delivery fee based on selected options:
+  // - Express delivery takes priority over custom
+  // - Custom delivery uses same fee as standard delivery
+  // - Standard delivery uses base shipping fee
+  const hasExpressItems = expressProductIds.value.size > 0
+  const hasCustomItems = Object.keys(customDates.value).length > 0
   
-  // Add custom delivery fees for products with custom dates
-  const customCount = Object.keys(customDates.value).length
-  const customFeePerProduct = 300 // 300 FCFA per custom product
-  deliveryFee += customCount * customFeePerProduct
+  if (hasExpressItems) {
+    // Express delivery - use express fee from API
+    deliveryFee = Number(expressDeliveryFee.value) || 0
+  } else if (hasCustomItems) {
+    // Custom delivery - uses same fee as standard delivery (no extra charge)
+    deliveryFee = Number(shippingFee.value) || 0
+  }
+  // else: standard delivery uses shippingFee.value
   
-  return subtotal + deliveryFee
+  const total = subtotal + deliveryFee
+  
+  // Ensure total is valid and within reasonable bounds
+  const validTotal = Math.round(total * 100) / 100 // Round to 2 decimal places
+  return Math.min(Math.max(validTotal, 0), 999999999.99) // Cap at reasonable maximum
 })
 
 // Placeholder; defined properly after expressEligibleItems
@@ -1491,9 +1494,31 @@ const placeOrder = async () => {
       shipping_address: `${selectedAddress.value.address_line1}, ${selectedAddress.value.city}, ${selectedAddress.value.state} ${selectedAddress.value.postal_code}, ${selectedAddress.value.country}`,
       total_amount: totalAmount.value,
       notes: `Payment method: ${paymentMethod.value}`,
-      // Include delivery information (default for all products, overridden by per-item settings)
-      delivery_option: 'default',
-      delivery_fee: totalAmount.value - (cart.items.total_amount || 0), // Total delivery fees
+      // Delivery options are now handled per-item via express_item_product_ids and custom_item_dates
+      delivery_fee: (() => {
+        // Calculate the actual delivery fee being used
+        const hasExpressItems = expressProductIds.value.size > 0;
+        const hasCustomItems = Object.keys(customDates.value).length > 0;
+        
+        let fee = 0;
+        if (hasExpressItems) {
+          fee = expressDeliveryFee.value || 0;
+        } else if (hasCustomItems) {
+          fee = shippingFee.value || 0;
+        } else {
+          fee = shippingFee.value || 0;
+        }
+        
+        // Ensure fee is a valid number and within decimal field limits (max 10 digits, 2 decimal places = max 99999999.99)
+        fee = Number(fee) || 0;
+        fee = Math.round(fee * 100) / 100; // Round to 2 decimal places
+        fee = Math.min(fee, 99999999.99); // Cap at maximum allowed value
+        fee = Math.max(fee, 0); // Ensure non-negative
+        
+        console.log('Delivery fee calculation:', { hasExpressItems, hasCustomItems, shippingFee: shippingFee.value, expressDeliveryFee: expressDeliveryFee.value, finalFee: fee });
+        
+        return fee;
+      })(),
       // Per-item delivery overrides
       express_item_product_ids: Array.from(expressProductIds.value),
       custom_item_dates: customDates.value,
@@ -1838,21 +1863,26 @@ const availableTimeSlots = [
 ];
 
 const getDeliveryOptionDisplay = () => {
-  switch (deliveryOption.value) {
-    case 'default':
-      return `Standard Delivery - ${getDefaultDeliveryTime()}`;
-    case 'express':
+  const hasExpressItems = expressProductIds.value.size > 0;
+  const hasCustomItems = Object.keys(customDates.value).length > 0;
+  const totalProducts = groupedCartItems.value.length;
+  
+  if (hasExpressItems && hasCustomItems) {
+    return `Mixed Delivery - ${expressProductIds.value.size} Express, ${Object.keys(customDates.value).length} Custom, ${totalProducts - expressProductIds.value.size - Object.keys(customDates.value).length} Standard`;
+  } else if (hasExpressItems) {
+    if (expressProductIds.value.size === totalProducts) {
       return `Express Delivery - ${getExpressDeliveryTime()}`;
-    case 'custom':
-      if (customDeliveryDate.value && customDeliveryTime.value) {
-        const date = new Date(customDeliveryDate.value);
-        const options = { weekday: 'short', month: 'short', day: 'numeric' };
-        const timeSlot = availableTimeSlots.find(slot => slot.value === customDeliveryTime.value);
-        return `Custom Delivery - ${date.toLocaleDateString('en-US', options)} ${timeSlot?.label || ''}`;
-      }
-      return 'Custom Delivery - Date and time to be selected';
-    default:
-      return 'Standard Delivery';
+    } else {
+      return `Mixed Delivery - ${expressProductIds.value.size} Express, ${totalProducts - expressProductIds.value.size} Standard`;
+    }
+  } else if (hasCustomItems) {
+    if (Object.keys(customDates.value).length === totalProducts) {
+      return `Custom Delivery - Multiple dates selected`;
+    } else {
+      return `Mixed Delivery - ${Object.keys(customDates.value).length} Custom, ${totalProducts - Object.keys(customDates.value).length} Standard`;
+    }
+  } else {
+    return `Standard Delivery - ${getDefaultDeliveryTime()}`;
   }
 };
 
@@ -1900,10 +1930,35 @@ const calculateDeliveryFee = async (option) => {
     const response = await apiService.calculateDeliveryFee(defaultDistance, option);
     
     if (response.data) {
-      // Update fees based on API response
-      shippingFee.value = response.data.base_fee || 0;
-      expressDeliveryFee.value = response.data.express_fee || 0;
-      customDeliveryFee.value = response.data.custom_fee || 0;
+      // Helper function to validate and limit delivery fee values
+      const validateFee = (fee) => {
+        const numFee = Number(fee) || 0;
+        const roundedFee = Math.round(numFee * 100) / 100; // Round to 2 decimal places
+        const limitedFee = Math.min(Math.max(roundedFee, 0), 99999999.99); // Ensure within valid range
+        return limitedFee;
+      };
+      
+      console.log('API response:', response.data);
+      
+      // Store the total delivery fee for the selected option
+      if (option === 'express') {
+        expressDeliveryFee.value = validateFee(response.data.delivery_fee);
+        shippingFee.value = validateFee(response.data.base_fee); // Standard fee for comparison
+      } else if (option === 'custom') {
+        customDeliveryFee.value = validateFee(response.data.delivery_fee);
+        shippingFee.value = validateFee(response.data.delivery_fee); // Same as standard
+      } else {
+        // Default/standard delivery
+        shippingFee.value = validateFee(response.data.delivery_fee);
+        expressDeliveryFee.value = 0;
+        customDeliveryFee.value = 0;
+      }
+      
+      console.log('Stored delivery fees:', { 
+        shippingFee: shippingFee.value, 
+        expressDeliveryFee: expressDeliveryFee.value, 
+        customDeliveryFee: customDeliveryFee.value 
+      });
     }
   } catch (error) {
     console.error('Error calculating delivery fee:', error);
@@ -1914,9 +1969,23 @@ const calculateDeliveryFee = async (option) => {
   }
 };
 
-// No longer need order-level delivery option watch since all delivery is per-product
-
-// Express delivery is now handled per-product, no need for order-level watches
+// Watch for delivery option changes to recalculate fees
+watch([expressProductIds, customDates], async () => {
+  // Determine the overall delivery type for the order
+  const hasExpress = expressProductIds.value.size > 0
+  const hasCustom = Object.keys(customDates.value).length > 0
+  
+  // Calculate fees based on the most premium delivery option selected
+  let deliveryType = 'default'
+  if (hasExpress) {
+    deliveryType = 'express' // Express takes priority
+  } else if (hasCustom) {
+    deliveryType = 'custom'
+  }
+  
+  // Recalculate delivery fees using the API
+  await calculateDeliveryFee(deliveryType)
+}, { deep: true })
 
 // Date picker state
 const currentMonth = ref(new Date())

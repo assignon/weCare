@@ -151,6 +151,19 @@
                 <p class="text-xs text-slate-600">
                   Quantity: {{ item.quantity }}
                 </p>
+                <!-- Delivery info for each product -->
+                <div v-if="item.delivery_date || item.delivery_timeslot || order.expected_delivery_date" class="mt-2 p-2 bg-amber-50 rounded-lg border border-amber-200">
+                  <div class="flex items-center space-x-1 mb-1">
+                    <Truck class="w-3 h-3 text-amber-600" />
+                    <span class="text-xs font-medium text-amber-700">Delivery Info</span>
+                  </div>
+                  <div v-if="item.delivery_date || order.expected_delivery_date" class="text-xs text-amber-600">
+                    <strong>Date:</strong> {{ formatDate(item.delivery_date || order.expected_delivery_date) }}
+                  </div>
+                  <div v-if="item.delivery_timeslot || order.expected_delivery_time" class="text-xs text-amber-600">
+                    <strong>Timeslot:</strong> {{ formatTimeSlot(item.delivery_timeslot || order.expected_delivery_time) }}
+                  </div>
+                </div>
               </div>
 
               <div class="text-right">
@@ -236,6 +249,19 @@
                         <div class="flex justify-between items-center text-xs font-semibold text-slate-900 pt-0.5 border-t border-slate-200">
                           <span>Subtotal:</span>
                           <span>{{ formatApiPrice({ price: item.price * item.quantity, currency_info: order.currency_info }) }}</span>
+                        </div>
+                        <!-- Delivery info for each product in summary -->
+                        <div v-if="item.delivery_date || item.delivery_timeslot || order.expected_delivery_date" class="mt-2 pt-2 border-t border-slate-200">
+                          <div class="flex items-center space-x-1 mb-1">
+                            <Truck class="w-3 h-3 text-green-600" />
+                            <span class="text-xs font-medium text-green-700">Delivery</span>
+                          </div>
+                          <div v-if="item.delivery_date || order.expected_delivery_date" class="text-xs text-slate-600">
+                            <strong>Date:</strong> {{ formatDate(item.delivery_date || order.expected_delivery_date) }}
+                          </div>
+                          <div v-if="item.delivery_timeslot || order.expected_delivery_time" class="text-xs text-slate-600">
+                            <strong>Time:</strong> {{ formatTimeSlot(item.delivery_timeslot || order.expected_delivery_time) }}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -641,6 +667,16 @@ const formatDate = (dateString) => {
 const formatDeliveryTime = (timeString) => {
   if (!timeString) return ''
   return timeString.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
+}
+
+const formatTimeSlot = (timeSlot) => {
+  if (!timeSlot) return ''
+  const timeMap = {
+    'morning': 'Morning (8:00 AM - 12:00 PM)',
+    'afternoon': 'Afternoon (12:00 PM - 4:00 PM)',
+    'evening': 'Evening (4:00 PM - 8:00 PM)'
+  }
+  return timeMap[timeSlot] || timeSlot.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
 }
 
 const formatStatus = (status) => {

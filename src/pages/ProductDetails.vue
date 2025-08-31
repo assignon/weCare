@@ -308,7 +308,19 @@
             </button>
           </div>
 
+          <!-- CRM Flow: Request Viewing Button -->
           <button 
+            v-if="usesCRMFlow"
+            @click="showViewingForm = true"
+            class="flex-1 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
+          >
+            <Calendar class="w-5 h-5 mr-2" />
+            Request Viewing
+          </button>
+
+          <!-- Regular Flow: Add to Cart Button -->
+          <button 
+            v-else
             @click="addToCart"
             class="flex-1 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
             style="background: linear-gradient(to right, #2563eb, #9333ea);"
@@ -352,6 +364,16 @@
         </button>
       </div>
     </div>
+
+    <!-- Viewing Request Form Modal -->
+    <ViewingRequestForm
+      :show-form="showViewingForm"
+      :product="product"
+      :product-type="getProductTypeFromCRM()"
+      @close="showViewingForm = false"
+      @success="onViewingRequestSuccess"
+      @error="onViewingRequestError"
+    />
   </div>
 </template>
 
@@ -363,9 +385,10 @@ import { useProductStore } from '@/stores/product'
 import { apiService } from '@/services/api'
 import { useCurrency } from '@/composables/useCurrency'
 import packagingImage from '@/assets/packaging_10471395.png'
+import ViewingRequestForm from '@/components/ViewingRequestForm.vue'
 import { 
   ArrowLeft, Heart, Share2, AlertCircle, Star, MessageCircle, 
-  Minus, Plus, ShoppingBag, ShoppingCart, CheckCircle, X 
+  Minus, Plus, ShoppingBag, ShoppingCart, CheckCircle, X, Calendar 
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -382,6 +405,12 @@ const showSnackbar = ref(false)
 const snackbarText = ref('')
 const snackbarColor = ref('success')
 const currentImageIndex = ref(0)
+
+// CRM flow variables
+const usesCRMFlow = ref(false)
+const crmFlowInfo = ref(null)
+const showViewingForm = ref(false)
+const checkingCRMFlow = ref(false)
 
 const loading = computed(() => productStore.loading)
 const error = computed(() => productStore.error)
@@ -436,6 +465,53 @@ const addToCart = async () => {
       showSnackbar.value = true;
     }
   }
+}
+
+const checkCRMFlow = async () => {
+  if (!product.value?.id) return
+
+  try {
+    checkingCRMFlow.value = true
+    const response = await apiService.checkProductCRMFlow(product.value.id)
+    
+    usesCRMFlow.value = response.data.uses_crm
+    crmFlowInfo.value = response.data.flow_info
+    
+    console.log('CRM Flow Check:', response.data)
+  } catch (error) {
+    console.error('Failed to check CRM flow:', error)
+    usesCRMFlow.value = false
+  } finally {
+    checkingCRMFlow.value = false
+  }
+}
+
+const onViewingRequestSuccess = (data) => {
+  snackbarText.value = data.message
+  snackbarColor.value = 'success'
+  showSnackbar.value = true
+}
+
+const onViewingRequestError = (errorMessage) => {
+  snackbarText.value = errorMessage
+  snackbarColor.value = 'error'
+  showSnackbar.value = true
+}
+
+const getProductTypeFromCRM = () => {
+  if (crmFlowInfo.value?.flow_key === 'crm' || usesCRMFlow.value) {
+    // Try to determine product type based on store category or product info
+    if (product.value?.store_name?.toLowerCase().includes('auto') || 
+        product.value?.name?.toLowerCase().includes('car') ||
+        product.value?.name?.toLowerCase().includes('vehicle')) {
+      return 'vehicle'
+    } else if (product.value?.store_name?.toLowerCase().includes('real') ||
+               product.value?.name?.toLowerCase().includes('house') ||
+               product.value?.name?.toLowerCase().includes('property')) {
+      return 'property'
+    }
+  }
+  return 'item'
 }
 
 const goToCart = () => {
@@ -536,6 +612,9 @@ onMounted(async () => {
       productStore.fetchRelatedProducts(productId),
       productStore.fetchProductReviews(productId)
     ])
+
+    // Check CRM flow after product is loaded
+    await checkCRMFlow()
   } catch (error) {
     // Handle error and redirect to home page
     console.error('Error fetching product:', error)
@@ -547,6 +626,13 @@ onMounted(async () => {
     router.push({ name: 'Home' })
   }
 })
+
+// Watch for product changes to recheck CRM flow
+watch(product, async (newProduct) => {
+  if (newProduct?.id) {
+    await checkCRMFlow()
+  }
+}, { immediate: false })
 </script>
 
 <style scoped>

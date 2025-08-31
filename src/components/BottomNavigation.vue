@@ -52,27 +52,41 @@
         <span class="font-medium">Orders</span>
       </router-link>
       
+      <!-- Dynamic Cart/Rendezvous Tab -->
       <router-link 
-        :to="{ name: 'Cart' }"
+        :to="{ name: shouldShowRendezvous ? 'Rendezvous' : 'Cart' }"
         class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
-        :class="activeTab === 'cart' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+        :class="(activeTab === 'cart' || activeTab === 'rendezvous') ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
       >
         <div class="relative">
-          <ShoppingBag v-if="activeTab === 'cart'" class="w-6 h-6 mb-1" />
+          <Calendar v-if="shouldShowRendezvous && (activeTab === 'cart' || activeTab === 'rendezvous')" class="w-6 h-6 mb-1" />
+          <Calendar v-else-if="shouldShowRendezvous" class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+          <ShoppingBag v-else-if="activeTab === 'cart'" class="w-6 h-6 mb-1" />
           <ShoppingBag v-else class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+          
+          <!-- Cart item count badge -->
           <span 
-            v-if="cart.cartItemCount > 0"
+            v-if="!shouldShowRendezvous && cart.cartItemCount > 0"
             class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-sm"
           >
             {{ cart.cartItemCount > 99 ? '99+' : cart.cartItemCount }}
           </span>
+          
+          <!-- Viewing requests badge -->
+          <span 
+            v-if="shouldShowRendezvous && pendingViewingRequests > 0"
+            class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-sm"
+          >
+            {{ pendingViewingRequests > 99 ? '99+' : pendingViewingRequests }}
+          </span>
+          
           <div 
-            v-if="activeTab === 'cart'" 
+            v-if="activeTab === 'cart' || activeTab === 'rendezvous'" 
             class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
             style="background: linear-gradient(to right, #2563eb, #9333ea);"
           ></div>
         </div>
-        <span class="font-medium">Cart</span>
+        <span class="font-medium">{{ shouldShowRendezvous ? 'Rendezvous' : 'Cart' }}</span>
       </router-link>
 
              <!-- Store selector -->
@@ -122,7 +136,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useNotificationStore } from '@/stores/notification'
-import { Home, Telescope, Package, ShoppingBag, Store, Sparkles, Shirt, Pill, Sofa, Monitor, Car } from 'lucide-vue-next'
+import { Home, Telescope, Package, ShoppingBag, Store, Sparkles, Shirt, Pill, Sofa, Monitor, Car, Calendar } from 'lucide-vue-next'
 import apiService from '@/services/api'
 
 const route = useRoute()
@@ -133,13 +147,18 @@ const activeTab = ref('home')
 
 const currentRouteName = computed(() => route.name)
 
+// State for CRM flow detection
+const shouldShowRendezvous = ref(false)
+const pendingViewingRequests = ref(0)
+
 // Update active tab based on current route
 const updateActiveTab = () => {
   const routeTabMap = {
     'Home': 'home',
     'Explore': 'explore',
     'Orders': 'orders',
-    'Cart': 'cart'
+    'Cart': 'cart',
+    'Rendezvous': 'rendezvous'
   }
   
   activeTab.value = routeTabMap[currentRouteName.value] || 'home'
@@ -161,6 +180,9 @@ onMounted(async () => {
       try {
         const resp = await apiService.getStoreCategories({ is_active: true })
         storeCategories.value = resp.data?.results || resp.data || []
+        
+        // Check CRM flow after loading categories
+        await checkCRMFlow()
       } catch (e) {
         console.warn('Failed to load store categories on mount:', e)
       }
@@ -220,13 +242,17 @@ const closeStoreDialog = () => {
 
 const isDefault = (id) => String(sessionStorage.getItem('defaultStore') || '') === String(id)
 
-const selectStore = (id) => {
+const selectStore = async (id) => {
   sessionStorage.setItem('defaultStore', String(id))
   showStoreDialog.value = false
   // Force reactivity update
   if (storeCategories.value.length > 0) {
     storeCategories.value = [...storeCategories.value]
   }
+  
+  // Check CRM flow for new store before reload
+  await checkCRMFlow()
+  
   // Reload to refresh product feeds with selected category
   location.reload()
 }
@@ -256,6 +282,48 @@ const getDefaultStoreIcon = () => {
 
 // Reactive computed property for the default store icon
 const defaultStoreIcon = computed(() => getDefaultStoreIcon())
+
+// Function to check if current default store uses CRM flow
+const checkCRMFlow = async () => {
+  try {
+    const defaultStoreId = sessionStorage.getItem('defaultStore')
+    if (!defaultStoreId) {
+      shouldShowRendezvous.value = false
+      return
+    }
+
+    // Find the default store category
+    if (storeCategories.value.length === 0) {
+      const resp = await apiService.getStoreCategories({ is_active: true })
+      storeCategories.value = resp.data?.results || resp.data || []
+    }
+
+    const defaultCategory = storeCategories.value.find(cat => String(cat.id) === String(defaultStoreId))
+    if (defaultCategory) {
+      const response = await apiService.checkStoreCategoryCRMFlow(defaultCategory.id)
+      shouldShowRendezvous.value = response.data.default_to_crm || false
+      
+      // If showing rendezvous, fetch pending requests count
+      if (shouldShowRendezvous.value) {
+        await fetchPendingViewingRequests()
+      }
+    }
+  } catch (error) {
+    console.error('Failed to check CRM flow:', error)
+    shouldShowRendezvous.value = false
+  }
+}
+
+// Function to fetch pending viewing requests count
+const fetchPendingViewingRequests = async () => {
+  try {
+    const response = await apiService.getViewingRequestStats()
+    pendingViewingRequests.value = response.data.pending_requests || 0
+  } catch (error) {
+    console.error('Failed to fetch viewing request stats:', error)
+    pendingViewingRequests.value = 0
+  }
+}
 </script>
 
 <style scoped>

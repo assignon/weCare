@@ -45,41 +45,58 @@ class NotificationService {
   initWebSocket(userId) {
     if (!userId) return;
 
-    // try {
-    //   const wsUrl = `ws://localhost:8000/ws/notifications/`;
-    //   this.socket = new WebSocket(wsUrl);
+    try {
+      // Get JWT token from localStorage for authentication
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn('No JWT token found, WebSocket connection may be anonymous');
+      }
 
-    //   this.socket.onopen = () => {
-    //     console.log("Notification WebSocket connected");
-    //     this.reconnectAttempts = 0;
-    //     this.reconnectDelay = 1000;
-    //     this.startHeartbeat();
-    //   };
+      // Use environment-aware WebSocket URL
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      // Handle local development domains (.local) by pointing to localhost:8000
+      const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.local');
+      const host = isLocalDev ? 'localhost:8000' : window.location.host;
+      
+      // Add JWT token as query parameter for authentication
+      const wsUrl = token 
+        ? `${protocol}//${host}/ws/notifications/?token=${token}` 
+        : `${protocol}//${host}/ws/notifications/`;
+      
+      console.log('🔌 Shopper connecting to WebSocket:', wsUrl.replace(/token=[^&]+/, 'token=***'));
+      this.socket = new WebSocket(wsUrl);
 
-    //   this.socket.onmessage = (event) => {
-    //     try {
-    //       const data = JSON.parse(event.data);
-    //       this.handleNotificationMessage(data);
-    //     } catch (error) {
-    //       console.error("Error parsing WebSocket message:", error);
-    //     }
-    //   };
+      this.socket.onopen = () => {
+        console.log("Shopper notification WebSocket connected");
+        this.reconnectAttempts = 0;
+        this.reconnectDelay = 1000;
+        this.startHeartbeat();
+      };
 
-    //   this.socket.onclose = (event) => {
-    //     console.log("Notification WebSocket disconnected");
-    //     this.stopHeartbeat();
-    //     if (!event.wasClean) {
-    //       this.handleReconnect(userId);
-    //     }
-    //   };
+      this.socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          this.handleNotificationMessage(data);
+        } catch (error) {
+          console.error("Error parsing WebSocket message:", error);
+        }
+      };
 
-    //   this.socket.onerror = (error) => {
-    //     console.error("Notification WebSocket error:", error);
-    //   };
-    // } catch (error) {
-    //   console.error("Error initializing WebSocket:", error);
-    //   this.handleReconnect(userId);
-    // }
+      this.socket.onclose = (event) => {
+        console.log("Shopper notification WebSocket disconnected");
+        this.stopHeartbeat();
+        if (!event.wasClean) {
+          this.handleReconnect(userId);
+        }
+      };
+
+      this.socket.onerror = (error) => {
+        console.error("Shopper notification WebSocket error:", error);
+      };
+    } catch (error) {
+      console.error("Error initializing shopper WebSocket:", error);
+      this.handleReconnect(userId);
+    }
   }
 
   // Start heartbeat to keep connection alive

@@ -758,6 +758,43 @@ export const apiService = {
 
   deleteReviewResponse(reviewId) {
     return api.delete(`/products/reviews/${reviewId}/response/`)
+  },
+
+  // CRM Viewing Requests
+  checkProductCRMFlow(productId) {
+    return api.get('/products/crm/check/check_product/', { 
+      params: { product_id: productId } 
+    })
+  },
+
+  checkStoreCategoryCRMFlow(categoryId) {
+    return api.get('/products/crm/check/check_store_category/', { 
+      params: { category_id: categoryId } 
+    })
+  },
+
+  createViewingRequest(requestData) {
+    return api.post('/products/crm/viewing-requests/', requestData)
+  },
+
+  getViewingRequests(params = {}) {
+    return api.get('/products/crm/viewing-requests/', { params })
+  },
+
+  getViewingRequest(id) {
+    return api.get(`/products/crm/viewing-requests/${id}/`)
+  },
+
+  updateViewingRequest(id, data) {
+    return api.patch(`/products/crm/viewing-requests/${id}/`, data)
+  },
+
+  getViewingRequestHistory(id) {
+    return api.get(`/products/crm/viewing-requests/${id}/history/`)
+  },
+
+  getViewingRequestStats() {
+    return api.get('/products/crm/viewing-requests/stats/')
   }
 }
 

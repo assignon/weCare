@@ -10,6 +10,7 @@ const routes = [
   { path: '/explore', name: 'Explore', component: () => import('@/pages/Explore.vue'), meta: { requiresAuth: true } },
   // { path: '/explore', name: 'Explore', component: () => import('@/pages/EnhancedExplore.vue'), meta: { requiresAuth: true } },
   { path: '/cart', name: 'Cart', component: () => import('@/pages/Cart.vue'), meta: { requiresAuth: true } },
+  { path: '/rendezvous', name: 'Rendezvous', component: () => import('@/pages/Rendezvous.vue'), meta: { requiresAuth: true } },
  
   { path: '/register', name: 'Register', component: () => import('@/pages/Register.vue') },
   { path: '/shopper-goals', name: 'ShopperGoals', component: () => import('@/pages/ShopperGoals.vue'), meta: { requiresAuth: true } },
