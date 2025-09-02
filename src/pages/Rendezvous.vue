@@ -304,104 +304,129 @@
     </div>
 
     <!-- Chat Modal -->
-    <div 
-      v-if="showChatModal"
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end"
-      @click="closeChat"
+    <Transition
+      enter-active-class="transition-all duration-300 ease-out"
+      enter-from-class="opacity-0 translate-y-full"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition-all duration-200 ease-in"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 translate-y-full"
     >
       <div 
-        class="bg-white rounded-t-3xl w-full h-[95vh] flex flex-col"
-        @click.stop
+        v-if="showChatModal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-end"
+        @click="closeChat"
       >
-        <!-- Chat Header -->
-        <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-3xl">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-              <img 
-                :src="selectedChatRequest?.product_main_image || '/placeholder.jpg'" 
-                :alt="selectedChatRequest?.product_name"
-                class="w-10 h-10 rounded-lg object-cover"
-              />
-              <div>
-                <h3 class="font-semibold text-gray-900">{{ selectedChatRequest?.product_name }}</h3>
-                <p class="text-sm text-gray-500">{{ selectedChatRequest?.store_name }}</p>
+        <div 
+          class="bg-white rounded-t-3xl w-full h-[95vh] flex flex-col shadow-2xl"
+          @click.stop
+        >
+          <!-- Chat Header -->
+          <div class="sticky top-0 bg-white border-b border-gray-100 px-6 py-5 rounded-t-3xl shadow-sm">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-4">
+                <div class="relative">
+                  <img 
+                    :src="selectedChatRequest?.product_main_image || '/placeholder.jpg'" 
+                    :alt="selectedChatRequest?.product_name"
+                    class="w-12 h-12 rounded-xl object-cover shadow-md ring-2 ring-white"
+                  />
+                  <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-gray-900 text-lg">{{ selectedChatRequest?.product_name }}</h3>
+                  <p class="text-sm text-gray-500 flex items-center">
+                    <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                    {{ selectedChatRequest?.store_name }}
+                  </p>
+                </div>
+              </div>
+              <button 
+                @click="closeChat"
+                class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all duration-200 hover:scale-105"
+              >
+                <X class="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+          </div>
+          
+          <!-- Chat Messages -->
+          <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-gray-50/50 to-white">
+            <div v-if="loadingChat" class="flex justify-center py-12">
+              <div class="flex flex-col items-center space-y-3">
+                <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-200 border-t-blue-600"></div>
+                <p class="text-sm text-gray-500">Loading messages...</p>
               </div>
             </div>
-            <button 
-              @click="closeChat"
-              class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
-            >
-              <X class="w-5 h-5 text-gray-500" />
-            </button>
-          </div>
-        </div>
-        
-        <!-- Chat Messages -->
-        <div class="flex-1 overflow-y-auto p-6 space-y-4">
-          <div v-if="loadingChat" class="flex justify-center py-8">
-            <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-200 border-t-blue-600"></div>
-          </div>
-          
-          <div v-else-if="chatMessages.length === 0" class="text-center py-8">
-            <MessageCircle class="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <p class="text-gray-600">No messages yet. Start the conversation!</p>
-          </div>
-          
-          <div v-else>
-            <div
-              v-for="message in chatMessages"
-              :key="message.id"
-              :class="[
-                'flex',
-                message.sender_type === 'SELLER' ? 'justify-end' : 'justify-start'
-              ]"
-            >
+            
+            <div v-else-if="chatMessages.length === 0" class="text-center py-16">
+              <div class="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MessageCircle class="w-10 h-10 text-blue-600" />
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Start the conversation!</h3>
+              <p class="text-gray-500">Send a message to discuss this product with the seller.</p>
+            </div>
+            
+            <div v-else class="space-y-4">
               <div
+                v-for="message in chatMessages"
+                :key="message.id"
                 :class="[
-                  'max-w-xs lg:max-w-md px-4 py-2 rounded-2xl',
-                  message.sender_type === 'SELLER'
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
-                    : 'bg-gray-100 text-gray-900'
+                  'flex',
+                  message.sender_type === 'SELLER' ? 'justify-end' : 'justify-start'
                 ]"
               >
-                <p class="text-sm">{{ message.content }}</p>
-                <p 
+                <div
                   :class="[
-                    'text-xs mt-1',
-                    message.sender_type === 'SELLER' ? 'text-blue-100' : 'text-gray-500'
+                    'max-w-xs lg:max-w-md px-5 py-3 rounded-3xl shadow-sm',
+                    message.sender_type === 'SELLER'
+                      ? 'bg-purple-600 text-white ml-12' 
+                      : 'bg-blue-600 text-white mr-12'
                   ]"
                 >
-                  {{ formatDateTime(message.created_at) }}
-                </p>
+                  <p class="text-sm leading-relaxed">{{ message.content }}</p>
+                  <p 
+                    :class="[
+                      'text-xs mt-2 opacity-70',
+                      message.sender_type === 'SELLER' ? 'text-purple-100' : 'text-blue-100'
+                    ]"
+                  >
+                    {{ formatDateTime(message.created_at) }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <!-- Chat Input -->
-        <div class="sticky bottom-0 bg-white border-t border-gray-200 p-4">
-          <div class="flex items-center space-x-3">
-            <input
-              v-model="newMessage"
-              @keyup.enter="sendMessage"
-              type="text"
-              placeholder="Type your message..."
-              class="flex-1 px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              :disabled="sendingMessage"
-            />
-            <button
-              @click="sendMessage"
-              :disabled="!newMessage.trim() || sendingMessage"
-              class="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              style="background: linear-gradient(to right, #2563eb, #9333ea);"
-            >
-              <div v-if="sendingMessage" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              <MessageCircle v-else class="w-5 h-5 text-white" />
-            </button>
+          
+          <!-- Chat Input -->
+          <div class="sticky bottom-0 bg-white border-t border-gray-100 p-6 shadow-lg">
+            <div class="flex items-end space-x-3">
+              <div class="flex-1 relative">
+                <input
+                  v-model="newMessage"
+                  @keyup.enter="sendMessage"
+                  type="text"
+                  placeholder="Type your message..."
+                  class="w-full px-5 py-4 pr-12 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200 placeholder-gray-400"
+                  :disabled="sendingMessage"
+                />
+                <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div v-if="sendingMessage" class="animate-spin rounded-full h-5 w-5 border-2 border-blue-200 border-t-blue-600"></div>
+                </div>
+              </div>
+              <button
+                @click="sendMessage"
+                :disabled="!newMessage.trim() || sendingMessage"
+                style="background: linear-gradient(to right, #2563eb, #9333ea);"
+                class="w-14 h-14 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:scale-105"
+              >
+                <Send v-if="!sendingMessage" class="w-6 h-6 text-white" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </div>
 </template>
 
@@ -410,7 +435,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiService } from '@/services/api'
 import { 
-  Calendar, Clock, RefreshCw, AlertCircle, CheckCircle, Eye, X, ArrowLeft, MessageCircle, ChevronDown 
+  Calendar, Clock, RefreshCw, AlertCircle, CheckCircle, Eye, X, ArrowLeft, MessageCircle, ChevronDown, Send 
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -553,22 +578,61 @@ const openChat = async (request) => {
     loadingChat.value = true
     
     console.log('Opening chat for viewing request:', request.id)
+    console.log('Request object:', request)
     
     // Fetch chat messages for this viewing request
-    const response = await apiService.getChatMessages({
-      viewing_request: request.id
+    console.log('Making API call to get chat messages with params:', { viewing_request: request.id })
+    
+    // Add timeout to prevent infinite loading
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Request timeout')), 10000) // 10 second timeout
     })
     
-    console.log('Chat messages response:', response.data)
-    chatMessages.value = response.data.results || response.data || []
-    console.log('Chat messages loaded:', chatMessages.value.length)
+    const response = await Promise.race([
+      apiService.getChatMessages({
+        viewing_request: request.id
+      }),
+      timeoutPromise
+    ])
     
-    // Mark all messages as read
-    await apiService.markAllMessagesAsRead(request.id)
+    console.log('Chat messages response:', response)
+    console.log('Response data:', response.data)
+    console.log('Response status:', response.status)
+    console.log('Response headers:', response.headers)
+    
+    // Handle different response formats
+    let messages = []
+    if (Array.isArray(response.data)) {
+      messages = response.data
+    } else if (response.data && Array.isArray(response.data.results)) {
+      messages = response.data.results
+    } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
+      messages = response.data.data
+    } else {
+      console.warn('Unexpected response format:', response.data)
+      messages = []
+    }
+    
+    chatMessages.value = messages
+    console.log('Chat messages loaded:', chatMessages.value.length)
+    console.log('Chat messages array:', chatMessages.value)
+    
+    // Mark all messages as read (optional - don't block chat loading)
+    apiService.markAllMessagesAsRead(request.id)
+      .then(() => console.log('Messages marked as read successfully'))
+      .catch((readError) => console.error('Failed to mark messages as read:', readError))
     
   } catch (err) {
     console.error('Failed to open chat:', err)
+    console.error('Error details:', err.response?.data)
+    console.error('Error status:', err.response?.status)
+    console.error('Error message:', err.message)
+    
+    // Set empty messages array and show error
     chatMessages.value = []
+    
+    // You could add a toast notification here if needed
+    // toast.error('Failed to load chat messages')
   } finally {
     loadingChat.value = false
   }
@@ -583,7 +647,8 @@ const sendMessage = async () => {
     const response = await apiService.sendChatMessage({
       viewing_request: selectedChatRequest.value.id,
       content: newMessage.value.trim(),
-      message_type: 'text'
+      message_type: 'text',
+      sender_type: 'SHOPPER'  // Explicitly set sender_type for shopper app
     })
     
     // Add the new message to the list

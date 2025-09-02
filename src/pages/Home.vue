@@ -97,7 +97,7 @@
             <div 
               v-for="product in productStore.popularProducts.slice(0, 10)" 
               :key="product.id"
-              class="flex-shrink-0 w-44 bg-white/90 backdrop-blur-sm rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-white/30"
+              class="flex-shrink-0 w-44 bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-100 hover:border-gray-200"
               @click="navigateToDetails(product.id)"
             >
               <div class="relative">
@@ -106,15 +106,15 @@
                   class="w-full h-40 object-cover" 
                   alt="Product"
                 />
-                <div class="absolute top-2 right-2 w-6 h-6 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center">
+                <div class="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
                   <span class="text-xs font-bold text-slate-700">🔥</span>
                 </div>
               </div>
               <div class="p-3">
-                <h3 class="text-sm font-semibold mb-1 truncate capitalize text-slate-900">{{ product.name }}</h3>
+                <h3 class="text-sm font-medium mb-1 line-clamp-2 capitalize text-slate-900">{{ product.name }}</h3>
                 <p class="text-xs text-slate-600 mb-2 truncate">{{ product.seller_name || 'weCare' }}</p>
                 <div class="flex justify-between items-center">
-                  <span class="text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  <span class="text-sm font-semibold text-blue-600">
                     {{ formatApiPrice(product) }}
                   </span>
                 </div>
@@ -157,7 +157,7 @@
             <div 
               v-for="product in productStore.newArrivals.slice(0, 10)" 
               :key="product.id"
-              class="flex-shrink-0 w-72 h-40 bg-white/90 backdrop-blur-sm rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-white/30"
+              class="flex-shrink-0 w-72 h-40 bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-100 hover:border-gray-200"
               @click="navigateToDetails(product.id)"
             >
               <div class="flex h-full">
@@ -167,13 +167,13 @@
                     class="w-full h-full object-cover" 
                     alt="Product"
                   />
-                  <div class="absolute top-2 left-2 w-6 h-6 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center">
+                  <div class="absolute top-2 left-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
                     <span class="text-xs font-bold text-slate-700">✨</span>
                   </div>
                 </div>
                 <div class="p-4 flex flex-col justify-between flex-1">
                   <div>
-                    <h3 class="text-sm font-semibold mb-1 truncate capitalize text-slate-900">{{ product.name }}</h3>
+                    <h3 class="text-sm font-medium mb-1 line-clamp-2 capitalize text-slate-900">{{ product.name }}</h3>
                     <p class="text-xs text-slate-600 mb-2 truncate">{{ product.seller_name || 'weCare' }}</p>
                   </div>
                   <div class="flex items-center justify-between">
@@ -184,7 +184,7 @@
                       >
                         {{ formatApiPrice({ price: product.original_price }) }}
                       </span>
-                      <span class="text-sm font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                      <span class="text-sm font-semibold text-blue-600">
                         {{ formatApiPrice(product) }}
                       </span>
                     </div>
@@ -229,7 +229,7 @@
             <div 
               v-for="product in productStore.recommendedProducts.slice(0, 4)" 
               :key="product.id"
-              class="bg-white/90 backdrop-blur-sm rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-white/30"
+              class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-100 hover:border-gray-200"
               @click="navigateToDetails(product.id)"
             >
               <div class="relative">
@@ -238,15 +238,15 @@
                   class="w-full h-32 object-cover" 
                   alt="Product"
                 />
-                <div class="absolute top-2 right-2 w-6 h-6 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center">
+                <div class="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
                   <span class="text-xs font-bold text-slate-700">💫</span>
                 </div>
               </div>
               <div class="p-3">
-                <h3 class="text-xs font-semibold mb-1 truncate capitalize text-slate-900">{{ product.name }}</h3>
+                <h3 class="text-xs font-medium mb-1 line-clamp-2 capitalize text-slate-900">{{ product.name }}</h3>
                 <p class="text-xs text-slate-600 mb-2 truncate">{{ product.seller_name || 'weCare' }}</p>
                 <div class="flex justify-between items-center">
-                  <span class="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  <span class="text-sm font-semibold text-blue-600">
                     {{ formatApiPrice(product) }}
                   </span>
                 </div>
@@ -401,6 +401,15 @@ function selectDefaultStore(id) {
 
 .shadow-xl {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Line clamp utility for product names */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* Custom scrollbar for category list */

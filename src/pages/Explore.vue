@@ -39,121 +39,132 @@
             Filter
           </button>
 
-          <div class="flex-1 ml-4 overflow-x-auto">
-            <div class="flex space-x-3">
-              <button 
-                @click="showAllProducts"
-                class="px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
-                style="background: linear-gradient(to right, #2563eb, #9333ea);"
-              >
-                All
-              </button>
-              <button 
-                v-for="category in productStore.categories" 
-                :key="category.id"
-                @click="filterByCategory(category.id)"
-                :class="[
-                  'px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-200 whitespace-nowrap shadow-sm hover:shadow-md',
-                  productStore.selectedCategory === category.id 
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
-                    : 'bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white hover:border-blue-500/50'
-                ]"
-                :style="productStore.selectedCategory === category.id ? 'background: linear-gradient(to right, #2563eb, #9333ea);' : ''"
-              >
-                {{ category.name }}
-              </button>
+          <div class="flex-1 ml-4">
+            <div class="relative">
+              <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                v-model="productSearch"
+                type="text"
+                placeholder="Search products by name..."
+                class="w-full pl-10 pr-4 py-3 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200 shadow-sm hover:shadow-md text-sm"
+                @input="handleProductSearch"
+              />
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Filter options -->
-      <transition name="slide-down">
-        <div v-if="showFilterOptions" class="mb-6 p-6 bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20">
-          <div class="space-y-6">
-            <!-- Dynamic attribute filters (from CategoryAttributeTemplate by store category) -->
-            <div v-if="storeAttributeTemplates.length > 0" class="space-y-6">
-              <div class="flex items-center justify-between">
-                <h3 class="text-base font-semibold text-gray-900">Filters</h3>
+      <!-- Filter Bottom Sheet -->
+      <div 
+        v-if="showFilterOptions"
+        class="fixed inset-0 z-50 flex items-end"
+      >
+        <!-- Backdrop -->
+        <div 
+          class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          @click="showFilterOptions = false"
+        ></div>
+
+        <!-- Bottom Sheet -->
+        <div 
+          class="relative w-full h-[95vh] bg-white rounded-t-3xl shadow-2xl flex flex-col transform transition-all duration-300 ease-out"
+          @click.stop
+        >
+          <!-- Header -->
+          <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-5 rounded-t-3xl shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Filter Products</h3>
                 <span class="text-xs text-gray-500">Personalized for your selected store</span>
               </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div v-for="tpl in storeAttributeTemplates" :key="tpl.id" class="bg-gray-50/50 rounded-2xl p-4 border border-gray-200/50">
-                  <label class="block text-sm font-semibold text-gray-800 mb-3">{{ tpl.label }}</label>
-                  <!-- Select / Multiselect as chips -->
-                  <div v-if="tpl.field_type === 'select' || tpl.field_type === 'multiselect'">
-                    <div class="flex flex-wrap gap-2">
-                      <button
-                        v-for="opt in (tpl.choices || [])"
-                        :key="opt"
-                        type="button"
-                        @click="toggleChoice(tpl, opt)"
-                        :class="[
-                          'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
-                          isSelected(tpl, opt)
-                            ? 'text-white border-transparent shadow-sm'
-                            : 'text-gray-700 border-gray-200 hover:border-blue-400'
-                        ]"
-                        :style="isSelected(tpl, opt) ? 'background: linear-gradient(to right, #2563eb, #9333ea);' : ''"
-                      >
-                        {{ opt }}
-                      </button>
+              <button 
+                @click="showFilterOptions = false"
+                class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all duration-200 hover:scale-105"
+              >
+                <X class="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+          </div>
+          
+          <!-- Scrollable Content -->
+          <div class="flex-1 overflow-y-auto p-6 mb-16">
+            <div class="space-y-6">
+              <!-- Dynamic attribute filters (from CategoryAttributeTemplate by store category) -->
+              <div v-if="storeAttributeTemplates.length > 0" class="space-y-6">
+                <div class="grid grid-cols-1 gap-6">
+                  <div v-for="tpl in storeAttributeTemplates" :key="tpl.id" class="bg-gray-50/50 rounded-2xl p-4 border border-gray-200/50">
+                    <label class="block text-sm font-semibold text-gray-800 mb-3">{{ tpl.label }}</label>
+                    <!-- Select / Multiselect as chips -->
+                    <div v-if="tpl.field_type === 'select' || tpl.field_type === 'multiselect'">
+                      <div class="flex flex-wrap gap-2">
+                        <button
+                          v-for="opt in getChoicesArray(tpl)"
+                          :key="opt"
+                          type="button"
+                          @click="toggleChoice(tpl, opt)"
+                          :class="[
+                            'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
+                            isSelected(tpl, opt)
+                              ? 'text-white border-transparent shadow-sm'
+                              : 'text-gray-700 border-gray-200 hover:border-blue-400'
+                          ]"
+                          :style="isSelected(tpl, opt) ? 'background: linear-gradient(to right, #2563eb, #9333ea);' : ''"
+                        >
+                          {{ opt }}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  <!-- Boolean toggle -->
-                  <div v-else-if="tpl.field_type === 'boolean'" class="flex items-center justify-between">
-                    <span class="text-sm text-gray-700">Enable</span>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" class="sr-only peer" :checked="getBoolean(tpl)" @change="toggleBoolean(tpl)" />
-                      <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 transition-colors"></div>
-                      <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
-                    </label>
-                  </div>
-                  <!-- Text / Number input -->
-                  <div v-else>
-                    <input
-                      :type="tpl.field_type === 'number' || tpl.field_type === 'decimal' ? 'number' : 'text'"
-                      class="w-full p-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50"
-                      :placeholder="tpl.help_text || 'Type to filter'"
-                      v-model="dynamicFilters[tpl.id]"
-                    />
+                    <!-- Boolean toggle -->
+                    <div v-else-if="tpl.field_type === 'boolean'" class="flex items-center justify-between">
+                      <span class="text-sm text-gray-700">Enable</span>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" class="sr-only peer" :checked="getBoolean(tpl)" @change="toggleBoolean(tpl)" />
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 transition-colors"></div>
+                        <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                      </label>
+                    </div>
+                    <!-- Text / Number input -->
+                    <div v-else>
+                      <input
+                        :type="tpl.field_type === 'number' || tpl.field_type === 'decimal' ? 'number' : 'text'"
+                        class="w-full p-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50"
+                        :placeholder="tpl.help_text || 'Type to filter'"
+                        v-model="dynamicFilters[tpl.id]"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div class="flex items-center justify-between pt-2">
-                <button 
-                  @click="clearDynamicFilters"
-                  class="px-6 py-3 text-blue-600 hover:text-blue-700 font-semibold text-sm bg-blue-50/50 hover:bg-blue-100/50 rounded-2xl transition-all duration-200"
-                >
-                  Clear All
-                </button>
-                <button 
-                  @click="applyDynamicFilters"
-                  class="px-6 py-3 text-white font-semibold text-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200"
-                  style="background: linear-gradient(to right, #2563eb, #9333ea);"
-                >
-                  Apply
-                </button>
-              </div>
-            </div>
-
-            <!-- Fallback default filters when no templates available -->
-            <div v-else class="space-y-6">
-              <!-- Note: Skin type, skin concern, and product type filters removed - API endpoints no longer exist -->
-
-              <div class="flex justify-end pt-2">
-                <button 
-                  @click="clearAllFilters"
-                  class="px-6 py-3 text-blue-600 hover:text-blue-700 font-semibold text-sm bg-blue-50/50 hover:bg-blue-100/50 rounded-2xl transition-all duration-200"
-                >
-                  Clear All
-                </button>
+              <!-- Fallback default filters when no templates available -->
+              <div v-else class="space-y-6">
+                <div class="text-center py-8 text-gray-500">
+                  No filters available for this store.
+                </div>
               </div>
             </div>
           </div>
+          
+          <!-- Footer Actions -->
+          <div class="sticky bottom-0 bg-white border-t border-gray-200 p-6 shadow-lg" style="position: sticky; bottom: 55px;">
+            <div class="flex gap-3">
+              <button 
+                @click="clearDynamicFilters"
+                class="flex-1 px-4 py-3 text-blue-600 hover:text-blue-700 font-semibold text-sm bg-blue-50/50 hover:bg-blue-100/50 rounded-2xl transition-all duration-200"
+              >
+                Clear All
+              </button>
+              <button 
+                @click="applyDynamicFilters"
+                class="flex-1 px-4 py-3 text-white font-semibold text-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200"
+                style="background: linear-gradient(to right, #2563eb, #9333ea);"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
         </div>
-      </transition>
+      </div>
 
       <!-- All Products Section with Infinite Scroll -->
       <div class="mb-6">
@@ -174,29 +185,28 @@
         </div>
 
         <!-- Products grid -->
-        <div v-else-if="filteredProducts.length > 0" class="grid grid-cols-2 gap-4 mt-6">
+        <div v-else-if="filteredProducts.length > 0" class="grid grid-cols-2 gap-3 mt-6">
           <div 
             v-for="product in filteredProducts" 
             :key="product.id" 
             @click="navigateToDetails(product.id)"
-            class="group bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border border-white/20 hover:border-blue-500/20 transform hover:-translate-y-1"
+            class="group bg-white rounded-lg border border-gray-100 hover:border-gray-200 transition-all duration-200 cursor-pointer overflow-hidden hover:shadow-md"
           >
-            <div class="aspect-square overflow-hidden relative">
+            <!-- Product Image -->
+            <div class="aspect-square overflow-hidden bg-gray-50">
               <img 
                 :src="product.main_image || packagingImage" 
                 :alt="product.name"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                class="w-full h-full object-cover"
               />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
-            <div class="p-4">
-              <h3 class="font-semibold text-sm text-gray-900 mb-2 truncate capitalize leading-tight">{{ product.name }}</h3>
-              <p class="text-xs text-gray-500 mb-3 truncate">{{ product.seller_name || 'weCare' }}</p>
-              <div class="flex justify-between items-center">
-                <span class="font-bold text-lg text-gray-900">{{ formatApiPrice(product) }}</span>
-                <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background: linear-gradient(to right, #2563eb, #9333ea);">
-                  <ArrowRight class="w-4 h-4 text-white" />
-                </div>
+            
+            <!-- Product Info -->
+            <div class="p-3">
+              <h3 class="font-medium text-sm text-gray-900 mb-1 line-clamp-2 leading-tight">{{ product.name }}</h3>
+              <p class="text-xs text-gray-500 mb-2">{{ product.seller_name || 'weCare' }}</p>
+              <div class="flex items-center justify-between">
+                <span class="font-semibold text-base text-blue-600">{{ formatApiPrice(product) }}</span>
               </div>
             </div>
           </div>
@@ -270,6 +280,9 @@ const search = ref('')
 const showSearch = ref(false)
 const isSearching = ref(false)
 
+// Product search functionality
+const productSearch = ref('')
+
 // Filter functionality
 const showFilterOptions = ref(false)
 // Note: Filter variables for skin types, concerns, and product types removed - API endpoints no longer exist
@@ -303,6 +316,20 @@ const loadStoreAttributeTemplates = async () => {
     storeAttributeTemplates.value = []
     dynamicFilters.value = {}
   }
+}
+
+const getChoicesArray = (tpl) => {
+  if (!tpl.choices) return []
+  
+  // If choices is already an array, return it
+  if (Array.isArray(tpl.choices)) return tpl.choices
+  
+  // If choices is a string, split by comma and trim whitespace
+  if (typeof tpl.choices === 'string') {
+    return tpl.choices.split(',').map(choice => choice.trim()).filter(choice => choice.length > 0)
+  }
+  
+  return []
 }
 
 const isSelected = (tpl, opt) => {
@@ -346,6 +373,8 @@ const applyDynamicFilters = async () => {
   // Backend support for attribute-based filtering may be added later.
   // Build query params as attr_<templateId>=value[] for server-side filtering
   isFiltering.value = true
+  showFilterOptions.value = false // Close the bottom sheet
+  
   const defaultStore = sessionStorage.getItem('defaultStore')
   const params = defaultStore ? { store_category: defaultStore, page_size: 24 } : { page_size: 24 }
   Object.entries(dynamicFilters.value).forEach(([templateId, val]) => {
@@ -417,6 +446,24 @@ const clearSearch = async () => {
   hasMoreProducts.value = hasMore
 }
 
+const handleProductSearch = async () => {
+  if (productSearch.value.trim()) {
+    isSearching.value = true
+    const hasMore = await productStore.searchProducts(productSearch.value)
+    hasMoreProducts.value = hasMore
+  } else {
+    await clearProductSearch()
+  }
+}
+
+const clearProductSearch = async () => {
+  productSearch.value = ''
+  isSearching.value = false
+  productStore.clearFilters()
+  const hasMore = await productStore.fetchProducts()
+  hasMoreProducts.value = hasMore
+}
+
 // Note: Filter functions for skin types, concerns, and product types removed - API endpoints no longer exist
 
 const clearAllFilters = async () => {
@@ -444,6 +491,8 @@ const showAllProducts = async () => {
   hasMoreProducts.value = hasMore
   setupInfiniteScroll()
 }
+
+
 
 // Infinite scroll methods
 const loadMoreProducts = async () => {
@@ -630,6 +679,15 @@ onUnmounted(() => {
   .grid {
     grid-template-columns: repeat(4, 1fr);
   }
+}
+
+/* Line clamp utility for product names */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* Custom scrollbar for filter chips */
