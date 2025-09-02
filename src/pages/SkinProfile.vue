@@ -598,10 +598,11 @@ const fetchOptions = async () => {
       accessTokenLength: accessToken?.length
     })
     
+    // Note: API endpoints for skin types, concerns, product types no longer exist
     const [skinTypesRes, skinConcernsRes, productTypesRes] = await Promise.all([
-      apiService.getSkinTypes(),
-      apiService.getSkinConcerns(),
-      apiService.getProductTypes()
+      Promise.resolve({ data: [] }),
+      Promise.resolve({ data: [] }),
+      Promise.resolve({ data: [] })
     ])
 
     console.log('Skin types response:', skinTypesRes)

@@ -6,9 +6,7 @@ export const useProductStore = defineStore('product', () => {
   // State
   const products = ref([])
   const categories = ref([])
-  const skinTypes = ref([])
-  const skinConcerns = ref([])
-  const productTypes = ref([])
+  // Note: skinTypes, skinConcerns, productTypes removed - API endpoints no longer exist
   const featuredProducts = ref([])
   const popularProducts = ref([])
   const newArrivals = ref([])
@@ -157,39 +155,7 @@ export const useProductStore = defineStore('product', () => {
     }
   }
   
-  const fetchSkinTypes = async () => {
-    try {
-      const response = await apiService.getSkinTypes()
-      skinTypes.value = response.data.results || response.data
-      return skinTypes.value
-    } catch (err) {
-      console.error('Failed to fetch skin types:', err)
-      // Don't set error.value here as skin types are not critical
-      return []
-    }
-  }
-
-  const fetchSkinConcerns = async () => {
-    try {
-      const response = await apiService.getSkinConcerns()
-      skinConcerns.value = response.data.results || response.data
-      return skinConcerns.value
-    } catch (err) {
-      console.error('Failed to fetch skin concerns:', err)
-      return []
-    }
-  }
-
-  const fetchProductTypes = async () => {
-    try {
-      const response = await apiService.getProductTypes()
-      productTypes.value = response.data.results || response.data
-      return productTypes.value
-    } catch (err) {
-      console.error('Failed to fetch product types:', err)
-      return []
-    }
-  }
+  // Note: fetchSkinTypes, fetchSkinConcerns, fetchProductTypes removed - API endpoints no longer exist
   
   const fetchFeaturedProducts = async () => {
     try {
@@ -303,9 +269,7 @@ export const useProductStore = defineStore('product', () => {
     // State
     products,
     categories,
-    skinTypes,
-    skinConcerns,
-    productTypes,
+    // Note: skinTypes, skinConcerns, productTypes removed
     featuredProducts,
     popularProducts,
     newArrivals,
@@ -330,9 +294,7 @@ export const useProductStore = defineStore('product', () => {
     fetchProducts,
     fetchProductById,
     fetchCategories,
-    fetchSkinTypes,
-    fetchSkinConcerns,
-    fetchProductTypes,
+    // Note: fetchSkinTypes, fetchSkinConcerns, fetchProductTypes removed
     fetchFeaturedProducts,
     fetchPopularProducts,
     fetchNewArrivals,

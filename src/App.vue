@@ -4,6 +4,7 @@ import { computed, onMounted } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useNotificationStore } from '@/stores/notification'
 import { useAuthStore } from '@/stores/auth'
+import { useCRMStore } from '@/stores/crm'
 import BottomNavigation from '@/components/BottomNavigation.vue'
 import GlobalSnackbar from '@/components/GlobalSnackbar.vue'
 import { StagewiseToolbar } from '@stagewise/toolbar-vue'
@@ -13,6 +14,7 @@ const route = useRoute()
 const cart = useCartStore()
 const notification = useNotificationStore()
 const auth = useAuthStore()
+const crmStore = useCRMStore()
 
 const mainPages = ['Home', 'Orders', 'Explore']
 const authPages = ['Login', 'Register', 'ForgotPassword', 'ResetPassword']
@@ -28,6 +30,9 @@ onMounted(async () => {
 
     // Initialize notification store
     await notification.init()
+    
+    // Initialize CRM store from session storage
+    await crmStore.initializeFromSession()
   } catch (error) {
     console.log('Error initializing app stores:', error)
   }

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 pb-24">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/20 to-indigo-50/30 pb-24">
     <!-- Top navigation bar -->
     <div class="fixed top-0 left-0 right-0 z-50 px-4 py-3">
       <div class="flex items-center justify-between">
@@ -7,14 +7,14 @@
           @click="$router.go(-1)" 
           class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-white/20 flex items-center justify-center"
         >
-          <ArrowLeft class="w-5 h-5 text-gray-700" />
+          <ArrowLeft class="w-5 h-5 text-gray-600" />
         </button>
         <div class="flex items-center space-x-2">
           <button class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-white/20 flex items-center justify-center">
-            <Heart class="w-5 h-5 text-gray-700" />
+            <Heart class="w-5 h-5 text-gray-600" />
           </button>
           <button class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-white/20 flex items-center justify-center">
-            <Share2 class="w-5 h-5 text-gray-700" />
+            <Share2 class="w-5 h-5 text-gray-600" />
           </button>
         </div>
       </div>
@@ -22,31 +22,56 @@
 
     <!-- Loading skeleton -->
     <div v-if="loading" class="pt-20 px-4">
-      <div class="animate-pulse">
-        <div class="bg-gray-200 rounded-3xl h-96 mb-6"></div>
+      <div class="animate-pulse space-y-4">
+        <!-- Image skeleton -->
+        <div class="bg-gray-200 rounded-2xl h-80 mb-6"></div>
+        
+        <!-- Content skeleton -->
         <div class="space-y-4">
-          <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-          <div class="h-6 bg-gray-200 rounded w-1/2"></div>
-          <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+          <!-- Brand and stock -->
+          <div class="flex justify-between items-center">
+            <div class="h-3 bg-gray-200 rounded-full w-20"></div>
+            <div class="h-5 bg-gray-200 rounded-full w-16"></div>
+          </div>
+          
+          <!-- Title -->
+          <div class="space-y-2">
+            <div class="h-6 bg-gray-200 rounded-lg w-3/4"></div>
+            <div class="h-4 bg-gray-200 rounded-lg w-1/2"></div>
+          </div>
+          
+          <!-- Price -->
+          <div class="h-6 bg-gray-200 rounded-lg w-24"></div>
+          
+          <!-- Variants -->
+          <div class="space-y-2">
+            <div class="h-4 bg-gray-200 rounded w-16"></div>
+            <div class="flex space-x-2">
+              <div class="h-10 bg-gray-200 rounded-xl w-16"></div>
+              <div class="h-10 bg-gray-200 rounded-xl w-16"></div>
+              <div class="h-10 bg-gray-200 rounded-xl w-16"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Error alert -->
     <div v-if="error" class="pt-20 px-4 mb-4">
-      <div class="p-4 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-3xl">
+      <div class="p-4 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-2xl">
         <div class="flex items-center">
           <AlertCircle class="w-5 h-5 text-red-500 mr-3" />
-          <span class="text-red-700 font-medium">{{ error }}</span>
+          <span class="text-red-700 font-medium text-sm">{{ error }}</span>
         </div>
       </div>
     </div>
 
     <!-- Product details -->
-    <div v-if="product" class="pt-20">
+    <div v-if="product" class="pt-16">
       <!-- Product image carousel -->
       <div class="relative mb-6">
-        <div class="aspect-square overflow-hidden">
+        <!-- Main image -->
+        <div class="aspect-square overflow-hidden bg-gray-100 relative">
           <img 
             v-if="product.image_1 == null && product.image_2 == null"
             :src="product.main_image || packagingImage" 
@@ -59,26 +84,33 @@
               :alt="product.name"
               class="w-full h-full object-cover"
             />
-            <!-- Image navigation dots -->
-            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-              <button 
-                v-for="(image, index) in productImages" 
-                :key="index"
-                @click="currentImageIndex = index"
-                :class="[
-                  'w-2 h-2 rounded-full transition-all duration-200',
-                  currentImageIndex === index 
-                    ? 'bg-white shadow-lg' 
-                    : 'bg-white/50 hover:bg-white/75'
-                ]"
-              ></button>
-            </div>
+          </div>
+          
+          <!-- Thumbnail images overlay -->
+          <div v-if="productImages.length > 1" class="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-2 bg-black/20 backdrop-blur-sm rounded-lg px-2 py-1">
+            <button 
+              v-for="(image, index) in productImages" 
+              :key="index"
+              @click="currentImageIndex = index"
+              :class="[
+                'w-10 h-10 rounded-md overflow-hidden border-2 transition-all duration-200',
+                currentImageIndex === index 
+                  ? 'border-white shadow-lg' 
+                  : 'border-white/50 hover:border-white/75'
+              ]"
+            >
+              <img 
+                :src="image" 
+                :alt="`${product.name} - Image ${index + 1}`"
+                class="w-full h-full object-cover"
+              />
+            </button>
           </div>
         </div>
       </div>
 
       <!-- Product info -->
-      <div class="px-4 space-y-6">
+      <div class="px-4 space-y-4">
         <!-- Brand and stock status -->
         <div class="flex justify-between items-center">
           <div class="text-sm text-gray-500 font-medium">{{ product.seller_name || 'weCare' }}</div>
@@ -97,34 +129,33 @@
         </div>
 
         <!-- Product title -->
-        <h1 class="text-2xl font-bold text-gray-900 capitalize leading-tight">{{ product.name }}</h1>
+        <h1 class="text-xl font-bold text-gray-900 capitalize leading-tight">{{ product.name }}</h1>
 
         <!-- Price -->
         <div class="flex items-center justify-between">
-          <div class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+          <div class="text-lg font-bold text-blue-600">
             {{ formatApiPrice({ price: currentPrice }) }}
           </div>
         </div>
 
         <!-- Size and Quantity - Only show if in stock -->
-        <div v-if="product.variants && product.variants.length > 0" class="space-y-4">
+        <div v-if="product.variants && product.variants.length > 0" class="space-y-3">
           <div class="flex justify-between items-center">
-            <h3 class="text-lg font-semibold text-gray-900">Size (ml)</h3>
+            <h3 class="text-sm font-semibold text-gray-900">Variants</h3>
           </div>
 
           <!-- Size options -->
-          <div class="flex flex-wrap gap-3">
+          <div class="flex flex-wrap gap-2">
             <button 
               v-for="variant in product.variants" 
               :key="variant.id"
               @click="selectVariant(variant)"
               :class="[
-                'px-4 py-3 rounded-2xl font-medium transition-all duration-200',
+                'px-3 py-2 rounded-xl font-medium text-sm transition-all duration-200',
                 selectedVariant?.id === variant.id 
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
-                  : 'bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white hover:shadow-md'
+                  ? 'bg-blue-600 text-white shadow-md' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               ]"
-              :style="selectedVariant?.id === variant.id ? 'background: linear-gradient(to right, #2563eb, #9333ea);' : ''"
             >
               {{ variant.name }}
             </button>
@@ -132,13 +163,13 @@
         </div>
 
         <!-- Tab section -->
-        <div class="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-sm border border-white/20">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-white/20">
           <!-- Tab headers -->
-          <div class="flex space-x-1 mb-6 bg-gray-100/50 rounded-2xl p-1">
+          <div class="flex space-x-1 mb-4 bg-gray-100/50 rounded-xl p-1">
             <button 
               @click="activeTab = 'description'"
               :class="[
-                'flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all duration-200',
+                'flex-1 py-2 px-3 rounded-lg font-medium text-xs transition-all duration-200',
                 activeTab === 'description' 
                   ? 'bg-white text-blue-600 shadow-sm' 
                   : 'text-gray-600 hover:text-gray-900'
@@ -149,7 +180,7 @@
             <button 
               @click="activeTab = 'reviews'"
               :class="[
-                'flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all duration-200',
+                'flex-1 py-2 px-3 rounded-lg font-medium text-xs transition-all duration-200',
                 activeTab === 'reviews' 
                   ? 'bg-white text-blue-600 shadow-sm' 
                   : 'text-gray-600 hover:text-gray-900'
@@ -158,35 +189,24 @@
               Reviews ({{ product.review_stats.count }})
             </button>
             <button 
-              @click="activeTab = 'how-to-use'"
+              @click="activeTab = 'attributes'"
               :class="[
-                'flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all duration-200',
-                activeTab === 'how-to-use' 
+                'flex-1 py-2 px-3 rounded-lg font-medium text-xs transition-all duration-200',
+                activeTab === 'attributes' 
                   ? 'bg-white text-blue-600 shadow-sm' 
                   : 'text-gray-600 hover:text-gray-900'
               ]"
             >
-              How to use
+              Details
             </button>
           </div>
 
           <!-- Tab content -->
-          <div class="space-y-6">
+          <div class="space-y-4">
             <!-- Description tab -->
-            <div v-if="activeTab === 'description'" class="space-y-6">
-              <p class="text-gray-700 leading-relaxed">{{ product.description || "No description available." }}</p>
+            <div v-if="activeTab === 'description'" class="space-y-4">
+              <p class="text-gray-700 leading-relaxed text-sm">{{ product.description || "No description available." }}</p>
 
-              <div class="space-y-4">
-                <div>
-                  <h6 class="text-lg font-semibold text-gray-900 mb-2">Ingredients</h6>
-                  <p class="text-gray-700 leading-relaxed">{{ product.ingredients || "No ingredients available." }}</p>
-                </div>
-
-                <div>
-                  <h6 class="text-lg font-semibold text-gray-900 mb-2">Benefits</h6>
-                  <p class="text-gray-700 leading-relaxed">{{ product.benefits || "No benefits available." }}</p>
-                </div>
-              </div>
 
               <!-- Skin Types Section -->
               <div v-if="product.suitable_for && product.suitable_for.length > 0" class="space-y-3">
@@ -263,9 +283,110 @@
               </div>
             </div>
 
-            <!-- How to use tab -->
-            <div v-if="activeTab === 'how-to-use'" class="space-y-4">
-              <p class="text-gray-700 leading-relaxed">{{ product.how_to_use || "No usage instructions available." }}</p>
+
+
+            <!-- Product Attributes tab -->
+            <div v-if="activeTab === 'attributes'" class="space-y-4">
+              <!-- Loading state for attributes -->
+              <div v-if="loadingAttributes" class="flex flex-col items-center justify-center py-8">
+                <div class="relative mb-4">
+                  <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-200" style="border-color: #dbeafe;"></div>
+                  <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent absolute top-0 left-0" style="border-color: #2563eb;"></div>
+                </div>
+                <p class="text-sm text-gray-600 font-medium">Loading product details...</p>
+              </div>
+
+              <!-- Attributes loaded successfully -->
+              <div v-else-if="productAttributes.length > 0" class="space-y-3">
+                <!-- Attributes Grid -->
+                <div class="grid grid-cols-1 gap-3">
+                  <div 
+                    v-for="attr in productAttributes" 
+                    :key="attr.id" 
+                    class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 hover:border-gray-200"
+                  >
+                    <!-- Simple Label and Value Display -->
+                    <div class="space-y-2">
+                      <!-- Attribute Label -->
+                      <h4 class="font-semibold text-gray-900 text-sm">{{ attr.label }}</h4>
+                      
+                      <!-- Attribute Value -->
+                      <div class="text-gray-700">
+                        <!-- Text, Number, Decimal values -->
+                        <span v-if="['text', 'number', 'decimal'].includes(attr.field_type)" 
+                              class="text-sm font-medium">
+                          {{ getFormattedAttributeValue(attr) || 'Not specified' }}
+                        </span>
+
+                        <!-- Select value -->
+                        <span v-else-if="attr.field_type === 'select'" 
+                              class="text-sm font-medium">
+                          {{ getFormattedAttributeValue(attr) || 'Not specified' }}
+                        </span>
+
+                        <!-- Multiselect values -->
+                        <div v-else-if="attr.field_type === 'multiselect'" class="space-y-2">
+                          <div v-if="attr.attribute_value && attr.attribute_value.selected_choices && attr.attribute_value.selected_choices.length > 0" 
+                               class="flex flex-wrap gap-2">
+                            <span 
+                              v-for="choice in attr.attribute_value.selected_choices" 
+                              :key="choice"
+                              class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full"
+                            >
+                              {{ choice }}
+                            </span>
+                          </div>
+                          <span v-else class="text-sm font-medium text-gray-500">Not specified</span>
+                        </div>
+
+                        <!-- Boolean value -->
+                        <div v-else-if="attr.field_type === 'boolean'" class="flex items-center space-x-2">
+                          <div class="w-5 h-5 rounded-full flex items-center justify-center"
+                               :class="attr.attribute_value && attr.attribute_value.boolean_value ? 'bg-green-500' : 'bg-gray-400'">
+                            <svg v-if="attr.attribute_value && attr.attribute_value.boolean_value" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <svg v-else class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                          </div>
+                          <span class="text-sm font-medium">
+                            {{ attr.attribute_value && attr.attribute_value.boolean_value ? 'Yes' : 'No' }}
+                          </span>
+                        </div>
+
+                        <!-- Date value -->
+                        <span v-else-if="attr.field_type === 'date'" 
+                              class="text-sm font-medium">
+                          {{ getFormattedAttributeValue(attr) || 'Not specified' }}
+                        </span>
+
+                        <!-- File value -->
+                        <span v-else-if="attr.field_type === 'file'" 
+                              class="text-sm font-medium">
+                          {{ getFormattedAttributeValue(attr) ? 'File attached' : 'No file' }}
+                        </span>
+
+                        <!-- Default fallback -->
+                        <span v-else class="text-sm font-medium">
+                          {{ getFormattedAttributeValue(attr) || 'Not specified' }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- No attributes available -->
+              <div v-else class="text-center py-8">
+                <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                </div>
+                <h3 class="text-sm font-semibold text-gray-900 mb-2">No Additional Details</h3>
+                <p class="text-gray-600 text-xs max-w-sm mx-auto">This product doesn't have additional details available at the moment.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -292,7 +413,7 @@
 
         <!-- In stock action buttons -->
         <div v-else class="flex items-center space-x-3">
-          <div class="flex items-center bg-gray-100 rounded-2xl p-1">
+          <div class="flex items-center bg-gray-100 rounded-2xl p-1"  v-if="!usesCRMFlow">
             <button 
               @click="decreaseQuantity"
               class="w-10 h-10 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors"
@@ -312,10 +433,26 @@
           <button 
             v-if="usesCRMFlow"
             @click="showViewingForm = true"
-            class="flex-1 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
+            :disabled="backendHasActiveViewingRequest"
+            class="flex-1 py-4 text-white font-semibold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+            style="background: linear-gradient(to right, #2563eb, #9333ea);"
           >
             <Calendar class="w-5 h-5 mr-2" />
-            Request Viewing
+            {{ backendHasActiveViewingRequest ? 'Request Pending' : 'Request Viewing' }}
+          </button>
+
+          <button 
+            v-if="usesCRMFlow"
+            @click="goToCart"
+            class="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center hover:bg-gray-200 transition-colors relative"
+          >
+            <Calendar class="w-6 h-6 text-gray-700" />
+            <span 
+              v-if="pendingViewingRequests > 0"
+              class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold"
+            >
+              {{ pendingViewingRequests > 99 ? '99+' : pendingViewingRequests }}
+            </span>
           </button>
 
           <!-- Regular Flow: Add to Cart Button -->
@@ -330,6 +467,7 @@
           </button>
 
           <button 
+            v-if="!usesCRMFlow"
             @click="goToCart"
             class="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center hover:bg-gray-200 transition-colors relative"
           >
@@ -355,7 +493,7 @@
         <div class="flex items-center">
           <CheckCircle v-if="snackbarColor === 'success'" class="w-5 h-5 text-green-500 mr-3" />
           <AlertCircle v-else class="w-5 h-5 text-red-500 mr-3" />
-          <span :class="snackbarColor === 'success' ? 'text-green-700' : 'text-red-700'" class="font-medium">
+          <span :class="snackbarColor === 'success' ? 'text-green-700' : 'text-red-700'" class="font-medium text-sm">
             {{ snackbarText }}
           </span>
         </div>
@@ -382,13 +520,15 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useProductStore } from '@/stores/product'
+import { useCRMStore } from '@/stores/crm'
 import { apiService } from '@/services/api'
 import { useCurrency } from '@/composables/useCurrency'
 import packagingImage from '@/assets/packaging_10471395.png'
 import ViewingRequestForm from '@/components/ViewingRequestForm.vue'
 import { 
   ArrowLeft, Heart, Share2, AlertCircle, Star, MessageCircle, 
-  Minus, Plus, ShoppingBag, ShoppingCart, CheckCircle, X, Calendar 
+  Minus, Plus, ShoppingBag, ShoppingCart, CheckCircle, X, Calendar, Info,
+  Hash, Calculator, List, CheckSquare, ToggleLeft, FileText, Type
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -399,6 +539,7 @@ const selectedVariant = ref(null)
 const selectedSize = ref(null)
 const cart = useCartStore()
 const productStore = useProductStore()
+const crmStore = useCRMStore()
 const { formatApiPrice } = useCurrency()
 const notificationStatus = ref('')
 const showSnackbar = ref(false)
@@ -411,10 +552,17 @@ const usesCRMFlow = ref(false)
 const crmFlowInfo = ref(null)
 const showViewingForm = ref(false)
 const checkingCRMFlow = ref(false)
+const hasPendingViewingRequest = ref(false)
+const checkingPendingRequest = ref(false)
+
+// Product attributes variables
+const productAttributes = ref([])
+const loadingAttributes = ref(false)
 
 const loading = computed(() => productStore.loading)
 const error = computed(() => productStore.error)
 const product = computed(() => productStore.currentProduct)
+const backendHasActiveViewingRequest = computed(() => !!product.value?.has_active_viewing_request)
 
 // Computed property for product images
 const productImages = computed(() => {
@@ -477,7 +625,11 @@ const checkCRMFlow = async () => {
     usesCRMFlow.value = response.data.uses_crm
     crmFlowInfo.value = response.data.flow_info
     
-    console.log('CRM Flow Check:', response.data)
+    // Update global CRM state if this product uses CRM
+    if (response.data.uses_crm && product.value.store?.store_category) {
+      await crmStore.checkCategoryFlow(product.value.store.store_category.id)
+    }
+    
   } catch (error) {
     console.error('Failed to check CRM flow:', error)
     usesCRMFlow.value = false
@@ -486,10 +638,38 @@ const checkCRMFlow = async () => {
   }
 }
 
+// Check if shopper has existing pending viewing request for this product
+const checkExistingViewingRequest = async () => {
+  if (!product.value?.id) return
+
+  try {
+    checkingPendingRequest.value = true
+    const response = await apiService.getViewingRequests({
+      product_id: product.value.id,
+      status: 'SCHEDULED,ACCEPTED,NEW'
+    })
+
+    // Disable if at least one matching active request exists
+    const res = response?.data
+    const results = Array.isArray(res?.results) ? res.results : []
+    hasPendingViewingRequest.value = results.length > 0 || !!product.value?.has_active_viewing_request
+
+  } catch (error) {
+    console.error('Failed to check existing viewing requests:', error)
+    hasPendingViewingRequest.value = false
+  } finally {
+    checkingPendingRequest.value = false
+  }
+}
+
 const onViewingRequestSuccess = (data) => {
   snackbarText.value = data.message
   snackbarColor.value = 'success'
   showSnackbar.value = true
+  showViewingForm.value = false
+  
+  // Refresh the pending request check
+  checkExistingViewingRequest()
 }
 
 const onViewingRequestError = (errorMessage) => {
@@ -512,6 +692,249 @@ const getProductTypeFromCRM = () => {
     }
   }
   return 'item'
+}
+
+// Fetch product attributes from existing product data
+const fetchProductAttributes = async () => {
+  
+  loadingAttributes.value = true
+  
+  try {
+    // Use the attribute values that are already included in the product data
+    if (product.value?.attribute_values && product.value.attribute_values.length > 0) {
+      
+      // Map the attribute values to include label and human display value only
+      const attributesWithValues = product.value.attribute_values.map(attrValue => {
+        const template = attrValue.attribute_template
+        
+        return {
+          id: template?.id || attrValue.attribute_template, // fallback to id
+          label: attrValue.attribute_label,
+          field_type: attrValue.field_type,
+          // Keep original value object for special cases (boolean, multiselect chips)
+          attribute_value: attrValue,
+          // Human-friendly value from backend
+          display_value: attrValue.display_value,
+          // Optional ordering when available
+          display_order: template?.display_order || 0,
+        }
+      })
+      
+      // Sort by display order; do not filter out anything for shopper view
+      productAttributes.value = attributesWithValues
+        .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+      
+    } else {
+      productAttributes.value = []
+    }
+    
+  } catch (error) {
+    console.error('❌ ProductDetails: Error processing product attributes:', error)
+    productAttributes.value = []
+  } finally {
+    loadingAttributes.value = false
+  }
+}
+
+// Get formatted attribute value for user-friendly display
+const getFormattedAttributeValue = (attr) => {
+  // First try to use the display_value that's already formatted by the backend
+  if (attr.display_value !== undefined && attr.display_value !== null && attr.display_value !== '') {
+    return attr.display_value
+  }
+  
+  // Fallback to getting raw value and formatting it
+  const rawValue = getAttributeValue(attr)
+  
+  if (rawValue === null || rawValue === undefined) {
+    return null
+  }
+  
+  // Format based on field type for better user experience
+  switch (attr.field_type) {
+    case 'number':
+      return rawValue.toLocaleString() // Add commas for large numbers
+    case 'decimal':
+      return parseFloat(rawValue).toFixed(2) // Show 2 decimal places
+    case 'date':
+      return formatDate(rawValue) // Format date nicely
+    case 'boolean':
+      return rawValue // Already handled in template
+    case 'multiselect':
+      return Array.isArray(rawValue) ? rawValue : [] // Ensure it's an array
+    case 'file':
+      return rawValue ? 'File attached' : null
+    default:
+      return rawValue // Return as-is for text, select, etc.
+  }
+}
+
+// Get attribute value for display from product data
+const getAttributeValue = (attr) => {
+  
+  // First check if we have the attribute_value stored in the processed attribute
+  if (attr.attribute_value) {
+    
+    const attributeValue = attr.attribute_value
+    
+    // Return the appropriate value based on field type
+    switch (attr.field_type) {
+      case 'text':
+      case 'textarea':
+      case 'url':
+      case 'email':
+        return attributeValue.text_value || null
+      case 'number':
+        return attributeValue.number_value || null
+      case 'decimal':
+        return attributeValue.decimal_value || null
+      case 'boolean':
+        return attributeValue.boolean_value
+      case 'date':
+        return attributeValue.date_value || null
+      case 'file':
+      case 'image':
+        return attributeValue.file_value ? 'File attached' : null
+      case 'select':
+        // For select, return the first choice or the choice itself
+        const selectChoices = attributeValue.selected_choices || []
+        return selectChoices.length > 0 ? selectChoices[0] : null
+      case 'multiselect':
+        // For multiselect, return the array of choices
+        return attributeValue.selected_choices || []
+      default:
+        return attributeValue.text_value || null
+    }
+  }
+  
+  // Fallback: check product's attribute_values directly
+  
+  if (!product.value || !product.value.attribute_values) {
+    
+    return null
+  }
+  
+  
+  
+  // Find the attribute value for this template
+  const attributeValue = product.value.attribute_values.find(
+    av => av.attribute_template && av.attribute_template.id === attr.id
+  )
+  
+  
+  
+  if (!attributeValue) {
+    
+    return null
+  }
+  
+  // Return the appropriate value based on field type
+  switch (attr.field_type) {
+    case 'text':
+    case 'textarea':
+    case 'url':
+    case 'email':
+      return attributeValue.text_value || null
+    case 'number':
+      return attributeValue.number_value || null
+    case 'decimal':
+      return attributeValue.decimal_value || null
+    case 'boolean':
+      return attributeValue.boolean_value
+    case 'date':
+      return attributeValue.date_value || null
+    case 'file':
+    case 'image':
+      return attributeValue.file_value ? 'File attached' : null
+    case 'select':
+      // For select, return the first choice or the choice itself
+      const selectChoices = attributeValue.selected_choices || []
+      return selectChoices.length > 0 ? selectChoices[0] : null
+    case 'multiselect':
+      // For multiselect, return the array of choices
+      return attributeValue.selected_choices || []
+    default:
+      return attributeValue.text_value || null
+  }
+}
+
+// Format date for display
+const formatDate = (dateString) => {
+  if (!dateString) return null
+  try {
+    return new Date(dateString).toLocaleDateString()
+  } catch {
+    return dateString
+  }
+}
+
+// Get field type icon component
+const getFieldTypeIcon = (fieldType) => {
+  const icons = {
+    text: Type,
+    number: Hash,
+    decimal: Calculator,
+    select: List,
+    multiselect: CheckSquare,
+    boolean: ToggleLeft,
+    date: Calendar,
+    file: FileText
+  }
+  return icons[fieldType] || Type
+}
+
+// Get field type color classes
+const getFieldTypeColor = (fieldType) => {
+  const colors = {
+    text: 'bg-gray-500',
+    number: 'bg-blue-500',
+    decimal: 'bg-blue-600',
+    select: 'bg-green-500',
+    multiselect: 'bg-purple-500',
+    boolean: 'bg-orange-500',
+    date: 'bg-yellow-500',
+    file: 'bg-indigo-500'
+  }
+  return colors[fieldType] || 'bg-gray-500'
+}
+
+// Test API call manually
+const testAPICall = async () => {
+  
+  
+  // Try to get store category ID from multiple sources
+  const sources = [
+    { name: 'Product Store Category', value: product.value?.store?.store_category?.id },
+    { name: 'Session Storage Default Store', value: sessionStorage.getItem('defaultStore') },
+    { name: 'Product Category', value: product.value?.category?.id }
+  ]
+  
+  
+  
+  for (const source of sources) {
+    if (source.value) {
+      
+      
+      try {
+        const response = await apiService.getStoreAttributesByStoreCategory({ 
+          store_category_id: source.value 
+        })
+        
+        
+        if (response.data?.templates?.length > 0) {
+          
+          // Update the attributes with this successful response
+          productAttributes.value = response.data.templates.filter(t => t.is_active)
+          return
+        } else {
+          console.log(`🧪 ProductDetails: No templates found with ${source.name}`)
+        }
+      } catch (error) {
+        console.error(`🧪 ProductDetails: FAILED with ${source.name}:`, error)
+      }
+    }
+  }
+  
 }
 
 const goToCart = () => {
@@ -615,6 +1038,15 @@ onMounted(async () => {
 
     // Check CRM flow after product is loaded
     await checkCRMFlow()
+
+    // Check for existing viewing requests if using CRM flow
+    if (usesCRMFlow.value) {
+      await checkExistingViewingRequest()
+    }
+
+    // Fetch product attributes based on store category
+    await fetchProductAttributes()
+    
   } catch (error) {
     // Handle error and redirect to home page
     console.error('Error fetching product:', error)
@@ -631,6 +1063,13 @@ onMounted(async () => {
 watch(product, async (newProduct) => {
   if (newProduct?.id) {
     await checkCRMFlow()
+    
+    // Check for existing viewing requests if using CRM flow
+    if (usesCRMFlow.value) {
+      await checkExistingViewingRequest()
+    }
+    
+    await fetchProductAttributes()
   }
 }, { immediate: false })
 </script>

@@ -139,6 +139,7 @@
           type="submit"
           :disabled="submitting"
           class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            style="background: linear-gradient(to right, #2563eb, #9333ea);"
         >
           <Calendar v-if="!submitting" class="w-5 h-5 mr-2" />
           <div v-else class="w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

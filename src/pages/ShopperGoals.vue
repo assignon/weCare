@@ -311,10 +311,11 @@ const infoDialogIcon = ref('')
 const fetchData = async () => {
     loading.value = true
     try {
+        // Note: API endpoints for skin types, concerns, product types no longer exist  
         const [skinTypesRes, skinConcernsRes, productTypesRes] = await Promise.all([
-            apiService.getSkinTypes(),
-            apiService.getSkinConcerns(),
-            apiService.getProductTypes()
+            Promise.resolve({ data: [] }),
+            Promise.resolve({ data: [] }),
+            Promise.resolve({ data: [] })
         ])
 
         skinTypes.value = skinTypesRes.data.results || skinTypesRes.data || []

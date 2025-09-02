@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useCRMStore } from '@/stores/crm'
 import apiService from '@/services/api'
 
 const routes = [
@@ -47,6 +48,13 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore()
+  const crmStore = useCRMStore()
+  
+  // Check for cart access restriction for CRM categories
+  if (to.name === 'Cart' && crmStore.shouldRestrictCart) {
+    console.log('Cart access restricted for CRM category, redirecting to Rendezvous')
+    return next({ name: 'Rendezvous' })
+  }
   
   // After auth check, ensure default store category selection exists
   

@@ -146,19 +146,22 @@ export const apiService = {
     return api.get('/products/categories/', { params })
   },
   
-  // Skin Types
+  // Note: Skin types, concerns, and product types APIs have been removed
+  // Use CategoryAttributeTemplate system instead for dynamic product attributes
+  
+  // Skin Types (DEPRECATED - returns empty array)
   getSkinTypes() {
-    return api.get('/products/skin-types/')
+    return Promise.resolve({ data: [] })
   },
 
-  // Skin Concerns
+  // Skin Concerns (DEPRECATED - returns empty array)
   getSkinConcerns() {
-    return api.get('/products/skin-concerns/')
+    return Promise.resolve({ data: [] })
   },
 
-  // Product Types
+  // Product Types (DEPRECATED - returns empty array)
   getProductTypes() {
-    return api.get('/products/product-types/')
+    return Promise.resolve({ data: [] })
   },
 
   // Countries
@@ -795,6 +798,25 @@ export const apiService = {
 
   getViewingRequestStats() {
     return api.get('/products/crm/viewing-requests/stats/')
+  },
+
+  // Chat Messages
+  getChatMessages(params = {}) {
+    return api.get('/products/crm/chat/', { params })
+  },
+
+  sendChatMessage(data) {
+    return api.post('/products/crm/chat/', data)
+  },
+
+  markMessageAsRead(messageId) {
+    return api.post(`/products/crm/chat/${messageId}/mark_as_read/`)
+  },
+
+  markAllMessagesAsRead(viewingRequestId) {
+    return api.post('/products/crm/chat/mark_all_as_read/', {
+      viewing_request_id: viewingRequestId
+    })
   }
 }
 

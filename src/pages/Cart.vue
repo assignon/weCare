@@ -253,6 +253,7 @@
 
 <script setup>
 import { useCartStore } from '@/stores/cart'
+import { useCRMStore } from '@/stores/crm'
 import { useRouter } from 'vue-router'
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useCurrency } from '@/composables/useCurrency'
@@ -262,6 +263,7 @@ import {
 } from 'lucide-vue-next'
 
 const cart = useCartStore()
+const crmStore = useCRMStore()
 const router = useRouter()
 const { formatApiPrice } = useCurrency()
 
@@ -280,6 +282,13 @@ const handleBeforeUnload = (e) => {
 }
 
 onMounted(async () => {
+  // Check if cart access should be restricted for CRM categories
+  if (crmStore.shouldRestrictCart) {
+    console.log('Cart access restricted for CRM category, redirecting to Rendezvous')
+    router.replace({ name: 'Rendezvous' })
+    return
+  }
+
   // Add event listener for page unload
   window.addEventListener('beforeunload', handleBeforeUnload)
   try {

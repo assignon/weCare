@@ -136,20 +136,22 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useNotificationStore } from '@/stores/notification'
+import { useCRMStore } from '@/stores/crm'
 import { Home, Telescope, Package, ShoppingBag, Store, Sparkles, Shirt, Pill, Sofa, Monitor, Car, Calendar } from 'lucide-vue-next'
 import apiService from '@/services/api'
 
 const route = useRoute()
 const cart = useCartStore()
 const notification = useNotificationStore()
+const crmStore = useCRMStore()
 
 const activeTab = ref('home')
 
 const currentRouteName = computed(() => route.name)
 
-// State for CRM flow detection
-const shouldShowRendezvous = ref(false)
-const pendingViewingRequests = ref(0)
+// Use CRM store for state
+const shouldShowRendezvous = computed(() => crmStore.shouldShowRendezvous)
+const pendingViewingRequests = computed(() => crmStore.pendingViewingRequests)
 
 // Update active tab based on current route
 const updateActiveTab = () => {
@@ -181,8 +183,9 @@ onMounted(async () => {
         const resp = await apiService.getStoreCategories({ is_active: true })
         storeCategories.value = resp.data?.results || resp.data || []
         
-        // Check CRM flow after loading categories
-        await checkCRMFlow()
+        // Initialize CRM state from session
+        console.log('🚀 BottomNav: Initializing CRM state from session...')
+        await crmStore.initializeFromSession()
       } catch (e) {
         console.warn('Failed to load store categories on mount:', e)
       }
@@ -243,16 +246,25 @@ const closeStoreDialog = () => {
 const isDefault = (id) => String(sessionStorage.getItem('defaultStore') || '') === String(id)
 
 const selectStore = async (id) => {
+  console.log('🏪 BottomNav: Store selected, ID:', id)
+  
   sessionStorage.setItem('defaultStore', String(id))
   showStoreDialog.value = false
+  
   // Force reactivity update
   if (storeCategories.value.length > 0) {
     storeCategories.value = [...storeCategories.value]
   }
   
-  // Check CRM flow for new store before reload
-  await checkCRMFlow()
+  // Find the selected category name for debugging
+  const selectedCategory = storeCategories.value.find(cat => String(cat.id) === String(id))
+  console.log('🏪 BottomNav: Selected category:', selectedCategory?.name)
   
+  // Check CRM flow for new store
+  console.log('🔄 BottomNav: Calling CRM store checkCategoryFlow...')
+  await crmStore.checkCategoryFlow(parseInt(id))
+  
+  console.log('🔄 BottomNav: CRM check complete, reloading page...')
   // Reload to refresh product feeds with selected category
   location.reload()
 }
@@ -283,47 +295,7 @@ const getDefaultStoreIcon = () => {
 // Reactive computed property for the default store icon
 const defaultStoreIcon = computed(() => getDefaultStoreIcon())
 
-// Function to check if current default store uses CRM flow
-const checkCRMFlow = async () => {
-  try {
-    const defaultStoreId = sessionStorage.getItem('defaultStore')
-    if (!defaultStoreId) {
-      shouldShowRendezvous.value = false
-      return
-    }
 
-    // Find the default store category
-    if (storeCategories.value.length === 0) {
-      const resp = await apiService.getStoreCategories({ is_active: true })
-      storeCategories.value = resp.data?.results || resp.data || []
-    }
-
-    const defaultCategory = storeCategories.value.find(cat => String(cat.id) === String(defaultStoreId))
-    if (defaultCategory) {
-      const response = await apiService.checkStoreCategoryCRMFlow(defaultCategory.id)
-      shouldShowRendezvous.value = response.data.default_to_crm || false
-      
-      // If showing rendezvous, fetch pending requests count
-      if (shouldShowRendezvous.value) {
-        await fetchPendingViewingRequests()
-      }
-    }
-  } catch (error) {
-    console.error('Failed to check CRM flow:', error)
-    shouldShowRendezvous.value = false
-  }
-}
-
-// Function to fetch pending viewing requests count
-const fetchPendingViewingRequests = async () => {
-  try {
-    const response = await apiService.getViewingRequestStats()
-    pendingViewingRequests.value = response.data.pending_requests || 0
-  } catch (error) {
-    console.error('Failed to fetch viewing request stats:', error)
-    pendingViewingRequests.value = 0
-  }
-}
 </script>
 
 <style scoped>

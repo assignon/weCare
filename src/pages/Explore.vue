@@ -140,62 +140,7 @@
 
             <!-- Fallback default filters when no templates available -->
             <div v-else class="space-y-6">
-              <!-- Skin Type Filter -->
-              <div>
-                <label class="block text-sm font-semibold text-gray-800 mb-3">Filter by Skin Type</label>
-                <select 
-                  v-model="selectedSkinTypes" 
-                  multiple
-                  @change="applySkinTypeFilter"
-                  class="w-full p-4 bg-gray-50/50 border border-gray-200/50 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
-                >
-                  <option 
-                    v-for="skinType in productStore.skinTypes" 
-                    :key="skinType.id" 
-                    :value="skinType.id"
-                  >
-                    {{ skinType.name }}
-                  </option>
-                </select>
-              </div>
-
-              <!-- Skin Concern Filter -->
-              <div>
-                <label class="block text-sm font-semibold text-gray-800 mb-3">Filter by Skin Concern</label>
-                <select 
-                  v-model="selectedSkinConcerns" 
-                  multiple
-                  @change="applySkinConcernFilter"
-                  class="w-full p-4 bg-gray-50/50 border border-gray-200/50 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
-                >
-                  <option 
-                    v-for="concern in productStore.skinConcerns" 
-                    :key="concern.id" 
-                    :value="concern.id"
-                  >
-                    {{ concern.name }}
-                  </option>
-                </select>
-              </div>
-
-              <!-- Product Type Filter -->
-              <div>
-                <label class="block text-sm font-semibold text-gray-800 mb-3">Filter by Product Type</label>
-                <select 
-                  v-model="selectedProductTypes" 
-                  multiple
-                  @change="applyProductTypeFilter"
-                  class="w-full p-4 bg-gray-50/50 border border-gray-200/50 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
-                >
-                  <option 
-                    v-for="productType in productStore.productTypes" 
-                    :key="productType.id" 
-                    :value="productType.id"
-                  >
-                    {{ productType.name }}
-                  </option>
-                </select>
-              </div>
+              <!-- Note: Skin type, skin concern, and product type filters removed - API endpoints no longer exist -->
 
               <div class="flex justify-end pt-2">
                 <button 
@@ -327,9 +272,7 @@ const isSearching = ref(false)
 
 // Filter functionality
 const showFilterOptions = ref(false)
-const selectedSkinTypes = ref([])
-const selectedSkinConcerns = ref([])
-const selectedProductTypes = ref([])
+// Note: Filter variables for skin types, concerns, and product types removed - API endpoints no longer exist
 const isFiltering = ref(false)
 
 // Dynamic store attribute templates and selections
@@ -429,41 +372,8 @@ const loading = computed(() => productStore.loading)
 const error = computed(() => productStore.error)
 
 // Computed property to handle local filtering for multiple skin types, skin concerns, and product types
-const filteredProducts = computed(() => {
-  let products = productStore.products
-
-  // Filter by multiple skin types
-  if (selectedSkinTypes.value.length > 1) {
-    products = products.filter(product => {
-      // Check if product has any of the selected skin types
-      return product.suitable_for && product.suitable_for.some(skinType =>
-        selectedSkinTypes.value.includes(skinType.id)
-      )
-    })
-  }
-
-  // Filter by skin concerns
-  if (selectedSkinConcerns.value.length > 0) {
-    products = products.filter(product => {
-      // Check if product addresses any of the selected skin concerns
-      return product.skin_concerns && product.skin_concerns.some(concern =>
-        selectedSkinConcerns.value.includes(concern.id)
-      )
-    })
-  }
-
-  // Filter by product types
-  if (selectedProductTypes.value.length > 0) {
-    products = products.filter(product => {
-      // Check if product matches any of the selected product types
-      return product.product_types && product.product_types.some(type =>
-        selectedProductTypes.value.includes(type.id)
-      )
-    })
-  }
-
-  return products
-})
+// Note: filteredProducts computed property removed - references removed fields and variables
+const filteredProducts = computed(() => productStore.products)
 
 const navigateToNotification = () => {
   router.push({ name: 'Notification' })
@@ -507,28 +417,10 @@ const clearSearch = async () => {
   hasMoreProducts.value = hasMore
 }
 
-const applySkinTypeFilter = async () => {
-  isFiltering.value = true
-  const hasMore = await productStore.filterBySkinTypes(selectedSkinTypes.value)
-  hasMoreProducts.value = hasMore
-}
-
-const applySkinConcernFilter = async () => {
-  isFiltering.value = true
-  // For now, we'll handle skin concern filtering locally since the API might not support it yet
-  // You can extend the backend API to support skin concern filtering if needed
-}
-
-const applyProductTypeFilter = async () => {
-  isFiltering.value = true
-  // For now, we'll handle product type filtering locally since the API might not support it yet
-  // You can extend the backend API to support product type filtering if needed
-}
+// Note: Filter functions for skin types, concerns, and product types removed - API endpoints no longer exist
 
 const clearAllFilters = async () => {
-  selectedSkinTypes.value = []
-  selectedSkinConcerns.value = []
-  selectedProductTypes.value = []
+  // Note: Filter variables for skin types, concerns, and product types removed
   isFiltering.value = false
   productStore.clearFilters()
   const hasMore = await productStore.fetchProducts()
@@ -655,9 +547,7 @@ onMounted(async () => {
 
     await Promise.all([
       productStore.fetchCategories(),
-      productStore.fetchSkinTypes(),
-      productStore.fetchSkinConcerns(),
-      productStore.fetchProductTypes(),
+      // Note: fetchSkinTypes, fetchSkinConcerns, fetchProductTypes removed - API endpoints no longer exist
       cart.fetchCart().catch(err => {
         console.error('Cart fetch failed, continuing anyway:', err)
       })
@@ -671,18 +561,29 @@ onMounted(async () => {
 
     // Fetch products filtered by default store category if set
     const defaultStore = sessionStorage.getItem('defaultStore')
+    console.log('🏪 Explore: defaultStore from sessionStorage:', defaultStore)
+    
     if (defaultStore) {
       try {
+        console.log('🏪 Explore: Fetching products for store category:', defaultStore)
         const hasMoreFromInitialLoad = await productStore.fetchProducts({ store_category: defaultStore, page_size: 24 })
         hasMoreProducts.value = hasMoreFromInitialLoad
+        console.log('✅ Explore: Products fetched for store, hasMore:', hasMoreFromInitialLoad)
       } catch (e) {
+        console.warn('⚠️ Explore: Failed to fetch products for store, falling back to all products:', e)
         const hasMoreFromInitialLoad = await productStore.fetchProducts()
         hasMoreProducts.value = hasMoreFromInitialLoad
+        console.log('✅ Explore: Fallback products fetched, hasMore:', hasMoreFromInitialLoad)
       }
     } else {
+      console.log('🏪 Explore: No default store, fetching all products')
       const hasMoreFromInitialLoad = await productStore.fetchProducts()
       hasMoreProducts.value = hasMoreFromInitialLoad
+      console.log('✅ Explore: All products fetched, hasMore:', hasMoreFromInitialLoad)
     }
+    
+    console.log('🏪 Explore: Products in store after fetch:', productStore.products.length)
+    console.log('🏪 Explore: filteredProducts computed value:', filteredProducts.value.length)
 
     // Setup infinite scroll after initial load
     nextTick(() => {

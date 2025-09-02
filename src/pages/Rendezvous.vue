@@ -3,16 +3,19 @@
     <!-- Header -->
     <div class="sticky top-0 bg-white/80 backdrop-blur-sm border-b border-gray-200/50 px-4 py-3 z-40">
       <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-xl font-bold text-gray-900">Rendezvous</h1>
-          <p class="text-sm text-gray-600">Your viewing appointments</p>
-        </div>
+        <button 
+          @click="$router.go(-1)"
+          class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm"
+        >
+          <ArrowLeft class="w-5 h-5 text-gray-700" />
+        </button>
         <button 
           @click="refreshRequests"
           :disabled="loading"
-          class="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center hover:bg-blue-200 transition-colors disabled:opacity-50"
+          class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm disabled:opacity-50"
+          style="background: linear-gradient(to right, #2563eb, #9333ea);"
         >
-          <RefreshCw :class="['w-5 h-5 text-blue-600', { 'animate-spin': loading }]" />
+          <RefreshCw :class="['w-5 h-5 text-white', { 'animate-spin': loading }]" />
         </button>
       </div>
     </div>
@@ -122,9 +125,12 @@
         :key="request.id"
         class="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden"
       >
-        <div class="p-4">
-          <!-- Request Header -->
-          <div class="flex items-start justify-between mb-4">
+        <!-- Accordion Header -->
+        <div 
+          @click="toggleAccordion(request.id)"
+          class="p-4 cursor-pointer hover:bg-gray-50/50 transition-colors"
+        >
+          <div class="flex items-start justify-between">
             <div class="flex items-center space-x-3">
               <img 
                 :src="request.product_main_image || '/placeholder.jpg'" 
@@ -137,18 +143,34 @@
                 <p class="text-xs text-gray-400">{{ formatDate(request.created_at) }}</p>
               </div>
             </div>
-            <div 
-              :class="[
-                'px-3 py-1 rounded-full text-xs font-semibold',
-                getStatusColor(request.status)
-              ]"
-            >
-              {{ request.status_display }}
+            <div class="flex items-center space-x-3">
+              <div 
+                :class="[
+                  'px-3 py-1 rounded-full text-xs font-semibold',
+                  getStatusColor(request.status)
+                ]"
+              >
+                {{ request.status_display }}
+              </div>
+              <div class="w-6 h-6 flex items-center justify-center">
+                <ChevronDown 
+                  :class="[
+                    'w-5 h-5 text-gray-400 transition-transform duration-200',
+                    expandedItems.includes(request.id) ? 'rotate-180' : ''
+                  ]"
+                />
+              </div>
             </div>
           </div>
+        </div>
 
-          <!-- Request Details -->
-          <div class="space-y-3">
+        <!-- Accordion Content -->
+        <div 
+          v-if="expandedItems.includes(request.id)"
+          class="border-t border-gray-100"
+        >
+          <div class="p-4 space-y-3">
+            <!-- Request Details -->
             <div class="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p class="text-gray-500">Preferred Date</p>
@@ -195,15 +217,26 @@
             </div>
           </div>
 
-          <!-- Actions -->
-          <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-            <button
-              @click="viewRequestHistory(request)"
-              class="flex items-center text-blue-600 text-sm font-medium hover:text-blue-700"
-            >
-              <Eye class="w-4 h-4 mr-1" />
-              View History
-            </button>
+          <!-- Footer Actions -->
+          <div class="flex items-center justify-between px-4 py-3 bg-gray-50/50 border-t border-gray-100">
+            <div class="flex items-center space-x-4">
+              <button
+                @click="viewRequestHistory(request)"
+                class="flex items-center text-blue-600 text-sm font-medium hover:text-blue-700"
+              >
+                <Eye class="w-4 h-4 mr-1" />
+                View History
+              </button>
+              
+              <button
+                v-if="['NEW', 'ACCEPTED', 'SCHEDULED'].includes(request.status)"
+                @click="openChat(request)"
+                class="flex items-center text-green-600 text-sm font-medium hover:text-green-700"
+              >
+                <MessageCircle class="w-4 h-4 mr-1" />
+                Chat
+              </button>
+            </div>
             
             <div class="flex items-center space-x-2">
               <span class="text-xs text-gray-500">
@@ -269,6 +302,106 @@
         </div>
       </div>
     </div>
+
+    <!-- Chat Modal -->
+    <div 
+      v-if="showChatModal"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end"
+      @click="closeChat"
+    >
+      <div 
+        class="bg-white rounded-t-3xl w-full h-[95vh] flex flex-col"
+        @click.stop
+      >
+        <!-- Chat Header -->
+        <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-3xl">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <img 
+                :src="selectedChatRequest?.product_main_image || '/placeholder.jpg'" 
+                :alt="selectedChatRequest?.product_name"
+                class="w-10 h-10 rounded-lg object-cover"
+              />
+              <div>
+                <h3 class="font-semibold text-gray-900">{{ selectedChatRequest?.product_name }}</h3>
+                <p class="text-sm text-gray-500">{{ selectedChatRequest?.store_name }}</p>
+              </div>
+            </div>
+            <button 
+              @click="closeChat"
+              class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+            >
+              <X class="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+        </div>
+        
+        <!-- Chat Messages -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-4">
+          <div v-if="loadingChat" class="flex justify-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-200 border-t-blue-600"></div>
+          </div>
+          
+          <div v-else-if="chatMessages.length === 0" class="text-center py-8">
+            <MessageCircle class="w-12 h-12 text-gray-400 mx-auto mb-3" />
+            <p class="text-gray-600">No messages yet. Start the conversation!</p>
+          </div>
+          
+          <div v-else>
+            <div
+              v-for="message in chatMessages"
+              :key="message.id"
+              :class="[
+                'flex',
+                message.sender_type === 'SELLER' ? 'justify-end' : 'justify-start'
+              ]"
+            >
+              <div
+                :class="[
+                  'max-w-xs lg:max-w-md px-4 py-2 rounded-2xl',
+                  message.sender_type === 'SELLER'
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
+                    : 'bg-gray-100 text-gray-900'
+                ]"
+              >
+                <p class="text-sm">{{ message.content }}</p>
+                <p 
+                  :class="[
+                    'text-xs mt-1',
+                    message.sender_type === 'SELLER' ? 'text-blue-100' : 'text-gray-500'
+                  ]"
+                >
+                  {{ formatDateTime(message.created_at) }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Chat Input -->
+        <div class="sticky bottom-0 bg-white border-t border-gray-200 p-4">
+          <div class="flex items-center space-x-3">
+            <input
+              v-model="newMessage"
+              @keyup.enter="sendMessage"
+              type="text"
+              placeholder="Type your message..."
+              class="flex-1 px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              :disabled="sendingMessage"
+            />
+            <button
+              @click="sendMessage"
+              :disabled="!newMessage.trim() || sendingMessage"
+              class="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              style="background: linear-gradient(to right, #2563eb, #9333ea);"
+            >
+              <div v-if="sendingMessage" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              <MessageCircle v-else class="w-5 h-5 text-white" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -277,7 +410,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiService } from '@/services/api'
 import { 
-  Calendar, Clock, RefreshCw, AlertCircle, CheckCircle, Eye, X 
+  Calendar, Clock, RefreshCw, AlertCircle, CheckCircle, Eye, X, ArrowLeft, MessageCircle, ChevronDown 
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -293,6 +426,17 @@ const showHistoryModal = ref(false)
 const selectedRequest = ref(null)
 const requestHistory = ref([])
 const loadingHistory = ref(false)
+
+// Chat modal
+const showChatModal = ref(false)
+const selectedChatRequest = ref(null)
+const chatMessages = ref([])
+const loadingChat = ref(false)
+const newMessage = ref('')
+const sendingMessage = ref(false)
+
+// Accordion state
+const expandedItems = ref([])
 
 const filterOptions = [
   { key: 'all', label: 'All' },
@@ -400,6 +544,73 @@ const formatDateTime = (dateTimeString) => {
     minute: '2-digit',
     hour12: true
   })
+}
+
+const openChat = async (request) => {
+  try {
+    selectedChatRequest.value = request
+    showChatModal.value = true
+    loadingChat.value = true
+    
+    console.log('Opening chat for viewing request:', request.id)
+    
+    // Fetch chat messages for this viewing request
+    const response = await apiService.getChatMessages({
+      viewing_request: request.id
+    })
+    
+    console.log('Chat messages response:', response.data)
+    chatMessages.value = response.data.results || response.data || []
+    console.log('Chat messages loaded:', chatMessages.value.length)
+    
+    // Mark all messages as read
+    await apiService.markAllMessagesAsRead(request.id)
+    
+  } catch (err) {
+    console.error('Failed to open chat:', err)
+    chatMessages.value = []
+  } finally {
+    loadingChat.value = false
+  }
+}
+
+const sendMessage = async () => {
+  if (!newMessage.value.trim() || !selectedChatRequest.value) return
+  
+  try {
+    sendingMessage.value = true
+    
+    const response = await apiService.sendChatMessage({
+      viewing_request: selectedChatRequest.value.id,
+      content: newMessage.value.trim(),
+      message_type: 'text'
+    })
+    
+    // Add the new message to the list
+    chatMessages.value.push(response.data)
+    newMessage.value = ''
+    
+  } catch (err) {
+    console.error('Failed to send message:', err)
+  } finally {
+    sendingMessage.value = false
+  }
+}
+
+const closeChat = () => {
+  showChatModal.value = false
+  selectedChatRequest.value = null
+  chatMessages.value = []
+  newMessage.value = ''
+}
+
+const toggleAccordion = (requestId) => {
+  const index = expandedItems.value.indexOf(requestId)
+  if (index > -1) {
+    expandedItems.value.splice(index, 1)
+  } else {
+    expandedItems.value.push(requestId)
+  }
 }
 
 onMounted(() => {
