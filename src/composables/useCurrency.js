@@ -12,12 +12,12 @@ export function useCurrency() {
 
   // Get user's currency from auth store
   const userCurrency = computed(() => {
-    return authStore.user?.currency || { code: 'USD', symbol: '$' }
+    return authStore.user?.currency || { code: 'CFA', symbol: 'CFA' }
   })
 
   // Get user's country from auth store
   const userCountry = computed(() => {
-    return authStore.user?.country || { code: 'US', name: 'United States' }
+    return authStore.user?.country || { code: 'CM', name: 'Cameroon' }
   })
 
   /**
@@ -27,12 +27,11 @@ export function useCurrency() {
    */
   const formatPrice = (amount) => {
     if (!amount && amount !== 0) return '0.00'
-    
     if (authStore.user && authStore.user.currency) {
       return formatCurrency(amount, authStore.user.currency.code)
     }
     
-    return formatCurrency(amount, 'USD')
+    return formatCurrency(amount, 'CFA')
   }
 
   /**

@@ -1,16 +1,25 @@
 <template>
   <Transition
     enter-active-class="transition ease-out duration-300"
-    enter-from-class="transform translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
-    enter-to-class="transform translate-y-0 opacity-100 sm:translate-x-0"
+    enter-from-class="transform scale-95 opacity-0 -translate-x-1/2 -translate-y-1/2"
+    enter-to-class="transform scale-100 opacity-100 -translate-x-1/2 -translate-y-1/2"
     leave-active-class="transition ease-in duration-200"
-    leave-from-class="transform translate-y-0 opacity-100 sm:translate-x-0"
-    leave-to-class="transform translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+    leave-from-class="transform scale-100 opacity-100 -translate-x-1/2 -translate-y-1/2"
+    leave-to-class="transform scale-95 opacity-0 -translate-x-1/2 -translate-y-1/2"
   >
-    <div
-      v-if="show"
-      class="fixed top-4 left-4 z-50 max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden"
-    >
+    <div v-if="show" class="fixed inset-0 snackbar-container">
+      <!-- Backdrop -->
+      <div
+        class="fixed inset-0 bg-black bg-opacity-20"
+        @click="closeSnackbar"
+      ></div>
+      
+      <!-- Snackbar -->
+      <div
+        @click="handleSnackbarClick"
+        class="fixed left-1/2 transform -translate-x-1/2 max-w-sm w-11/12 sm:w-full bg-white shadow-2xl rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden cursor-pointer snackbar-content"
+        style="top: 2%;"
+      >
       <div class="p-4">
         <div class="flex items-start">
           <div class="flex-shrink-0">
@@ -44,12 +53,14 @@
         </div>
       </div>
     </div>
+    </div>
   </Transition>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { X, CheckCircle, Info, AlertTriangle, AlertCircle } from 'lucide-vue-next'
 import notificationService from '@/services/notificationService'
 
 const router = useRouter()
@@ -113,6 +124,21 @@ const actionText = computed(() => {
 
 // Methods
 const displayNotification = (notification) => {
+  console.log('📱 Shopper GlobalSnackbar: Displaying notification:', notification)
+  console.log('📱 Shopper GlobalSnackbar: Current show state:', show.value)
+  
+  // Check for duplicate notifications (same ID or same message within 5 seconds)
+  const isDuplicate = notificationQueue.value.some(n => 
+    n.id === notification.id || 
+    (n.message === notification.message && 
+     Math.abs(new Date(n.created_at) - new Date(notification.created_at)) < 5000)
+  )
+  
+  if (isDuplicate) {
+    console.log('📱 Duplicate notification ignored:', notification.message)
+    return
+  }
+  
   // Add to queue
   notificationQueue.value.push(notification)
 
@@ -151,6 +177,11 @@ const closeSnackbar = () => {
   }, 300)
 }
 
+const handleSnackbarClick = () => {
+  // Close snackbar when clicked anywhere on it
+  closeSnackbar()
+}
+
 const handleAction = () => {
   if (!currentNotification.value?.reference_type || !currentNotification.value?.reference_id) {
     return
@@ -185,5 +216,18 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Additional styles if needed */
+/* Ensure snackbar is above everything */
+.snackbar-container {
+  z-index: 9998 !important;
+}
+
+.snackbar-content {
+  z-index: 9999 !important;
+  position: fixed !important;
+}
+
+/* Override any potential z-index conflicts */
+:deep(.snackbar-content) {
+  z-index: 9999 !important;
+}
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pb-24">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pb-32">
     <div class="p-4">
       <!-- Modern Header -->
       <div class="mb-4">
@@ -64,14 +64,54 @@
       <!-- Order Content -->
       <div v-if="!loading && order" class="space-y-4">
             <!-- Order Notes -->
-        <div v-if="order.notes" class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-4">
+        <div v-if="order.notes || order.status === 'on_hold'" class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-4">
           <div class="flex items-center space-x-2 mb-3">
             <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
               <FileText class="w-4 h-4 text-blue-600" />
             </div>
             <h3 class="text-base font-semibold text-slate-900">Order Notes</h3>
           </div>
-          <div v-if="order.status !== 'wrong_delivery'" class="p-4 bg-blue-50 border border-blue-200 rounded-2xl">
+          
+          <!-- On Hold Status Special Notes -->
+          <div v-if="order.status === 'on_hold'" class="p-4 bg-amber-50 border border-amber-200 rounded-2xl mb-3">
+            <div class="flex items-start space-x-3">
+              <AlertTriangle class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p class="font-semibold text-amber-800 mb-2">Order On Hold</p>
+                <p class="text-amber-700 text-sm mb-3">
+                  Your order has been temporarily placed on hold. You can proceed with the order using the button below.
+                </p>
+                
+                <!-- Show new expected delivery date if available -->
+                <div v-if="order.expected_delivery_date" class="bg-amber-100 p-3 rounded-lg border border-amber-300">
+                  <div class="flex items-center space-x-2 mb-1">
+                    <Calendar class="w-4 h-4 text-amber-700" />
+                    <span class="text-sm font-medium text-amber-800">New Expected Delivery Date</span>
+                  </div>
+                  <p class="text-amber-700 text-sm">
+                    <strong>{{ formatDate(order.expected_delivery_date) }}</strong>
+                  </p>
+                  <p class="text-amber-600 text-xs mt-1">
+                    This is the new delivery date set by the seller when your order was put on hold.
+                  </p>
+                </div>
+                
+                <!-- Show delivery time if available -->
+                <div v-if="order.expected_delivery_time" class="bg-amber-100 p-3 rounded-lg border border-amber-300 mt-2">
+                  <div class="flex items-center space-x-2 mb-1">
+                    <Clock class="w-4 h-4 text-amber-700" />
+                    <span class="text-sm font-medium text-amber-800">Expected Delivery Time</span>
+                  </div>
+                  <p class="text-amber-700 text-sm">
+                    <strong>{{ formatTimeSlot(order.expected_delivery_time) }}</strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Regular order notes -->
+          <div v-if="order.notes && order.status !== 'wrong_delivery'" class="p-4 bg-blue-50 border border-blue-200 rounded-2xl">
             <p class="text-slate-700">{{ order.notes }}</p>
           </div>
           <div v-if="order.status === 'wrong_delivery'" class="p-4 bg-amber-50 border border-amber-200 rounded-2xl">
@@ -272,22 +312,26 @@
             
             <!-- Price Summary -->
             <div class="space-y-2 pt-2 border-t border-slate-200">
+              <!-- Debug info - remove after testing -->
+              <div class="text-xs text-gray-500 bg-gray-100 p-2 rounded">
+                Debug: total_amount={{ order.total_amount }}, delivery_fee={{ order.delivery_fee }}, type={{ typeof order.delivery_fee }}
+              </div>
               <div class="flex justify-between items-center text-sm">
                 <span class="text-slate-600">Subtotal</span>
                 <span class="font-semibold text-slate-900">
-                  {{ formatApiPrice({ price: order.total_amount - (order.delivery_fee || 0), currency_info: order.currency_info }) }}
+                  {{ formatApiPrice({ price: parseFloat(order.total_amount) || 0, currency_info: order.currency_info }) }}
                 </span>
                   </div>
-              <div v-if="order.delivery_fee" class="flex justify-between items-center text-sm">
+              <div v-if="order.delivery_fee && parseFloat(order.delivery_fee) > 0" class="flex justify-between items-center text-sm">
                 <span class="text-slate-600">Delivery Fee</span>
                 <span class="font-semibold text-slate-900">
-                  {{ formatApiPrice({ price: order.delivery_fee, currency_info: order.currency_info }) }}
+                  {{ formatApiPrice({ price: parseFloat(order.delivery_fee) || 0, currency_info: order.currency_info }) }}
                 </span>
                   </div>
               <div class="flex justify-between items-center pt-2 border-t border-slate-200">
                 <span class="text-base font-bold text-slate-900">Total</span>
                 <span class="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text">
-                      {{ formatApiPrice({ price: order.total_amount, currency_info: order.currency_info }) }}
+                      {{ formatApiPrice({ price: (parseFloat(order.total_amount) || 0) + (parseFloat(order.delivery_fee) || 0), currency_info: order.currency_info }) }}
                     </span>
                   </div>
                 </div>
@@ -339,31 +383,45 @@
           <OrderStatusTimeline :order="order" />
         </div>
 
-        <!-- Action Buttons -->
-        <div class="space-y-2">
-          <!-- Cancel Order Button -->
-          <button 
-            v-if="order && canCancel(order.status)"
-            @click="showCancelConfirmDialog = true"
-            class="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-sm flex items-center justify-center space-x-1 text-sm"
-          >
-            <X class="w-3 h-3" />
-            <span>Cancel Order</span>
-          </button>
+        <!-- Action Buttons - Moved to fixed footer -->
+      </div>
+    </div>
 
-          <!-- Reorder Items Button -->
-          <button 
-            v-if="order && canReorder(order.status)"
-            @click="reorderItems"
-            class="w-full px-4 py-2 text-white font-semibold rounded-xl transition-all duration-200 shadow-sm flex items-center justify-center space-x-1 hover:shadow-md text-sm"
-            style="background: linear-gradient(to right, #2563eb, #4f46e5);"
-            onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
-            onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
-          >
-            <RefreshCw class="w-3 h-3" />
-            <span>Reorder Items</span>
-          </button>
-        </div>
+    <!-- Fixed Action Buttons Footer -->
+    <div v-if="order" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50">
+      <div class="max-w-md mx-auto flex gap-3">
+        <!-- Proceed Order Button (for on_hold status) -->
+        <button 
+          v-if="order.status === 'on_hold'"
+          @click="showProceedConfirmDialog = true"
+          class="flex-1 px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-sm flex items-center justify-center space-x-2 text-sm"
+        >
+          <CheckCircle class="w-4 h-4" />
+          <span>Proceed with Order</span>
+        </button>
+
+        <!-- Cancel Order Button -->
+        <button 
+          v-if="canCancel(order.status)"
+          @click="showCancelConfirmDialog = true"
+          class="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-sm flex items-center justify-center space-x-2 text-sm"
+        >
+          <X class="w-4 h-4" />
+          <span>Cancel Order</span>
+        </button>
+
+        <!-- Reorder Items Button -->
+        <button 
+          v-if="canReorder(order.status)"
+          @click="reorderItems"
+          class="flex-1 px-4 py-3 text-white font-semibold rounded-xl transition-all duration-200 shadow-sm flex items-center justify-center space-x-2 hover:shadow-md text-sm"
+          style="background: linear-gradient(to right, #2563eb, #4f46e5);"
+          onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
+          onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
+        >
+          <RefreshCw class="w-4 h-4" />
+          <span>Reorder Items</span>
+        </button>
       </div>
     </div>
 
@@ -426,7 +484,31 @@
             <p class="text-slate-600 text-sm">Order #{{ orderId }}</p>
           </div>
         </div>
-        <p class="text-slate-700 mb-6">Are you sure you want to proceed with this order? It will be moved to pending status.</p>
+        <div class="mb-6">
+          <p class="text-slate-700 mb-4">Are you sure you want to proceed with this order? It will be moved to pending status.</p>
+          
+          <!-- Express Delivery Refund Notice -->
+          <div v-if="hasExpressDelivery && expressDeliveryCost > 0" class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Zap class="w-4 h-4 text-amber-600" />
+              </div>
+              <div class="flex-1">
+                <h4 class="font-semibold text-amber-800 mb-2">Express Delivery Refund</h4>
+                <p class="text-amber-700 text-sm mb-3">
+                  Since your order cannot be delivered the same day as originally planned, you will receive a refund for the express delivery cost.
+                </p>
+                <div class="bg-amber-100 p-3 rounded-lg border border-amber-300">
+                  <div class="flex items-center justify-between">
+                    <span class="text-amber-800 font-medium text-sm">Express Delivery Refund:</span>
+                    <span class="text-amber-900 font-bold">{{ formatApiPrice(expressDeliveryCost) }} CFA</span>
+                  </div>
+                  <p class="text-amber-600 text-xs mt-1">This amount will be processed back to your account</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="flex space-x-4">
           <button 
             @click="showProceedConfirmDialog = false"
@@ -577,6 +659,24 @@ const canReportWrongDelivery = computed(() => {
   const timeDifference = currentTime - deliveredTime
   const hoursDifference = timeDifference / (1000 * 60 * 60)
   return hoursDifference < 24
+})
+
+// Check if order has express delivery
+const hasExpressDelivery = computed(() => {
+  if (!order.value) return false
+  // Check if any order item has express delivery
+  return order.value.items?.some(item => item.express_delivery) || 
+         order.value.delivery_option === 'express'
+})
+
+// Calculate express delivery cost (25% of total delivery fee)
+const expressDeliveryCost = computed(() => {
+  if (!order.value || !hasExpressDelivery.value || !order.value.delivery_fee) return 0
+  
+  // Express delivery is charged as 25% of the total delivery fee
+  const totalDeliveryFee = parseFloat(order.value.delivery_fee)
+  const expressPortionCost = totalDeliveryFee * 0.25 // 25% of total delivery fee
+  return Math.round(expressPortionCost)
 })
 
 // Methods
@@ -780,8 +880,59 @@ const executeCancelOrder = async () => {
 }
 
 const executeProceedOrder = async () => {
-  await updateOrderStatus('pending')
-  showProceedConfirmDialog.value = false
+  try {
+    updatingStatus.value = true
+    
+    // Check if order has express delivery and needs refund
+    const hasExpressDeliveryLocal = order.value.items?.some(item => item.express_delivery) || 
+                                   order.value.delivery_option === 'express'
+    
+    console.log('Proceeding with order:', {
+      orderId: order.value.id,
+      hasExpressDelivery: hasExpressDeliveryLocal,
+      deliveryFee: order.value.delivery_fee,
+      orderItems: order.value.items?.map(item => ({
+        id: item.id,
+        express_delivery: item.express_delivery,
+        product_name: item.product?.name
+      })),
+      deliveryOption: order.value.delivery_option,
+      expressDeliveryCost: expressDeliveryCost.value,
+      willCreateRefund: hasExpressDeliveryLocal && expressDeliveryCost.value > 0
+    })
+    
+    // If order has express delivery and delivery fee > 0, create refund for express delivery cost
+    if (hasExpressDelivery.value && expressDeliveryCost.value > 0) {
+      try {
+        console.log('Creating express delivery refund for order...', {
+          expressDeliveryCost: expressDeliveryCost.value,
+          totalDeliveryFee: order.value.delivery_fee
+        })
+        
+        // Create refund for express delivery cost only
+        await apiService.requestRefund(order.value.id, {
+          amount: expressDeliveryCost.value,
+          reason: 'Express delivery refund - order cannot be delivered same day as planned',
+          refund_type: 'express_delivery_fee'
+        })
+        
+        console.log('Express delivery refund created successfully')
+      } catch (refundError) {
+        console.error('Error creating express delivery refund:', refundError)
+        // Don't fail the entire operation if refund fails
+        error.value = 'Order status updated, but failed to process express delivery refund. Please contact support.'
+      }
+    }
+    
+    // Update order status to rescheduled
+    await updateOrderStatus('rescheduled')
+    showProceedConfirmDialog.value = false
+  } catch (err) {
+    console.error('Error proceeding with order:', err)
+    error.value = 'Failed to proceed with order. Please try again.'
+  } finally {
+    updatingStatus.value = false
+  }
 }
 
 // Delivery confirmation method

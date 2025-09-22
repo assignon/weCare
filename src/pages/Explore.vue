@@ -375,20 +375,41 @@ const applyDynamicFilters = async () => {
   isFiltering.value = true
   showFilterOptions.value = false // Close the bottom sheet
   
-  const defaultStore = sessionStorage.getItem('defaultStore')
-  const params = defaultStore ? { store_category: defaultStore, page_size: 24 } : { page_size: 24 }
-  Object.entries(dynamicFilters.value).forEach(([templateId, val]) => {
-    const key = `attr_${templateId}`
-    if (Array.isArray(val)) {
-      if (val.length > 0) params[key] = JSON.stringify(val)
-    } else if (typeof val === 'boolean') {
-      if (val === true) params[key] = 'true'
-    } else if (val) {
-      params[key] = String(val)
-    }
-  })
-  const hasMore = await productStore.fetchProducts(params)
-  hasMoreProducts.value = hasMore
+  try {
+    const defaultStore = sessionStorage.getItem('defaultStore')
+    console.log('🏪 Default store:', defaultStore)
+    console.log('🎛️ Dynamic filters state:', dynamicFilters.value)
+    console.log('📊 Store attribute templates:', storeAttributeTemplates.value.map(t => ({ id: t.id, label: t.label, type: t.field_type })))
+    
+    const params = defaultStore ? { store_category: defaultStore, page_size: 24 } : { page_size: 24 }
+    Object.entries(dynamicFilters.value).forEach(([templateId, val]) => {
+      const key = `attr_${templateId}`
+      console.log(`🔧 Processing filter ${templateId}:`, val, typeof val)
+      if (Array.isArray(val)) {
+        if (val.length > 0) {
+          // For multiselect, send as JSON string (backend handles parsing)
+          params[key] = JSON.stringify(val)
+          console.log(`📤 Added multiselect filter ${key}:`, params[key])
+        }
+      } else if (typeof val === 'boolean') {
+        if (val === true) {
+          params[key] = 'true'
+          console.log(`📤 Added boolean filter ${key}:`, params[key])
+        }
+      } else if (val && String(val).trim()) {
+        params[key] = String(val).trim()
+        console.log(`📤 Added text filter ${key}:`, params[key])
+      }
+    })
+    console.log('📝 Final params to send:', params)
+    const hasMore = await productStore.fetchProducts(params)
+    hasMoreProducts.value = hasMore
+    console.log('✅ Filters applied successfully, hasMore:', hasMore, 'products count:', productStore.products.length)
+  } catch (error) {
+    console.error('❌ Error applying dynamic filters:', error)
+  } finally {
+    isFiltering.value = false
+  }
 }
 
 // Infinite scroll for all products
@@ -469,6 +490,7 @@ const clearProductSearch = async () => {
 const clearAllFilters = async () => {
   // Note: Filter variables for skin types, concerns, and product types removed
   isFiltering.value = false
+  clearDynamicFilters()
   productStore.clearFilters()
   const hasMore = await productStore.fetchProducts()
   hasMoreProducts.value = hasMore
@@ -496,7 +518,7 @@ const showAllProducts = async () => {
 
 // Infinite scroll methods
 const loadMoreProducts = async () => {
-  if (loadingMore.value || !hasMoreProducts.value || isSearching.value || isFiltering.value) {
+  if (loadingMore.value || !hasMoreProducts.value || isSearching.value) {
     return
   }
 
@@ -506,7 +528,30 @@ const loadMoreProducts = async () => {
     const currentPage = productStore.pagination?.page || 1
     const nextPage = currentPage + 1
 
-    const hasMore = await productStore.fetchProducts({ page: nextPage }, true)
+    // Build params to maintain current filters when loading more
+    const defaultStore = sessionStorage.getItem('defaultStore')
+    const params = { 
+      page: nextPage,
+      ...(defaultStore ? { store_category: defaultStore } : {}),
+      page_size: 24
+    }
+    
+    // Add dynamic filters to params for infinite scroll
+    Object.entries(dynamicFilters.value).forEach(([templateId, val]) => {
+      const key = `attr_${templateId}`
+      if (Array.isArray(val)) {
+        if (val.length > 0) {
+          // For multiselect, send as JSON string (backend handles parsing)
+          params[key] = JSON.stringify(val)
+        }
+      } else if (typeof val === 'boolean') {
+        if (val === true) params[key] = 'true'
+      } else if (val && String(val).trim()) {
+        params[key] = String(val).trim()
+      }
+    })
+
+    const hasMore = await productStore.fetchProducts(params, true)
     hasMoreProducts.value = hasMore
 
     if (!hasMore && observer) {
@@ -582,7 +627,7 @@ watch(() => sessionStorage.getItem('defaultStore'), async (newStoreId, oldStoreI
 
 // Watch for products changes to re-setup infinite scroll
 watch(() => productStore.products, () => {
-  if (productStore.products.length > 0 && !isSearching.value && !isFiltering.value) {
+  if (productStore.products.length > 0 && !isSearching.value) {
     nextTick(() => {
       setupInfiniteScroll()
     })

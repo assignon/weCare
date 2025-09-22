@@ -52,9 +52,11 @@ export const useProductStore = defineStore('product', () => {
     try {
       const defaultStore = sessionStorage.getItem('defaultStore')
 
-      // Build params to send
+      // Build params to send - preserve all incoming params including custom attribute filters
+      console.log('🔍 ProductStore fetchProducts called with params:', params)
       const baseParams = { ...(params || {}) }
-      if (searchQuery.value) {
+      console.log('🔧 Base params after spread:', baseParams)
+      if (searchQuery.value && !baseParams.search) {
         baseParams.search = searchQuery.value
       }
       
@@ -64,21 +66,24 @@ export const useProductStore = defineStore('product', () => {
       if (!baseParams.page) {
         baseParams.page = append ? pagination.value.page + 1 : 1
       }
-      baseParams.page_size = pagination.value.pageSize
+      if (!baseParams.page_size) {
+        baseParams.page_size = pagination.value.pageSize
+      }
       
-      if (selectedSkinTypes.value && selectedSkinTypes.value.length > 0) {
+      if (selectedSkinTypes.value && selectedSkinTypes.value.length > 0 && !baseParams.suitable_for) {
         baseParams.suitable_for = selectedSkinTypes.value[0]
       }
       
       // Always use shopper 'all' endpoint; pass store_id when available
       const allParams = { ...baseParams }
-      if (categoryId) {
+      if (categoryId && !allParams.categories) {
         // Backend expects 'categories' filter for M2M
         allParams.categories = categoryId
       }
-      if (defaultStore) {
+      if (defaultStore && !allParams.store_category) {
         allParams.store_category = defaultStore
       }
+      console.log('🚀 Making API call with final params:', allParams)
       const response = await apiService.getProducts(allParams)
       
       const newProducts = response.data.results || response.data

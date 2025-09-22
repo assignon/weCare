@@ -101,7 +101,7 @@ export default defineConfig({
     host: "shopper.local",
     port: 3000,
     open: true,
-    allowedHosts: ["2383235b86f8.ngrok-free.app"],
+    allowedHosts: ["7a643c2e8ed8.ngrok-free.app"],
     // allowedHosts: true,
     // https: {
     //   key: fs.readFileSync('shopper-key.pem'),

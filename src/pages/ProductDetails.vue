@@ -297,80 +297,89 @@
               </div>
 
               <!-- Attributes loaded successfully -->
-              <div v-else-if="productAttributes.length > 0" class="space-y-3">
-                <!-- Attributes Grid -->
-                <div class="grid grid-cols-1 gap-3">
-                  <div 
-                    v-for="attr in productAttributes" 
-                    :key="attr.id" 
-                    class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 hover:border-gray-200"
-                  >
-                    <!-- Simple Label and Value Display -->
-                    <div class="space-y-2">
-                      <!-- Attribute Label -->
-                      <h4 class="font-semibold text-gray-900 text-sm">{{ attr.label }}</h4>
+              <div v-else-if="productAttributes.length > 0" class="space-y-6">
+                <!-- Document-style specifications -->
+                <div class="bg-white rounded-xl shadow-sm">
+                  <!-- Header -->
+                  <div class="px-6 py-4 border-b border-gray-100">
+                    <h3 class="text-xl font-bold text-gray-900">Product Specifications</h3>
+                    <p class="text-sm text-gray-600 mt-1">Technical details and specifications</p>
+                  </div>
+                  
+                  <!-- Specifications list -->
+                  <div class="px-6 py-6 space-y-6">
+                    <div 
+                      v-for="(attr, index) in productAttributes" 
+                      :key="`${attr.id}-${index}`" 
+                      class="space-y-2"
+                    >
+                      <!-- Specification Label -->
+                      <h4 class="font-semibold text-gray-900 text-base leading-6">{{ attr.label }}</h4>
                       
-                      <!-- Attribute Value -->
-                      <div class="text-gray-700">
+                      <!-- Specification Value -->
+                      <div class="ml-0">
                         <!-- Text, Number, Decimal values -->
-                        <span v-if="['text', 'number', 'decimal'].includes(attr.field_type)" 
-                              class="text-sm font-medium">
+                        <p v-if="['text', 'number', 'decimal'].includes(attr.field_type)" 
+                           class="text-gray-700 text-sm leading-relaxed">
                           {{ getFormattedAttributeValue(attr) || 'Not specified' }}
-                        </span>
+                        </p>
 
                         <!-- Select value -->
-                        <span v-else-if="attr.field_type === 'select'" 
-                              class="text-sm font-medium">
+                        <p v-else-if="attr.field_type === 'select'" 
+                           class="text-gray-700 text-sm leading-relaxed">
                           {{ getFormattedAttributeValue(attr) || 'Not specified' }}
-                        </span>
+                        </p>
 
                         <!-- Multiselect values -->
-                        <div v-else-if="attr.field_type === 'multiselect'" class="space-y-2">
-                          <div v-if="attr.attribute_value && attr.attribute_value.selected_choices && attr.attribute_value.selected_choices.length > 0" 
-                               class="flex flex-wrap gap-2">
+                        <div v-else-if="attr.field_type === 'multiselect'">
+                          <div v-if="attr.attribute_value && attr.attribute_value.selected_choices && attr.attribute_value.selected_choices.length > 0" class="flex flex-wrap gap-3">
                             <span 
                               v-for="choice in attr.attribute_value.selected_choices" 
                               :key="choice"
-                              class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full"
+                              class="inline-block px-3 py-1.5 bg-blue-50 text-blue-700 text-sm font-medium rounded-lg border border-blue-200"
                             >
                               {{ choice }}
                             </span>
                           </div>
-                          <span v-else class="text-sm font-medium text-gray-500">Not specified</span>
+                          <p v-else class="text-sm text-gray-500 italic">Not specified</p>
                         </div>
 
                         <!-- Boolean value -->
-                        <div v-else-if="attr.field_type === 'boolean'" class="flex items-center space-x-2">
-                          <div class="w-5 h-5 rounded-full flex items-center justify-center"
+                        <div v-else-if="attr.field_type === 'boolean'" class="flex items-center space-x-3">
+                          <div class="w-5 h-5 rounded-full flex items-center justify-center shadow-sm"
                                :class="attr.attribute_value && attr.attribute_value.boolean_value ? 'bg-green-500' : 'bg-gray-400'">
                             <svg v-if="attr.attribute_value && attr.attribute_value.boolean_value" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
                             </svg>
                             <svg v-else class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                           </div>
-                          <span class="text-sm font-medium">
+                          <span class="text-sm text-gray-700 font-medium">
                             {{ attr.attribute_value && attr.attribute_value.boolean_value ? 'Yes' : 'No' }}
                           </span>
                         </div>
 
                         <!-- Date value -->
-                        <span v-else-if="attr.field_type === 'date'" 
-                              class="text-sm font-medium">
+                        <p v-else-if="attr.field_type === 'date'" 
+                           class="text-gray-700 text-sm leading-relaxed">
                           {{ getFormattedAttributeValue(attr) || 'Not specified' }}
-                        </span>
+                        </p>
 
                         <!-- File value -->
-                        <span v-else-if="attr.field_type === 'file'" 
-                              class="text-sm font-medium">
-                          {{ getFormattedAttributeValue(attr) ? 'File attached' : 'No file' }}
-                        </span>
+                        <div v-else-if="attr.field_type === 'file'" class="flex items-center space-x-2">
+                          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                          </svg>
+                          <span class="text-sm text-gray-700">
+                            {{ getFormattedAttributeValue(attr) ? 'File attached' : 'No file' }}
+                          </span>
+                        </div>
 
                         <!-- Default fallback -->
-                        <span v-else class="text-sm font-medium">
+                        <p v-else class="text-gray-700 text-sm leading-relaxed">
                           {{ getFormattedAttributeValue(attr) || 'Not specified' }}
-                        </span>
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -720,8 +729,27 @@ const fetchProductAttributes = async () => {
         }
       })
       
+      // Remove duplicates based on attribute label and field type
+      const uniqueAttributes = attributesWithValues.reduce((acc, current) => {
+        const existingIndex = acc.findIndex(attr => 
+          attr.label === current.label && attr.field_type === current.field_type
+        )
+        
+        if (existingIndex === -1) {
+          acc.push(current)
+        } else {
+          // If duplicate found, keep the one with better data (has display_value or higher display_order)
+          const existing = acc[existingIndex]
+          if (current.display_value || current.display_order > existing.display_order) {
+            acc[existingIndex] = current
+          }
+        }
+        
+        return acc
+      }, [])
+      
       // Sort by display order; do not filter out anything for shopper view
-      productAttributes.value = attributesWithValues
+      productAttributes.value = uniqueAttributes
         .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
       
     } else {

@@ -134,7 +134,7 @@
             <div class="text-right">
               <h4 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text">
                 {{ formatApiPrice({
-                  price: order.total_amount, 
+                  price: (parseFloat(order.total_amount) || 0) + (parseFloat(order.delivery_fee) || 0), 
                   currency_info: order.currency_info
                 }) }}
               </h4>
@@ -366,7 +366,7 @@
             <p class="text-slate-600 text-sm">Order #{{ orderToUpdate }}</p>
           </div>
         </div>
-        <p class="text-slate-700 mb-6">Are you sure you want to proceed with this order? It will be moved to pending status.</p>
+        <p class="text-slate-700 mb-6">Are you sure you want to proceed with this order? It will be moved to rescheduled status.</p>
         <div class="flex space-x-4">
           <button 
             @click="showProceedDialog = false"
@@ -841,7 +841,7 @@ const executeProceedOrder = async () => {
     updatingOrderId.value = orderToUpdate.value
     try {
       await apiService.updateOrderStatus(orderToUpdate.value, {
-        status: 'pending',
+        status: 'rescheduled',
         notes: 'Order proceeded by customer from on-hold status'
       })
       await loadOrders()

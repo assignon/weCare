@@ -153,6 +153,30 @@
           </button>
         </div>
 
+        <!-- Support Section -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 overflow-hidden">
+          <div class="p-4 border-b border-slate-100">
+            <h3 class="text-lg font-semibold text-slate-900">Support</h3>
+          </div>
+          
+          <!-- Customer Support -->
+          <button 
+            @click="$router.push({ name: 'CustomerSupport' })"
+            class="w-full p-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors"
+          >
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <Headphones class="w-5 h-5 text-blue-600" />
+              </div>
+              <div class="text-left">
+                <p class="font-semibold text-slate-900">Customer Support</p>
+                <p class="text-sm text-slate-600">Get help and contact us</p>
+              </div>
+            </div>
+            <ChevronRight class="w-5 h-5 text-slate-400" />
+          </button>
+        </div>
+
         <!-- Account Section -->
         <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 overflow-hidden">
           <div class="p-4 border-b border-slate-100">
@@ -343,7 +367,7 @@ import { apiService } from '@/services/api'
 import AppHeader from '@/components/AppHeader.vue'
 import { 
   User, Edit3, Sparkles, MapPin, Globe, LogOut, ChevronRight, 
-  Camera, Loader2, Check, Store
+  Camera, Loader2, Check, Store, Headphones
 } from 'lucide-vue-next'
 
 const auth = useAuthStore()

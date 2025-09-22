@@ -212,89 +212,100 @@
               </div>
             </div>
 
-            <!-- Product Delivery Options -->
+            <!-- Seller Delivery Groups -->
             <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm border border-white/20 p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-6">Delivery Options</h3>
+              <h3 class="text-lg font-semibold text-gray-900 mb-6">Delivery Options by Seller</h3>
               
-              <!-- Default delivery information -->
-              <div class="p-4 rounded-2xl border-2 border-blue-500 bg-blue-50/50 mb-6">
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center" style="background: linear-gradient(to right, #2563eb, #9333ea);">
-                    <Truck class="w-5 h-5 text-white" />
-                  </div>
-                  <div class="flex-1">
-                    <span class="font-semibold text-gray-900">Standard Delivery</span>
-                    <p class="text-sm text-gray-600 mt-1">{{ getDefaultDeliveryTime() }}</p>
-                    <p class="text-xs text-blue-600 mt-1">Each product has its own delivery date. Customize individual products below.</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Products with delivery options -->
-              <div class="space-y-4">
+              <!-- Seller delivery groups -->
+              <div class="space-y-6">
                 <div 
-                  v-for="item in groupedCartItems" 
-                  :key="item.product_id"
-                  class="p-4 rounded-2xl border border-gray-200 bg-white/50"
+                  v-for="group in sellerDeliveryGroups" 
+                  :key="`${group.seller_id}_${group.delivery_type}`"
+                  class="p-4 rounded-2xl border bg-white/50"
+                  :class="group.delivery_type === 'express' ? 'border-green-200 bg-green-50/30' : 'border-gray-200'"
                 >
-                  <div class="flex items-start space-x-3">
-                    <!-- Product image -->
-                    <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
-                      <img 
-                        :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
-                        :alt="item.product_name"
-                        class="w-full h-full object-cover"
-                      />
+                  <!-- Group header -->
+                  <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                      <div 
+                        class="w-10 h-10 rounded-full flex items-center justify-center"
+                        :class="group.delivery_type === 'express' ? 'bg-gradient-to-r from-green-600 to-emerald-600' : 'bg-gradient-to-r from-blue-600 to-purple-600'"
+                        :style="group.delivery_type === 'express' ? 'background: linear-gradient(to right, #059669, #10b981);' : 'background: linear-gradient(to right, #2563eb, #9333ea);'"
+                      >
+                        <Truck v-if="group.delivery_type !== 'express'" class="w-5 h-5 text-white" />
+                        <Zap v-else class="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h4 class="font-semibold text-gray-900">{{ group.seller_name }}</h4>
+                        <p class="text-sm text-gray-600 capitalize">
+                          {{ group.delivery_type }} delivery
+                          <span v-if="group.is_express_group" class="text-green-600">(Express Item)</span>
+                        </p>
+                        <p class="text-xs text-blue-600 mt-1">
+                          Expected: {{ formatGroupDeliveryDate(group) }}
+                        </p>
+                      </div>
                     </div>
                     
-                    <!-- Product info and delivery options -->
-                    <div class="flex-1 min-w-0">
-                      <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                          <h4 class="font-medium text-gray-900">{{ item.product_name }}</h4>
-                          <p class="text-sm text-gray-600">{{ getTotalQuantity(item) }} items</p>
-                          <div class="flex items-center text-blue-600 text-sm mt-1">
-                            <Truck class="w-3 h-3 mr-1" />
-                            {{ getAdaptiveDeliveryDate(item) }}
-                          </div>
+                    <!-- Group delivery options (only custom for standard groups) -->
+                    <div class="flex items-center space-x-2">
+                      <!-- Always show Custom button for standard and custom groups -->
+                      <button
+                        v-if="group.delivery_type === 'standard' || group.delivery_type === 'custom'"
+                        @click="() => { console.log('🔧 Custom button clicked for group:', group); openCustomDeliveryModalForGroup(group); }"
+                        class="flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 border-2 bg-gray-50 border-gray-200 text-gray-600 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600"
+                      >
+                        <span class="w-4 h-4 mr-2 flex items-center justify-center rounded-full text-xs bg-gray-200 text-gray-600">
+                          📅
+                        </span>
+                        Custom
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Group items -->
+                  <div class="space-y-3">
+                    <div 
+                      v-for="item in group.items" 
+                      :key="item.product_id"
+                      class="flex items-center space-x-3 p-3 bg-gray-50/50 rounded-xl"
+                    >
+                      <!-- Product image -->
+                      <div class="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
+                        <img 
+                          :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
+                          :alt="item.product_name"
+                          class="w-full h-full object-cover"
+                        />
+                      </div>
+                      
+                      <!-- Product info -->
+                      <div class="flex-1 min-w-0">
+                        <h5 class="font-medium text-gray-900 text-sm">{{ item.product_name }}</h5>
+                        <p class="text-xs text-gray-600">{{ getTotalQuantityForItem(item) }} items</p>
+                        <div class="flex items-center text-blue-600 text-xs mt-1">
+                          <Truck class="w-3 h-3 mr-1" />
+                          {{ getAdaptiveDeliveryDateForItem(item) }}
                         </div>
                       </div>
                       
-                      <!-- Delivery option links at bottom -->
-                      <div class="mt-4 flex items-center justify-center space-x-3">
-                        <!-- Express delivery option -->
+                      <!-- Individual item express option -->
+                      <div class="flex-shrink-0">
                         <button
                           v-if="isExpressEligibleItem(item)"
-                          @click="toggleExpressForProduct(item.product_id)"
+                          @click="toggleExpressForItem(item)"
                           :class="[
-                            'flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border-2',
+                            'flex items-center px-3 py-2 rounded-full text-xs font-medium transition-all duration-200 border-2',
                             expressProductIds.has(item.product_id)
                               ? 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100'
                               : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-green-50 hover:border-green-200 hover:text-green-600'
                           ]"
                         >
-                          <span class="w-4 h-4 mr-2 flex items-center justify-center rounded-full text-xs" :class="expressProductIds.has(item.product_id) ? 'bg-green-200 text-green-800' : 'bg-gray-200 text-gray-600'">
+                          <span class="w-3 h-3 mr-1 flex items-center justify-center rounded-full text-xs" :class="expressProductIds.has(item.product_id) ? 'bg-green-200 text-green-800' : 'bg-gray-200 text-gray-600'">
                             <span v-if="expressProductIds.has(item.product_id)">✓</span>
                             <span v-else>⚡</span>
                           </span>
                           Express
-                        </button>
-                        
-                        <!-- Custom delivery option -->
-                        <button
-                          @click="openCustomDeliveryModal(item)"
-                          :class="[
-                            'flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border-2',
-                            customDates[item.product_id]
-                              ? 'bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100'
-                              : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600'
-                          ]"
-                        >
-                          <span class="w-4 h-4 mr-2 flex items-center justify-center rounded-full text-xs" :class="customDates[item.product_id] ? 'bg-orange-200 text-orange-800' : 'bg-gray-200 text-gray-600'">
-                            <span v-if="customDates[item.product_id]">✓</span>
-                            <span v-else>📅</span>
-                          </span>
-                          Custom
                         </button>
                       </div>
                     </div>
@@ -302,6 +313,15 @@
                 </div>
               </div>
             </div>
+
+            <!-- Delivery Cost Breakdown -->
+            <DeliveryCostBreakdown
+              :loading="deliveryCost.loading || isCalculatingDelivery"
+              :error="deliveryCost.error"
+              :total-delivery-cost="getDeliveryFeeForDisplay()"
+              :seller-groups="sellerGroups.length > 0 ? sellerGroups : deliveryCost.deliveryCosts.seller_groups"
+              :breakdown="Object.keys(deliveryCostBreakdown).length > 0 ? deliveryCostBreakdown : deliveryCost.deliveryCosts.breakdown"
+            />
 
               <!-- Order summary -->
             <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm border border-white/20 p-6">
@@ -363,8 +383,28 @@
                   </span>
                   </div>
 
+                <!-- Delivery Cost (using new calculation) -->
+                <div class="space-y-1">
+                  <div class="flex justify-between items-center">
+                    <span class="text-gray-600 flex items-center">
+                      <Truck class="w-4 h-4 mr-1" />
+                      Delivery
+                      <span v-if="deliveryCost.loading || isCalculatingDelivery" class="ml-2 text-xs text-blue-600">
+                        (calculating...)
+                      </span>
+                    </span>
+                    <span class="font-semibold text-gray-900">
+                      {{ formatApiPrice({
+                        price: getDeliveryFeeForDisplay(), 
+                        currency_info: cart.items.currency_info 
+                      }) }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Legacy delivery fee sections - now hidden as we show the unified delivery cost above -->
                 <!-- Base delivery fee (standard/custom delivery) -->
-                <div v-if="expressProductIds.size === 0" class="flex justify-between items-center">
+                <div v-if="false && expressProductIds.size === 0" class="flex justify-between items-center">
                   <span class="text-gray-600">
                     {{ Object.keys(customDates).length > 0 ? 'Custom Delivery' : 'Standard Delivery' }}
                   </span>
@@ -377,7 +417,7 @@
                 </div>
 
                 <!-- Express delivery info (replaces standard delivery) -->
-                <div v-if="expressProductIds.size > 0" class="flex justify-between items-center">
+                <div v-if="false && expressProductIds.size > 0" class="flex justify-between items-center">
                   <span class="text-gray-600">Express Delivery ({{ expressProductIds.size }} items)</span>
                   <span class="font-semibold text-blue-600">
                     {{ formatApiPrice({
@@ -776,6 +816,21 @@
                       currency_info: cart.items.currency_info 
                     }) }}
                   </p>
+                  
+                  <!-- Individual product custom delivery button -->
+                  <div class="mt-2">
+                    <!-- Always show Custom button -->
+                    <button
+                      v-if="!expressProductIds.has(item.product_id)"
+                      @click="openCustomDeliveryModal(item)"
+                      class="flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border-2 bg-gray-50 border-gray-200 text-gray-600 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600"
+                    >
+                      <span class="w-3 h-3 mr-1 flex items-center justify-center rounded-full text-xs bg-gray-200 text-gray-600">
+                        📅
+                      </span>
+                      Custom
+                    </button>
+                  </div>
               </div>
             </div>
             </div>
@@ -1021,6 +1076,95 @@
         </div>
       </div>
 
+      <!-- Group Custom Delivery Modal -->
+      <div v-if="showCustomDeliveryModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click="showCustomDeliveryModal = false">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl" @click.stop>
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-gray-900">Custom Delivery for Group</h3>
+            <button @click="showCustomDeliveryModal = false" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors">
+              <X class="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
+          
+          <div v-if="currentCustomGroup" class="space-y-6">
+            <!-- Group info -->
+            <div class="p-4 bg-gray-50 rounded-xl">
+              <h4 class="font-semibold text-gray-900 mb-2">{{ currentCustomGroup.seller_name }}</h4>
+              <p class="text-sm text-gray-600 mb-3">{{ currentCustomGroup.items.length }} item{{ currentCustomGroup.items.length > 1 ? 's' : '' }}</p>
+              
+              <!-- Group items -->
+              <div class="space-y-2">
+                <div 
+                  v-for="item in currentCustomGroup.items" 
+                  :key="item.product_id"
+                  class="flex items-center space-x-2 text-sm"
+                >
+                  <div class="w-8 h-8 rounded-lg overflow-hidden">
+                    <img 
+                      :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
+                      :alt="item.product_name"
+                      class="w-full h-full object-cover"
+                    />
+                  </div>
+                  <span class="text-gray-700">{{ item.product_name }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Date selection -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Custom Delivery Date</label>
+              <div class="relative">
+                <input 
+                  v-model="customDeliveryDate"
+                  type="text"
+                  readonly
+                  @click="openDatePicker"
+                  :placeholder="customDeliveryDate ? formatDate(customDeliveryDate) : 'Select delivery date'"
+                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors cursor-pointer bg-white"
+                />
+                <button type="button" @click="openDatePicker" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-auto">
+                  <Calendar class="h-5 w-5 text-gray-400" />
+                </button>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">This date will be applied to all items in this group</p>
+            </div>
+            
+            <!-- Time slot selection -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Time Slot</label>
+              <select 
+                v-model="customDeliveryTime"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              >
+                <option value="">Select time slot</option>
+                <option value="morning">Morning (8:00 AM - 12:00 PM)</option>
+                <option value="afternoon">Afternoon (12:00 PM - 4:00 PM)</option>
+                <option value="evening">Evening (4:00 PM - 8:00 PM)</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Actions -->
+          <div class="flex space-x-3 mt-6">
+            <button 
+              @click="showCustomDeliveryModal = false"
+              class="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+            >
+              Cancel
+            </button>
+            <button 
+              @click="confirmGroupCustomDelivery"
+              :disabled="!customDeliveryDate || !customDeliveryTime"
+              class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              style="background: linear-gradient(to right, #2563eb, #9333ea);"
+            >
+              Confirm
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Location Confirmation Dialog -->
       <LocationConfirmationDialog
         v-model="locationConfirmation.showLocationDialog.value"
@@ -1035,11 +1179,13 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useCartStore } from '@/stores/cart'
+import { useDeliveryCostStore } from '@/stores/deliveryCost'
 import { useRouter } from 'vue-router'
 import { apiService } from '@/services/api'
 import { useCurrency } from '@/composables/useCurrency'
 import { useLocationConfirmation } from '@/composables/useLocationConfirmation'
 import LocationConfirmationDialog from '@/components/LocationConfirmationDialog.vue'
+import DeliveryCostBreakdown from '@/components/DeliveryCostBreakdown.vue'
 import { 
   ArrowLeft, Home, Building, MapPin, MapPinOff, Edit, CheckCircle, Plus, 
   Truck, Zap, Calendar, Info, Smartphone, X, ChevronLeft, ChevronRight, ShoppingBag 
@@ -1047,7 +1193,8 @@ import {
 
 const router = useRouter()
 const cart = useCartStore()
-const { formatApiPrice } = useCurrency()
+const deliveryCost = useDeliveryCostStore()
+const { formatApiPrice, formatPrice } = useCurrency()
 const locationConfirmation = useLocationConfirmation()
 
 // Checkout state
@@ -1060,8 +1207,47 @@ const shippingFee = ref(0)
 // Delivery options (now all per-product based)
 const customDeliveryDate = ref(null) // Legacy - kept for existing functionality
 const customDeliveryTime = ref(null) // Legacy - kept for existing functionality
-const expressDeliveryFee = ref(500) // 500 FCFA extra for express
-const customDeliveryFee = ref(300) // 300 FCFA extra for custom delivery
+const expressDeliveryFee = ref(0) // Will be calculated by API
+const customDeliveryFee = ref(0) // Will be calculated by API
+
+// Multi-seller delivery cost variables
+const multiSellerDeliveryCost = ref(0)
+const sellerGroups = ref([])
+const deliveryCostBreakdown = ref({})
+const isCalculatingDelivery = ref(false)
+
+// Initialize with default values to prevent endless loading
+const initializeDefaultDeliveryData = () => {
+  console.log('🔧 initializeDefaultDeliveryData called, current values:', {
+    multiSellerDeliveryCost: multiSellerDeliveryCost.value,
+    sellerGroupsLength: sellerGroups.value.length
+  });
+  
+  // Initialize with empty/default values - real calculation will happen later
+  multiSellerDeliveryCost.value = 0;
+  sellerGroups.value = [];
+  deliveryCostBreakdown.value = {
+    total_standard_cost: 0,
+    total_express_cost: 0,
+    total_mixed_cost: 0
+  };
+  
+  console.log('✅ Default data initialized (empty values):', {
+    multiSellerDeliveryCost: multiSellerDeliveryCost.value,
+    sellerGroupsLength: sellerGroups.value.length,
+    deliveryCostBreakdown: deliveryCostBreakdown.value
+  });
+  
+  // Double-check the values are actually set
+  setTimeout(() => {
+    console.log('🔍 Verification after 100ms:', {
+      multiSellerDeliveryCost: multiSellerDeliveryCost.value,
+      sellerGroupsLength: sellerGroups.value.length,
+      'Expected in debug': 'TotalCost: 0, SellerGroups: 0, HasMultiple: false'
+    });
+  }, 100);
+};
+
 // Per-item delivery overrides state
 const showExpressDialog = ref(false)
 const showCustomDialog = ref(false)
@@ -1139,24 +1325,34 @@ const formValid = computed(() => {
 
 // Computed
 const totalAmount = computed(() => {
-  const subtotal = Number(cart.items.total_amount) || 0
-  let deliveryFee = Number(shippingFee.value) || 0 // Base delivery fee (standard)
+  const subtotal = Number(cart.items?.total_amount) || 0
   
-  // Use the correct delivery fee based on selected options:
-  // - Express delivery takes priority over custom
-  // - Custom delivery uses same fee as standard delivery
-  // - Standard delivery uses base shipping fee
-  const hasExpressItems = expressProductIds.value.size > 0
-  const hasCustomItems = Object.keys(customDates.value).length > 0
+  // Use multi-seller delivery cost if available, otherwise fall back to legacy calculation
+  let deliveryFee = 0
   
-  if (hasExpressItems) {
-    // Express delivery - use express fee from API
-    deliveryFee = Number(expressDeliveryFee.value) || 0
-  } else if (hasCustomItems) {
-    // Custom delivery - uses same fee as standard delivery (no extra charge)
+  // Check if multi-seller delivery cost is available and valid
+  if (multiSellerDeliveryCost.value && multiSellerDeliveryCost.value > 0 && !isNaN(multiSellerDeliveryCost.value)) {
+    // Use the new multi-seller delivery cost calculation
+    deliveryFee = Number(multiSellerDeliveryCost.value) || 0
+  } else {
+    // Fallback to legacy calculation for backward compatibility
     deliveryFee = Number(shippingFee.value) || 0
+    
+    // Use the correct delivery fee based on selected options:
+    // - Express delivery takes priority over custom
+    // - Custom delivery uses same fee as standard delivery
+    // - Standard delivery uses base shipping fee
+    const hasExpressItems = expressProductIds.value.size > 0
+    const hasCustomItems = Object.keys(customDates.value).length > 0
+    
+    if (hasExpressItems) {
+      // Express delivery - use express fee from API
+      deliveryFee = Number(expressDeliveryFee.value) || 0
+    } else if (hasCustomItems) {
+      // Custom delivery - uses same fee as standard delivery (no extra charge)
+      deliveryFee = Number(shippingFee.value) || 0
+    }
   }
-  // else: standard delivery uses shippingFee.value
   
   const total = subtotal + deliveryFee
   
@@ -1189,6 +1385,7 @@ const groupedCartItems = computed(() => {
         product_id: item.product_id,
         product_name: item.product_name,
         seller_name: item.seller_name,
+        seller_id: item.seller_id,
         main_image: item.main_image,
         delivery_info: item.delivery_info,
         variants: []
@@ -1207,6 +1404,283 @@ const groupedCartItems = computed(() => {
 
   return Object.values(grouped);
 });
+
+// New seller-based grouping for delivery options
+const sellerDeliveryGroups = computed(() => {
+  if (!cart.items || !cart.items.items || cart.items.items.length === 0) {
+    return [];
+  }
+
+  const groups = {};
+
+  // Group items by seller and delivery option
+  cart.items.items.forEach(item => {
+    const sellerId = item.seller_id;
+    const isExpress = expressProductIds.value.has(item.product_id);
+    const hasCustomDate = customDates.value[item.product_id];
+    
+    // Determine delivery type
+    let deliveryType = 'standard';
+    if (isExpress) {
+      deliveryType = 'express';
+    } else if (hasCustomDate) {
+      deliveryType = 'custom';
+    }
+
+    // Create separate groups for express items from the same seller
+    const groupKey = isExpress ? `${sellerId}_express_${item.product_id}` : `${sellerId}_${deliveryType}`;
+    
+    if (!groups[groupKey]) {
+      groups[groupKey] = {
+        seller_id: sellerId,
+        seller_name: item.seller_name,
+        delivery_type: deliveryType,
+        items: [],
+        custom_date: null,
+        expected_delivery_date: null,
+        is_express_group: isExpress
+      };
+    }
+
+    // Add item to group
+    groups[groupKey].items.push({
+      cart_item_id: item.id,
+      product_id: item.product_id,
+      product_name: item.product_name,
+      main_image: item.main_image,
+      delivery_info: item.delivery_info,
+      variants: item.variants,
+      is_express: isExpress,
+      custom_date: hasCustomDate ? customDates.value[item.product_id] : null
+    });
+  });
+
+  // Calculate expected delivery dates for each group
+  Object.values(groups).forEach(group => {
+    console.log('🔧 Processing group:', group.delivery_type, group);
+    
+    if (group.delivery_type === 'express') {
+      // For express, use the earliest express delivery date
+      group.expected_delivery_date = getEarliestExpressDate(group.items);
+      console.log('🔧 Set express group expected_delivery_date:', group.expected_delivery_date);
+    } else if (group.delivery_type === 'custom') {
+      // For custom, use the custom date (should be the same for all items in group)
+      group.custom_date = getCustomDateForGroup(group.items);
+      group.expected_delivery_date = group.custom_date;
+    } else {
+      // For standard, use the latest standard delivery date
+      group.expected_delivery_date = getLatestStandardDate(group.items);
+    }
+  });
+
+  return Object.values(groups);
+});
+
+// Helper functions for date calculations
+const getEarliestExpressDate = (items) => {
+  // For express delivery, use current date (today)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to start of day
+  console.log('🔧 getEarliestExpressDate returning:', today);
+  return today;
+};
+
+const getCustomDateForGroup = (items) => {
+  // All items in a custom group should have the same custom date
+  const customDates = items.map(item => item.custom_date).filter(Boolean);
+  return customDates[0] || null;
+};
+
+const getLatestStandardDate = (items) => {
+  let latestDate = null;
+  items.forEach(item => {
+    if (item.delivery_info?.estimated_delivery_date) {
+      const standardDate = new Date(item.delivery_info.estimated_delivery_date);
+      if (!latestDate || standardDate > latestDate) {
+        latestDate = standardDate;
+      }
+    }
+  });
+  return latestDate;
+};
+
+// Helper functions for the new grouping system
+const formatGroupDeliveryDate = (group) => {
+  console.log('🔧 formatGroupDeliveryDate called with group:', group);
+  console.log('🔧 group.expected_delivery_date:', group.expected_delivery_date);
+  
+  if (!group.expected_delivery_date) {
+    console.log('🔧 No expected_delivery_date, returning TBD');
+    return 'TBD';
+  }
+  
+  const date = new Date(group.expected_delivery_date);
+  const formatted = date.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric'
+  });
+  
+  console.log('🔧 Formatted date:', formatted);
+  return formatted;
+};
+
+const hasExpressEligibleItems = (items) => {
+  return items.some(item => isExpressEligibleItem(item));
+};
+
+const isGroupExpress = (group) => {
+  return group.delivery_type === 'express';
+};
+
+const getTotalQuantityForItem = (item) => {
+  if (!item.variants) return 0;
+  return item.variants.reduce((total, variant) => total + (variant.quantity || 0), 0);
+};
+
+const getAdaptiveDeliveryDateForItem = (item) => {
+  if (item.is_express) {
+    // For express delivery, show current date
+    const today = new Date();
+    return `Express: ${today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+  } else if (item.custom_date) {
+    const date = new Date(item.custom_date);
+    return `Custom: ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+  } else if (item.delivery_info?.estimated_delivery_display) {
+    return item.delivery_info.estimated_delivery_display;
+  } else {
+    return 'Standard Delivery';
+  }
+};
+
+// Individual item express toggle handler
+const toggleExpressForItem = (item) => {
+  if (expressProductIds.value.has(item.product_id)) {
+    // Remove from express - item will go back to standard group
+    expressProductIds.value.delete(item.product_id);
+    // Clear custom date if it exists
+    delete customDates.value[item.product_id];
+  } else {
+    // Add to express - item will be moved to express group
+    expressProductIds.value.add(item.product_id);
+    // Clear custom date if it exists
+    delete customDates.value[item.product_id];
+  }
+};
+
+// Get standard delivery dates for all items
+const getStandardDeliveryDates = () => {
+  const standardDates = {};
+  
+  console.log('🔧 Debugging cart items for standard delivery dates:');
+  console.log('Cart items:', cart.items.items);
+  
+  // Get all items that are not express or custom
+  cart.items.items.forEach(item => {
+    const isExpress = expressProductIds.value.has(item.product_id);
+    const hasCustomDate = customDates.value[item.product_id];
+    
+    console.log(`Item ${item.product_id}:`, {
+      isExpress,
+      hasCustomDate,
+      delivery_info: item.delivery_info,
+      estimated_delivery_date: item.delivery_info?.estimated_delivery_date
+    });
+    
+    if (!isExpress && !hasCustomDate) {
+      // This is a standard delivery item
+      // Use the estimated_delivery_date that was already calculated and displayed to the user
+      // This ensures consistency between what the user sees and what gets saved in the database
+      if (item.delivery_info?.estimated_delivery_date) {
+        // Use the pre-calculated delivery date from the product
+        standardDates[item.product_id] = item.delivery_info.estimated_delivery_date;
+        
+        console.log(`Using pre-calculated delivery date for product ${item.product_id}:`, {
+          estimated_delivery_date: item.delivery_info.estimated_delivery_date,
+          delivery_days: item.delivery_info?.delivery_days
+        });
+      } else {
+        // Fallback: calculate delivery date based on current time (when order is placed)
+        const deliveryDays = item.delivery_info?.delivery_days || 2;
+        const today = new Date();
+        const deliveryDate = new Date(today);
+        deliveryDate.setDate(today.getDate() + deliveryDays);
+        
+        // Format as YYYY-MM-DD for backend
+        const formattedDate = deliveryDate.toISOString().split('T')[0];
+        standardDates[item.product_id] = formattedDate;
+        
+        console.log(`Fallback: Calculated standard date for product ${item.product_id}:`, {
+          deliveryDays,
+          today: today.toISOString().split('T')[0],
+          calculatedDate: formattedDate
+        });
+      }
+    }
+  });
+  
+  console.log('🔧 Standard delivery dates being sent:', standardDates);
+  return standardDates;
+};
+
+// Group-level delivery option handlers (legacy - kept for custom delivery)
+const toggleExpressForGroup = (group) => {
+  if (group.delivery_type === 'express') {
+    // Convert express group back to standard
+    group.items.forEach(item => {
+      expressProductIds.value.delete(item.product_id);
+    });
+  } else {
+    // Convert standard group to express
+    group.items.forEach(item => {
+      if (isExpressEligibleItem(item)) {
+        expressProductIds.value.add(item.product_id);
+        // Clear custom date if it exists
+        delete customDates.value[item.product_id];
+      }
+    });
+  }
+};
+
+const openCustomDeliveryModalForGroup = (group) => {
+  console.log('🔧 openCustomDeliveryModalForGroup called with group:', group);
+  
+  // Set the current group for custom delivery
+  currentCustomGroup.value = group;
+  
+  // Set the initial date to the highest date in the group
+  const highestDate = getHighestDateInGroup(group);
+  customDeliveryDate.value = highestDate;
+  
+  console.log('🔧 Setting showCustomDeliveryModal to true, highestDate:', highestDate);
+  showCustomDeliveryModal.value = true;
+};
+
+const getHighestDateInGroup = (group) => {
+  let highestDate = null;
+  
+  group.items.forEach(item => {
+    let itemDate = null;
+    
+    if (item.delivery_info?.estimated_delivery_date) {
+      itemDate = new Date(item.delivery_info.estimated_delivery_date);
+    } else if (item.custom_date) {
+      itemDate = new Date(item.custom_date);
+    }
+    
+    if (itemDate && (!highestDate || itemDate > highestDate)) {
+      highestDate = itemDate;
+    }
+  });
+  
+  // If no date found, use tomorrow
+  if (!highestDate) {
+    highestDate = new Date();
+    highestDate.setDate(highestDate.getDate() + 1);
+  }
+  
+  return highestDate.toISOString().split('T')[0];
+};
 
 const displayedCartItems = computed(() => {
   return groupedCartItems.value.slice(0, 3);
@@ -1282,6 +1756,10 @@ const getItemTotal = (item) => {
 
 // Initialize component
 onMounted(async () => {
+  // Initialize default delivery data immediately
+  console.log('=== CHECKOUT PAGE MOUNTED ===');
+  initializeDefaultDeliveryData();
+  
   // Initialize cart first
   try {
     await cart.fetchCart()
@@ -1302,8 +1780,115 @@ onMounted(async () => {
     selectedAddressIndex.value = defaultIndex >= 0 ? defaultIndex : 0
   }
 
-  // Initialize delivery fee for default option
-  await calculateDeliveryFee('default');
+  // Calculate multi-seller delivery costs first
+  await calculateMultiSellerDeliveryCost();
+  
+  // Only calculate legacy delivery fee if multi-seller calculation failed
+  if (!multiSellerDeliveryCost.value || multiSellerDeliveryCost.value === 0) {
+    await calculateDeliveryFee('default');
+  } else {
+    console.log('Multi-seller calculation successful, using:', multiSellerDeliveryCost.value);
+  }
+  
+  // Initialize delivery cost store with cart data - use fallback to ensure we always have values
+  if (cart.items && cart.items.items && cart.items.items.length > 0) {
+    console.log('Raw cart items structure:', cart.items.items);
+    
+    try {
+      const formattedCartItems = cart.items.items.map(item => {
+        console.log('Processing cart item:', item);
+        
+        // Handle different possible cart item structures
+        let sellerId, sellerName;
+        
+        if (item.seller_id && item.seller_name) {
+          // Direct seller properties (preferred)
+          sellerId = item.seller_id;
+          sellerName = item.seller_name;
+        } else if (item.product && item.product.seller) {
+          // Nested seller structure
+          sellerId = item.product.seller.id;
+          sellerName = item.product.seller.name || item.product.seller.email;
+        } else if (item.seller_id) {
+          // Only seller_id available
+          sellerId = item.seller_id;
+          sellerName = `Seller ${item.seller_id}`;
+        } else if (item.product && item.product.seller_id) {
+          // Another alternative: item.product.seller_id
+          sellerId = item.product.seller_id;
+          sellerName = `Seller ${item.product.seller_id}`;
+        } else {
+          // Fallback to default seller
+          console.warn('No seller information found in cart item:', item);
+          sellerId = 'default';
+          sellerName = 'Default Seller';
+        }
+        
+        return {
+          product: {
+            seller: {
+              id: sellerId,
+              name: sellerName
+            }
+          },
+          product_id: item.product_id,
+          express_delivery: expressProductIds.value.has(item.product_id),
+          quantity: item.quantity || 1
+        };
+      });
+      
+      console.log('Formatted cart items:', formattedCartItems);
+      
+      // Always use local calculation as fallback to ensure we have delivery costs
+      deliveryCost.calculateDeliveryCostLocally(formattedCartItems);
+      
+      // Debug: Log the values after calculation
+      setTimeout(() => {
+        console.log('After calculation:', {
+          multiSellerDeliveryCost: multiSellerDeliveryCost.value,
+          deliveryCostTotal: deliveryCost.totalDeliveryCost,
+          sellerGroups: sellerGroups.value,
+          deliveryCostBreakdown: deliveryCostBreakdown.value
+        });
+      }, 100);
+      
+    } catch (error) {
+      console.error('Error processing cart items for delivery cost:', error);
+      // Fallback to default data if cart processing fails
+      initializeDefaultDeliveryData();
+    }
+  } else {
+    // If no cart items, initialize default delivery data
+    console.log('No cart items found, using default delivery data');
+    initializeDefaultDeliveryData();
+  }
+  
+  // Ensure we always have delivery data after a short delay
+  setTimeout(() => {
+    console.log('🔄 Final check - forcing default delivery data initialization...');
+    console.log('Before final init:', {
+      multiSellerDeliveryCost: multiSellerDeliveryCost.value,
+      sellerGroupsLength: sellerGroups.value.length
+    });
+    
+    initializeDefaultDeliveryData();
+    
+    console.log('After final init:', {
+      multiSellerDeliveryCost: multiSellerDeliveryCost.value,
+      sellerGroupsLength: sellerGroups.value.length,
+      sellerGroups: sellerGroups.value
+    });
+    
+    // Final verification that will show in console
+    setTimeout(() => {
+      console.log('🚨 FINAL STATE (should show in debug box):', {
+        'Expected': 'TotalCost: 0, SellerGroups: 0, HasMultiple: false',
+        'Actual multiSellerDeliveryCost': multiSellerDeliveryCost.value,
+        'Actual sellerGroups.length': sellerGroups.value.length,
+        'Actual hasMultiple': sellerGroups.value.length > 1
+      });
+    }, 200);
+  }, 500);
 })
 
 // Fetch addresses from API
@@ -1342,11 +1927,23 @@ const fetchCountries = async () => {
 
 // Select address
 const selectAddress = (index) => {
-  console.log('Selected address index:', index);
+  console.log('📍 Address selection triggered:', {
+    previousIndex: selectedAddressIndex.value,
+    newIndex: index,
+    previousAddress: selectedAddress.value?.address_line1,
+    newAddress: addresses.value[index]?.address_line1
+  });
+  
   selectedAddressIndex.value = index;
+  
   // Force reactivity update by accessing the selected address
   const selected = selectedAddress.value;
-  console.log('Selected address:', selected);
+  console.log('📍 New address selected:', {
+    address: selected?.address_line1,
+    city: selected?.city,
+    coordinates: selected ? `${selected.latitude}, ${selected.longitude}` : 'No GPS',
+    willTriggerDeliveryCostRecalculation: true
+  });
 }
 
 // Edit address
@@ -1496,41 +2093,73 @@ const placeOrder = async () => {
       notes: `Payment method: ${paymentMethod.value}`,
       // Delivery options are now handled per-item via express_item_product_ids and custom_item_dates
       delivery_fee: (() => {
-        // Calculate the actual delivery fee being used
-        const hasExpressItems = expressProductIds.value.size > 0;
-        const hasCustomItems = Object.keys(customDates.value).length > 0;
+        // Use the same logic as totalAmount computed property
+        let deliveryFee = 0;
         
-        let fee = 0;
-        if (hasExpressItems) {
-          fee = expressDeliveryFee.value || 0;
-        } else if (hasCustomItems) {
-          fee = shippingFee.value || 0;
+        // Check if multi-seller delivery cost is available and valid
+        if (multiSellerDeliveryCost.value && multiSellerDeliveryCost.value > 0 && !isNaN(multiSellerDeliveryCost.value)) {
+          // Use the new multi-seller delivery cost calculation
+          deliveryFee = Number(multiSellerDeliveryCost.value) || 0;
         } else {
-          fee = shippingFee.value || 0;
+          // Fallback to legacy calculation for backward compatibility
+          deliveryFee = Number(shippingFee.value) || 0;
+          
+          // Use the correct delivery fee based on selected options:
+          // - Express delivery takes priority over custom
+          // - Custom delivery uses same fee as standard delivery
+          // - Standard delivery uses base shipping fee
+          const hasExpressItems = expressProductIds.value.size > 0;
+          const hasCustomItems = Object.keys(customDates.value).length > 0;
+          
+          if (hasExpressItems) {
+            // Express delivery - use express fee from API
+            deliveryFee = Number(expressDeliveryFee.value) || 0;
+          } else if (hasCustomItems) {
+            // Custom delivery - uses same fee as standard delivery (no extra charge)
+            deliveryFee = Number(shippingFee.value) || 0;
+          }
         }
         
         // Ensure fee is a valid number and within decimal field limits (max 10 digits, 2 decimal places = max 99999999.99)
-        fee = Number(fee) || 0;
-        fee = Math.round(fee * 100) / 100; // Round to 2 decimal places
-        fee = Math.min(fee, 99999999.99); // Cap at maximum allowed value
-        fee = Math.max(fee, 0); // Ensure non-negative
+        deliveryFee = Number(deliveryFee) || 0;
+        deliveryFee = Math.round(deliveryFee * 100) / 100; // Round to 2 decimal places
+        deliveryFee = Math.min(deliveryFee, 99999999.99); // Cap at maximum allowed value
+        deliveryFee = Math.max(deliveryFee, 0); // Ensure non-negative
         
-        console.log('Delivery fee calculation:', { hasExpressItems, hasCustomItems, shippingFee: shippingFee.value, expressDeliveryFee: expressDeliveryFee.value, finalFee: fee });
+        console.log('Order delivery fee calculation:', { 
+          multiSellerDeliveryCost: multiSellerDeliveryCost.value, 
+          hasExpressItems: expressProductIds.value.size > 0, 
+          hasCustomItems: Object.keys(customDates.value).length > 0,
+          shippingFee: shippingFee.value, 
+          expressDeliveryFee: expressDeliveryFee.value, 
+          finalFee: deliveryFee,
+          expressProductIds: Array.from(expressProductIds.value),
+          customDates: Object.keys(customDates.value)
+        });
         
-        return fee;
+        return deliveryFee;
       })(),
       // Per-item delivery overrides
       express_item_product_ids: Array.from(expressProductIds.value),
       custom_item_dates: customDates.value,
+      standard_item_dates: getStandardDeliveryDates(),
       // Include payment data for processing
       payment_data: {
         payment_method: paymentMethod.value,
         phone_number: selectedAddress.value.phone || '',
-        currency: 'XOF'
+        currency: 'CFA'
       }
     }
 
     // Custom delivery dates are now handled per-product via custom_item_dates
+
+    // Debug: Log the order data being sent
+    console.log('🔧 Order data being sent to backend:', {
+      express_item_product_ids: orderData.express_item_product_ids,
+      custom_item_dates: orderData.custom_item_dates,
+      standard_item_dates: orderData.standard_item_dates,
+      total_items: orderData.items.length
+    });
 
     // Call order creation API
     const response = await apiService.createOrder(orderData)
@@ -1637,7 +2266,7 @@ const goToStep = (step) => {
   currentStep.value = step;
 }
 
-const nextStep = () => {
+const nextStep = async () => {
   // If moving from step 1 (address selection), check GPS coordinates
   if (currentStep.value === 1 && selectedAddress.value) {
     const needsLocationConfirmation = locationConfirmation.checkAddressLocation(
@@ -1653,6 +2282,20 @@ const nextStep = () => {
   
   if (currentStep.value < 3) {
     currentStep.value++;
+    
+    // If moving to step 2 (delivery), ensure delivery costs are calculated
+    if (currentStep.value === 2) {
+      console.log('🚀 NextStep: Moving to delivery step, ensuring delivery costs are calculated...');
+      await calculateMultiSellerDeliveryCost();
+      
+      // Only calculate legacy delivery fee if multi-seller calculation failed
+      if (!multiSellerDeliveryCost.value || multiSellerDeliveryCost.value === 0) {
+        console.log('NextStep: Multi-seller calculation failed, falling back to legacy calculation');
+        await calculateDeliveryFee('default');
+      } else {
+        console.log('NextStep: Multi-seller calculation successful, using:', multiSellerDeliveryCost.value);
+      }
+    }
   }
 }
 
@@ -1783,14 +2426,14 @@ const getExpressDeliveryTime = () => {
   const now = new Date();
   const currentHour = now.getHours();
   
-  if (currentHour >= 20) { // After 8 PM
+  if (currentHour >= 19) { // After 7 PM
     // Can only deliver next day
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
     const options = { weekday: 'short', month: 'short', day: 'numeric' };
     return `Next day delivery (${tomorrow.toLocaleDateString('en-US', options)})`;
   } else {
-    // Can deliver same day if ordered before 8 PM
+    // Can deliver same day if ordered before 7 PM
     const options = { weekday: 'short', month: 'short', day: 'numeric' };
     return `Same day delivery (${now.toLocaleDateString('en-US', options)})`;
   }
@@ -1895,14 +2538,14 @@ const getAdaptiveDeliveryDate = (item) => {
     const now = new Date();
     const currentHour = now.getHours();
     
-    if (currentHour >= 20) { // After 8 PM
+    if (currentHour >= 19) { // After 7 PM
       // Can only deliver next day
       const tomorrow = new Date(now);
       tomorrow.setDate(tomorrow.getDate() + 1);
       const options = { weekday: 'short', month: 'short', day: 'numeric' };
       return `Express - ${tomorrow.toLocaleDateString('en-US', options)}`;
     } else {
-      // Can deliver same day if ordered before 8 PM
+      // Can deliver same day if ordered before 7 PM
       const options = { weekday: 'short', month: 'short', day: 'numeric' };
       return `Express - ${now.toLocaleDateString('en-US', options)}`;
     }
@@ -1969,22 +2612,260 @@ const calculateDeliveryFee = async (option) => {
   }
 };
 
-// Watch for delivery option changes to recalculate fees
-watch([expressProductIds, customDates], async () => {
-  // Determine the overall delivery type for the order
-  const hasExpress = expressProductIds.value.size > 0
-  const hasCustom = Object.keys(customDates.value).length > 0
+// Function to calculate multi-seller delivery costs
+const calculateMultiSellerDeliveryCost = async () => {
+  console.log('🚀 calculateMultiSellerDeliveryCost called from step:', currentStep.value);
   
-  // Calculate fees based on the most premium delivery option selected
-  let deliveryType = 'default'
-  if (hasExpress) {
-    deliveryType = 'express' // Express takes priority
-  } else if (hasCustom) {
-    deliveryType = 'custom'
+  if (!cart.items || !cart.items.items || cart.items.items.length === 0) {
+    console.log('No cart items available for multi-seller delivery calculation');
+    return;
+  }
+
+  try {
+    isCalculatingDelivery.value = true;
+    
+    // Prepare cart items for API call with error handling
+    const cartItems = cart.items.items.map(item => {
+      let sellerId, sellerName;
+      
+      try {
+        if (item.seller_id && item.seller_name) {
+          // Direct seller properties (preferred)
+          sellerId = item.seller_id;
+          sellerName = item.seller_name;
+        } else if (item.product && item.product.seller) {
+          // Nested seller structure
+          sellerId = item.product.seller.id;
+          sellerName = item.product.seller.name || item.product.seller.email;
+        } else if (item.seller_id) {
+          // Only seller_id available
+          sellerId = item.seller_id;
+          sellerName = `Seller ${item.seller_id}`;
+        } else {
+          sellerId = 'default';
+          sellerName = 'Default Seller';
+        }
+      } catch (error) {
+        console.error('Error accessing seller info for item:', item, error);
+        sellerId = 'default';
+        sellerName = 'Default Seller';
+      }
+      
+      return {
+        product: {
+          seller: {
+            id: sellerId,
+            name: sellerName
+          }
+        },
+        product_id: item.product_id,
+        express_delivery: expressProductIds.value.has(item.product_id),
+        quantity: item.quantity || 1
+      };
+    });
+
+    // Get customer address if available
+    const customerAddress = selectedAddress.value ? {
+      latitude: selectedAddress.value.latitude,
+      longitude: selectedAddress.value.longitude
+    } : null;
+
+    const expressItemsInCall = cartItems.filter(item => item.express_delivery);
+    const standardItemsInCall = cartItems.filter(item => !item.express_delivery);
+    
+    console.log('🚛 API Call - Multi-seller delivery cost calculation:', {
+      cartItemsCount: cartItems.length,
+      expressItemsCount: expressItemsInCall.length,
+      standardItemsCount: standardItemsInCall.length,
+      cartItems: cartItems.map(item => ({
+        product_id: item.product_id,
+        seller_id: item.seller_id,
+        seller_name: item.seller_name,
+        quantity: item.quantity,
+        express_delivery: item.express_delivery ? '⚡ EXPRESS' : '🚚 STANDARD'
+      })),
+      expressItems: expressItemsInCall.map(item => `Product ${item.product_id} (${item.seller_name})`),
+      customerAddress: customerAddress ? {
+        hasCoordinates: !!(customerAddress.latitude && customerAddress.longitude),
+        coordinates: `${customerAddress.latitude}, ${customerAddress.longitude}`
+      } : 'No address provided'
+    });
+
+    const response = await apiService.calculateMultiSellerDeliveryFee(cartItems, customerAddress);
+    
+    if (response.data) {
+      multiSellerDeliveryCost.value = response.data.total_delivery_cost;
+      sellerGroups.value = response.data.seller_groups;
+      deliveryCostBreakdown.value = response.data.breakdown;
+      
+      // Update the new delivery cost store as well
+      deliveryCost.deliveryCosts.value = {
+        total_delivery_cost: response.data.total_delivery_cost,
+        seller_groups: response.data.seller_groups || [],
+        breakdown: response.data.breakdown || {
+          total_standard_cost: 0,
+          total_express_cost: 0,
+          total_mixed_cost: 0
+        }
+      };
+      
+      console.log('Multi-seller delivery cost calculated:', {
+        total: multiSellerDeliveryCost.value,
+        totalType: typeof multiSellerDeliveryCost.value,
+        sellerGroups: sellerGroups.value,
+        breakdown: deliveryCostBreakdown.value
+      });
+    } else {
+      console.log('No data in response');
+    }
+  } catch (error) {
+    console.error('Error calculating multi-seller delivery cost:', error);
+    // Fallback to legacy calculation
+    multiSellerDeliveryCost.value = 0;
+    sellerGroups.value = [];
+    deliveryCostBreakdown.value = {};
+  } finally {
+    isCalculatingDelivery.value = false;
+  }
+};
+
+// Watch for step changes to recalculate delivery costs
+watch(currentStep, async (newStep, oldStep) => {
+  console.log('🔄 Step changed from', oldStep, 'to', newStep);
+  
+  // When moving to step 2 (delivery), recalculate delivery costs
+  if (newStep === 2) {
+    console.log('📦 Moving to delivery step, recalculating delivery costs...');
+    await calculateMultiSellerDeliveryCost();
+    
+    // Only calculate legacy delivery fee if multi-seller calculation failed
+    if (!multiSellerDeliveryCost.value || multiSellerDeliveryCost.value === 0) {
+      console.log('Multi-seller calculation failed, falling back to legacy calculation');
+      await calculateDeliveryFee('default');
+    } else {
+      console.log('Multi-seller calculation successful, using:', multiSellerDeliveryCost.value);
+    }
+  }
+});
+
+// Watch for when step 2 becomes active to ensure delivery costs are calculated
+watch(() => currentStep.value === 2, async (isStep2) => {
+  if (isStep2) {
+    console.log('🎯 Step 2 is now active, ensuring delivery costs are calculated...');
+    // Small delay to ensure the step transition is complete
+    setTimeout(async () => {
+      if (currentStep.value === 2) {
+        await calculateMultiSellerDeliveryCost();
+        
+        if (!multiSellerDeliveryCost.value || multiSellerDeliveryCost.value === 0) {
+          await calculateDeliveryFee('default');
+        }
+      }
+    }, 100);
+  }
+});
+
+// Watch for delivery option changes to recalculate fees
+watch([expressProductIds, customDates, selectedAddress], async (newValues, oldValues) => {
+  const [newExpressIds, newCustomDates, newAddress] = newValues;
+  const [oldExpressIds, oldCustomDates, oldAddress] = oldValues || [new Set(), {}, null];
+  
+  // Detect what changed to trigger this recalculation
+  const expressChanged = JSON.stringify(Array.from(newExpressIds).sort()) !== JSON.stringify(Array.from(oldExpressIds).sort());
+  const customDatesChanged = JSON.stringify(newCustomDates) !== JSON.stringify(oldCustomDates);
+  const addressChanged = newAddress?.id !== oldAddress?.id;
+  
+  console.log('🔄 Delivery recalculation watcher triggered', {
+    triggers: {
+      expressDeliveryChanged: expressChanged,
+      customDatesChanged: customDatesChanged,
+      addressChanged: addressChanged
+    },
+    expressItems: {
+      previous: Array.from(oldExpressIds),
+      current: Array.from(newExpressIds),
+      count: newExpressIds.size
+    }
+  });
+  
+  // Store previous seller groups structure before recalculation
+  const previousSellerGroups = [...sellerGroups.value];
+  const previousTotalCost = multiSellerDeliveryCost.value;
+  
+  console.log('📊 Before address change recalculation:', {
+    multiSellerDeliveryCost: previousTotalCost,
+    sellerGroupsLength: previousSellerGroups.length,
+    selectedAddress: selectedAddress.value?.address_line1
+  });
+  
+  // Use the new multi-seller delivery cost calculation
+  await calculateMultiSellerDeliveryCost();
+  
+  console.log('📊 After address change recalculation:', {
+    multiSellerDeliveryCost: multiSellerDeliveryCost.value,
+    sellerGroupsLength: sellerGroups.value.length,
+    change: `${previousTotalCost} → ${multiSellerDeliveryCost.value}`,
+    sellerGroupsChanged: previousSellerGroups.length !== sellerGroups.value.length
+  });
+  
+  // CRITICAL FIX: Preserve seller groups structure on address change
+  if (previousSellerGroups.length > 0 && sellerGroups.value.length !== previousSellerGroups.length) {
+    console.warn('⚠️  Seller groups structure changed unexpectedly on address change! Restoring previous structure...');
+    console.log('🔧 Preserving seller groups structure and only updating costs');
+    
+    // Restore the previous seller groups structure
+    sellerGroups.value = previousSellerGroups.map(prevSeller => {
+      // Find matching seller in new response
+      const newSeller = sellerGroups.value.find(ns => ns.seller_id === prevSeller.seller_id);
+      
+      if (newSeller) {
+        // Preserve structure, update only cost
+        return {
+          ...prevSeller,
+          delivery_cost: newSeller.delivery_cost,
+          breakdown: newSeller.breakdown || prevSeller.breakdown
+        };
+      } else {
+        // If seller not found in new response, keep previous data but log warning
+        console.warn(`Seller ${prevSeller.seller_id} not found in new response, keeping previous cost`);
+        return prevSeller;
+      }
+    });
+    
+    // Recalculate total from preserved seller groups
+    multiSellerDeliveryCost.value = sellerGroups.value.reduce((total, seller) => total + seller.delivery_cost, 0);
+    
+    console.log('✅ Structure preserved, costs updated:', {
+      multiSellerDeliveryCost: multiSellerDeliveryCost.value,
+      sellerGroupsLength: sellerGroups.value.length,
+      finalChange: `${previousTotalCost} → ${multiSellerDeliveryCost.value}`,
+      structurePreserved: true
+    });
   }
   
-  // Recalculate delivery fees using the API
-  await calculateDeliveryFee(deliveryType)
+  // Also try using the delivery cost store as fallback
+  if (multiSellerDeliveryCost.value === 0 && cart.items && cart.items.items) {
+    try {
+      const formattedCartItems = cart.items.items.map(item => ({
+        product: {
+          seller: {
+            id: item.product.seller.id,
+            name: item.product.seller.name || item.product.seller.email
+          }
+        },
+        product_id: item.product.id,
+        express_delivery: expressProductIds.value.has(item.product.id),
+        quantity: item.quantity
+      }));
+      
+      await deliveryCost.calculateDeliveryCostFromAPI(formattedCartItems, selectedAddress.value ? {
+        latitude: selectedAddress.value.latitude,
+        longitude: selectedAddress.value.longitude
+      } : null);
+    } catch (error) {
+      console.error('Fallback delivery cost calculation failed:', error);
+    }
+  }
 }, { deep: true })
 
 // Date picker state
@@ -1992,6 +2873,169 @@ const currentMonth = ref(new Date())
 const selectedDateInPicker = ref(null)
 // Track which product (if any) is selecting a custom date via the dialog
 const currentCustomProductId = ref(null)
+// Track which group is selecting a custom date via the dialog
+const currentCustomGroup = ref(null)
+const showCustomDeliveryModal = ref(false)
+
+// Helper function to get delivery fee for display
+const getDeliveryFeeForDisplay = () => {
+  console.log('🔍 getDeliveryFeeForDisplay called:', {
+    multiSellerDeliveryCost: multiSellerDeliveryCost.value,
+    deliveryCostTotal: deliveryCost.totalDeliveryCost,
+    shippingFee: shippingFee.value,
+    expressDeliveryFee: expressDeliveryFee.value,
+    expressProductIds: Array.from(expressProductIds.value),
+    customDates: Object.keys(customDates.value)
+  });
+  
+  // Use the same logic as totalAmount computed property
+  if (multiSellerDeliveryCost.value && multiSellerDeliveryCost.value > 0 && !isNaN(multiSellerDeliveryCost.value)) {
+    console.log('✅ Using multiSellerDeliveryCost:', multiSellerDeliveryCost.value);
+    return Number(multiSellerDeliveryCost.value) || 0
+  } else {
+    // Calculate based on actual cart items instead of legacy values
+    console.log('⚠️ Falling back to cart-based calculation');
+    
+    if (!cart.items?.items || cart.items.items.length === 0) {
+      console.log('❌ No cart items, returning 0');
+      return 0;
+    }
+    
+    // Calculate based on actual cart items and their delivery fees
+    let totalCost = 0;
+    const sellerGroups = {};
+    
+    // Group items by seller
+    cart.items.items.forEach(item => {
+      console.log('🔍 Processing cart item:', item);
+      
+      // Check if product data exists
+      if (!item.product) {
+        console.error('❌ Item missing product data:', item);
+        return;
+      }
+      
+      if (!item.product.seller) {
+        console.error('❌ Item missing seller data:', item);
+        return;
+      }
+      
+      const sellerId = item.product.seller.id;
+      if (!sellerGroups[sellerId]) {
+        sellerGroups[sellerId] = {
+          seller: item.product.seller,
+          items: [],
+          hasExpress: false,
+          hasStandard: false
+        };
+      }
+      sellerGroups[sellerId].items.push(item);
+      
+      // Check if this item is selected for express delivery
+      const isExpress = expressProductIds.value.has(item.product_id);
+      if (isExpress && item.product.express_delivery) {
+        sellerGroups[sellerId].hasExpress = true;
+      } else {
+        sellerGroups[sellerId].hasStandard = true;
+      }
+      
+      console.log(`Item ${item.product_id}: seller=${sellerId}, isExpress=${isExpress}, standardFee=${item.product.standard_delivery_fee}, expressFee=${item.product.express_delivery_fee}`);
+    });
+    
+    // Calculate cost for each seller group
+    Object.values(sellerGroups).forEach(group => {
+      if (group.hasExpress && group.hasStandard) {
+        // Mixed delivery: standard + express
+        const standardCost = group.items.reduce((sum, item) => {
+          return sum + (item.product.standard_delivery_fee || 0);
+        }, 0);
+        const expressCost = group.items.reduce((sum, item) => {
+          const isExpress = expressProductIds.value.has(item.product_id);
+          return sum + (isExpress ? (item.product.express_delivery_fee || 0) : 0);
+        }, 0);
+        totalCost += standardCost + expressCost;
+        console.log(`Mixed delivery for seller ${group.seller.name}: standard=${standardCost}, express=${expressCost}`);
+      } else if (group.hasExpress) {
+        // All express
+        const expressCost = group.items.reduce((sum, item) => {
+          return sum + (item.product.express_delivery_fee || 0);
+        }, 0);
+        totalCost += expressCost;
+        console.log(`All express for seller ${group.seller.name}: ${expressCost}`);
+      } else {
+        // All standard
+        const standardCost = group.items.reduce((sum, item) => {
+          return sum + (item.product.standard_delivery_fee || 0);
+        }, 0);
+        totalCost += standardCost;
+        console.log(`All standard for seller ${group.seller.name}: ${standardCost}`);
+      }
+    });
+    
+    console.log('✅ Calculated total cost from cart items:', totalCost);
+    console.log('📊 Seller groups summary:', Object.values(sellerGroups).map(group => ({
+      seller: group.seller.name,
+      itemCount: group.items.length,
+      hasExpress: group.hasExpress,
+      hasStandard: group.hasStandard,
+      items: group.items.map(item => ({
+        id: item.product_id,
+        name: item.product.name,
+        standardFee: item.product.standard_delivery_fee,
+        expressFee: item.product.express_delivery_fee
+      }))
+    })));
+    
+    // If cart-based calculation failed, fall back to legacy values
+    if (totalCost === 0) {
+      console.log('⚠️ Cart-based calculation returned 0, falling back to legacy values');
+      const hasExpressItems = expressProductIds.value.size > 0;
+      const hasCustomItems = Object.keys(customDates.value).length > 0;
+      
+      if (hasExpressItems) {
+        return Number(expressDeliveryFee.value) || 0;
+      } else if (hasCustomItems) {
+        return Number(shippingFee.value) || 0;
+      } else {
+        return Number(shippingFee.value) || 10; // Default fallback
+      }
+    }
+    
+    return totalCost;
+  }
+}
+
+// Helper function to generate delivery breakdown formula for order summary
+const getDeliveryBreakdownFormula = () => {
+  if (!sellerGroups.value || sellerGroups.value.length <= 1) {
+    return ''
+  }
+  
+  const parts = sellerGroups.value.map(seller => {
+    const sellerName = seller.seller_name || `Seller ${seller.seller_id}`
+    let formula = ''
+    
+    switch (seller.delivery_type) {
+      case 'standard':
+        formula = `${sellerName}(${formatPrice(seller.breakdown?.standard_cost || 0)})`
+        break
+      case 'express':
+        formula = `${sellerName}(${formatPrice(seller.breakdown?.express_cost || 0)})`
+        break
+      case 'mixed':
+        const std = formatPrice(seller.breakdown?.standard_cost || 0)
+        const exp = formatPrice(seller.breakdown?.express_cost || 0)
+        formula = `${sellerName}(${std}+${exp})`
+        break
+      default:
+        formula = `${sellerName}(${formatPrice(seller.delivery_cost || 0)})`
+    }
+    
+    return formula
+  })
+  
+  return parts.join(' + ')
+}
 
 // Date picker functions
 const getCalendarDays = () => {
@@ -2019,6 +3063,9 @@ const getCalendarDays = () => {
       futureDate.setDate(futureDate.getDate() + days)
       standardDeliveryDateStr = formatDateAsYYYYMMDD(futureDate)
     }
+  } else if (currentCustomGroup.value && showCustomDeliveryModal.value) {
+    // Use group-specific minimum date when in group custom delivery modal
+    standardDeliveryDateStr = getMinDateForGroup(currentCustomGroup.value)
   } else {
     // Use global minimum delivery date for other cases
     standardDeliveryDateStr = getMinDeliveryDate()
@@ -2171,6 +3218,14 @@ const isTruthyExpress = (val) => {
 
 const isExpressEligibleItem = (item) => {
   if (!item) return false
+  
+  // Check if current time is after 7 PM (19:00) - express delivery not available
+  const now = new Date()
+  const currentHour = now.getHours()
+  if (currentHour >= 19) { // After 7 PM
+    return false
+  }
+  
   // Note: delivery_info may not include express flag in your API; skip relying on it
   // Check direct flag on item if present
   if (isTruthyExpress(item.express_delivery)) return true
@@ -2206,21 +3261,22 @@ const confirmExpressSelection = () => {
 }
 
 const minDateForItem = (item) => {
-  // Enforce min date strictly after the standard delivery date
+  // Use the actual estimated_delivery_date as the minimum selectable date
   const est = item.delivery_info?.estimated_delivery_date
+  console.log('🔧 minDateForItem called with item:', item.product_name, 'estimated_delivery_date:', est)
   if (est) {
-    const d = parseDateYMD(est)
-    d.setDate(d.getDate() + 1) // next day after standard
-    return formatDateAsYYYYMMDD(d)
+    // Return the actual delivery date (not day after)
+    console.log('🔧 Using estimated_delivery_date:', est)
+    return est
   }
   // Fallback: use delivery_days when available
   const dd = item.delivery_info?.delivery_days
   if (typeof dd === 'number') {
     const d = new Date()
-    d.setDate(d.getDate() + dd + 1)
+    d.setDate(d.getDate() + dd)
     return formatDateAsYYYYMMDD(d)
   }
-  // Legacy fallback: parse from display text and add one business day beyond max
+  // Legacy fallback: parse from display text
   let days = 3
   const text = item.delivery_info?.estimated_delivery_display || ''
   const range = text.match(/(\d+)-(\d+)/)
@@ -2230,7 +3286,7 @@ const minDateForItem = (item) => {
     const single = text.match(/(\d+)/)
     if (single) days = parseInt(single[1]) || 3
   }
-  const d = addBusinessDays(new Date(), days + 1)
+  const d = addBusinessDays(new Date(), days)
   return formatDateAsYYYYMMDD(d)
 }
 
@@ -2240,6 +3296,15 @@ const confirmCustomSelection = () => {
 
 // Product-specific delivery functions
 const toggleExpressForProduct = (productId) => {
+  const wasExpressSelected = expressProductIds.value.has(productId);
+  const action = wasExpressSelected ? 'disable' : 'enable';
+  
+  console.log(`⚡ Express delivery ${action} for product ${productId}`, {
+    previousExpressItems: Array.from(expressProductIds.value),
+    action: action,
+    willTriggerDeliveryRecalculation: true
+  });
+  
   if (expressProductIds.value.has(productId)) {
     expressProductIds.value.delete(productId)
   } else {
@@ -2249,9 +3314,16 @@ const toggleExpressForProduct = (productId) => {
       delete customDates.value[productId]
     }
   }
+  
+  console.log(`⚡ Express delivery ${action} completed`, {
+    newExpressItems: Array.from(expressProductIds.value),
+    totalExpressItems: expressProductIds.value.size,
+    shouldRecalculateDeliveryCosts: true
+  });
 }
 
 const openCustomDeliveryModal = (product) => {
+  console.log('🔧 openCustomDeliveryModal called with product:', product)
   selectedProductForDelivery.value = product
   // Pre-populate if there's already a custom date set
   if (customDates.value[product.product_id]) {
@@ -2283,9 +3355,112 @@ const confirmProductCustomDelivery = () => {
   }
 }
 
+const confirmGroupCustomDelivery = () => {
+  if (currentCustomGroup.value && customDeliveryDate.value && customDeliveryTime.value) {
+    // Apply custom date to all items in the group
+    currentCustomGroup.value.items.forEach(item => {
+      customDates.value[item.product_id] = customDeliveryDate.value
+      
+      // Remove from express if it was selected
+      if (expressProductIds.value.has(item.product_id)) {
+        expressProductIds.value.delete(item.product_id)
+      }
+    })
+    
+    // Set the group's custom_date property
+    currentCustomGroup.value.custom_date = customDeliveryDate.value
+    
+    // Show success message
+    showSuccess(`Custom delivery date set for ${currentCustomGroup.value.items.length} item${currentCustomGroup.value.items.length > 1 ? 's' : ''}!`)
+    
+    // Close modal
+    showCustomDeliveryModal.value = false
+    currentCustomGroup.value = null
+    customDeliveryDate.value = null
+    customDeliveryTime.value = null
+  }
+}
+
+// Revert functions
+const revertToDefaultDelivery = (productId) => {
+  // Remove custom date for this product
+  delete customDates.value[productId]
+  
+  // Show success message
+  showSuccess('Reverted to default delivery date!')
+  
+  console.log(`Reverted product ${productId} to default delivery`)
+}
+
+const revertProductToDefaultDelivery = () => {
+  if (selectedProductForDelivery.value) {
+    const productId = selectedProductForDelivery.value.product_id
+    
+    // Remove custom date for this product
+    delete customDates.value[productId]
+    
+    // Clear the modal fields
+    productCustomDate.value = null
+    productCustomTime.value = null
+    
+    // Close modal
+    showProductDeliveryModal.value = false
+    selectedProductForDelivery.value = null
+    
+    // Show success message
+    showSuccess('Reverted to default delivery date!')
+    
+    console.log(`Reverted product ${productId} to default delivery`)
+  }
+}
+
+const revertGroupToDefaultDelivery = (group) => {
+  // Remove custom dates for all items in the group
+  group.items.forEach(item => {
+    delete customDates.value[item.product_id]
+  })
+  
+  // Clear the group's custom_date property
+  group.custom_date = null
+  
+  // Show success message
+  showSuccess('Reverted to default delivery dates!')
+  
+  console.log(`Reverted group to default delivery`)
+}
+
 const getMinDateForProduct = (product) => {
   // Get the minimum date as day after standard delivery
   return minDateForItem(product)
+}
+
+const getMinDateForGroup = (group) => {
+  console.log('🔧 getMinDateForGroup called with group:', group);
+  
+  // Get the minimum date as the highest standard delivery date in the group
+  let minDate = null;
+  
+  group.items.forEach(item => {
+    const itemMinDate = minDateForItem(item);
+    const itemDate = parseDateYMD(itemMinDate);
+    
+    console.log('🔧 Item min date:', itemMinDate, 'parsed:', itemDate);
+    
+    if (itemDate && (!minDate || itemDate > minDate)) {
+      minDate = itemDate;
+    }
+  });
+  
+  // If no date found, use tomorrow
+  if (!minDate) {
+    minDate = new Date();
+    minDate.setDate(minDate.getDate() + 1);
+  }
+  
+  const result = formatDateAsYYYYMMDD(minDate);
+  console.log('🔧 Group min date result:', result);
+  
+  return result;
 }
 
 const openDatePickerForProduct = () => {
@@ -2316,12 +3491,40 @@ const openDatePickerForProduct = () => {
   }
 }
 
+const openDatePicker = () => {
+  // Set the group context for the date picker
+  currentCustomProductId.value = null // Clear product context
+  
+  // Pre-populate the date picker if there's already a selected date
+  if (customDeliveryDate.value) {
+    selectedDateInPicker.value = new Date(customDeliveryDate.value)
+  } else {
+    selectedDateInPicker.value = null
+  }
+  
+  // Set up the calendar for the group's minimum date
+  if (currentCustomGroup.value) {
+    try {
+      const minDate = getMinDateForGroup(currentCustomGroup.value);
+      const d = parseDateYMD(minDate);
+      if (d instanceof Date && !isNaN(d)) {
+        currentMonth.value = new Date(d.getFullYear(), d.getMonth(), 1);
+      }
+    } catch (e) {
+      // Fallback to current month
+      currentMonth.value = new Date();
+    }
+  }
+  
+  showDatePicker.value = true
+}
+
 // Now that expressEligibleItems exists, define expressDeliveryAvailable
 expressDeliveryAvailable = computed(() => {
   const now = new Date()
   const currentHour = now.getHours()
   const hasExpressProducts = expressEligibleItems.value.length > 0
-  return hasExpressProducts && currentHour < 20
+  return hasExpressProducts && currentHour < 19 // After 7 PM, express delivery not available
 })
 </script>
 

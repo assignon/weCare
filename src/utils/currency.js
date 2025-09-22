@@ -9,6 +9,7 @@ const CURRENCY_FORMATS = {
   'GBP': { symbol: '£', position: 'before', decimalPlaces: 2, thousandsSeparator: ',' },
   'XOF': { symbol: 'CFA', position: 'after', decimalPlaces: 0, thousandsSeparator: ' ' }, // West African CFA franc
   'XAF': { symbol: 'FCFA', position: 'after', decimalPlaces: 0, thousandsSeparator: ' ' }, // Central African CFA franc
+  'CFA': { symbol: 'CFA', position: 'after', decimalPlaces: 0, thousandsSeparator: ' ' }, // Central African CFA franc (alias)
   'NGN': { symbol: '₦', position: 'before', decimalPlaces: 2, thousandsSeparator: ',' },
   'GHS': { symbol: '₵', position: 'before', decimalPlaces: 2, thousandsSeparator: ',' },
   'KES': { symbol: 'KSh', position: 'before', decimalPlaces: 2, thousandsSeparator: ',' },
@@ -21,19 +22,22 @@ const CURRENCY_FORMATS = {
   'EGP': { symbol: '£E', position: 'before', decimalPlaces: 2, thousandsSeparator: ',' },
 }
 
+// Default currency for the application
+const DEFAULT_CURRENCY = 'CFA'
+
 /**
  * Format a currency amount according to the currency's formatting rules
  * @param {number} amount - The amount to format
  * @param {string} currencyCode - The ISO currency code (e.g., 'USD', 'EUR')
  * @returns {string} Formatted currency string
  */
-export function formatCurrency(amount, currencyCode = 'USD') {
+export function formatCurrency(amount, currencyCode = DEFAULT_CURRENCY) {
   if (amount === null || amount === undefined) {
     return '0.00'
   }
 
   // Get formatting configuration for the currency
-  const config = CURRENCY_FORMATS[currencyCode] || CURRENCY_FORMATS['USD']
+  const config = CURRENCY_FORMATS[currencyCode] || CURRENCY_FORMATS[DEFAULT_CURRENCY]
   
   // Format the number with appropriate decimal places
   const decimalPlaces = config.decimalPlaces
@@ -68,7 +72,7 @@ export function formatCurrency(amount, currencyCode = 'USD') {
  * @returns {object} Currency formatting configuration
  */
 export function getCurrencyInfo(currencyCode) {
-  return CURRENCY_FORMATS[currencyCode] || CURRENCY_FORMATS['USD']
+  return CURRENCY_FORMATS[currencyCode] || CURRENCY_FORMATS[DEFAULT_CURRENCY]
 }
 
 /**
@@ -79,7 +83,7 @@ export function getCurrencyInfo(currencyCode) {
  */
 export function formatCurrencyForUser(amount, user) {
   if (!user || !user.currency) {
-    return formatCurrency(amount, 'USD')
+    return formatCurrency(amount, DEFAULT_CURRENCY)
   }
   
   return formatCurrency(amount, user.currency.code)
@@ -91,7 +95,7 @@ export function formatCurrencyForUser(amount, user) {
  * @returns {string} Currency symbol
  */
 export function getCurrencySymbol(currencyCode) {
-  const config = CURRENCY_FORMATS[currencyCode] || CURRENCY_FORMATS['USD']
+  const config = CURRENCY_FORMATS[currencyCode] || CURRENCY_FORMATS[DEFAULT_CURRENCY]
   return config.symbol
 }
 
@@ -101,10 +105,10 @@ export function getCurrencySymbol(currencyCode) {
  * @param {string} currencyCode - The ISO currency code
  * @returns {number} Parsed amount
  */
-export function parseCurrency(formattedAmount, currencyCode = 'USD') {
+export function parseCurrency(formattedAmount, currencyCode = DEFAULT_CURRENCY) {
   if (!formattedAmount) return 0
   
-  const config = CURRENCY_FORMATS[currencyCode] || CURRENCY_FORMATS['USD']
+  const config = CURRENCY_FORMATS[currencyCode] || CURRENCY_FORMATS[DEFAULT_CURRENCY]
   
   // Remove currency symbol and spaces
   let cleanAmount = formattedAmount.replace(config.symbol, '').trim()

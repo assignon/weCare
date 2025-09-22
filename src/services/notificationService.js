@@ -47,7 +47,7 @@ class NotificationService {
 
     try {
       // Get JWT token from localStorage for authentication
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token') || localStorage.getItem('token');
       if (!token) {
         console.warn('No JWT token found, WebSocket connection may be anonymous');
       }
@@ -123,9 +123,23 @@ class NotificationService {
 
   // Handle incoming notification messages
   handleNotificationMessage(data) {
+    console.log('📩 Shopper received WebSocket notification:', data)
+    
     const notificationStore = useNotificationStore();
 
     if (data.type === "notification") {
+      // Check if this is a restock notification and skip it
+      const message = data.message || data.data?.message || '';
+      const title = data.data?.title || '';
+      
+      // Skip only specific restock notification types to prevent duplicate snackbars
+      // Allow general stock update notifications but skip restock request confirmations
+      if ((message.toLowerCase().includes('notify you when') && message.toLowerCase().includes('back in stock')) ||
+          (title.toLowerCase().includes('restock') && message.toLowerCase().includes('notify you when'))) {
+        console.log('🚫 Skipping restock request confirmation to prevent duplicate snackbar');
+        return;
+      }
+
       // Add new notification to store
       const notification = {
         id: data.data?.notification_id || Date.now(),
@@ -133,21 +147,49 @@ class NotificationService {
         message: data.message || data.data?.message,
         type: data.data?.type || "info",
         severity: data.data?.severity || "info",
-        persistent: data.data?.persistent || false,
-        timeout: data.data?.timeout || 5000,
+        persistent: data.data?.persistent || true, // Make notifications persistent by default
+        timeout: data.data?.timeout || 0, // 0 means persistent
         reference_id: data.data?.reference_id,
         reference_type: data.data?.reference_type,
         is_read: false,
         created_at: data.data?.created_at || new Date().toISOString(),
       };
 
+      console.log('📋 Processed notification:', notification)
+
       notificationStore.addNotification(notification);
 
       // Trigger snackbar display
       this.showSnackbar(notification);
 
+      // If order-related, optionally refresh order list/store (non-blocking)
+      try {
+        if (notification.reference_type === 'Order' || (notification.type && notification.type.toLowerCase() === 'order')) {
+          import('@/stores/order').then(mod => {
+            if (mod && mod.useOrderStore) {
+              const ordersStore = mod.useOrderStore()
+              ordersStore.fetchOrders?.().catch(() => {})
+            }
+          }).catch(() => {})
+        }
+      } catch (e) {}
+
       // Show browser notification if permission granted
       this.showBrowserNotification(notification);
+    } else if (data.type === "chat_message") {
+      const chat = data.data || {}
+      const chatNotification = {
+        id: chat.message_id || Date.now(),
+        title: "New Chat Message",
+        message: chat.content || data.message || "You have a new message",
+        type: "info",
+        severity: "info",
+        persistent: false,
+        timeout: 5000,
+        is_read: false,
+        created_at: chat.created_at || new Date().toISOString(),
+      };
+      this.showSnackbar(chatNotification);
     } else if (data.type === "broadcast") {
       // Handle broadcast messages
       const broadcastNotification = {

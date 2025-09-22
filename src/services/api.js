@@ -187,9 +187,16 @@ export const apiService = {
   },
 
   calculateDeliveryFee(distanceKm, deliveryOption) {
-    return api.post('/orders/orders/calculate_delivery_fee/', {
+    return api.post('/orders/calculate-delivery-fee/', {
       distance_km: distanceKm,
       delivery_option: deliveryOption
+    })
+  },
+
+  calculateMultiSellerDeliveryFee(cartItems, customerAddress = null) {
+    return api.post('/orders/calculate-multi-seller-delivery-fee/', {
+      cart_items: cartItems,
+      customer_address: customerAddress
     })
   },
   

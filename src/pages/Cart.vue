@@ -61,10 +61,7 @@
                                      <div class="text-center">
                      <span class="text-sm font-bold text-blue-600">{{ variant.name }} ML</span>
                      <div class="text-lg font-semibold text-gray-900 mt-1">
-                       {{ formatApiPrice({
-                         price: variant.price * variant.quantity,
-                         currency_info: variant.currency_info 
-                       }) }}
+                       {{ formatPrice(variant.price * variant.quantity) }}
                      </div>
                    </div>
                   </div>
@@ -121,23 +118,22 @@
             <div class="flex justify-between items-center">
               <span class="text-gray-600">Items</span>
               <span class="font-semibold text-gray-900">
-                {{ formatApiPrice({
-                  price: cart.items.total_amount || 0, 
-                  currency_info: cart.items.currency_info 
-                }) }}
+                {{ formatPrice(cart.items.total_amount || 0) }}
               </span>
             </div>
 
-           
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Delivery Fee</span>
+              <span class="font-semibold text-gray-900">
+                {{ formatPrice(estimatedDeliveryFee) }}
+              </span>
+            </div>
 
             <div class="border-t border-gray-200 pt-4">
               <div class="flex justify-between items-center">
                 <span class="text-lg font-bold text-gray-900">Total</span>
                 <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
-                  {{ formatApiPrice({
-                    price: cart.items.total_amount || 0, 
-                    currency_info: cart.items.currency_info 
-                  }) }}
+                  {{ formatPrice(totalWithDelivery) }}
                 </span>
               </div>
             </div>
@@ -172,10 +168,7 @@
             style="background: linear-gradient(to right, #2563eb, #9333ea);"
           >
             <span>Proceed to Checkout</span>
-            <span class="ml-2">({{ formatApiPrice({ 
-              price: cart.items.total_amount || 0, 
-              currency_info: cart.items.currency_info 
-            }) }})</span>
+            <span class="ml-2">({{ formatPrice(totalWithDelivery) }})</span>
           </button>
         </div>
                 </div>
@@ -265,7 +258,7 @@ import {
 const cart = useCartStore()
 const crmStore = useCRMStore()
 const router = useRouter()
-const { formatApiPrice } = useCurrency()
+const { formatPrice } = useCurrency()
 
 // Add warning dialog
 const showWarningDialog = ref(false)
@@ -295,13 +288,15 @@ onMounted(async () => {
     // Initialize cart state
     cart.initCartState()
 
-    // If cart is updated, sync with backend
-    if (cart.cartUpdated) {
-      await cart.syncCartWithBackend()
-    } else {
-      // Otherwise just fetch the latest cart state
-      await cart.fetchCart()
-    }
+    // Force refresh cart data to ensure we have the latest
+    console.log('🔄 Force refreshing cart data...')
+    await cart.fetchCart()
+    
+    console.log('📊 Cart data after refresh:', {
+      total_amount: cart.items?.total_amount,
+      items: cart.items?.items?.length,
+      cart: cart.items
+    })
   } catch (error) {
     console.error('Failed to initialize cart:', error)
   }
@@ -381,6 +376,60 @@ const groupedCartItems = computed(() => {
   });
 
   return Object.values(grouped);
+});
+
+// Calculate estimated delivery fee
+const estimatedDeliveryFee = computed(() => {
+  if (!cart.items || !cart.items.items || cart.items.items.length === 0) {
+    return 0;
+  }
+
+  // Get delivery cost from cart data or use default
+  let rawDeliveryCost = 7.5; // Default fallback
+  
+  // Try to get delivery cost from cart data
+  if (cart.items.delivery_cost) {
+    rawDeliveryCost = parseFloat(cart.items.delivery_cost);
+  } else if (cart.items.total_delivery_cost) {
+    rawDeliveryCost = parseFloat(cart.items.total_delivery_cost);
+  } else if (cart.items.delivery_fee) {
+    rawDeliveryCost = parseFloat(cart.items.delivery_fee);
+  }
+  
+  // Round up to the nearest whole number for display and calculation
+  const roundedDeliveryCost = Math.ceil(rawDeliveryCost);
+  
+  console.log('🚚 Delivery fee calculation:', {
+    rawDeliveryCost: rawDeliveryCost,
+    roundedDeliveryCost: roundedDeliveryCost,
+    cartDeliveryCost: cart.items.delivery_cost,
+    cartTotalDeliveryCost: cart.items.total_delivery_cost,
+    cartDeliveryFee: cart.items.delivery_fee,
+    cartData: cart.items
+  });
+  
+  return roundedDeliveryCost;
+});
+
+// Calculate total with delivery fee
+const totalWithDelivery = computed(() => {
+  const rawSubtotal = cart.items?.total_amount || 0;
+  const subtotal = parseFloat(rawSubtotal);
+  const deliveryFee = estimatedDeliveryFee.value;
+  const total = subtotal + deliveryFee;
+  
+  console.log('🔍 Cart total calculation:', {
+    rawSubtotal: rawSubtotal,
+    subtotal: subtotal,
+    deliveryFee: deliveryFee,
+    total: total,
+    calculation: `${subtotal} + ${deliveryFee} = ${total}`,
+    cartTotalAmount: cart.items?.total_amount,
+    cartItems: cart.items
+  });
+  
+  // Ensure we return a proper number
+  return Math.round(total * 100) / 100;
 });
 </script>
 

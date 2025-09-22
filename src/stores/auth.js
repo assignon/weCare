@@ -50,8 +50,7 @@ export const useAuthStore = defineStore('auth', () => {
         
         // Initialize notification service if user is authenticated
         if (user.value?.id) {
-          notificationService.initWebSocket(user.value.id)
-          await notificationService.requestNotificationPermission()
+          await notificationService.init(user.value.id)
         }
       } catch (error) {
         // If token is invalid or expired, clear auth state
@@ -124,8 +123,7 @@ export const useAuthStore = defineStore('auth', () => {
       
       // Initialize notification service after successful login
       if (user.value?.id) {
-        notificationService.initWebSocket(user.value.id)
-        await notificationService.requestNotificationPermission()
+        await notificationService.init(user.value.id)
       }
       
       return true
@@ -180,7 +178,7 @@ export const useAuthStore = defineStore('auth', () => {
       
       // Initialize notification service if not already connected
       if (user.value?.id && !notificationService.isConnected()) {
-        notificationService.initWebSocket(user.value.id)
+        await notificationService.init(user.value.id)
       }
       
       return user.value
