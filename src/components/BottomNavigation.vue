@@ -19,6 +19,7 @@
       </router-link>
       
       <router-link 
+        v-if="!shouldHideExploreAndCart"
         :to="{ name: 'Explore' }"
         class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
         :class="activeTab === 'explore' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
@@ -54,6 +55,7 @@
       
       <!-- Dynamic Cart/Rendezvous Tab -->
       <router-link 
+        v-if="!shouldHideExploreAndCart"
         :to="{ name: shouldShowRendezvous ? 'Rendezvous' : 'Cart' }"
         class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
         :class="(activeTab === 'cart' || activeTab === 'rendezvous') ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
@@ -137,6 +139,7 @@ import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useNotificationStore } from '@/stores/notification'
 import { useCRMStore } from '@/stores/crm'
+import { usePharmacyStore } from '@/stores/pharmacy'
 import { Home, Telescope, Package, ShoppingBag, Store, Sparkles, Shirt, Pill, Sofa, Monitor, Car, Calendar } from 'lucide-vue-next'
 import apiService from '@/services/api'
 
@@ -144,6 +147,7 @@ const route = useRoute()
 const cart = useCartStore()
 const notification = useNotificationStore()
 const crmStore = useCRMStore()
+const pharmacyStore = usePharmacyStore()
 
 const activeTab = ref('home')
 
@@ -152,6 +156,9 @@ const currentRouteName = computed(() => route.name)
 // Use CRM store for state
 const shouldShowRendezvous = computed(() => crmStore.shouldShowRendezvous)
 const pendingViewingRequests = computed(() => crmStore.pendingViewingRequests)
+
+// Use Pharmacy store for state
+const shouldHideExploreAndCart = computed(() => pharmacyStore.shouldHideExploreAndCart)
 
 // Update active tab based on current route
 const updateActiveTab = () => {
@@ -186,6 +193,10 @@ onMounted(async () => {
         // Initialize CRM state from session
         console.log('🚀 BottomNav: Initializing CRM state from session...')
         await crmStore.initializeFromSession()
+        
+        // Initialize Pharmacy state from session
+        console.log('🚀 BottomNav: Initializing Pharmacy state from session...')
+        await pharmacyStore.initializeFromSession()
       } catch (e) {
         console.warn('Failed to load store categories on mount:', e)
       }
@@ -264,7 +275,11 @@ const selectStore = async (id) => {
   console.log('🔄 BottomNav: Calling CRM store checkCategoryFlow...')
   await crmStore.checkCategoryFlow(parseInt(id))
   
-  console.log('🔄 BottomNav: CRM check complete, reloading page...')
+  // Check pharmacy category for new store
+  console.log('🔄 BottomNav: Calling Pharmacy store checkCategoryForPharmacy...')
+  await pharmacyStore.checkCategoryForPharmacy(parseInt(id), selectedCategory?.name)
+  
+  console.log('🔄 BottomNav: CRM and Pharmacy checks complete, reloading page...')
   // Reload to refresh product feeds with selected category
   location.reload()
 }

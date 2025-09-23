@@ -824,6 +824,58 @@ export const apiService = {
     return api.post('/products/crm/chat/mark_all_as_read/', {
       viewing_request_id: viewingRequestId
     })
+  },
+
+  // Pharmacy Medicine Requests
+  createMedicineRequest(requestData) {
+    return api.post('/orders/medicine-requests/', requestData)
+  },
+
+  getMedicineRequest(id) {
+    return api.get(`/orders/medicine-requests/${id}/`)
+  },
+
+  getMedicineRequests(params = {}) {
+    return api.get('/orders/medicine-requests/', { params })
+  },
+
+  updateMedicineRequest(id, data) {
+    return api.patch(`/orders/medicine-requests/${id}/`, data)
+  },
+
+  deleteMedicineRequest(id) {
+    return api.delete(`/orders/medicine-requests/${id}/`)
+  },
+
+  // Pharmacy Offers
+  getPharmacyOffers(medicineRequestId) {
+    return api.get(`/orders/medicine-requests/${medicineRequestId}/offers/`)
+  },
+
+  acceptPharmacyOffer(offerId) {
+    return api.post(`/orders/pharmacy-offers/${offerId}/accept/`)
+  },
+
+  declinePharmacyOffer(offerId) {
+    return api.post(`/orders/pharmacy-offers/${offerId}/decline/`)
+  },
+
+  // Medicine Request Status
+  cancelMedicineRequest(id, reason = '') {
+    return api.post(`/orders/medicine-requests/${id}/cancel/`, { reason })
+  },
+
+  expandSearchRadius(id, newRadius) {
+    return api.post(`/orders/medicine-requests/${id}/expand-radius/`, { radius: newRadius })
+  },
+
+  retryMedicineRequest(id) {
+    return api.post(`/orders/medicine-requests/${id}/retry/`)
+  },
+
+  // Get pharmacy sellers with locations for map display
+  getPharmacySellers(params = {}) {
+    return api.get('/delivery/seller-locations/', { params })
   }
 }
 
