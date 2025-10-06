@@ -20,10 +20,7 @@ export default defineConfig({
               cacheName: "google-fonts-cache",
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // <== 365 days
-              },
-              cacheKeyWillBeUsed: async ({ request }) => {
-                return `${request.url}?v=1`;
+                maxAgeSeconds: 60 * 60 * 24 * 365,
               },
             },
           },
@@ -34,7 +31,7 @@ export default defineConfig({
               cacheName: "gstatic-fonts-cache",
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // <== 365 days
+                maxAgeSeconds: 60 * 60 * 24 * 365,
               },
             },
           },
@@ -45,7 +42,7 @@ export default defineConfig({
               cacheName: "api-cache",
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24, // <== 24 hours
+                maxAgeSeconds: 60 * 60 * 24,
               },
             },
           },
@@ -69,13 +66,13 @@ export default defineConfig({
             src: "/pwa-192x192.png",
             sizes: "192x192",
             type: "image/png",
-            purpose: "any maskable",
+            purpose: "any",
           },
           {
             src: "/pwa-512x512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "any maskable",
+            purpose: "any",
           },
         ],
         screenshots: [

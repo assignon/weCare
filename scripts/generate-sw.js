@@ -15,7 +15,8 @@ function loadEnvFile() {
   if (fs.existsSync(envPath)) {
     const envContent = fs.readFileSync(envPath, 'utf8');
     envContent.split('\n').forEach(line => {
-      const match = line.match(/^([^=]+)=(.*)$/);
+      const trimmedLine = line.trim();
+      const match = trimmedLine.match(/^([^=]+)=(.*)$/);
       if (match) {
         const key = match[1].trim();
         const value = match[2].trim().replace(/^["']|["']$/g, ''); // Remove quotes
