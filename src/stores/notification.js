@@ -128,6 +128,17 @@ export const useNotificationStore = defineStore('notification', () => {
     }
   }
 
+  const removeNotification = (notificationId) => {
+    const index = notifications.value.findIndex(n => n.id === notificationId)
+    if (index > -1) {
+      const notification = notifications.value[index]
+      notifications.value.splice(index, 1)
+      if (!notification.is_read) {
+        unreadCount.value = Math.max(0, unreadCount.value - 1)
+      }
+    }
+  }
+
   const clearError = () => {
     error.value = null
   }
@@ -185,6 +196,7 @@ export const useNotificationStore = defineStore('notification', () => {
     markAsRead,
     markAllAsRead,
     addNotification,
+    removeNotification,
     clearError,
     resetStore,
     init

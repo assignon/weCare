@@ -876,6 +876,52 @@ export const apiService = {
   // Get pharmacy sellers with locations for map display
   getPharmacySellers(params = {}) {
     return api.get('/delivery/seller-locations/', { params })
+  },
+
+  // Pharmacy Orders
+  createPharmacyOrder(orderData) {
+    return api.post('/orders/pharmacy-orders/', orderData)
+  },
+
+  getPharmacyOrders(params = {}) {
+    return api.get('/orders/pharmacy-orders/', { params })
+  },
+
+  getPharmacyOrder(id) {
+    return api.get(`/orders/pharmacy-orders/${id}/`)
+  },
+
+  updatePharmacyOrderStatus(id, status) {
+    return api.patch(`/orders/pharmacy-orders/${id}/`, { status })
+  },
+
+  confirmPharmacyOrder(id) {
+    return api.post(`/orders/pharmacy-orders/${id}/confirm/`)
+  },
+
+  markPharmacyOrderReady(id) {
+    return api.post(`/orders/pharmacy-orders/${id}/ready/`)
+  },
+
+  cancelPharmacyOrder(id) {
+    return api.post(`/orders/pharmacy-orders/${id}/cancel/`)
+  },
+
+  trackPharmacyOrder(id) {
+    return api.get(`/orders/pharmacy-orders/${id}/track/`)
+  },
+
+  // Medicine Autocomplete
+  getMedicineAutocomplete(query) {
+    return api.get('/orders/medicine-autocomplete/', { params: { q: query } })
+  },
+
+  getPopularMedicines() {
+    return api.get('/orders/popular-medicines/')
+  },
+
+  getMedicineForms() {
+    return api.get('/orders/medicine-forms/')
   }
 }
 

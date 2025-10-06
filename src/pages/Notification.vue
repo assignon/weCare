@@ -12,7 +12,7 @@
              @click="handleMarkAllAsRead"
              :disabled="markingAllAsRead"
              class="px-4 py-2 text-white text-sm font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg"
-             style="background: linear-gradient(to right, #2563eb, #4f46e5);"
+             style="background: linear-gradient(to right, #2563eb, #9333ea);"
              onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
              onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
            >
@@ -79,11 +79,14 @@
                 <div :class="[
                   'w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0',
                   getNotificationIcon(notification.type).bgClass
-                ]">
+                ]" style="background: linear-gradient(to right, #2563eb, #9333ea);">
                   <component 
                     :is="getNotificationIcon(notification.type).icon" 
                     class="w-6 h-6 text-white"
+                    v-if="getNotificationIcon(notification.type).icon"
                   />
+                  <!-- Fallback icon if component fails to render -->
+                  <Bell v-else class="w-6 h-6 text-white" />
                 </div>
 
                 <!-- Notification content -->
@@ -326,9 +329,23 @@ const getNotificationIcon = (type) => {
     'product': { 
       icon: Package, 
       bgClass: 'bg-gradient-to-r from-purple-500 to-pink-500'
+    },
+    'medicine': { 
+      icon: Package, 
+      bgClass: 'bg-gradient-to-r from-green-600 to-emerald-600'
+    },
+    'pharmacy': { 
+      icon: ShoppingBag, 
+      bgClass: 'bg-gradient-to-r from-blue-500 to-indigo-500'
     }
   }
-  return icons[type] || icons.info
+  
+  // Ensure we always return a valid icon object
+  const result = icons[type] || icons.info
+  return {
+    icon: result.icon || Bell,
+    bgClass: result.bgClass || 'bg-gradient-to-r from-blue-500 to-cyan-500'
+  }
 }
 
 const navigateToReference = (notification) => {

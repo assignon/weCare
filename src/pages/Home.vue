@@ -263,7 +263,13 @@
     <!-- Pharmacy Interface -->
     <div v-else class="pharmacy-map-container relative">
       <!-- Full-screen OpenStreetMap -->
-      <div id="pharmacy-map" class="w-full h-screen"></div>
+      <div id="pharmacy-map" class="w-full pharmacy-map-height"></div>
+      
+      <!-- Header overlay on map -->
+      <div class="absolute top-0 left-0 right-0 z-50 p-4">
+        <AppHeader />
+      </div>
+      
       
       <!-- Search animation overlay on map -->
       <div v-if="isSearching" class="absolute inset-0 pointer-events-none z-40">
@@ -280,7 +286,8 @@
         </div>
         
         <!-- Search status overlay -->
-        <div class="absolute bottom-32 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-2xl px-6 py-3 shadow-lg">
+        <div class="absolute left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-2xl px-6 py-3 shadow-lg" 
+             :style="{ bottom: `${bottomSheetHeight + 96}px` }">
           <div class="flex items-center space-x-3">
             <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
               <div class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -295,7 +302,7 @@
       
       <!-- Transparent floating top bar -->
       <div class="absolute top-0 left-0 right-0 z-50 p-4 pointer-events-none">
-        <div class="pointer-events-auto">
+        <div class="pointer-events-auto" style="margin-top: 0px;width: 60%;">
         <div class="flex items-center justify-center">
           <!-- Location pill -->
           <div class="flex-1 max-w-xs">
@@ -306,6 +313,13 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 </svg>
                 <span class="text-sm font-medium text-slate-700">{{ currentLocationText }}</span>
+                <!-- Pharmacy Count -->
+                <div class="pharmacy-count-inline">
+                  <svg class="pharmacy-count-icon-inline" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 8h-2V6a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v2H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1zM9 6h6v2H9V6zm8 12H7v-8h10v8zm-7-6h4v1h-4v-1zm0 2h4v1h-4v-1z"/>
+                  </svg>
+                  <span class="pharmacy-count-number pharmacy-count">0</span>
+                </div>
               </div>
             </div>
           </div>
@@ -315,8 +329,12 @@
 
       <!-- Draggable bottom sheet -->
       <div 
-        class="absolute bottom-0 left-0 right-0 transition-all duration-200 ease-out" 
-        :style="{ height: `${bottomSheetHeight}px`, zIndex: 9999 }"
+        class="absolute left-0 right-0 transition-all duration-200 ease-out bg-white rounded-t-3xl shadow-2xl" 
+        :style="{ 
+          height: `${bottomSheetHeight}px`, 
+          bottom: '0px', /* Sit directly on bottom menu */
+          zIndex: 10 
+        }"
       >
         <!-- Handle for dragging -->
         <div 
@@ -328,15 +346,392 @@
         </div>
         
         <!-- Bottom sheet content -->
-        <div class="bg-white rounded-t-3xl shadow-2xl h-full overflow-hidden flex flex-col">
-          <!-- Search Status Display (when searching) -->
-          <div v-if="isSearching" class="p-4 flex-1 overflow-y-auto">
-            <div class="text-center mb-4">
-              <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                <div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        <div class="bg-white rounded-t-3xl h-full overflow-hidden flex flex-col">
+          
+          <!-- ==================== STATE-BASED UI MODES ==================== -->
+          
+          <!-- MODE 1: SEARCHING - Waiting for seller to acknowledge -->
+          <div v-if="pharmacyRequestState === 'searching' && hasActiveSession" class="p-6 flex-1 overflow-y-auto">
+            <div class="text-center">
+              <div class="w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center mx-auto mb-4 shadow-lg animate-pulse">
+                <svg class="w-10 h-10 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
               </div>
-              <h3 class="text-lg font-bold text-slate-900 mb-1">Searching Pharmacies</h3>
-              <p class="text-sm text-slate-600">{{ searchStatus.currentStep }}</p>
+              <h3 class="text-2xl font-bold text-slate-900 mb-2">Searching for Pharmacies</h3>
+              <p class="text-base text-slate-600 mb-4">Finding the best pharmacy near you...</p>
+              <div class="flex items-center justify-center space-x-2 py-4">
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+              </div>
+              
+              <!-- Cancel Request Button -->
+              <button 
+                @click="clearStuckSession"
+                class="mt-6 px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                Cancel Request
+              </button>
+            </div>
+          </div>
+          
+          <!-- MODE 2: SELLER_ACKNOWLEDGED - Seller reviewing, preparing offer -->
+          <div v-else-if="pharmacyRequestState === 'seller_acknowledged' && activeSession?.sellerData" class="p-6 flex-1 overflow-y-auto">
+            <div class="text-center mb-6">
+              <div class="w-20 h-20 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <h3 class="text-2xl font-bold text-slate-900 mb-2">Pharmacy Found! ✅</h3>
+              <p class="text-base text-slate-600">Waiting for an offer...</p>
+            </div>
+            
+            <!-- Seller Details Card -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <div class="flex items-center justify-center space-x-3 mb-4">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                  <span class="text-white font-bold text-2xl">{{ (activeSession.sellerData.name || 'P').charAt(0).toUpperCase() }}</span>
+                </div>
+                <div class="flex-1 text-center">
+                  <h4 class="text-xl font-bold text-slate-900">{{ activeSession.sellerData.name }}</h4>
+                  <p class="text-sm text-slate-500 mt-1" v-if="activeSession.sellerData.address">{{ activeSession.sellerData.address }}</p>
+                  <p class="text-sm text-slate-500" v-if="activeSession.sellerData.phone">📞 {{ activeSession.sellerData.phone }}</p>
+                </div>
+              </div>
+              
+              <!-- Animated waiting indicator -->
+              <div class="flex items-center justify-center space-x-2 py-4">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+              </div>
+              <p class="text-center text-sm text-slate-600">Preparing your offer...</p>
+            </div>
+          </div>
+          
+          <!-- MODE 3: OFFER_RECEIVED - Seller made an offer, choose delivery -->
+          <div v-else-if="pharmacyRequestState === 'offer_received' && activeSession?.sellerData" class="p-6 flex-1 overflow-y-auto">
+            <div class="text-center mb-6">
+              <div class="w-20 h-20 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center mx-auto mb-4 shadow-lg animate-pulse">
+                <span class="text-4xl">🎉</span>
+              </div>
+              <h3 class="text-2xl font-bold text-slate-900 mb-2">Offer Received!</h3>
+              <p class="text-base text-slate-600">Choose how to get your medicine</p>
+            </div>
+            
+            <!-- Seller & Offer Details -->
+            <div class="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-2xl p-6 shadow-md mb-4">
+              <!-- Seller Info -->
+              <div class="flex items-center space-x-4 mb-4">
+                <div class="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center ring-4 ring-yellow-200">
+                  <span class="text-white font-bold text-2xl">{{ (activeSession.sellerData.name || 'P').charAt(0).toUpperCase() }}</span>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-xl font-bold text-slate-900">{{ activeSession.sellerData.name }}</h4>
+                  <p class="text-sm text-slate-600" v-if="activeSession.sellerData.address">{{ activeSession.sellerData.address }}</p>
+                  <p class="text-sm text-slate-600" v-if="activeSession.sellerData.phone">📞 {{ activeSession.sellerData.phone }}</p>
+                </div>
+              </div>
+              
+              <!-- Offer Price -->
+              <div v-if="activeSession.sellerData.offer" class="bg-white rounded-xl p-4 mb-4">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm font-medium text-slate-700">Total Price:</span>
+                  <span class="text-2xl font-bold text-green-600">{{ formatApiPrice(activeSession.sellerData.offer.total_price) }}</span>
+                </div>
+                <div v-if="activeSession.sellerData.offer.message" class="text-sm text-slate-600 border-t pt-2 mt-2">
+                  <strong>Message:</strong> {{ activeSession.sellerData.offer.message }}
+                </div>
+              </div>
+              
+              <!-- Delivery Choice Buttons -->
+              <div class="space-y-3">
+                <p class="text-center text-sm font-medium text-slate-700 mb-2">How would you like to receive your medicine?</p>
+                
+                <!-- Pick up myself button -->
+                <button 
+                  @click="selectPickupOption({ ...activeSession.sellerData, requestId: activeSession.requestId })"
+                  class="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                  </svg>
+                  <span>Pick Up Myself</span>
+                </button>
+                
+                <!-- Use AfriQExpress delivery button -->
+                <button 
+                  @click="selectDeliveryOption({ ...activeSession.sellerData, requestId: activeSession.requestId })"
+                  class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                  <span>Use AfriQExpress Delivery</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- MODE 4: NO_SELLERS_FOUND - Admin takeover -->
+          <div v-else-if="pharmacyRequestState === 'no_sellers_found'" class="p-6 flex-1 overflow-y-auto">
+            <div class="text-center">
+              <div class="w-20 h-20 rounded-full bg-gradient-to-r from-red-500 to-pink-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <span class="text-4xl">👨‍💼</span>
+              </div>
+              <h3 class="text-2xl font-bold text-slate-900 mb-2">No Pharmacies Available</h3>
+              <p class="text-base text-slate-600 mb-4">Don't worry! One of our admins will personally take care of your request.</p>
+              <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-left">
+                <p class="text-sm text-blue-800">
+                  <strong>ℹ️ What happens next:</strong><br>
+                  • Our team has been notified<br>
+                  • An admin will contact you shortly<br>
+                  • They'll find the medicine for you<br>
+                  • You'll receive updates via phone
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Legacy: Seller Notifications Section (fallback) -->
+          <div v-else-if="showSellerNotifications && foundSellers.length > 0" class="p-4 flex-1 overflow-y-auto">
+            <div class="text-center mb-4">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center mx-auto mb-3">
+                <span class="text-white text-xl">🏥</span>
+              </div>
+              <h3 class="text-lg font-bold text-slate-900 mb-1">Found Pharmacies</h3>
+              <p class="text-sm text-slate-600">{{ foundSellers.length }} pharmacy{{ foundSellers.length > 1 ? 'ies' : '' }} found</p>
+            </div>
+            
+            <!-- Seller List -->
+            <div class="space-y-3">
+              <div v-for="seller in foundSellers" :key="seller.id" 
+                class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">{{ (seller.seller_name || seller.name || 'P').charAt(0).toUpperCase() }}</span>
+                      </div>
+                      <div class="flex-1">
+                        <h4 class="font-semibold text-slate-900">{{ seller.seller_name || seller.name || 'Pharmacy' }}</h4>
+                        <div class="flex items-center space-x-2 text-sm text-slate-600">
+                          <span>{{ seller.distance || 'Nearby' }}km</span>
+                          <span class="w-1 h-1 bg-slate-400 rounded-full"></span>
+                          <span class="px-2 py-0.5 rounded-full text-xs font-medium"
+                            :class="{
+                              'bg-blue-100 text-blue-700': seller.status === 'found',
+                              'bg-green-100 text-green-700': seller.status === 'acknowledged',
+                              'bg-yellow-100 text-yellow-700': seller.status === 'offered',
+                              'bg-red-100 text-red-700': seller.status === 'declined'
+                            }"
+                          >
+                            {{ seller.status === 'found' ? 'Found' : 
+                               seller.status === 'acknowledged' ? 'Reviewing' :
+                               seller.status === 'offered' ? 'Offered' :
+                               seller.status === 'declined' ? 'Declined' : seller.status }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Chat Button -->
+                  <button 
+                    v-if="seller.chatEnabled && seller.status !== 'declined'"
+                    @click="openChat(seller)"
+                    class="ml-3 p-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                    title="Chat with pharmacy"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                  </button>
+                </div>
+                
+                <!-- Status-specific content -->
+                <div v-if="seller.status === 'acknowledged'" class="mt-3 p-2 bg-blue-50 rounded-lg">
+                  <div class="flex items-center space-x-2 text-sm text-blue-700">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <span>Pharmacy is reviewing your request...</span>
+                  </div>
+                </div>
+                
+                <div v-if="seller.status === 'offered' && seller.offer" class="mt-3 p-2 bg-green-50 rounded-lg">
+                  <div class="text-sm text-green-700">
+                    <div class="font-medium">Offer Received!</div>
+                    <div class="text-xs text-green-600 mt-1">{{ seller.offer.message || 'Check details in offers' }}</div>
+                  </div>
+                </div>
+                
+                <div v-if="seller.status === 'declined'" class="mt-3 p-2 bg-red-50 rounded-lg">
+                  <div class="flex items-center space-x-2 text-sm text-red-700">
+                    <span>❌</span>
+                    <span>This pharmacy declined your request</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- No sellers found message -->
+            <div v-if="foundSellers.length === 0" class="text-center py-8">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center mx-auto mb-4">
+                <span class="text-white text-2xl">🚫</span>
+              </div>
+              <h3 class="text-lg font-bold text-slate-900 mb-2">No Pharmacies Found</h3>
+              <p class="text-sm text-slate-600 mb-4">No pharmacies were found in your area. Try expanding your search radius.</p>
+              <button 
+                @click="expandRadius"
+                class="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200"
+              >
+                Expand Search Radius
+              </button>
+            </div>
+          </div>
+          
+          <!-- Seller Found (when seller acknowledged) -->
+          <div v-if="foundSellers.some(s => s.status === 'acknowledged') && !foundSellers.some(s => s.status === 'offered')" class="p-6 flex-1 overflow-y-auto">
+            <div class="text-center mb-6">
+              <div class="w-20 h-20 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <h3 class="text-2xl font-bold text-slate-900 mb-2">Seller Found</h3>
+              <p class="text-base text-slate-600">Waiting for an offer from seller</p>
+            </div>
+            
+            <!-- Seller List -->
+            <div class="space-y-4">
+              <div v-for="seller in foundSellers.filter(s => s.status === 'acknowledged')" :key="seller.id" 
+                class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <div class="flex items-center justify-center space-x-3 mb-4">
+                  <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                    <span class="text-white font-bold text-2xl">{{ (seller.seller_name || seller.business_name || seller.name || 'P').charAt(0).toUpperCase() }}</span>
+                  </div>
+                  <div class="flex-1 text-center">
+                    <h4 class="text-xl font-bold text-slate-900">
+                      {{ seller.seller_name || seller.business_name || seller.name || 'Pharmacy' }}
+                    </h4>
+                    <p class="text-sm text-slate-500 mt-1">Preparing your offer...</p>
+                  </div>
+                </div>
+                
+                <!-- Animated waiting indicator -->
+                <div class="flex items-center justify-center space-x-2 py-4">
+                  <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                  <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                  <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seller Made an Offer (when offer received) -->
+          <div v-else-if="foundSellers.some(s => s.status === 'offered')" class="p-6 flex-1 overflow-y-auto">
+            <div class="text-center mb-6">
+              <div class="w-20 h-20 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center mx-auto mb-4 shadow-lg animate-pulse">
+                <span class="text-4xl">🎉</span>
+              </div>
+              <h3 class="text-2xl font-bold text-slate-900 mb-2">Seller Made an Offer!</h3>
+              <p class="text-base text-slate-600">Choose how to get your medicine</p>
+            </div>
+            
+            <!-- Offers List -->
+            <div class="space-y-4 mb-6">
+              <div v-for="seller in foundSellers.filter(s => s.status === 'offered')" :key="seller.id" 
+                class="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-2xl p-6 shadow-md">
+                
+                <!-- Seller Info -->
+                <div class="flex items-center space-x-4 mb-4">
+                  <div class="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center ring-4 ring-yellow-200">
+                    <span class="text-white font-bold text-2xl">{{ (seller.seller_name || seller.business_name || seller.name || 'P').charAt(0).toUpperCase() }}</span>
+                  </div>
+                  <div class="flex-1">
+                    <h4 class="text-xl font-bold text-slate-900">
+                      {{ seller.seller_name || seller.business_name || seller.name || 'Pharmacy' }}
+                    </h4>
+                    <p class="text-sm text-slate-600">{{ seller.business_address || 'Nearby pharmacy' }}</p>
+                  </div>
+                </div>
+                
+                <!-- Offer Details -->
+                <div v-if="seller.offer" class="bg-white rounded-xl p-4 mb-4">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-slate-700">Total Price:</span>
+                    <span class="text-2xl font-bold text-green-600">{{ formatApiPrice(seller.offer.total_price) }}</span>
+                  </div>
+                  <div v-if="seller.offer.message" class="text-sm text-slate-600 border-t pt-2 mt-2">
+                    <strong>Message:</strong> {{ seller.offer.message }}
+                  </div>
+                </div>
+                
+                <!-- View Offer Button -->
+                <button 
+                  @click="viewOfferDetails(seller)"
+                  class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-semibold mb-4 transition-colors duration-200"
+                >
+                  View Offer Details
+                </button>
+                
+                <!-- Delivery Choice Buttons -->
+                <div class="space-y-3">
+                  <p class="text-center text-sm font-medium text-slate-700 mb-2">How would you like to receive your medicine?</p>
+                  
+                  <!-- Pick up myself button -->
+                  <button 
+                    @click="selectPickupOption(seller)"
+                    class="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 flex items-center justify-center space-x-2"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                    <span>Pick Up Myself</span>
+                  </button>
+                  
+                  <!-- Use AfriQExpress delivery button -->
+                  <button 
+                    @click="selectDeliveryOption(seller)"
+                    class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 flex items-center justify-center space-x-2"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    <span>Use AfriQExpress Delivery</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search Status Display (when searching but no sellers found yet) -->
+          <div v-else-if="isSearching && (!showSellerNotifications || foundSellers.length === 0)" class="p-4 flex-1 overflow-y-auto">
+            <div class="text-center mb-4">
+              <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
+                   :class="{
+                     'bg-gradient-to-r from-blue-500 to-indigo-600': searchStatus.isSearching,
+                     'bg-gradient-to-r from-green-500 to-emerald-600': searchStatus.status === 'success',
+                     'bg-gradient-to-r from-yellow-500 to-orange-500': searchStatus.status === 'no_results',
+                     'bg-gradient-to-r from-red-500 to-pink-500': searchStatus.status === 'error'
+                   }">
+                <div v-if="searchStatus.isSearching" class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div v-else-if="searchStatus.status === 'success'" class="w-6 h-6 text-white">✅</div>
+                <div v-else-if="searchStatus.status === 'no_results'" class="w-6 h-6 text-white">⚠️</div>
+                <div v-else-if="searchStatus.status === 'error'" class="w-6 h-6 text-white">❌</div>
+                <div v-else class="w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
+              </div>
+              <h3 class="text-lg font-bold text-slate-900 mb-1">
+                <span v-if="searchStatus.isSearching">Searching Pharmacies</span>
+                <span v-else-if="searchStatus.status === 'success'" class="text-green-600">✅ Pharmacies Found!</span>
+                <span v-else-if="searchStatus.status === 'no_results'" class="text-yellow-600">⚠️ No Pharmacies Found</span>
+                <span v-else-if="searchStatus.status === 'error'" class="text-red-600">❌ Search Error</span>
+                <span v-else>Search Complete</span>
+              </h3>
+              <p class="text-sm text-slate-600">{{ searchStatus.message || searchStatus.currentStep }}</p>
               <div class="text-xs text-slate-500 mt-1">{{ searchTimer }}s elapsed • {{ searchRadius }}km radius</div>
             </div>
             
@@ -368,55 +763,12 @@
                 </div>
               </div>
             </div>
-            
-            <!-- Contacted Pharmacies -->
-            <div v-if="searchStatus.selectedPharmacies.length > 0" class="mb-4">
-              <h4 class="text-sm font-semibold text-slate-700 mb-2">
-                Contacted Pharmacies ({{ searchStatus.selectedPharmacies.length }}):
-              </h4>
-              <div class="space-y-1">
-                <div v-for="pharmacy in searchStatus.selectedPharmacies" :key="pharmacy.name"
-                  class="flex justify-between items-center text-xs p-2 bg-slate-50 rounded-lg"
-                >
-                  <div class="flex items-center space-x-2">
-                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                    <span class="font-medium">{{ pharmacy.name }}</span>
-                  </div>
-                  <div class="flex items-center space-x-2 text-slate-500">
-                    <span>{{ pharmacy.distance }}</span>
-                    <span class="text-xs px-2 py-0.5 rounded-full"
-                      :class="{
-                        'bg-blue-100 text-blue-700': pharmacy.status === 'contacted',
-                        'bg-green-100 text-green-700': pharmacy.status === 'responding',
-                        'bg-yellow-100 text-yellow-700': pharmacy.status === 'declined'
-                      }"
-                    >
-                      {{ pharmacy.status }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Response Counter -->
-            <div v-if="searchStatus.responseCount > 0" class="text-center">
-              <div class="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                {{ searchStatus.responseCount }} offer{{ searchStatus.responseCount > 1 ? 's' : '' }} received
-              </div>
-            </div>
           </div>
           
-          <!-- Collapsed state: Quick actions -->
-          <div v-else-if="!isExpanded" class="p-6">
+          <!-- Collapsed state: Quick actions (only show before search starts) -->
+          <div v-else-if="!isExpanded && !isSearching && !showSellerNotifications && foundSellers.length === 0 && !hasEverSearched" class="p-6">
             <div class="text-center mb-6">
-              <div class="w-16 h-16 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z"></path>
-                </svg>
-              </div>
+              
               <h2 class="text-xl font-bold text-slate-900 mb-2">Pharmacy Request</h2>
               <p class="text-sm text-slate-600">Request medicines from nearby pharmacies</p>
             </div>
@@ -478,7 +830,7 @@
           </div>
 
           <!-- Expanded state: Request composer -->
-          <div v-else class="flex-1 p-6 overflow-y-auto">
+          <div v-else-if="isExpanded && !showSellerNotifications && foundSellers.length === 0 && !hasEverSearched" class="flex-1 p-6 overflow-y-auto">
             <div class="flex items-center justify-between mb-6">
               <div>
                 <h2 class="text-xl font-bold text-slate-900">
@@ -495,15 +847,30 @@
 
             <!-- Medicine request form -->
             <div class="space-y-4">
-              <!-- Medicine name -->
+              <!-- Medicine name with autocomplete -->
               <div>
                 <label class="block text-sm font-medium text-slate-700 mb-2">Medicine Name</label>
-                <input 
-                  v-model="medicineRequest.name" 
-                  type="text" 
-                  placeholder="Enter medicine name..."
-                  class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                <div class="relative">
+                  <input 
+                    v-model="medicineRequest.name" 
+                    @input="onMedicineNameInput"
+                    @focus="showAutocomplete = true"
+                    @blur="hideAutocomplete"
+                    type="text" 
+                    placeholder="Enter medicine name..."
+                    class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <!-- Autocomplete dropdown -->
+                  <div v-if="showAutocomplete && autocompleteSuggestions.length > 0" 
+                       class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                    <div v-for="suggestion in autocompleteSuggestions" 
+                         :key="suggestion"
+                         @click="selectSuggestion(suggestion)"
+                         class="px-4 py-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-b-0">
+                      {{ suggestion }}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- Quantity -->
@@ -611,6 +978,200 @@
                   Searching Pharmacies...
                 </span>
                 <span v-else>{{ isEditing ? 'Update Medicine' : 'Send Request' }}</span>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Fallback: Show seller notifications when expanded but should show results -->
+          <div v-else-if="isExpanded && (showSellerNotifications || foundSellers.length > 0 || hasEverSearched)" class="flex-1 p-6 overflow-y-auto">
+            <!-- Seller Notifications Section (when expanded but should show results) -->
+            <div v-if="showSellerNotifications && foundSellers.length > 0">
+              <div class="text-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center mx-auto mb-3">
+                  <span class="text-white text-xl">🏥</span>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mb-1">Found Pharmacies</h3>
+                <p class="text-sm text-slate-600">{{ foundSellers.length }} pharmacy{{ foundSellers.length > 1 ? 'ies' : '' }} found</p>
+              </div>
+              
+              <!-- Seller List -->
+              <div class="space-y-3">
+                <div v-for="seller in foundSellers" :key="seller.id" 
+                  class="bg-white border-2 rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
+                  :class="{
+                    'border-blue-200 bg-blue-50/30': seller.status === 'found',
+                    'border-green-200 bg-green-50/30': seller.status === 'acknowledged',
+                    'border-yellow-300 bg-yellow-50/30': seller.status === 'offered',
+                    'border-red-200 bg-red-50/30': seller.status === 'declined'
+                  }"
+                >
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <div class="flex items-start space-x-3">
+                        <!-- Pharmacy Avatar -->
+                        <div class="relative flex-shrink-0">
+                          <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold text-lg">{{ (seller.seller_name || seller.name || 'P').charAt(0).toUpperCase() }}</span>
+                          </div>
+                          <!-- Status indicator dot -->
+                          <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white"
+                            :class="{
+                              'bg-blue-500': seller.status === 'found',
+                              'bg-green-500 animate-pulse': seller.status === 'acknowledged',
+                              'bg-yellow-500': seller.status === 'offered',
+                              'bg-red-500': seller.status === 'declined'
+                            }"
+                          ></div>
+                        </div>
+                        
+                        <div class="flex-1 min-w-0">
+                          <h4 class="font-semibold text-slate-900 text-base truncate">
+                            {{ seller.seller_name || seller.business_name || seller.name || 'Pharmacy' }}
+                          </h4>
+                          
+                          <!-- Additional pharmacy info -->
+                          <div class="mt-1 space-y-1">
+                            <div class="flex items-center space-x-2 text-xs text-slate-600">
+                              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                              </svg>
+                              <span>{{ seller.distance || seller.delivery_radius || 'Nearby' }}</span>
+                              <span v-if="seller.response_time" class="w-1 h-1 bg-slate-400 rounded-full"></span>
+                              <span v-if="seller.response_time">{{ seller.response_time }}</span>
+                            </div>
+                            
+                            <div v-if="seller.phone_number" class="flex items-center space-x-2 text-xs text-slate-600">
+                              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                              </svg>
+                              <span>{{ seller.phone_number }}</span>
+                            </div>
+                          </div>
+                          
+                          <!-- Status badge -->
+                          <div class="mt-2">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
+                              :class="{
+                                'bg-blue-100 text-blue-800 border border-blue-200': seller.status === 'found',
+                                'bg-green-100 text-green-800 border border-green-200': seller.status === 'acknowledged',
+                                'bg-yellow-100 text-yellow-800 border border-yellow-200': seller.status === 'offered',
+                                'bg-red-100 text-red-800 border border-red-200': seller.status === 'declined'
+                              }"
+                            >
+                              <span v-if="seller.status === 'found'">📍 Request Received</span>
+                              <span v-else-if="seller.status === 'acknowledged'">✅ Reviewing Request</span>
+                              <span v-else-if="seller.status === 'offered'">💰 Offer Available</span>
+                              <span v-else-if="seller.status === 'declined'">❌ Unavailable</span>
+                              <span v-else>{{ seller.status }}</span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col space-y-2 ml-3">
+                      <!-- View Offer Button (only if offered) -->
+                      <button 
+                        v-if="seller.status === 'offered'"
+                        @click="openOffersModal(seller.requestId)"
+                        class="p-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 shadow-md hover:shadow-lg"
+                        title="View offer"
+                      >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                      </button>
+                      
+                      <!-- Chat Button -->
+                      <button 
+                        v-if="seller.chatEnabled && seller.status !== 'declined'"
+                        @click="openChat(seller)"
+                        class="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                        title="Chat with pharmacy"
+                      >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                      </button>
+                      
+                      <!-- Call Button -->
+                      <button 
+                        v-if="seller.phone_number && seller.status !== 'declined'"
+                        @click="window.open(`tel:${seller.phone_number}`)"
+                        class="p-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                        title="Call pharmacy"
+                      >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Status-specific content -->
+                  <div v-if="seller.status === 'acknowledged'" class="mt-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
+                    <div class="flex items-center space-x-2 text-sm text-green-700">
+                      <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span class="font-medium">Pharmacy is reviewing your request...</span>
+                    </div>
+                  </div>
+                  
+                  <div v-if="seller.status === 'offered' && seller.offer" class="mt-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg">
+                    <div class="text-sm">
+                      <div class="font-semibold text-yellow-800 flex items-center">
+                        <span class="text-lg mr-2">🎉</span>
+                        Offer Received!
+                      </div>
+                      <div class="text-yellow-700 mt-1">
+                        {{ seller.offer.message || 'Tap "View Offer" to see details and accept' }}
+                      </div>
+                      <div v-if="seller.offer.delivery_time" class="text-xs text-yellow-600 mt-1">
+                        ⏱️ Est. delivery: {{ seller.offer.delivery_time }}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div v-if="seller.status === 'declined'" class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="text-sm text-red-700">
+                      <div class="font-medium flex items-center">
+                        <span class="mr-2">❌</span>
+                        Request Declined
+                      </div>
+                      <div v-if="seller.decline_reason" class="text-xs text-red-600 mt-1">
+                        Reason: {{ seller.decline_reason }}
+                      </div>
+                      <div v-else class="text-xs text-red-600 mt-1">
+                        This pharmacy cannot fulfill your request at this time
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Initial contact message -->
+                  <div v-if="seller.status === 'found'" class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-center space-x-2 text-sm text-blue-700">
+                      <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                      <span>Waiting for pharmacy response...</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- No sellers found message -->
+            <div v-else-if="foundSellers.length === 0 && hasEverSearched" class="text-center py-8">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center mx-auto mb-4">
+                <span class="text-white text-2xl">🚫</span>
+              </div>
+              <h3 class="text-lg font-bold text-slate-900 mb-2">No Pharmacies Found</h3>
+              <p class="text-sm text-slate-600 mb-4">No pharmacies were found in your area. Try expanding your search radius.</p>
+              <button 
+                @click="expandRadius"
+                class="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200"
+              >
+                Expand Search Radius
               </button>
             </div>
           </div>
@@ -724,6 +1285,68 @@
               </svg>
             </div>
             <p class="text-slate-600">No offers received yet...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Dialog -->
+      <div v-if="showChatDialog" class="absolute inset-0 bg-black/50 backdrop-blur-sm z-70 flex items-center justify-center">
+        <div class="bg-white rounded-3xl mx-4 max-w-md w-full shadow-2xl max-h-[80vh] overflow-hidden flex flex-col">
+          <!-- Header -->
+          <div class="flex justify-between items-center p-6 pb-4 border-b border-slate-200">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                <span class="text-white font-bold text-sm">{{ (selectedSeller?.seller_name || selectedSeller?.name || 'P').charAt(0).toUpperCase() }}</span>
+              </div>
+              <div>
+                <h3 class="text-lg font-bold text-slate-900">{{ selectedSeller?.seller_name || selectedSeller?.name || 'Pharmacy' }}</h3>
+                <p class="text-sm text-slate-600">Online now</p>
+              </div>
+            </div>
+            <button @click="closeChat" class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center hover:bg-slate-200 transition-colors">
+              <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Chat Messages -->
+          <div class="flex-1 overflow-y-auto p-4 space-y-3">
+            <div v-for="message in chatMessages" :key="message.id" 
+              :class="message.sender === 'shopper' ? 'flex justify-end' : 'flex justify-start'"
+            >
+              <div 
+                :class="message.sender === 'shopper' 
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white' 
+                  : 'bg-slate-100 text-slate-900'"
+                class="max-w-xs px-4 py-2 rounded-2xl text-sm"
+              >
+                <div>{{ message.message }}</div>
+                <div class="text-xs mt-1 opacity-70">{{ formatTime(message.timestamp) }}</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Chat Input -->
+          <div class="p-4 border-t border-slate-200">
+            <div class="flex items-center space-x-2">
+              <input 
+                v-model="newChatMessage"
+                @keyup.enter="sendChatMessage"
+                type="text" 
+                placeholder="Type your message..."
+                class="flex-1 px-4 py-2 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button 
+                @click="sendChatMessage"
+                :disabled="!newChatMessage.trim()"
+                class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full flex items-center justify-center hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -866,15 +1489,153 @@ const showRetryOptions = ref(false)
 const pharmacyOffers = ref([])
 const showOffersModal = ref(false)
 const pharmacyMarkers = ref([])
-const bottomSheetHeight = ref(300) // Default collapsed height
+// Bottom sheet height management
+const bottomSheetHeight = ref(200) // Default: lowest height for initial view
 const isDragging = ref(false)
 const dragStartY = ref(0)
 const dragStartHeight = ref(0)
+
+// Medicine autocomplete
+const showAutocomplete = ref(false)
+const autocompleteSuggestions = ref([])
+const autocompleteTimeout = ref(null)
+
+// Height constants for different states
+const HEIGHTS = {
+  LOWEST: 200,    // Initial view - just show content
+  MIDDLE: 400,    // Live updates visible
+  HIGHEST: 600    // Full form for adding medicine
+}
 const showDeliveryChoice = ref(false)
 const selectedOffer = ref(null)
 let searchInterval = null
 
-// Search status tracking (pharmacy-flow.txt implementation)
+// ==================== PHARMACY REQUEST STATE MACHINE ====================
+// States: idle, searching, seller_acknowledged, offer_received, no_sellers_found
+const pharmacyRequestState = ref('idle')
+const activeSession = ref(null)
+
+// Session structure:
+// {
+//   sessionId: string,
+//   requestId: number,
+//   state: string,
+//   sellerData: { id, name, address, phone, status },
+//   startedAt: timestamp,
+//   expiresAt: timestamp
+// }
+
+// Initialize session from localStorage on mount
+const initializeSession = () => {
+  const savedSession = localStorage.getItem('pharmacy_request_session')
+  if (savedSession) {
+    try {
+      const session = JSON.parse(savedSession)
+      
+      // Check if session is still valid (not expired)
+      if (session.expiresAt && new Date(session.expiresAt) > new Date()) {
+        // Additional validation: check if session is in a terminal state
+        // If in offer_received or no_sellers_found for >5 minutes, clear it
+        const sessionAge = Date.now() - new Date(session.startedAt).getTime()
+        const fiveMinutes = 5 * 60 * 1000
+        
+        if ((session.state === 'offer_received' || session.state === 'no_sellers_found') && sessionAge > fiveMinutes) {
+          console.log('⏰ Session in terminal state for too long, clearing...')
+          clearSession()
+          return
+        }
+        
+        activeSession.value = session
+        pharmacyRequestState.value = session.state || 'searching'
+        console.log('📦 Restored session from localStorage:', session)
+        
+        // If in searching state but session is old (>30 min), clear it
+        if (session.state === 'searching' && sessionAge > 30 * 60 * 1000) {
+          console.log('⏰ Searching session too old, clearing...')
+          clearSession()
+        }
+      } else {
+        // Session expired, clear it
+        console.log('⏰ Session expired, clearing...')
+        clearSession()
+      }
+    } catch (e) {
+      console.error('Failed to parse saved session:', e)
+      localStorage.removeItem('pharmacy_request_session')
+    }
+  }
+}
+
+// Save session to localStorage
+const saveSession = () => {
+  if (activeSession.value) {
+    localStorage.setItem('pharmacy_request_session', JSON.stringify(activeSession.value))
+    console.log('💾 Session saved to localStorage')
+  }
+}
+
+// Clear session
+const clearSession = () => {
+  activeSession.value = null
+  pharmacyRequestState.value = 'idle'
+  localStorage.removeItem('pharmacy_request_session')
+  console.log('🗑️ Session cleared')
+}
+
+// Start new session
+const startSession = (requestId) => {
+  const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  activeSession.value = {
+    sessionId,
+    requestId,
+    state: 'searching',
+    sellerData: null,
+    startedAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes
+  }
+  pharmacyRequestState.value = 'searching'
+  saveSession()
+  console.log('🚀 Session started:', activeSession.value)
+}
+
+// Update session state
+const updateSessionState = (newState, data = {}) => {
+  if (activeSession.value) {
+    activeSession.value.state = newState
+    pharmacyRequestState.value = newState
+    
+    // Update seller data if provided
+    if (data.sellerData) {
+      activeSession.value.sellerData = data.sellerData
+    }
+    
+    // Extend expiration if needed
+    if (newState === 'seller_acknowledged' || newState === 'offer_received') {
+      activeSession.value.expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString()
+    }
+    
+    saveSession()
+    console.log('🔄 Session state updated:', newState, data)
+  }
+}
+
+// End session
+const endSession = () => {
+  console.log('🏁 Session ended')
+  clearSession()
+  // Reset UI state
+  isSearching.value = false
+  isSubmitting.value = false
+  hasEverSearched.value = false
+  submittedMedicines.value = []
+}
+
+// Check if session is active
+const hasActiveSession = computed(() => {
+  return activeSession.value !== null && pharmacyRequestState.value !== 'idle'
+})
+
+// Legacy compatibility - keep for now but map to new state
 const searchStatus = ref({
   isSearching: false,
   messages: [],
@@ -885,6 +1646,15 @@ const searchStatus = ref({
   responseCount: 0
 })
 
+// Seller notifications and chat (kept for compatibility)
+const foundSellers = ref([])
+const showSellerNotifications = ref(false)
+const showChatDialog = ref(false)
+const selectedSeller = ref(null)
+const chatMessages = ref([])
+const newChatMessage = ref('')
+const hasEverSearched = ref(false)
+
 // WebSocket for real-time updates (would be replaced with actual WebSocket)
 let searchStatusInterval = null
 
@@ -892,7 +1662,7 @@ let searchStatusInterval = null
 const medicineRequest = ref({
   name: '',
   quantity: 1,
-  form: '',
+  form: 'tablet', // Default to tablet instead of empty string
   urgency: 'normal',
   additional_notes: ''
 })
@@ -917,10 +1687,31 @@ const navigateToDetails = (productId) => {
   router.push({ name: 'ProductDetails', params: { id: productId } })
 }
 
+// Developer helper function to clear stuck sessions
+const clearStuckSession = () => {
+  console.log('🧹 Manually clearing session...')
+  clearSession()
+  isSearching.value = false
+  isSubmitting.value = false
+  hasEverSearched.value = false
+  submittedMedicines.value = []
+  console.log('✅ Session cleared! You can now submit a new request.')
+}
+
+// Expose to window for developer access
+if (typeof window !== 'undefined') {
+  window.clearStuckSession = clearStuckSession
+  console.log('💡 Developer helper available: clearStuckSession()')
+}
+
 onMounted(async () => {
   console.log('Home page mounted - starting initialization')
 
   try {
+    // ✅ Initialize pharmacy request session from localStorage
+    initializeSession()
+    console.log('Pharmacy request session initialized')
+    
     // Initialize cart state
     cart.initCartState()
     console.log('Cart state initialized')
@@ -1010,13 +1801,16 @@ const exitPharmacyMode = () => {
   medicineRequest.value = {
     name: '',
     quantity: 1,
-    form: '',
+    form: 'tablet',
     urgency: 'normal',
     additional_notes: ''
   }
   isExpanded.value = false
   isSubmitting.value = false
   isSearching.value = false
+  hasEverSearched.value = false
+  showSellerNotifications.value = false
+  foundSellers.value = []
   if (searchInterval) {
     clearInterval(searchInterval)
     searchInterval = null
@@ -1035,20 +1829,20 @@ const expandBottomSheet = () => {
     medicineRequest.value = {
       name: '',
       quantity: 1,
-      form: '',
+      form: 'tablet',
       urgency: 'normal',
       additional_notes: ''
     }
   }
   isExpanded.value = true
-  // Set bottom sheet to expanded height to show the form and submit button
-  bottomSheetHeight.value = window.innerHeight * 0.7
+  // Set bottom sheet to highest height for adding medicine
+  bottomSheetHeight.value = HEIGHTS.HIGHEST
 }
 
 const collapseBottomSheet = () => {
   isExpanded.value = false
-  // Reset to collapsed height
-  bottomSheetHeight.value = 300
+  // Reset to lowest height for initial view
+  bottomSheetHeight.value = HEIGHTS.LOWEST
 }
 
 const submitRequest = () => {
@@ -1099,7 +1893,7 @@ const submitRequest = () => {
   medicineRequest.value = {
     name: '',
     quantity: 1,
-    form: '',
+    form: 'tablet',
     urgency: 'normal',
     additional_notes: ''
   }
@@ -1137,7 +1931,7 @@ const cancelEdit = () => {
   medicineRequest.value = {
     name: '',
     quantity: 1,
-    form: '',
+    form: 'tablet',
     urgency: 'normal',
     additional_notes: ''
   }
@@ -1164,7 +1958,57 @@ const removeMedicine = (medicineId) => {
   }
 }
 
+// Reset pharmacy search state
+const resetPharmacySearch = () => {
+  console.log('🔄 Resetting pharmacy search state')
+  
+  // Clear all search-related state
+  submittedMedicines.value = []
+  foundSellers.value = []
+  showSellerNotifications.value = false
+  isSearching.value = false
+  isSubmitting.value = false
+  isExpanded.value = false
+  hasEverSearched.value = false
+  
+  // Reset medicine request form
+  medicineRequest.value = {
+    name: '',
+    quantity: 1,
+    form: '',
+    urgency: 'normal',
+    notes: ''
+  }
+  
+  // Reset bottom sheet
+  bottomSheetHeight.value = HEIGHTS.LOWEST
+  
+  // Clear search status
+  searchStatus.value = {
+    isSearching: false,
+    messages: [],
+    currentStep: '',
+    searchStartTime: null,
+    foundOffers: [],
+    selectedPharmacies: [],
+    responseCount: 0
+  }
+}
+
 const submitAllRequests = async () => {
+  // ✅ BLOCK: Check if session is already active
+  if (hasActiveSession.value) {
+    // Show more helpful message with option to clear
+    console.warn('🚫 Blocked duplicate request - session already active:', activeSession.value)
+    notification.addNotification({
+      type: 'warning',
+      title: 'Request In Progress',
+      message: `You have an active request (${pharmacyRequestState.value}). If this is stuck, refresh the page or check console and type: clearStuckSession()`,
+      timeout: 8000
+    })
+    return
+  }
+  
   if (submittedMedicines.value.length === 0 || isSubmitting.value) return
   
   isSubmitting.value = true
@@ -1194,12 +2038,14 @@ const submitAllRequests = async () => {
     const requestData = {
       pickup_latitude: userLocation.latitude,
       pickup_longitude: userLocation.longitude,
+      pickup_address: `Togo, Lomé (${userLocation.latitude.toFixed(6)}, ${userLocation.longitude.toFixed(6)})`,
       search_radius_km: searchRadius.value,
-      urgency: 'normal', // Use default or could be based on highest priority
+      urgency: medicineRequest.value.urgency, // Use default or could be based on highest priority
+      additional_notes: medicineRequest.value.additional_notes,
       items: submittedMedicines.value.map(medicine => ({
         medicine_name: medicine.name,
         quantity: medicine.quantity,
-        form: medicine.form || null
+        form: medicine.form || 'tablet' // Default to tablet if form is empty
       }))
     }
 
@@ -1211,13 +2057,17 @@ const submitAllRequests = async () => {
 
     console.log('All medicine requests created:', createdRequest)
 
+    // ✅ START SESSION
+    startSession(createdRequest.id)
+
     // Start searching animation and reduce bottom sheet height
     isSubmitting.value = false
     isSearching.value = true
+    hasEverSearched.value = true
     searchTimer.value = 0
     
-    // Reduce bottom sheet height during search (as requested)
-    bottomSheetHeight.value = 200
+    // Set bottom sheet to middle height for live updates visibility
+    bottomSheetHeight.value = HEIGHTS.MIDDLE
     isExpanded.value = false
     
     // Initialize search status
@@ -1231,10 +2081,10 @@ const submitAllRequests = async () => {
       responseCount: 0
     }
     
-    // Start search timer
+    // Start search timer (reduced frequency to 5 seconds for better performance)
     searchInterval = setInterval(() => {
-      searchTimer.value++
-    }, 1000)
+      searchTimer.value += 5
+    }, 5000)
     
     // Start real-time search status updates
     startSearchStatusUpdates(createdRequest.id)
@@ -1245,62 +2095,8 @@ const submitAllRequests = async () => {
     // DON'T clear medicines - keep them for potential retry (pharmacy-flow.txt line 249)
     // submittedMedicines.value = [] // REMOVED - keep medicines for retry
 
-    // Simulate waiting for pharmacy responses (in real implementation, use WebSocket)
-    setTimeout(async () => {
-      try {
-        // Check for offers
-        const offersResponse = await apiService.getPharmacyOffers(createdRequest.id)
-        const offers = offersResponse.data
-
-        isSearching.value = false
-        stopSearchStatusUpdates()
-        if (searchInterval) {
-          clearInterval(searchInterval)
-          searchInterval = null
-        }
-
-        if (offers && offers.length > 0) {
-          // Navigate to offers page or show offers
-          // Stop search animation
-          isSearching.value = false
-          if (searchInterval) {
-            clearInterval(searchInterval)
-            searchInterval = null
-          }
-          
-          // Increase bottom sheet height to show search results properly
-          bottomSheetHeight.value = window.innerHeight * 0.75 // 75% of screen height for offers
-          isExpanded.value = true
-          
-          // Store offers and show them (pharmacy-flow.txt lines 213-216)
-          pharmacyOffers.value = offers
-          showOffersModal.value = true
-          
-          notification.addNotification({
-            type: 'success',
-            title: 'Pharmacy Responses Received!',
-            message: `${offers.length} pharmacy(ies) responded to your request.`
-          })
-          
-          console.log('Received offers:', offers)
-        } else {
-          // No offers received - implement pharmacy-flow.txt lines 249-251
-          handleNoResponseTimeout(createdRequest.id)
-        }
-      } catch (error) {
-        console.error('Error checking offers:', error)
-        isSearching.value = false
-        if (searchInterval) {
-          clearInterval(searchInterval)
-          searchInterval = null
-        }
-        notification.addNotification({
-          type: 'error',
-          title: 'Search Error',
-          message: 'There was an error checking for pharmacy responses.'
-        })
-      }
-    }, 8000) // Wait 8 seconds for responses
+    // Start polling for pharmacy responses
+    startPollingForOffers(createdRequest.id)
 
   } catch (error) {
     console.error('Error submitting all medicine requests:', error)
@@ -1348,17 +2144,14 @@ const startSearchStatusUpdates = (requestId) => {
       stepIndex++
     }
     
-    // Simulate some pharmacy responses for demo
-    if (searchTimer.value >= 3 && searchStatus.value.selectedPharmacies.length === 0) {
-      simulatePharmacyResponses()
-    }
+    // Real pharmacy responses will come via WebSocket from the backend
     
     // Stop after 10 seconds if no real responses
     if (searchTimer.value >= 10) {
       clearInterval(searchStatusInterval)
       searchStatusInterval = null
     }
-  }, 2000) // Update every 2 seconds
+  }, 5000) // Update every 5 seconds (reduced frequency)
 }
 
 // Add search status message
@@ -1377,31 +2170,7 @@ const addSearchMessage = (message, type = 'info') => {
   }
 }
 
-// Simulate pharmacy responses for demo (replace with real WebSocket data)
-const simulatePharmacyResponses = () => {
-  const demoPharmacies = [
-    { name: 'PharmaCare Plus', status: 'contacted', distance: '1.2km' },
-    { name: 'HealthLine Pharmacy', status: 'responding', distance: '2.8km' },
-    { name: 'MediCenter Togo', status: 'contacted', distance: '0.9km' }
-  ]
-  
-  demoPharmacies.forEach((pharmacy, index) => {
-    setTimeout(() => {
-      searchStatus.value.selectedPharmacies.push(pharmacy)
-      addSearchMessage(`Request sent to ${pharmacy.name}`, 'success')
-      
-      // Simulate response
-      setTimeout(() => {
-        if (pharmacy.status === 'responding') {
-          searchStatus.value.responseCount++
-          addSearchMessage(`${pharmacy.name} is preparing an offer`, 'success')
-        } else {
-          addSearchMessage(`${pharmacy.name} declined - out of stock`, 'warning')
-        }
-      }, 1500 + (index * 500))
-    }, index * 1000)
-  })
-}
+// Real pharmacy responses will be handled via WebSocket from the backend
 
 // Stop search status updates
 const stopSearchStatusUpdates = () => {
@@ -1410,6 +2179,12 @@ const stopSearchStatusUpdates = () => {
     searchStatusInterval = null
   }
   searchStatus.value.isSearching = false
+}
+
+// Polling replaced by WebSocket events (see notificationService dispatch)
+let offerPollingInterval = null
+const startPollingForOffers = (requestId) => {
+  console.log('🟢 WS mode: waiting for real-time offers for request:', requestId)
 }
 
 // Handle no response timeout according to pharmacy-flow.txt lines 249-251
@@ -1424,6 +2199,12 @@ const handleNoResponseTimeout = async (requestId) => {
     searchInterval = null
   }
   
+  // Update search status to show no results
+  searchStatus.value.isSearching = false
+  searchStatus.value.status = 'no_results'
+  searchStatus.value.message = 'No pharmacies found with your medicines'
+  addSearchMessage('❌ No pharmacies found with your medicines', 'warning')
+  
   // Update UI to show no pharmacy found message (pharmacy-flow.txt line 249)
   notification.addNotification({
     type: 'warning',
@@ -1432,9 +2213,9 @@ const handleNoResponseTimeout = async (requestId) => {
   })
   
   // Show retry options UI (pharmacy-flow.txt lines 132-136, 249)
-  // Increase bottom sheet height to show retry options properly
-  bottomSheetHeight.value = window.innerHeight * 0.6 // 60% of screen height for retry options
-  isExpanded.value = true
+  // Keep searching view visible for retry options
+  bottomSheetHeight.value = HEIGHTS.MIDDLE // Stay at middle height for searching view
+  isExpanded.value = false
   showRetryOptions.value = true
   
   try {
@@ -1451,6 +2232,590 @@ const handleNoResponseTimeout = async (requestId) => {
   }
 }
 
+// Handle real-time pharmacy events from notification service
+window.addEventListener('pharmacyOffersReceived', (event) => {
+  try {
+    const { requestId, offersCount, hasActionButton, actionButton, timeoutSeconds } = event.detail || {}
+    console.log('📡 WS: pharmacy offers received:', requestId, offersCount, hasActionButton)
+    
+    isSearching.value = false
+    stopSearchStatusUpdates()
+    if (searchInterval) {
+      clearInterval(searchInterval)
+      searchInterval = null
+    }
+    searchStatus.value.isSearching = false
+    searchStatus.value.status = 'success'
+    searchStatus.value.message = `Found ${offersCount} pharmacy(ies) with your medicines!`
+    addSearchMessage(`✅ Found ${offersCount} pharmacy(ies) with your medicines!`, 'success')
+    bottomSheetHeight.value = HEIGHTS.MIDDLE
+    isExpanded.value = false
+    
+    // If there's an action button, show persistent notification with countdown
+    if (hasActionButton && actionButton) {
+      console.log('🎯 Showing offer notification with action button and countdown')
+      
+      // Show persistent notification with action button
+      notification.addNotification({
+        id: `offer_${requestId}_${Date.now()}`,
+        type: 'success',
+        title: 'Medicine Offers Received!',
+        message: `You have ${offersCount} pharmacy offer(s) for your medicine request`,
+        persistent: true,
+        timeout: 0,
+        category: 'pharmacy_offers',
+        data: {
+          requestId: requestId,
+          offersCount: offersCount,
+          actionButton: actionButton,
+          timeoutSeconds: timeoutSeconds || 300  // Default to 5 minutes
+        },
+        onActionClick: () => {
+          // Open medicine request details dialog
+          openOffersModal(requestId)
+        },
+        onTimeout: () => {
+          // Handle timeout - search for more pharmacies
+          console.log('⏰ Offer review timeout, searching for more pharmacies')
+          addSearchMessage('⏰ Offer review timeout, searching for more pharmacies...', 'warning')
+          // Trigger escalation
+          window.dispatchEvent(new CustomEvent('offerReviewTimeout', {
+            detail: { requestId }
+          }))
+        }
+      })
+    } else {
+      // Fallback to old behavior
+      apiService.getPharmacyOffers(requestId).then(res => {
+        pharmacyOffers.value = res.data || []
+        showOffersModal.value = true
+      }).catch(() => {
+        showOffersModal.value = true
+      })
+    }
+  } catch (e) {
+    console.warn('Failed to handle WS offers:', e)
+  }
+})
+
+window.addEventListener('pharmacyNoOffers', (event) => {
+  try {
+    const { requestId } = event.detail || {}
+    console.log('📡 WS: no offers for request:', requestId)
+    handleNoResponseTimeout(requestId)
+  } catch (e) {}
+})
+
+// Handle intelligent pharmacy search updates
+window.addEventListener('pharmacySearchUpdate', (event) => {
+  try {
+    const { eventType, requestId, title, message, status, progress, data } = event.detail || {}
+    console.log('🔍 Intelligent search update:', eventType, title, message)
+    
+    // Update search status based on event type
+    switch (eventType) {
+      case 'search_started':
+        isSearching.value = true
+        hasEverSearched.value = true
+        searchStatus.value.isSearching = true
+        searchStatus.value.status = 'searching'
+        searchStatus.value.message = message
+        addSearchMessage(`🔍 ${message}`, 'info')
+        break
+        
+      case 'pharmacies_found':
+        searchStatus.value.message = message
+        addSearchMessage(`📍 ${message}`, 'info')
+        break
+        
+      case 'pharmacy_contacted':
+        const pharmacyName = data.pharmacy_name || 'Pharmacy'
+        addSearchMessage(`📞 Contacted ${pharmacyName}`, 'info')
+        break
+        
+      case 'pharmacy_acknowledged':
+        const reviewingPharmacy = data.pharmacy_name || 'Pharmacy'
+        searchStatus.value.message = `${reviewingPharmacy} is reviewing your request`
+        addSearchMessage(`👀 ${reviewingPharmacy} is reviewing`, 'success')
+        break
+        
+      case 'pharmacy_timeout':
+        const timeoutPharmacy = data.pharmacy_name || 'Pharmacy'
+        addSearchMessage(`⏰ ${timeoutPharmacy} did not respond`, 'warning')
+        break
+        
+      case 'radius_expanded':
+        const newRadius = data.new_radius || 'wider'
+        searchStatus.value.message = `Expanding search to ${newRadius}km radius`
+        addSearchMessage(`🔍 Expanded search radius to ${newRadius}km`, 'info')
+        break
+        
+      case 'no_pharmacies':
+        isSearching.value = false
+        stopSearchStatusUpdates()
+        searchStatus.value.isSearching = false
+        searchStatus.value.status = 'no_results'
+        searchStatus.value.message = message
+        addSearchMessage(`❌ ${message}`, 'warning')
+        showRetryOptions.value = true
+        break
+        
+      default:
+        console.log('Unknown search event type:', eventType)
+    }
+    
+    // Update progress if provided
+    if (progress && progress > 0) {
+      console.log(`Search progress: ${progress}%`)
+    }
+    
+  } catch (e) {
+    console.warn('Failed to handle intelligent search update:', e)
+  }
+})
+
+// Handle offer review timeout
+window.addEventListener('offerReviewTimeout', (event) => {
+  try {
+    const { requestId } = event.detail || {}
+    console.log('⏰ Offer review timeout for request:', requestId)
+    
+    // Restart search for more pharmacies
+    isSearching.value = true
+    hasEverSearched.value = true
+    searchStatus.value.isSearching = true
+    searchStatus.value.status = 'searching'
+    searchStatus.value.message = 'Searching for more pharmacies...'
+    addSearchMessage('🔍 Searching for more pharmacies...', 'info')
+    
+    // Trigger escalation in backend
+    // This would typically be handled by the backend timeout task
+    console.log('Escalation triggered for request:', requestId)
+    
+  } catch (e) {
+    console.warn('Failed to handle offer review timeout:', e)
+  }
+})
+
+// Function to open offers modal
+const openOffersModal = async (requestId) => {
+  try {
+    console.log('🎯 Opening offers modal for request:', requestId)
+    
+    // Fetch offers from API
+    const response = await apiService.getPharmacyOffers(requestId)
+    pharmacyOffers.value = response.data || []
+    
+    // Show offers modal
+    showOffersModal.value = true
+    
+    // Remove the persistent notification since user clicked the action button
+    notification.removeNotification(`offer_${requestId}`)
+    
+  } catch (error) {
+    console.error('Error opening offers modal:', error)
+    notification.addNotification({
+      type: 'error',
+      title: 'Error',
+      message: 'Failed to load pharmacy offers'
+    })
+  }
+}
+
+// Seller notification functions
+const addFoundSeller = (seller) => {
+  console.log('🏥 Adding found seller:', seller)
+  const existingSeller = foundSellers.value.find(s => s.id === seller.id)
+  if (!existingSeller) {
+    foundSellers.value.push({
+      ...seller,
+      status: 'found', // 'found', 'acknowledged', 'declined', 'offered'
+      timestamp: new Date().toISOString(),
+      chatEnabled: true
+    })
+    showSellerNotifications.value = true
+    
+    // Keep searching overlay visible but show seller notifications in it
+    // This allows real-time updates while showing found pharmacies
+    bottomSheetHeight.value = HEIGHTS.MIDDLE // Show at middle height for better visibility
+    isExpanded.value = true // Ensure sheet is expanded to show sellers
+    
+    addSearchMessage(`🏥 Found pharmacy: ${seller.seller_name || seller.name}`, 'success')
+    
+    // Bottom sheet will show the seller - no snackbar notification
+  }
+}
+
+const updateSellerStatus = (sellerId, status, data = {}) => {
+  console.log('📊 Updating seller status:', { sellerId, status, data })
+  const seller = foundSellers.value.find(s => s.id === sellerId)
+  if (seller) {
+    seller.status = status
+    seller.timestamp = new Date().toISOString()
+    Object.assign(seller, data)
+    
+    // Add appropriate message and notification based on status
+    switch (status) {
+      case 'acknowledged':
+        // Update bottom sheet only - no snackbar notification
+        addSearchMessage(`✅ ${seller.seller_name || seller.name} found and reviewing`, 'success')
+        break
+      case 'declined':
+        // Remove seller from list and go back to searching mode
+        foundSellers.value = foundSellers.value.filter(s => s.id !== sellerId)
+        addSearchMessage(`❌ ${seller.seller_name || seller.name} declined - searching for other pharmacies`, 'warning')
+        
+        // If no sellers left, show searching mode
+        if (foundSellers.value.length === 0) {
+          showSellerNotifications.value = false
+          isSearching.value = true
+        }
+        break
+      case 'offered':
+        // Update bottom sheet only - no snackbar notification
+        addSearchMessage(`🎉 ${seller.seller_name || seller.name} made an offer!`, 'success')
+        // Ensure we show seller notifications when an offer comes in
+        showSellerNotifications.value = true
+        break
+    }
+  } else {
+    console.warn('⚠️ Seller not found in foundSellers array:', sellerId)
+    // If seller not found, try to add them first with the data provided
+    if (data.seller_name || data.name) {
+      addFoundSeller({
+        id: sellerId,
+        seller_name: data.seller_name || data.name,
+        name: data.name || data.seller_name,
+        ...data
+      })
+      // Then try to update status again
+      setTimeout(() => updateSellerStatus(sellerId, status, data), 100)
+    }
+  }
+}
+
+const openChat = (seller) => {
+  selectedSeller.value = seller
+  showChatDialog.value = true
+  // Load chat messages for this seller
+  loadChatMessages(seller.id)
+}
+
+const loadChatMessages = async (sellerId) => {
+  try {
+    // TODO: Implement API call to load chat messages
+    chatMessages.value = [
+      {
+        id: 1,
+        sender: 'seller',
+        message: 'Hello! I received your medicine request. Do you have a prescription?',
+        timestamp: new Date().toISOString()
+      }
+    ]
+  } catch (error) {
+    console.error('Error loading chat messages:', error)
+  }
+}
+
+const sendChatMessage = async () => {
+  if (!newChatMessage.value.trim() || !selectedSeller.value) return
+  
+  try {
+    const message = {
+      id: Date.now(),
+      sender: 'shopper',
+      message: newChatMessage.value,
+      timestamp: new Date().toISOString()
+    }
+    
+    chatMessages.value.push(message)
+    
+    // TODO: Implement API call to send message
+    console.log('Sending message to seller:', selectedSeller.value.id, message)
+    
+    newChatMessage.value = ''
+  } catch (error) {
+    console.error('Error sending message:', error)
+  }
+}
+
+const closeChat = () => {
+  showChatDialog.value = false
+  selectedSeller.value = null
+  chatMessages.value = []
+  newChatMessage.value = ''
+}
+
+// Utility function to format time
+const formatTime = (timestamp) => {
+  const date = new Date(timestamp)
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+// "Dispatched" phase feedback — keep searching view but surface waiting message
+window.addEventListener('pharmacyDispatched', (event) => {
+  try {
+    const { requestId, radiusKm } = event.detail || {}
+    console.log('📡 WS: request dispatched to pharmacies:', requestId, radiusKm)
+    // Ensure searching overlay remains, but refresh copy to waiting state
+    isSearching.value = true
+    hasEverSearched.value = true
+    if (!searchStatusInterval) {
+      startSearchStatusUpdates()
+    }
+    searchStatus.value.isSearching = true
+    searchStatus.value.currentStep = `Waiting for pharmacy responses…`
+    addSearchMessage(`📡 Request dispatched to pharmacies within ${radiusKm || searchRadius.value}km`, 'info')
+  } catch (e) {}
+})
+
+// Seller notification WebSocket listeners
+window.addEventListener('sellerFound', (event) => {
+  try {
+    const { seller, requestId } = event.detail || {}
+    console.log('🏥 Seller found event received:', { seller, requestId })
+    
+    // Store the current request ID for later use
+    if (requestId) {
+      sessionStorage.setItem('currentMedicineRequestId', requestId)
+    }
+    
+    // Add seller with requestId
+    addFoundSeller({
+      ...seller,
+      requestId: requestId || sessionStorage.getItem('currentMedicineRequestId')
+    })
+  } catch (e) {
+    console.warn('Failed to handle seller found event:', e)
+  }
+})
+
+// ==================== STATE MACHINE EVENT HANDLERS ====================
+
+window.addEventListener('sellerAcknowledged', (event) => {
+  try {
+    const sellerData = event.detail || {}
+    console.log('✅ sellerAcknowledged event:', sellerData)
+    
+    // Validate session
+    if (!activeSession.value || activeSession.value.requestId !== sellerData.requestId) {
+      console.warn('⚠️ Ignoring event - no active session or requestId mismatch')
+      return
+    }
+    
+    // ✅ TRANSITION: searching → seller_acknowledged
+    const { 
+      sellerId, 
+      sellerName, 
+      business_name, 
+      business_address, 
+      phone_number,
+      delivery_radius,
+      response_time
+    } = sellerData
+    
+    updateSessionState('seller_acknowledged', {
+      sellerData: {
+        id: sellerId,
+        name: sellerName || business_name || 'Pharmacy',
+        businessName: business_name,
+        address: business_address || '',
+        phone: phone_number || '',
+        deliveryRadius: delivery_radius || 5,
+        responseTime: response_time || '10-15 mins'
+      }
+    })
+    
+    // Stop searching UI
+    isSearching.value = false
+    if (searchInterval) {
+      clearInterval(searchInterval)
+      searchInterval = null
+    }
+    
+    console.log('✅ State transitioned to SELLER_ACKNOWLEDGED')
+    
+  } catch (e) {
+    console.error('❌ Failed to handle seller acknowledged:', e)
+  }
+})
+
+window.addEventListener('sellerDeclined', (event) => {
+  try {
+    const { sellerId, sellerName, reason, requestId } = event.detail || {}
+    console.log('❌ sellerDeclined event:', { sellerId, sellerName, reason, requestId })
+    
+    // Validate session
+    if (!activeSession.value || activeSession.value.requestId !== requestId) {
+      console.warn('⚠️ Ignoring event - no active session or requestId mismatch')
+      return
+    }
+    
+    console.log('🔍 Current session before clearing:', JSON.parse(JSON.stringify(activeSession.value)))
+    
+    // ✅ TRANSITION: seller_acknowledged/searching → searching
+    // Backend continues searching for another seller
+    // Explicitly clear seller data
+    if (activeSession.value) {
+      activeSession.value.state = 'searching'
+      activeSession.value.sellerData = null
+      pharmacyRequestState.value = 'searching'
+      saveSession()
+    }
+    
+    console.log('🔍 Session after clearing:', JSON.parse(JSON.stringify(activeSession.value)))
+    
+    // Resume searching UI
+    isSearching.value = true
+    
+    // Add notification about decline
+    notification.addNotification({
+      type: 'info',
+      title: 'Seller Declined',
+      message: `${sellerName || 'Pharmacy'} declined your request. Searching for another pharmacy...`,
+      timeout: 5000
+    })
+    
+    console.log('✅ State transitioned back to SEARCHING after decline')
+    console.log('✅ pharmacyRequestState:', pharmacyRequestState.value)
+    console.log('✅ activeSession.sellerData:', activeSession.value?.sellerData)
+    
+  } catch (e) {
+    console.error('❌ Failed to handle seller declined:', e)
+  }
+})
+
+window.addEventListener('sellerOffered', (event) => {
+  try {
+    const sellerData = event.detail || {}
+    console.log('💰 sellerOffered event:', sellerData)
+    
+    const { 
+      sellerId, sellerName, offer, requestId,
+      seller_name, business_name, business_address, phone_number
+    } = sellerData
+    
+    // Validate session
+    if (!activeSession.value || activeSession.value.requestId !== requestId) {
+      console.warn('⚠️ Ignoring event - no active session or requestId mismatch')
+      return
+    }
+    
+    // ✅ TRANSITION: seller_acknowledged → offer_received
+    updateSessionState('offer_received', {
+      sellerData: {
+        id: sellerId,
+        name: sellerName || business_name || seller_name || 'Pharmacy',
+        businessName: business_name || seller_name,
+        address: business_address || '',
+        phone: phone_number || '',
+        offer: offer
+      }
+    })
+    
+    // Stop searching UI
+    isSearching.value = false
+    if (searchInterval) {
+      clearInterval(searchInterval)
+      searchInterval = null
+    }
+    stopSearchStatusUpdates()
+    
+    // Fetch full offer details
+    if (requestId) {
+      apiService.getPharmacyOffers(requestId)
+        .then(response => {
+          pharmacyOffers.value = response.data || []
+          console.log('📋 Fetched pharmacy offers:', pharmacyOffers.value.length)
+        })
+        .catch(err => {
+          console.error('Failed to fetch offers:', err)
+        })
+    }
+    
+    console.log('✅ State transitioned to OFFER_RECEIVED')
+    
+  } catch (e) {
+    console.error('❌ Failed to handle seller offered:', e)
+  }
+})
+
+window.addEventListener('noSellersFound', (event) => {
+  try {
+    const { requestId, message } = event.detail || {}
+    console.log('🚫 noSellersFound event:', { requestId, message })
+    
+    // Validate session
+    if (!activeSession.value || activeSession.value.requestId !== requestId) {
+      console.warn('⚠️ Ignoring event - no active session or requestId mismatch')
+      return
+    }
+    
+    // ✅ TRANSITION: searching → no_sellers_found
+    updateSessionState('no_sellers_found', {
+      sellerData: null
+    })
+    
+    // Stop searching UI
+    isSearching.value = false
+    if (searchInterval) {
+      clearInterval(searchInterval)
+      searchInterval = null
+    }
+    stopSearchStatusUpdates()
+    
+    // Show admin takeover notification
+    notification.addNotification({
+      type: 'info',
+      title: 'Admin Assistance',
+      message: 'No pharmacies available. One of our admins will take over your request.',
+      timeout: 0, // Persistent
+      persistent: true
+    })
+    
+    console.log('✅ State transitioned to NO_SELLERS_FOUND')
+    
+  } catch (e) {
+    console.error('❌ Failed to handle no sellers found:', e)
+  }
+})
+
+// Handle acknowledgment timeout (5 min timer expired without seller acknowledging)
+window.addEventListener('acknowledgmentTimeout', (event) => {
+  try {
+    const { requestId, pharmacy_id } = event.detail || {}
+    console.log('⏰ acknowledgmentTimeout event:', { requestId, pharmacy_id })
+    
+    // Validate session
+    if (!activeSession.value || activeSession.value.requestId !== requestId) {
+      console.warn('⚠️ Ignoring timeout - no active session or requestId mismatch')
+      return
+    }
+    
+    // ✅ TRANSITION: seller_acknowledged/searching → searching
+    // Backend automatically continues to next pharmacy
+    updateSessionState('searching', {
+      sellerData: null
+    })
+    
+    // Resume searching UI
+    isSearching.value = true
+    
+    // Show timeout notification
+    notification.addNotification({
+      type: 'info',
+      title: 'Searching Continues',
+      message: 'Previous pharmacy didn\'t respond in time. Finding another pharmacy for you...',
+      timeout: 5000
+    })
+    
+    console.log('✅ State transitioned back to SEARCHING after timeout')
+    
+  } catch (e) {
+    console.error('❌ Failed to handle acknowledgment timeout:', e)
+  }
+})
+
 // Retry options functions (pharmacy-flow.txt lines 132-136)
 const expandRadius = () => {
   searchRadius.value += 5
@@ -1462,7 +2827,7 @@ const expandRadius = () => {
 const retrySearch = () => {
   showRetryOptions.value = false
   // Restart the search with current medicines
-  sendMedicineRequestsToPharmacies()
+  submitAllRequests()
 }
 
 const notifyWhenAvailable = async () => {
@@ -1591,16 +2956,17 @@ const handleDrag = (event) => {
 const endDrag = () => {
   isDragging.value = false
   
-  // Snap to positions
-  if (bottomSheetHeight.value < 250) {
-    bottomSheetHeight.value = 200 // Collapsed
+  // Snap to positions using height constants
+  if (bottomSheetHeight.value < 300) {
+    bottomSheetHeight.value = HEIGHTS.LOWEST // Collapsed
     isExpanded.value = false
   } else if (bottomSheetHeight.value > 500) {
-    bottomSheetHeight.value = window.innerHeight * 0.7 // Expanded
+    bottomSheetHeight.value = HEIGHTS.HIGHEST // Expanded
     isExpanded.value = true
   } else {
-    // Snap to nearest state
-    bottomSheetHeight.value = isExpanded.value ? window.innerHeight * 0.7 : 300
+    // Snap to middle height
+    bottomSheetHeight.value = HEIGHTS.MIDDLE
+    isExpanded.value = false
   }
   
   // Remove global event listeners
@@ -1608,6 +2974,45 @@ const endDrag = () => {
   document.removeEventListener('mouseup', endDrag)
   document.removeEventListener('touchmove', handleDrag)
   document.removeEventListener('touchend', endDrag)
+}
+
+// Medicine autocomplete functions
+const onMedicineNameInput = async () => {
+  const query = medicineRequest.value.name.trim()
+  
+  if (query.length < 2) {
+    autocompleteSuggestions.value = []
+    return
+  }
+  
+  // Clear previous timeout
+  if (autocompleteTimeout.value) {
+    clearTimeout(autocompleteTimeout.value)
+  }
+  
+  // Debounce the API call
+  autocompleteTimeout.value = setTimeout(async () => {
+    try {
+      const response = await apiService.getMedicineAutocomplete(query)
+      autocompleteSuggestions.value = response.data.suggestions || []
+    } catch (error) {
+      console.error('Error fetching autocomplete suggestions:', error)
+      autocompleteSuggestions.value = []
+    }
+  }, 300)
+}
+
+const selectSuggestion = (suggestion) => {
+  medicineRequest.value.name = suggestion
+  showAutocomplete.value = false
+  autocompleteSuggestions.value = []
+}
+
+const hideAutocomplete = () => {
+  // Delay hiding to allow click events to fire
+  setTimeout(() => {
+    showAutocomplete.value = false
+  }, 200)
 }
 
 // Delivery choice functions (pharmacy-flow.txt lines 227-243)
@@ -1622,15 +3027,22 @@ const chooseDelivery = async () => {
     
     // Create order with delivery option (pharmacy-flow.txt lines 230-236)
     const orderData = {
-      offer_id: selectedOffer.value.id,
-      delivery_method: 'delivery',
-      delivery_fee: 2.50,
-      medicines: submittedMedicines.value,
-      pharmacy_details: selectedOffer.value
+      medicine_request: selectedOffer.value.medicine_request,
+      pharmacy_offer: selectedOffer.value.id,
+      pickup_latitude: userLocation.value?.lat || 6.13,
+      pickup_longitude: userLocation.value?.lng || 1.22,
+      pickup_address: 'User Location', // TODO: Get actual address
+      delivery_type: 'delivery',
+      items_data: submittedMedicines.value.map(medicine => ({
+        medicine_name: medicine.name,
+        quantity: medicine.quantity,
+        form: medicine.form,
+        unit_price: selectedOffer.value.price_per_item || 0
+      }))
     }
     
     // Submit order to backend
-    const response = await apiService.post('/orders/pharmacy-orders/', orderData)
+    const response = await apiService.createPharmacyOrder(orderData)
     
     notification.addNotification({
       type: 'success',
@@ -1653,24 +3065,159 @@ const chooseDelivery = async () => {
   }
 }
 
+// View offer details
+const viewOfferDetails = (seller) => {
+  console.log('📋 Viewing offer details for:', seller)
+  
+  if (seller.offer) {
+    selectedOffer.value = seller.offer
+    showOffersModal.value = true
+  } else {
+    notification.addNotification({
+      type: 'warning',
+      title: 'No Offer Details',
+      message: 'Offer details are not available at this time.',
+      timeout: 3000
+    })
+  }
+}
+
+// Select pickup option
+const selectPickupOption = async (seller) => {
+  try {
+    console.log('🚶 Selecting pickup option for:', seller)
+    
+    if (!seller.offer) {
+      throw new Error('No offer available')
+    }
+    
+    // Create order with pickup option (pharmacy-flow.txt lines 239-242)
+    const orderData = {
+      medicine_request: seller.requestId || seller.offer.medicine_request,
+      pharmacy_offer: seller.offer.id,
+      pickup_latitude: userLocation.value?.lat || 6.13,
+      pickup_longitude: userLocation.value?.lng || 1.22,
+      pickup_address: seller.business_address || 'Pharmacy Location',
+      delivery_type: 'pickup',
+      items_data: submittedMedicines.value.map(medicine => ({
+        medicine_name: medicine.name,
+        quantity: medicine.quantity,
+        form: medicine.form,
+        unit_price: seller.offer.price_per_item || 0
+      }))
+    }
+    
+    // Submit order to backend
+    const response = await apiService.createPharmacyOrder(orderData)
+    
+    // Get pickup code from response
+    const pickupCode = response.data.pickup_code || `PU${Date.now().toString().slice(-6)}`
+    
+    notification.addNotification({
+      type: 'success',
+      title: '✅ Pickup Order Confirmed!',
+      message: `Your pickup code is ${pickupCode}. Show this at ${seller.seller_name || 'the pharmacy'}.`,
+      timeout: 10000,
+      persistent: true
+    })
+    
+    // ✅ END SESSION - Pickup selected
+    endSession()
+    console.log('✅ Session ended after pickup selection')
+    
+    // Reset UI
+    resetPharmacySearch()
+    
+  } catch (error) {
+    console.error('❌ Error creating pickup order:', error)
+    notification.addNotification({
+      type: 'error',
+      title: 'Order Failed',
+      message: error.response?.data?.message || 'Could not create your pickup order. Please try again.',
+      timeout: 5000
+    })
+  }
+}
+
+// Select delivery option
+const selectDeliveryOption = async (seller) => {
+  try {
+    console.log('🚚 Selecting delivery option for:', seller)
+    
+    if (!seller.offer) {
+      throw new Error('No offer available')
+    }
+    
+    // Create order with delivery option (pharmacy-flow.txt lines 230-236)
+    const orderData = {
+      medicine_request: seller.requestId || seller.offer.medicine_request,
+      pharmacy_offer: seller.offer.id,
+      pickup_latitude: userLocation.value?.lat || 6.13,
+      pickup_longitude: userLocation.value?.lng || 1.22,
+      pickup_address: 'User Location',
+      delivery_type: 'delivery',
+      items_data: submittedMedicines.value.map(medicine => ({
+        medicine_name: medicine.name,
+        quantity: medicine.quantity,
+        form: medicine.form,
+        unit_price: seller.offer.price_per_item || 0
+      }))
+    }
+    
+    // Submit order to backend
+    const response = await apiService.createPharmacyOrder(orderData)
+    
+    notification.addNotification({
+      type: 'success',
+      title: '✅ Delivery Order Confirmed!',
+      message: 'Your order has been submitted. An AfriQExpress driver will deliver your medicine shortly.',
+      timeout: 10000,
+      persistent: true
+    })
+    
+    // ✅ END SESSION - Delivery selected
+    endSession()
+    console.log('✅ Session ended after delivery selection')
+    
+    // Reset UI
+    resetPharmacySearch()
+    
+  } catch (error) {
+    console.error('❌ Error creating delivery order:', error)
+    notification.addNotification({
+      type: 'error',
+      title: 'Order Failed',
+      message: error.response?.data?.message || 'Could not create your delivery order. Please try again.',
+      timeout: 5000
+    })
+  }
+}
+
 const choosePickup = async () => {
   try {
     console.log('Choosing pickup for offer:', selectedOffer.value)
     
     // Create order with pickup option (pharmacy-flow.txt lines 239-242)
     const orderData = {
-      offer_id: selectedOffer.value.id,
-      delivery_method: 'pickup',
-      delivery_fee: 0,
-      medicines: submittedMedicines.value,
-      pharmacy_details: selectedOffer.value
+      medicine_request: selectedOffer.value.medicine_request,
+      pharmacy_offer: selectedOffer.value.id,
+      pickup_latitude: userLocation.value?.lat || 6.13,
+      pickup_longitude: userLocation.value?.lng || 1.22,
+      pickup_address: 'User Location', // TODO: Get actual address
+      delivery_type: 'pickup',
+      items_data: submittedMedicines.value.map(medicine => ({
+        medicine_name: medicine.name,
+        quantity: medicine.quantity,
+        form: medicine.form,
+        unit_price: selectedOffer.value.price_per_item || 0
+      }))
     }
     
     // Submit order to backend
-    const response = await apiService.post('/orders/pharmacy-orders/', orderData)
+    const response = await apiService.createPharmacyOrder(orderData)
     
-    // Generate pickup code
-    const pickupCode = `PU${Date.now().toString().slice(-6)}`
+    // Get pickup code from response
+    const pickupCode = response.data.pickup_code || `PU${Date.now().toString().slice(-6)}`
     
     notification.addNotification({
       type: 'success',
@@ -1788,54 +3335,72 @@ const loadPharmacyMarkers = async () => {
     const pharmacySellers = await fetchPharmacySellers()
     console.log('🏥 Loaded pharmacy sellers for markers:', pharmacySellers)
     
-    // Create proper pharmacy icon (not circle)
+    // Clear existing markers
+    pharmacyMarkers.value.forEach(marker => {
+      map.value.removeLayer(marker)
+    })
+    pharmacyMarkers.value = []
+    
+    // Create proper green pharmacy marker icon
     const createPharmacyIcon = (name) => {
       return L.divIcon({
         className: 'pharmacy-marker',
         html: `<div class="pharmacy-marker-container">
-                 <!-- Pharmacy Icon -->
-                 <div class="pharmacy-icon">
-                   <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                     <path d="M19 8h-2V6a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v2H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1zM9 6h6v2H9V6zm8 12H7v-8h10v8zm-7-6h4v1h-4v-1zm0 2h4v1h-4v-1z"/>
-                     <rect x="10" y="4" width="4" height="1"/>
-                     <rect x="10" y="12" width="4" height="1"/>
-                     <rect x="11.5" y="10.5" width="1" height="4"/>
+                 <!-- Gradient Marker Pin -->
+                 <div class="pharmacy-pin">
+                   <svg class="pharmacy-pin-svg" viewBox="0 0 24 24" fill="none">
+                     <defs>
+                       <linearGradient id="pharmacyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                         <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+                         <stop offset="100%" style="stop-color:#4f46e5;stop-opacity:1" />
+                       </linearGradient>
+                     </defs>
+                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="url(#pharmacyGradient)"/>
+                     <path d="M12 6c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="white"/>
                    </svg>
                  </div>
-                 <!-- Pharmacy Name on Top -->
-                 <div class="pharmacy-name">${name}</div>
+                 <!-- Pharmacy Name Label -->
+                 <div class="pharmacy-name-label" style="font-weight: bold;color: blue;">${name}</div>
                </div>`,
-        iconSize: [120, 60],
-        iconAnchor: [60, 45],
-        popupAnchor: [0, -45]
+        iconSize: [50, 50],
+        iconAnchor: [40, 45],
+        popupAnchor: [-15,-15]
       })
     }
     
-    // Add marker and label for each pharmacy seller
+    // Store pharmacy coordinates for bounds calculation
+    const pharmacyCoords = []
+    
+    // Add marker for each pharmacy seller
     pharmacySellers.forEach(seller => {
       // Check if seller has valid coordinates
       if (seller.latitude && seller.longitude) {
-        const pharmacyName = seller.business_name || seller.name || 'Pharmacy'
+        const pharmacyName = seller.business_name || seller.seller_name || 'Pharmacy'
         
-        // Add main pharmacy marker
+        // Add pharmacy marker with green pin
         const marker = L.marker([seller.latitude, seller.longitude], {
-          icon: pharmacyIcon,
+          icon: createPharmacyIcon(pharmacyName),
           title: pharmacyName
         }).addTo(map.value)
         
-        // Add permanent name label slightly offset from marker
-        const labelMarker = L.marker([seller.latitude + 0.0003, seller.longitude], {
-          icon: createPharmacyLabel(pharmacyName),
-          interactive: false
-        }).addTo(map.value)
+        // Store marker for later cleanup
+        pharmacyMarkers.value.push(marker)
+        
+        // Store coordinates for bounds calculation
+        pharmacyCoords.push([seller.latitude, seller.longitude])
         
         // Create detailed popup with pharmacy info
         const popupContent = `
-          <div class="text-center p-3 min-w-[200px]">
-            <div class="font-bold text-green-700 mb-2 text-lg">${pharmacyName}</div>
-            <div class="text-sm text-slate-600 mb-2">${seller.address || 'Pharmacy location'}</div>
-            ${seller.phone ? `<div class="text-sm text-blue-600 mb-2">📞 ${seller.phone}</div>` : ''}
-            <div class="text-xs text-slate-500 italic">Available for medicine requests</div>
+          <div class="pharmacy-popup-content">
+            <div class="pharmacy-popup-header">
+              <div class="pharmacy-popup-icon">🏥</div>
+              <div class="pharmacy-popup-title">${pharmacyName}</div>
+            </div>
+            <div class="pharmacy-popup-body">
+              <div class="pharmacy-popup-address">${seller.address || 'Pharmacy location'}</div>
+              ${seller.phone ? `<div class="pharmacy-popup-phone">📞 ${seller.phone}</div>` : ''}
+              <div class="pharmacy-popup-status">✅ Available for medicine requests</div>
+            </div>
           </div>
         `
         
@@ -1853,10 +3418,35 @@ const loadPharmacyMarkers = async () => {
       }
     })
     
-    console.log('🗺️ Added', pharmacySellers.length, 'pharmacy markers with labels to map')
+    // Update pharmacy count display
+    const pharmacyCount = pharmacySellers.length
+    console.log('🗺️ Added', pharmacyCount, 'pharmacy markers to map')
+    
+    // Zoom to show all pharmacies instead of user location
+    if (pharmacyCoords.length > 0) {
+      const group = new L.featureGroup(pharmacyMarkers.value)
+      map.value.fitBounds(group.getBounds().pad(0.1)) // Add 10% padding
+      
+      // If only one pharmacy, zoom to a reasonable level
+      if (pharmacyCoords.length === 1) {
+        map.value.setView(pharmacyCoords[0], 15)
+      }
+    }
+    
+    // Update pharmacy count in the UI
+    updatePharmacyCount(pharmacyCount)
     
   } catch (error) {
     console.error('❌ Error loading pharmacy markers:', error)
+  }
+}
+
+// Update pharmacy count display
+const updatePharmacyCount = (count) => {
+  // Find and update pharmacy count element
+  const countElement = document.querySelector('.pharmacy-count')
+  if (countElement) {
+    countElement.textContent = count
   }
 }
 
@@ -2037,8 +3627,17 @@ async function selectDefaultStore(id) {
 
 .pharmacy-map-container {
   width: 100%;
-  height: 100vh;
+  height: calc(100vh - 96px); /* Account for bottom navigation (96px) */
   overflow: hidden;
+}
+
+.pharmacy-map-container .absolute.top-0 {
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1), transparent);
+  /* padding-top: env(safe-area-inset-top, 0); */
+}
+
+.pharmacy-map-height {
+  height: 100%;
 }
 
 #pharmacy-map {
@@ -2107,14 +3706,49 @@ async function selectDefaultStore(id) {
   border: none !important;
 }
 
-.pharmacy-marker div {
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-  transition: all 0.2s ease;
+.pharmacy-marker-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
-.pharmacy-marker:hover div {
+.pharmacy-pin {
+  position: relative;
+  z-index: 2;
+}
+
+.pharmacy-pin-svg {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.pharmacy-name-label {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #3b82f6;
+  margin-top: 2px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pharmacy-marker:hover .pharmacy-name-label {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: scale(1.05);
+}
+
+.pharmacy-marker:hover .pharmacy-pin-svg {
   transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
 }
 
 /* Pharmacy label styles */
@@ -2129,10 +3763,83 @@ async function selectDefaultStore(id) {
   font-family: system-ui, -apple-system, sans-serif;
 }
 
+/* Pharmacy count inline styles */
+.pharmacy-count-inline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  padding: 4px 8px;
+  margin-left: 8px;
+}
+
+.pharmacy-count-icon-inline {
+  width: 14px;
+  height: 14px;
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.pharmacy-count-number {
+  font-size: 12px;
+  font-weight: 700;
+  color: #3b82f6;
+  margin: 0;
+}
+
 /* Pharmacy popup styles */
 .pharmacy-popup {
   min-width: 200px;
   font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+.pharmacy-popup-content {
+  padding: 16px;
+}
+
+.pharmacy-popup-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.pharmacy-popup-icon {
+  font-size: 20px;
+}
+
+.pharmacy-popup-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #3b82f6;
+  margin: 0;
+}
+
+.pharmacy-popup-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pharmacy-popup-address {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.pharmacy-popup-phone {
+  font-size: 13px;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.pharmacy-popup-status {
+  font-size: 12px;
+  color: #059669;
+  font-weight: 600;
+  margin-top: 4px;
 }
 
 .pharmacy-popup h3 {
