@@ -243,6 +243,28 @@ export const apiService = {
   removeFromWishlist(productId) {
     return api.post(`/products/wishlists/${productId}/remove_product/`, { product_id: productId })
   },
+
+  // Product Likes
+  toggleProductLike(productId) {
+    return api.post('/products/product-likes/toggle/', { product_id: productId })
+  },
+
+  checkProductLike(productId) {
+    return api.get('/products/product-likes/check/', { params: { product_id: productId } })
+  },
+
+  getMyLikedProducts() {
+    return api.get('/products/product-likes/my-likes/')
+  },
+
+  // Shopper Listing Likes
+  toggleShopperListingLike(listingId) {
+    return api.post('/products/shopper-listing-likes/toggle/', { listing_id: listingId })
+  },
+
+  checkShopperListingLike(listingId) {
+    return api.get('/products/shopper-listing-likes/check/', { params: { listing_id: listingId } })
+  },
   
   // User profile
   getProfile() {
@@ -922,6 +944,135 @@ export const apiService = {
 
   getMedicineForms() {
     return api.get('/orders/medicine-forms/')
+  },
+
+  // ============================================
+  // Shopper Listing (Classified Ads) API
+  // ============================================
+  
+  // Listings
+  getShopperListings(params = {}) {
+    return api.get('/products/shopper-listings/', { params })
+  },
+
+  getShopperListing(id) {
+    return api.get(`/products/shopper-listings/${id}/`)
+  },
+
+  getMyListings() {
+    return api.get('/products/shopper-listings/my_listings/')
+  },
+
+  createShopperListing(data) {
+    // Use FormData for image upload
+    const formData = new FormData()
+    
+    // Add text fields
+    Object.keys(data).forEach(key => {
+      if (key === 'images') {
+        // Handle images array
+        data.images.forEach((image, index) => {
+          formData.append('images', image)
+          if (data.image_orders && data.image_orders[index] !== undefined) {
+            formData.append('image_orders', data.image_orders[index])
+          }
+        })
+      } else if (key === 'image_orders') {
+        // Skip, already handled above
+      } else if (key === 'contact_methods') {
+        // Handle array fields
+        formData.append(key, JSON.stringify(data[key]))
+      } else if (data[key] !== null && data[key] !== undefined) {
+        formData.append(key, data[key])
+      }
+    })
+    
+    return api.post('/products/shopper-listings/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+
+  updateShopperListing(id, data) {
+    // For updates, we'll use JSON unless images are involved
+    if (data.images && data.images.length > 0) {
+      const formData = new FormData()
+      Object.keys(data).forEach(key => {
+        if (key === 'images') {
+          data.images.forEach(image => {
+            formData.append('images', image)
+          })
+        } else if (key === 'contact_methods') {
+          formData.append(key, JSON.stringify(data[key]))
+        } else if (data[key] !== null && data[key] !== undefined) {
+          formData.append(key, data[key])
+        }
+      })
+      
+      return api.patch(`/products/shopper-listings/${id}/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+    } else {
+      return api.patch(`/products/shopper-listings/${id}/`, data)
+    }
+  },
+
+  deleteShopperListing(id) {
+    return api.delete(`/products/shopper-listings/${id}/`)
+  },
+
+  markListingAsSold(id) {
+    return api.post(`/products/shopper-listings/${id}/mark_as_sold/`)
+  },
+
+  reactivateListing(id) {
+    return api.post(`/products/shopper-listings/${id}/reactivate/`)
+  },
+
+  updateListingStatus(id, status) {
+    return api.post(`/products/shopper-listings/${id}/update_status/`, { status })
+  },
+
+  getListingStats() {
+    return api.get('/products/shopper-listings/listing_stats/')
+  },
+
+  // Inquiries
+  createInquiry(data) {
+    return api.post('/products/listing-inquiries/', data)
+  },
+
+  getSellerInquiries() {
+    return api.get('/products/listing-inquiries/seller_inquiries/')
+  },
+
+  getMyInquiries(params = {}) {
+    return api.get('/products/listing-inquiries/', { params })
+  },
+
+  getInquiry(id) {
+    return api.get(`/products/listing-inquiries/${id}/`)
+  },
+
+  // Messages
+  sendListingMessage(data) {
+    return api.post('/products/listing-messages/', data)
+  },
+
+  getInquiryMessages(inquiryId) {
+    if (!inquiryId) {
+      return Promise.reject(new Error('inquiry_id parameter is required'))
+    }
+    return api.get('/products/listing-messages/by_inquiry/', {
+      params: { inquiry_id: inquiryId }
+    })
+  },
+
+  markMessagesAsRead(inquiryId) {
+    return api.post(`/products/listing-messages/${inquiryId}/mark_read/`)
   }
 }
 

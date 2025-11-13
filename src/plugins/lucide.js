@@ -15,7 +15,10 @@ import {
   ShieldX, Key, Unlock, Database, Server, HardDrive, Cpu, MemoryStick, Mouse, Keyboard, Headphones,
   Speaker, Radio, Tv, Gamepad, Palette, Brush, PenTool, Type, Bold, Italic, Underline,
   Strikethrough, AlignLeft, AlignCenter, AlignRight, AlignJustify, Quote, Code, Terminal, Command,
-  Slash, Hash, AtSign, DollarSign, Percent, Divide, Equal, Infinity
+  Slash, Hash, AtSign, DollarSign, Percent, Divide, Equal, Infinity,
+  // Additional icons for MDI replacements
+  Activity, Baby, Circle, Droplet, DropletOff, Flame, HelpCircle, PackageCheck, PlayCircle,
+  Sparkles, Users, UserCircle, UserPlus, Wrench, Briefcase, Waves, CircleDot
 } from 'lucide-vue-next'
 
 export default {
@@ -37,7 +40,10 @@ export default {
       ShieldX, Key, Unlock, Database, Server, HardDrive, Cpu, MemoryStick, Mouse, Keyboard, Headphones,
       Speaker, Radio, Tv, Gamepad, Palette, Brush, PenTool, Type, Bold, Italic, Underline,
       Strikethrough, AlignLeft, AlignCenter, AlignRight, AlignJustify, Quote, Code, Terminal, Command,
-      Slash, Hash, AtSign, DollarSign, Percent, Divide, Equal, Infinity
+      Slash, Hash, AtSign, DollarSign, Percent, Divide, Equal, Infinity,
+      // Additional icons for MDI replacements
+      Activity, Baby, Circle, Droplet, DropletOff, Flame, HelpCircle, PackageCheck, PlayCircle,
+      Sparkles, Users, UserCircle, UserPlus, Wrench, Briefcase, Waves, CircleDot
     }
     
     Object.entries(icons).forEach(([name, component]) => {

@@ -12,94 +12,17 @@
                 </div>
             </div>
             <!-- <v-btn icon variant="text" @click="skipQuestionnaire" class="skip-btn">
-                <v-icon>mdi-close</v-icon>
+                <X class="w-5 h-5" />
             </v-btn> -->
         </div>
 
         <!-- Step Content -->
         <div class="step-content">
-            <!-- Step 1: Skin Type -->
+            <!-- Step 1: Product Types -->
             <div v-if="currentStep === 1" class="step-container">
                 <div class="step-header">
                     <div class="step-icon">
-                        <v-icon size="48" color="primary">mdi-face-woman-shimmer</v-icon>
-                    </div>
-                    <h2 class="step-title">What's your skin type?</h2>
-                    <p class="step-subtitle">Help us recommend the perfect products for your skin</p>
-                </div>
-
-                <div class="options-grid">
-                    <div v-for="skinType in skinTypes" :key="skinType.id" class="option-card"
-                        :class="{ active: selectedSkinType === skinType.id }" @click="selectSkinType(skinType.id)">
-                        <div class="option-icon">
-                            <v-icon size="32" :color="selectedSkinType === skinType.id ? 'white' : 'primary'">
-                                {{ getSkinTypeIcon(skinType.name) }}
-                            </v-icon>
-                        </div>
-                        <h3 class="option-title">{{ skinType.name }}</h3>
-                        <p class="option-description">{{ skinType.description }}</p>
-                        <v-btn icon size="small" variant="text" @click.stop="showSkinTypeInfo(skinType)"
-                            class="info-btn">
-                            <v-icon size="16">mdi-information-outline</v-icon>
-                        </v-btn>
-                    </div>
-                </div>
-
-                <div class="step-actions">
-                    <v-btn color="primary" size="large" :disabled="!selectedSkinType" @click="nextStep"
-                        class="next-btn">
-                        Continue
-                        <v-icon end>mdi-arrow-right</v-icon>
-                    </v-btn>
-                </div>
-            </div>
-
-            <!-- Step 2: Skin Concerns -->
-            <div v-if="currentStep === 2" class="step-container">
-                <div class="step-header">
-                    <div class="step-icon">
-                        <v-icon size="48" color="primary">mdi-heart-pulse</v-icon>
-                    </div>
-                    <h2 class="step-title">What are your main skin concerns?</h2>
-                    <p class="step-subtitle">Select all that apply - we'll find products that target these areas</p>
-                </div>
-
-                <div class="options-grid multi-select">
-                    <div v-for="concern in skinConcerns" :key="concern.id" class="option-card"
-                        :class="{ active: selectedSkinConcerns.includes(concern.id) }"
-                        @click="toggleSkinConcern(concern.id)">
-                        <div class="option-icon">
-                            <v-icon size="32" :color="selectedSkinConcerns.includes(concern.id) ? 'white' : 'primary'">
-                                {{ getSkinConcernIcon(concern.name) }}
-                            </v-icon>
-                        </div>
-                        <h3 class="option-title">{{ concern.name }}</h3>
-                        <p class="option-description">{{ concern.description }}</p>
-                        <v-btn icon size="small" variant="text" @click.stop="showSkinConcernInfo(concern)"
-                            class="info-btn">
-                            <v-icon size="16">mdi-information-outline</v-icon>
-                        </v-btn>
-                    </div>
-                </div>
-
-                <div class="step-actions">
-                    <v-btn variant="outlined" @click="previousStep" class="back-btn">
-                        <v-icon start>mdi-arrow-left</v-icon>
-                        Back
-                    </v-btn>
-                    <v-btn color="primary" size="large" :disabled="selectedSkinConcerns.length === 0" @click="nextStep"
-                        class="next-btn">
-                        Continue
-                        <v-icon end>mdi-arrow-right</v-icon>
-                    </v-btn>
-                </div>
-            </div>
-
-            <!-- Step 3: Product Types -->
-            <div v-if="currentStep === 3" class="step-container">
-                <div class="step-header">
-                    <div class="step-icon">
-                        <v-icon size="48" color="primary">mdi-bottle-tonic-plus</v-icon>
+                        <Package class="w-12 h-12 text-primary" />
                     </div>
                     <h2 class="step-title">What products do you use?</h2>
                     <p class="step-subtitle">Tell us about your current routine so we can suggest improvements</p>
@@ -110,38 +33,38 @@
                         :class="{ active: selectedProductTypes.includes(productType.id) }"
                         @click="toggleProductType(productType.id)">
                         <div class="option-icon">
-                            <v-icon size="32"
-                                :color="selectedProductTypes.includes(productType.id) ? 'white' : 'primary'">
-                                {{ getProductTypeIcon(productType.name) }}
-                            </v-icon>
+                            <component 
+                                :is="getProductTypeIcon(productType.name)" 
+                                :class="`w-8 h-8 ${selectedProductTypes.includes(productType.id) ? 'text-white' : 'text-primary'}`"
+                            />
                         </div>
                         <h3 class="option-title">{{ productType.name }}</h3>
                         <p class="option-description">{{ productType.description }}</p>
                         <v-btn icon size="small" variant="text" @click.stop="showProductTypeInfo(productType)"
                             class="info-btn">
-                            <v-icon size="16">mdi-information-outline</v-icon>
+                            <Info class="w-4 h-4" />
                         </v-btn>
                     </div>
                 </div>
 
                 <div class="step-actions">
                     <v-btn variant="outlined" @click="previousStep" class="back-btn">
-                        <v-icon start>mdi-arrow-left</v-icon>
+                        <ArrowLeft class="w-4 h-4 mr-2" />
                         Back
                     </v-btn>
                     <v-btn color="primary" size="large" :disabled="selectedProductTypes.length === 0" @click="nextStep"
                         class="next-btn">
                         Continue
-                        <v-icon end>mdi-arrow-right</v-icon>
+                        <ArrowRight class="w-4 h-4 ml-2" />
                     </v-btn>
                 </div>
             </div>
 
-            <!-- Step 4: Age Group -->
-            <div v-if="currentStep === 4" class="step-container">
+            <!-- Step 2: Age Group -->
+            <div v-if="currentStep === 2" class="step-container">
                 <div class="step-header">
                     <div class="step-icon">
-                        <v-icon size="48" color="primary">mdi-calendar-heart</v-icon>
+                        <Calendar class="w-12 h-12 text-primary" />
                     </div>
                     <h2 class="step-title">What's your age group?</h2>
                     <p class="step-subtitle">Age helps us recommend age-appropriate skincare solutions</p>
@@ -152,9 +75,9 @@
                         :class="{ active: selectedAgeGroup === ageGroup.value }"
                         @click="selectAgeGroup(ageGroup.value)">
                         <div class="option-icon">
-                            <v-icon size="32" :color="selectedAgeGroup === ageGroup.value ? 'white' : 'primary'">
-                                {{ ageGroup.icon }}
-                            </v-icon>
+                            <UserCircle 
+                                :class="`w-8 h-8 ${selectedAgeGroup === ageGroup.value ? 'text-white' : 'text-primary'}`"
+                            />
                         </div>
                         <h3 class="option-title">{{ ageGroup.label }}</h3>
                         <p class="option-description">{{ ageGroup.description }}</p>
@@ -163,22 +86,22 @@
 
                 <div class="step-actions">
                     <v-btn variant="outlined" @click="previousStep" class="back-btn">
-                        <v-icon start>mdi-arrow-left</v-icon>
+                        <ArrowLeft class="w-4 h-4 mr-2" />
                         Back
                     </v-btn>
                     <v-btn color="primary" size="large" :disabled="!selectedAgeGroup" @click="nextStep"
                         class="next-btn">
                         Continue
-                        <v-icon end>mdi-arrow-right</v-icon>
+                        <ArrowRight class="w-4 h-4 ml-2" />
                     </v-btn>
                 </div>
             </div>
 
-            <!-- Step 5: Completion -->
-            <div v-if="currentStep === 5" class="step-container completion">
+            <!-- Step 3: Completion -->
+            <div v-if="currentStep === 3" class="step-container completion">
                 <div class="completion-content">
                     <div class="completion-icon">
-                        <v-icon size="80" color="success">mdi-check-circle</v-icon>
+                        <CheckCircle class="w-20 h-20 text-success" />
                     </div>
                     <h2 class="completion-title">Perfect! You're all set!</h2>
                     <p class="completion-subtitle">
@@ -189,19 +112,11 @@
                     <div class="profile-summary">
                         <h3>Your Beauty Profile:</h3>
                         <div class="summary-item">
-                            <v-icon start color="primary">mdi-face-woman-shimmer</v-icon>
-                            <span>{{ getSkinTypeName(selectedSkinType) }}</span>
-                        </div>
-                        <div class="summary-item">
-                            <v-icon start color="primary">mdi-heart-pulse</v-icon>
-                            <span>{{ selectedSkinConcerns.length }} skin concerns</span>
-                        </div>
-                        <div class="summary-item">
-                            <v-icon start color="primary">mdi-bottle-tonic-plus</v-icon>
+                            <Package class="w-5 h-5 text-primary mr-2" />
                             <span>{{ selectedProductTypes.length }} product types</span>
                         </div>
                         <div class="summary-item">
-                            <v-icon start color="primary">mdi-calendar-heart</v-icon>
+                            <Calendar class="w-5 h-5 text-primary mr-2" />
                             <span>{{ getAgeGroupName(selectedAgeGroup) }}</span>
                         </div>
                     </div>
@@ -210,7 +125,7 @@
                         <v-btn color="primary" size="large" @click="completeQuestionnaire" :loading="saving"
                             class="complete-btn">
                             Start Shopping
-                            <v-icon end>mdi-shopping</v-icon>
+                            <ShoppingCart class="w-4 h-4 ml-2" />
                         </v-btn>
                     </div>
                 </div>
@@ -221,7 +136,7 @@
         <v-dialog v-model="infoDialog" max-width="400">
             <v-card>
                 <v-card-title class="d-flex align-center">
-                    <v-icon start color="primary">{{ infoDialogIcon }}</v-icon>
+                    <component :is="infoDialogIcon" class="w-5 h-5 text-primary mr-2" />
                     {{ infoDialogTitle }}
                 </v-card-title>
                 <v-card-text>
@@ -246,6 +161,11 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
+import {
+  X, UserCircle, Activity, ArrowRight, ArrowLeft, CheckCircle, Package,
+  Calendar, Heart, AlertCircle, Clock, Circle, Droplet, Sun, Grid, Eye,
+  Sparkles, Wrench, Briefcase, Info, CircleDot, DropletOff, ShoppingCart
+} from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -254,16 +174,12 @@ const authStore = useAuthStore()
 const loading = ref(false)
 const saving = ref(false)
 const currentStep = ref(1)
-const totalSteps = ref(5)
+const totalSteps = ref(3)
 
 // Data
-const skinTypes = ref([])
-const skinConcerns = ref([])
 const productTypes = ref([])
 
 // Selections
-const selectedSkinType = ref(null)
-const selectedSkinConcerns = ref([])
 const selectedProductTypes = ref([])
 const selectedAgeGroup = ref(null)
 
@@ -305,39 +221,19 @@ const ageGroups = ref([
 const infoDialog = ref(false)
 const infoDialogTitle = ref('')
 const infoDialogContent = ref('')
-const infoDialogIcon = ref('')
+const infoDialogIcon = ref(UserCircle)
 
 // Methods
 const fetchData = async () => {
     loading.value = true
     try {
-        // Note: API endpoints for skin types, concerns, product types no longer exist  
-        const [skinTypesRes, skinConcernsRes, productTypesRes] = await Promise.all([
-            Promise.resolve({ data: [] }),
-            Promise.resolve({ data: [] }),
-            Promise.resolve({ data: [] })
-        ])
-
-        skinTypes.value = skinTypesRes.data.results || skinTypesRes.data || []
-        skinConcerns.value = skinConcernsRes.data.results || skinConcernsRes.data || []
+        // Note: API endpoints for product types no longer exist  
+        const productTypesRes = await Promise.resolve({ data: [] })
         productTypes.value = productTypesRes.data.results || productTypesRes.data || []
     } catch (error) {
         console.error('Failed to fetch questionnaire data:', error)
     } finally {
         loading.value = false
-    }
-}
-
-const selectSkinType = (id) => {
-    selectedSkinType.value = id
-}
-
-const toggleSkinConcern = (id) => {
-    const index = selectedSkinConcerns.value.indexOf(id)
-    if (index > -1) {
-        selectedSkinConcerns.value.splice(index, 1)
-    } else {
-        selectedSkinConcerns.value.push(id)
     }
 }
 
@@ -376,8 +272,6 @@ const completeQuestionnaire = async () => {
     try {
         // Save preferences to authenticated user's profile
         const profileData = {
-            skin_type: selectedSkinType.value,
-            skin_concerns: selectedSkinConcerns.value,
             product_types: selectedProductTypes.value,
             age_group: selectedAgeGroup.value
         }
@@ -395,21 +289,6 @@ const completeQuestionnaire = async () => {
     }
 }
 
-// Info dialogs
-const showSkinTypeInfo = (skinType) => {
-    infoDialogTitle.value = skinType.name
-    infoDialogContent.value = skinType.description
-    infoDialogIcon.value = getSkinTypeIcon(skinType.name)
-    infoDialog.value = true
-}
-
-const showSkinConcernInfo = (concern) => {
-    infoDialogTitle.value = concern.name
-    infoDialogContent.value = concern.description
-    infoDialogIcon.value = getSkinConcernIcon(concern.name)
-    infoDialog.value = true
-}
-
 const showProductTypeInfo = (productType) => {
     infoDialogTitle.value = productType.name
     infoDialogContent.value = productType.description
@@ -417,57 +296,25 @@ const showProductTypeInfo = (productType) => {
     infoDialog.value = true
 }
 
-// Icon helpers
-const getSkinTypeIcon = (name) => {
-    const iconMap = {
-        'Normal': 'mdi-face-woman',
-        'Dry': 'mdi-water-off',
-        'Oily': 'mdi-oil',
-        'Combination': 'mdi-yin-yang',
-        'Sensitive': 'mdi-heart-pulse',
-        'Acne-Prone': 'mdi-alert-circle'
-    }
-    return iconMap[name] || 'mdi-face-woman-shimmer'
-}
-
-const getSkinConcernIcon = (name) => {
-    const iconMap = {
-        'Acne': 'mdi-alert-circle',
-        'Aging': 'mdi-clock-outline',
-        'Dark Spots': 'mdi-circle-multiple',
-        'Wrinkles': 'mdi-waves',
-        'Dryness': 'mdi-water-off',
-        'Oiliness': 'mdi-oil',
-        'Sensitivity': 'mdi-heart-pulse',
-        'Dullness': 'mdi-brightness-6',
-        'Pores': 'mdi-dots-grid',
-        'Redness': 'mdi-heart'
-    }
-    return iconMap[name] || 'mdi-heart-pulse'
-}
+// Icon helpers - return Lucide component names
 
 const getProductTypeIcon = (name) => {
     const iconMap = {
-        'Cleanser': 'mdi-soap',
-        'Moisturizer': 'mdi-water',
-        'Serum': 'mdi-eyedropper',
-        'Sunscreen': 'mdi-weather-sunny',
-        'Toner': 'mdi-bottle-tonic',
-        'Exfoliant': 'mdi-screwdriver',
-        'Mask': 'mdi-face-woman-shimmer',
-        'Eye Cream': 'mdi-eye',
-        'Oil': 'mdi-oil',
-        'Treatment': 'mdi-medical-bag'
+        'Cleanser': Sparkles,
+        'Moisturizer': Droplet,
+        'Serum': Droplet,
+        'Sunscreen': Sun,
+        'Toner': Package,
+        'Exfoliant': Wrench,
+        'Mask': UserCircle,
+        'Eye Cream': Eye,
+        'Oil': Droplet,
+        'Treatment': Briefcase
     }
-    return iconMap[name] || 'mdi-bottle-tonic-plus'
+    return iconMap[name] || Package
 }
 
 // Helper functions
-const getSkinTypeName = (id) => {
-    const skinType = skinTypes.value.find(st => st.id === id)
-    return skinType ? skinType.name : ''
-}
-
 const getAgeGroupName = (value) => {
     const ageGroup = ageGroups.value.find(ag => ag.value === value)
     return ageGroup ? ageGroup.label : ''

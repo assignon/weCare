@@ -1,11 +1,6 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pb-24">
     <div class="p-4">
-      <!-- Modern Header -->
-      <AppHeader 
-        :show-back="true"
-        custom-title="My Profile"
-      />
 
       <!-- Profile Summary Card -->
       <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6 mb-6">
@@ -106,6 +101,47 @@
               <div class="text-left">
                 <p class="font-semibold text-slate-900">Addresses</p>
                 <p class="text-sm text-slate-600">Manage your delivery addresses</p>
+              </div>
+            </div>
+            <ChevronRight class="w-5 h-5 text-slate-400" />
+          </button>
+        </div>
+
+        <!-- Marketplace Section -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 overflow-hidden">
+          <div class="p-4 border-b border-slate-100">
+            <h3 class="text-lg font-semibold text-slate-900">Marketplace</h3>
+          </div>
+          
+          <!-- My Listings -->
+          <button 
+            @click="$router.push({ name: 'MyListings' })"
+            class="w-full p-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors"
+          >
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <Package class="w-5 h-5 text-blue-600" />
+              </div>
+              <div class="text-left">
+                <p class="font-semibold text-slate-900">My Listings</p>
+                <p class="text-sm text-slate-600">Manage your classified ads</p>
+              </div>
+            </div>
+            <ChevronRight class="w-5 h-5 text-slate-400" />
+          </button>
+
+          <!-- Listing Inquiries -->
+          <button 
+            @click="$router.push({ name: 'ListingInquiries' })"
+            class="w-full p-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors border-t border-slate-100"
+          >
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                <MessageCircle class="w-5 h-5 text-green-600" />
+              </div>
+              <div class="text-left">
+                <p class="font-semibold text-slate-900">Inquiries</p>
+                <p class="text-sm text-slate-600">View buyer messages</p>
               </div>
             </div>
             <ChevronRight class="w-5 h-5 text-slate-400" />
@@ -356,6 +392,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Bottom Navigation -->
+    <BottomNavigation />
   </div>
 </template>
 
@@ -364,10 +403,10 @@ import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { ref, computed, onMounted } from 'vue'
 import { apiService } from '@/services/api'
-import AppHeader from '@/components/AppHeader.vue'
+import BottomNavigation from '@/components/BottomNavigation.vue'
 import { 
   User, Edit3, Sparkles, MapPin, Globe, LogOut, ChevronRight, 
-  Camera, Loader2, Check, Store, Headphones
+  Camera, Loader2, Check, Store, Headphones, Package, MessageCircle
 } from 'lucide-vue-next'
 
 const auth = useAuthStore()

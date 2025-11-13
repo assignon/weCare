@@ -197,27 +197,50 @@
           </div>
 
           <!-- Products Grid -->
-          <div v-else-if="filteredProducts.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+          <div v-else-if="filteredProducts.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
             <div 
               v-for="product in filteredProducts" 
               :key="product.id"
-              class="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden border border-white/20 hover:border-blue-500/20 transform hover:-translate-y-1"
-              @click="navigateToProduct(product.id)"
+              class="flex flex-col"
             >
-              <div class="aspect-square overflow-hidden relative">
+              <!-- Product Card - Only contains image -->
+              <div 
+                @click="navigateToProduct(product.id)"
+                class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square cursor-pointer"
+              >
                 <img 
                   :src="product.main_image || defaultProductImage" 
                   :alt="product.name"
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  class="w-full h-full object-cover rounded-lg"
                 />
               </div>
-              <div class="p-3">
-                <h4 class="font-medium text-sm text-gray-900 mb-1 truncate">{{ product.name }}</h4>
+              
+              <!-- Product Info - Outside the card -->
+              <div class="space-y-1">
+                <!-- Product Name -->
+                <h4 
+                  @click="navigateToProduct(product.id)"
+                  class="font-bold text-sm text-gray-900 mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors"
+                >
+                  {{ product.name }}
+                </h4>
+                
+                <!-- Local Names/Description with Flag -->
+                <div v-if="product.local_name || product.description" class="flex items-start gap-1.5 mb-1">
+                  <Flag class="w-3.5 h-3.5 text-gray-600 mt-0.5 flex-shrink-0" />
+                  <p class="text-xs italic text-gray-600 line-clamp-1">
+                    {{ product.local_name || (product.description ? product.description.substring(0, 50) + '...' : '') }}
+                  </p>
+                </div>
+                
+                <!-- Price and Quantity -->
                 <div class="flex items-center justify-between">
-                  <span class="font-bold text-sm text-gray-900">{{ formatPrice(product.price) }}</span>
-                  <div class="w-6 h-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <ArrowRight class="w-3 h-3 text-white" />
-                  </div>
+                  <span class="font-bold text-sm text-blue-600">
+                    {{ formatPrice(product.price) }}
+                    <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
+                      / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
+                    </span>
+                  </span>
                 </div>
               </div>
             </div>
@@ -254,14 +277,16 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { apiService } from '@/services/api'
 import { useCurrency } from '@/composables/useCurrency'
+import { useCartStore } from '@/stores/cart'
 import BottomNavigation from '@/components/BottomNavigation.vue'
 import { 
-  ArrowLeft, Share2, Heart, Star, Package, Users, Clock, UserPlus, MessageCircle, ArrowRight, AlertCircle
+  ArrowLeft, Share2, Heart, Star, Package, Users, Clock, UserPlus, MessageCircle, ArrowRight, AlertCircle, Flag
 } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
 const { formatPrice } = useCurrency()
+const cart = useCartStore()
 
 // State
 const store = ref(null)
@@ -424,6 +449,16 @@ const navigateToProduct = (productId) => {
   router.push({ name: 'ProductDetails', params: { id: productId } })
 }
 
+const addToCart = async (product) => {
+  try {
+    await cart.addToCart(product, 1)
+    // Optionally show a success notification
+    console.log('Product added to cart:', product.name)
+  } catch (error) {
+    console.error('Failed to add product to cart:', error)
+  }
+}
+
 const goBack = () => {
   router.back()
 }
@@ -487,6 +522,7 @@ onMounted(() => {
 .line-clamp-1 {
   display: -webkit-box;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -494,6 +530,7 @@ onMounted(() => {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

@@ -10,10 +10,20 @@
           <ArrowLeft class="w-5 h-5 text-gray-600" />
         </button>
         <div class="flex items-center space-x-2">
-          <button class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-white/20 flex items-center justify-center">
-            <Heart class="w-5 h-5 text-gray-600" />
+          <button 
+            @click="toggleLike"
+            class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-white/20 flex items-center justify-center"
+            :class="isLiked ? 'bg-red-50 border-red-200' : ''"
+          >
+            <Heart 
+              class="w-5 h-5 transition-all duration-200" 
+              :class="isLiked ? 'text-red-600 fill-red-600' : 'text-gray-600'"
+            />
           </button>
-          <button class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-white/20 flex items-center justify-center">
+          <button 
+            @click="shareProduct"
+            class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-white/20 flex items-center justify-center"
+          >
             <Share2 class="w-5 h-5 text-gray-600" />
           </button>
         </div>
@@ -110,7 +120,7 @@
       </div>
 
       <!-- Product info -->
-      <div class="px-4 space-y-4">
+      <div class="px-4 space-y-4 mb-8">
         <!-- Brand and stock status -->
         <div class="flex justify-between items-center">
           <div class="text-sm text-gray-500 font-medium">{{ product.seller_name || 'weCare' }}</div>
@@ -161,9 +171,10 @@
             </button>
           </div>
         </div>
+      </div>
 
-        <!-- Tab section -->
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-white/20">
+      <!-- Tab section -->
+      <div class="px-4">
           <!-- Tab headers -->
           <div class="flex space-x-1 mb-4 bg-gray-100/50 rounded-xl p-1">
             <button 
@@ -299,22 +310,22 @@
               <!-- Attributes loaded successfully -->
               <div v-else-if="productAttributes.length > 0" class="space-y-6">
                 <!-- Document-style specifications -->
-                <div class="bg-white rounded-xl shadow-sm">
+                <div>
                   <!-- Header -->
-                  <div class="px-6 py-4 border-b border-gray-100">
+                  <div class="pb-4 border-b border-gray-100">
                     <h3 class="text-xl font-bold text-gray-900">Product Specifications</h3>
                     <p class="text-sm text-gray-600 mt-1">Technical details and specifications</p>
                   </div>
                   
                   <!-- Specifications list -->
-                  <div class="px-6 py-6 space-y-6">
+                  <div class="pt-6 grid grid-cols-2 gap-4">
                     <div 
                       v-for="(attr, index) in productAttributes" 
                       :key="`${attr.id}-${index}`" 
                       class="space-y-2"
                     >
                       <!-- Specification Label -->
-                      <h4 class="font-semibold text-gray-900 text-base leading-6">{{ attr.label }}</h4>
+                      <h4 class="font-semibold text-gray-900 text-sm leading-5">{{ attr.label }}</h4>
                       
                       <!-- Specification Value -->
                       <div class="ml-0">
@@ -396,6 +407,134 @@
                 <h3 class="text-sm font-semibold text-gray-900 mb-2">No Additional Details</h3>
                 <p class="text-gray-600 text-xs max-w-sm mx-auto">This product doesn't have additional details available at the moment.</p>
               </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <!-- Separator -->
+    <div class="px-4 py-6">
+      <div class="border-t border-gray-200"></div>
+    </div>
+
+    <!-- Similar Products Section (Same Store Category) -->
+    <div v-if="similarProducts.length > 0" class="px-4 py-6">
+      <div class="mb-4">
+        <h2 class="text-xl font-bold text-gray-900 mb-1">Similar Products</h2>
+        <p class="text-sm text-gray-600">Products from the same category</p>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div 
+          v-for="product in similarProducts" 
+          :key="product.id" 
+          class="flex flex-col cursor-pointer"
+          @click="navigateToDetails(product.id, product.item_type || 'store_product')"
+        >
+          <!-- Product Card - Only contains image -->
+          <div class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square relative">
+            <img 
+              :src="product.main_image || packagingImage" 
+              :alt="product.name"
+              class="w-full h-full object-cover rounded-lg"
+            />
+            <!-- Verified Badge (for all approved store products) -->
+            <button
+              v-if="product.item_type === 'store_product' && product.seller_account_status === 'APPROVED'"
+              @click.stop="showVerificationDialog = true; selectedProduct = product"
+              class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all z-10"
+            >
+              <BadgeCheck class="w-4 h-4 text-blue-600" />
+            </button>
+          </div>
+          
+          <!-- Product Info - Outside the card -->
+          <div class="space-y-1">
+            <!-- Store Name Caption (only for store products, not shopper listings) -->
+            <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
+              {{ product.seller_name || product.store_name || 'weCare' }}
+            </p>
+            
+            <!-- Product Name -->
+            <h3 
+              class="font-bold text-xs text-gray-900 mb-1 line-clamp-2 leading-tight hover:text-blue-600 transition-colors capitalize"
+            >
+              {{ product.name }}
+            </h3>
+            
+            <!-- Price and Quantity -->
+            <div class="flex items-center justify-between">
+              <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
+                {{ formatApiPrice(product) }}
+                <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
+                  / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products from Same Seller Section -->
+    <div v-if="sellerProducts.length > 0" class="px-4 py-6">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h2 class="text-xl font-bold text-gray-900 mb-1">More from {{ product?.seller_name || product?.store_name || 'Seller' }}</h2>
+          <p class="text-sm text-gray-600">Other products from this seller</p>
+        </div>
+        <button 
+          @click="viewAllSellerProducts"
+          class="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+        >
+          View All
+        </button>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div 
+          v-for="product in sellerProducts" 
+          :key="product.id" 
+          class="flex flex-col cursor-pointer"
+          @click="navigateToDetails(product.id, product.item_type || 'store_product')"
+        >
+          <!-- Product Card - Only contains image -->
+          <div class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square relative">
+            <img 
+              :src="product.main_image || packagingImage" 
+              :alt="product.name"
+              class="w-full h-full object-cover rounded-lg"
+            />
+            <!-- Verified Badge (for all approved store products) -->
+            <button
+              v-if="product.item_type === 'store_product' && product.seller_account_status === 'APPROVED'"
+              @click.stop="showVerificationDialog = true; selectedProduct = product"
+              class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all z-10"
+            >
+              <BadgeCheck class="w-4 h-4 text-blue-600" />
+            </button>
+          </div>
+          
+          <!-- Product Info - Outside the card -->
+          <div class="space-y-1">
+            <!-- Store Name Caption (only for store products, not shopper listings) -->
+            <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
+              {{ product.seller_name || product.store_name || 'weCare' }}
+            </p>
+            
+            <!-- Product Name -->
+            <h3 
+              class="font-bold text-xs text-gray-900 mb-1 line-clamp-2 leading-tight hover:text-blue-600 transition-colors capitalize"
+            >
+              {{ product.name }}
+            </h3>
+            
+            <!-- Price and Quantity -->
+            <div class="flex items-center justify-between">
+              <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
+                {{ formatApiPrice(product) }}
+                <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
+                  / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
+                </span>
+              </span>
             </div>
           </div>
         </div>
@@ -521,6 +660,37 @@
       @success="onViewingRequestSuccess"
       @error="onViewingRequestError"
     />
+
+    <!-- Verification Dialog -->
+    <Transition name="dialog">
+      <div v-if="showVerificationDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showVerificationDialog = false"></div>
+        <div class="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 w-full max-w-md transform transition-all duration-300">
+          <!-- Header -->
+          <div class="p-6 pb-4">
+            <div class="flex items-center justify-center mb-4">
+              <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                <BadgeCheck class="w-8 h-8 text-blue-600" />
+              </div>
+            </div>
+            <h3 class="text-xl font-bold text-center text-slate-900 mb-2">Verified by AfriQExpress</h3>
+            <p class="text-center text-slate-600 text-sm leading-relaxed">
+              This product and seller have been verified by AfriQExpress. You can shop with confidence knowing that this seller has been authenticated and approved.
+            </p>
+          </div>
+
+          <!-- Actions -->
+          <div class="p-6 pt-4">
+            <button
+              @click="showVerificationDialog = false"
+              class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -537,7 +707,7 @@ import ViewingRequestForm from '@/components/ViewingRequestForm.vue'
 import { 
   ArrowLeft, Heart, Share2, AlertCircle, Star, MessageCircle, 
   Minus, Plus, ShoppingBag, ShoppingCart, CheckCircle, X, Calendar, Info,
-  Hash, Calculator, List, CheckSquare, ToggleLeft, FileText, Type
+  Hash, Calculator, List, CheckSquare, ToggleLeft, FileText, Type, BadgeCheck
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -567,6 +737,16 @@ const checkingPendingRequest = ref(false)
 // Product attributes variables
 const productAttributes = ref([])
 const loadingAttributes = ref(false)
+
+// Similar products and seller products
+const similarProducts = ref([])
+const sellerProducts = ref([])
+const showVerificationDialog = ref(false)
+const selectedProduct = ref(null)
+
+// Like functionality
+const isLiked = ref(false)
+const togglingLike = ref(false)
 
 const loading = computed(() => productStore.loading)
 const error = computed(() => productStore.error)
@@ -969,6 +1149,183 @@ const goToCart = () => {
   router.push({ name: 'Cart' })
 }
 
+// Like functionality
+const checkLikeStatus = async (productId) => {
+  if (!productId) return
+  try {
+    const response = await apiService.checkProductLike(productId)
+    isLiked.value = response.data.liked || false
+  } catch (error) {
+    console.error('Failed to check like status:', error)
+    isLiked.value = false
+  }
+}
+
+const toggleLike = async () => {
+  if (!product.value || togglingLike.value) return
+  
+  togglingLike.value = true
+  try {
+    const response = await apiService.toggleProductLike(product.value.id)
+    isLiked.value = response.data.liked || false
+    
+    // Show feedback
+    snackbarText.value = response.data.liked ? 'Product liked' : 'Product unliked'
+    snackbarColor.value = 'success'
+    showSnackbar.value = true
+  } catch (error) {
+    console.error('Failed to toggle like:', error)
+    snackbarText.value = 'Failed to update like status'
+    snackbarColor.value = 'error'
+    showSnackbar.value = true
+  } finally {
+    togglingLike.value = false
+  }
+}
+
+// Share product via WhatsApp
+const shareProduct = () => {
+  if (!product.value) return
+  
+  const productUrl = `${window.location.origin}/product/${product.value.id}`
+  const productName = product.value.name || 'Check out this product'
+  const shareText = `${productName}\n\n${productUrl}`
+  
+  // Encode the message for WhatsApp
+  const encodedText = encodeURIComponent(shareText)
+  const whatsappUrl = `https://wa.me/?text=${encodedText}`
+  
+  // Open WhatsApp in a new window/tab
+  window.open(whatsappUrl, '_blank')
+}
+
+// Navigate to product details
+const navigateToDetails = (productId, itemType = 'store_product') => {
+  if (itemType === 'shopper_listing') {
+    router.push({ name: 'ShopperProduct', params: { id: productId } })
+  } else {
+    router.push({ name: 'ProductDetails', params: { id: productId } })
+  }
+}
+
+// View all products from seller
+const viewAllSellerProducts = () => {
+  if (!product.value) return
+  
+  // Store seller ID in sessionStorage for Explore page to filter
+  const sellerId = product.value.seller || product.value.seller_id || product.value.store?.seller?.id || product.value.store?.seller_id
+  if (sellerId) {
+    sessionStorage.setItem('filterBySeller', sellerId.toString())
+  }
+  
+  router.push({ name: 'Explore' })
+}
+
+// Fetch similar products (same store category)
+const fetchSimilarProducts = async () => {
+  if (!product.value) return
+  
+  try {
+    const storeCategoryId = product.value.store?.store_category?.id
+    if (!storeCategoryId) return
+    
+    const response = await apiService.getProducts({
+      store_category: storeCategoryId,
+      page_size: 7, // Get 7 to exclude current product
+      page: 1
+    })
+    
+    const products = response.data.results || response.data
+    // Filter out current product and limit to 6
+    similarProducts.value = products
+      .filter(p => p.id !== product.value.id)
+      .slice(0, 6)
+      .map(p => ({ ...p, item_type: 'store_product' }))
+  } catch (error) {
+    console.error('Failed to fetch similar products:', error)
+    similarProducts.value = []
+  }
+}
+
+// Fetch products from same seller
+const fetchSellerProducts = async () => {
+  if (!product.value) return
+  
+  try {
+    // Get seller ID from product - check multiple possible locations
+    let sellerId = null
+    
+    // Try direct seller field (could be ID or object)
+    if (product.value.seller) {
+      sellerId = typeof product.value.seller === 'object' ? product.value.seller.id : product.value.seller
+    }
+    
+    // Try seller_id field
+    if (!sellerId && product.value.seller_id) {
+      sellerId = product.value.seller_id
+    }
+    
+    // Try store.seller
+    if (!sellerId && product.value.store?.seller) {
+      sellerId = typeof product.value.store.seller === 'object' ? product.value.store.seller.id : product.value.store.seller
+    }
+    
+    // Try store.seller_id
+    if (!sellerId && product.value.store?.seller_id) {
+      sellerId = product.value.store.seller_id
+    }
+    
+    console.log('🔍 Fetching seller products - Product data:', {
+      seller: product.value.seller,
+      seller_id: product.value.seller_id,
+      store: product.value.store,
+      extracted_seller_id: sellerId
+    })
+    
+    if (!sellerId) {
+      console.warn('⚠️ No seller ID found in product data')
+      sellerProducts.value = []
+      return
+    }
+    
+    const response = await apiService.getProducts({
+      seller: sellerId,
+      page_size: 7, // Get 7 to exclude current product
+      page: 1
+    })
+    
+    const products = response.data.results || response.data
+    console.log('🔍 Seller products response:', products)
+    
+    // Helper function to extract seller ID from a product
+    const getProductSellerId = (p) => {
+      if (p.seller) {
+        return typeof p.seller === 'object' ? p.seller.id : p.seller
+      }
+      if (p.seller_id) return p.seller_id
+      if (p.store?.seller) {
+        return typeof p.store.seller === 'object' ? p.store.seller.id : p.store.seller
+      }
+      if (p.store?.seller_id) return p.store.seller_id
+      return null
+    }
+    
+    // Filter out current product and ensure all products are from the same seller
+    sellerProducts.value = products
+      .filter(p => {
+        const pSellerId = getProductSellerId(p)
+        return p.id !== product.value.id && pSellerId === sellerId
+      })
+      .slice(0, 6)
+      .map(p => ({ ...p, item_type: 'store_product' }))
+    
+    console.log('🔍 Filtered seller products:', sellerProducts.value)
+  } catch (error) {
+    console.error('Failed to fetch seller products:', error)
+    sellerProducts.value = []
+  }
+}
+
 const requestRestockNotification = async () => {
   if (!product.value) return
 
@@ -1051,12 +1408,24 @@ const selectVariant = (variant) => {
 
 const cartItemsCount = computed(() => cart.cartItemCount)
 
-onMounted(async () => {
-  const productId = route.params.id
-
+// Function to load product data
+const loadProductData = async (productId) => {
   try {
+    // Reset state
+    currentImageIndex.value = 0
+    activeTab.value = 'description'
+    selectedVariant.value = null
+    selectedSize.value = null
+    quantity.value = 1
+    similarProducts.value = []
+    sellerProducts.value = []
+    isLiked.value = false
+    
     // Fetch product data
     await productStore.fetchProductById(productId)
+    
+    // Check if product is liked
+    await checkLikeStatus(productId)
 
     // Fetch related data
     await Promise.all([
@@ -1075,6 +1444,12 @@ onMounted(async () => {
     // Fetch product attributes based on store category
     await fetchProductAttributes()
     
+    // Fetch similar products and seller products
+    await Promise.all([
+      fetchSimilarProducts(),
+      fetchSellerProducts()
+    ])
+    
   } catch (error) {
     // Handle error and redirect to home page
     console.error('Error fetching product:', error)
@@ -1084,6 +1459,17 @@ onMounted(async () => {
 
     // Redirect to home page
     router.push({ name: 'Home' })
+  }
+}
+
+onMounted(async () => {
+  await loadProductData(route.params.id)
+})
+
+// Watch for route changes to reload product when navigating to different product
+watch(() => route.params.id, async (newProductId, oldProductId) => {
+  if (newProductId && newProductId !== oldProductId) {
+    await loadProductData(newProductId)
   }
 })
 
@@ -1098,6 +1484,12 @@ watch(product, async (newProduct) => {
     }
     
     await fetchProductAttributes()
+    
+    // Fetch similar products and seller products
+    await Promise.all([
+      fetchSimilarProducts(),
+      fetchSellerProducts()
+    ])
   }
 }, { immediate: false })
 </script>

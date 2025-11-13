@@ -1,27 +1,25 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pb-24">
+    <!-- Modern Header -->
+    <BackButtonHeader title="Notifications">
+      <template #right>
+        <button 
+          v-if="notifications.length > 0 && hasUnreadNotifications"
+          @click="handleMarkAllAsRead"
+          :disabled="markingAllAsRead"
+          class="px-4 py-2 text-white text-sm font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg"
+          style="background: linear-gradient(to right, #2563eb, #9333ea);"
+          onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
+          onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
+        >
+          <Loader2 v-if="markingAllAsRead" class="w-4 h-4 animate-spin" />
+          <CheckCheck v-else class="w-4 h-4" />
+          <span>Mark all read</span>
+        </button>
+      </template>
+    </BackButtonHeader>
+    
     <div class="p-4">
-      <!-- Modern Header -->
-      <AppHeader 
-        :show-back="true"
-        custom-title="Notifications"
-      >
-        <template #right-content>
-                     <button 
-             v-if="notifications.length > 0 && hasUnreadNotifications"
-             @click="handleMarkAllAsRead"
-             :disabled="markingAllAsRead"
-             class="px-4 py-2 text-white text-sm font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg"
-             style="background: linear-gradient(to right, #2563eb, #9333ea);"
-             onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
-             onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
-           >
-            <Loader2 v-if="markingAllAsRead" class="w-4 h-4 animate-spin" />
-            <CheckCheck v-else class="w-4 h-4" />
-            <span>Mark all read</span>
-          </button>
-        </template>
-      </AppHeader>
 
       <!-- Unread count badge -->
       <div v-if="hasUnreadNotifications" class="mb-6">
@@ -90,21 +88,18 @@
                 </div>
 
                 <!-- Notification content -->
-                <div class="flex-1 min-w-0 overflow-hidden">
+                <div class="flex-1 min-w-0 overflow-hidden max-w-full">
                   <div class="flex items-center space-x-3 mb-2">
-                    <h3 class="text-lg font-semibold text-slate-900 truncate flex-1 min-w-0">
+                    <h3 class="text-sm font-semibold text-slate-900 truncate flex-1 min-w-0">
                       {{ notification.title }}
                     </h3>
                     <div v-if="!notification.is_read" class="flex items-center space-x-2 flex-shrink-0">
                       <div class="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
-                      <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                        New
-                      </span>
                     </div>
                   </div>
                   
                   <!-- Preview message (truncated) -->
-                  <p class="text-sm text-slate-600 mb-3 line-clamp-2">
+                  <p class="text-sm text-slate-600 mb-3 line-clamp-2 break-words">
                     {{ notification.message }}
                   </p>
                   
@@ -159,7 +154,7 @@
                 <!-- Full message content -->
                 <div class="mb-4">
                   <h4 class="text-sm font-semibold text-slate-700 mb-2">Full Message:</h4>
-                  <p class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+                  <p class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere">
                     {{ notification.message }}
                   </p>
                 </div>
@@ -262,7 +257,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNotificationStore } from '@/stores/notification'
-import AppHeader from '@/components/AppHeader.vue'
+import BackButtonHeader from '@/components/BackButtonHeader.vue'
 import { 
   Bell, Check, CheckCheck, CheckCircle, Clock, AlertCircle, X, Loader2, ArrowRight,
   ShoppingBag, AlertTriangle, Info, Package, ChevronDown
@@ -354,7 +349,8 @@ const navigateToReference = (notification) => {
   const linkMap = {
     'Order': `/order-status/${notification.reference_id}`,
     'Product': `/product/${notification.reference_id}`,
-    'Profile': '/profile'
+    'Profile': '/profile',
+    'ListingInquiry': '/listing-inquiries'
   }
 
   const link = linkMap[notification.reference_type]

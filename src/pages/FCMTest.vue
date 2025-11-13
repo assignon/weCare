@@ -4,13 +4,13 @@
       <v-col cols="12" md="8">
         <v-card>
           <v-card-title class="text-h5 d-flex align-center">
-            <v-icon class="mr-2">mdi-bell-ring</v-icon>
+            <Bell class="w-5 h-5 mr-2" />
             Firebase Cloud Messaging Test
           </v-card-title>
 
           <v-card-text>
             <v-alert v-if="!isSupported" type="error" class="mb-4">
-              <v-icon start>mdi-alert-circle</v-icon>
+              <AlertCircle class="w-4 h-4 mr-2" />
               FCM is not supported in this browser. You need HTTPS and a modern
               browser.
             </v-alert>
@@ -20,32 +20,24 @@
               <v-card-title class="text-h6">Current Status</v-card-title>
               <v-card-text>
                 <div class="d-flex align-center mb-2">
-                  <v-icon :color="getStatusColor('permission')" class="mr-2">
-                    {{ getStatusIcon("permission") }}
-                  </v-icon>
+                  <component :is="getStatusIconComponent('permission')" :class="`w-5 h-5 mr-2 text-${getStatusColor('permission')}`" />
                   <span
                     >Notification Permission: {{ notificationPermission }}</span
                   >
                 </div>
 
                 <div class="d-flex align-center mb-2">
-                  <v-icon :color="getStatusColor('fcm')" class="mr-2">
-                    {{ getStatusIcon("fcm") }}
-                  </v-icon>
+                  <component :is="getStatusIconComponent('fcm')" :class="`w-5 h-5 mr-2 text-${getStatusColor('fcm')}`" />
                   <span>FCM Status: {{ fcmStatus }}</span>
                 </div>
 
                 <div class="d-flex align-center mb-2">
-                  <v-icon :color="getStatusColor('token')" class="mr-2">
-                    {{ getStatusIcon("token") }}
-                  </v-icon>
+                  <component :is="getStatusIconComponent('token')" :class="`w-5 h-5 mr-2 text-${getStatusColor('token')}`" />
                   <span>FCM Token: {{ tokenStatus }}</span>
                 </div>
 
                 <div class="d-flex align-center">
-                  <v-icon :color="getStatusColor('backend')" class="mr-2">
-                    {{ getStatusIcon("backend") }}
-                  </v-icon>
+                  <component :is="getStatusIconComponent('backend')" :class="`w-5 h-5 mr-2 text-${getStatusColor('backend')}`" />
                   <span>Backend Connection: {{ backendStatus }}</span>
                 </div>
               </v-card-text>
@@ -60,8 +52,8 @@
                     color="primary"
                     @click="runFullTest"
                     :loading="testing"
-                    prepend-icon="mdi-play-circle"
                   >
+                    <PlayCircle class="w-4 h-4 mr-2" />
                     Run Full Test
                   </v-btn>
 
@@ -69,8 +61,8 @@
                     color="secondary"
                     @click="requestPermission"
                     :disabled="notificationPermission === 'granted'"
-                    prepend-icon="mdi-bell"
                   >
+                    <Bell class="w-4 h-4 mr-2" />
                     Request Permission
                   </v-btn>
 
@@ -78,8 +70,8 @@
                     color="success"
                     @click="initializeFCM"
                     :loading="initializing"
-                    prepend-icon="mdi-fire"
                   >
+                    <Flame class="w-4 h-4 mr-2" />
                     Initialize FCM
                   </v-btn>
 
@@ -88,8 +80,8 @@
                     @click="sendTestNotification"
                     :disabled="notificationPermission !== 'granted'"
                     :loading="testing"
-                    prepend-icon="mdi-message-alert"
                   >
+                    <MessageCircle class="w-4 h-4 mr-2" />
                     Test Notifications
                   </v-btn>
                 </div>
@@ -110,9 +102,7 @@
                   class="mb-2"
                 >
                   <div class="d-flex align-center">
-                    <v-icon :color="getResultColor(result.status)" class="mr-2">
-                      {{ getResultIcon(result.status) }}
-                    </v-icon>
+                    <component :is="getResultIconComponent(result.status)" :class="`w-5 h-5 mr-2 text-${getResultColor(result.status)}`" />
                     <strong>{{ result.test }}:</strong>
                     <span class="ml-2">{{ result.message }}</span>
                   </div>
@@ -140,9 +130,9 @@
                 />
                 <v-btn
                   size="small"
-                  prepend-icon="mdi-content-copy"
                   @click="copyToken"
                 >
+                  <Copy class="w-4 h-4 mr-2" />
                   Copy Token
                 </v-btn>
               </v-card-text>
@@ -194,6 +184,10 @@ import { ref, onMounted, computed } from "vue";
 import fcmService from "@/services/fcmService";
 import fcmTester from "@/utils/fcmTest";
 import { api } from "@/services/api";
+import { 
+  Bell, AlertCircle, PlayCircle, Flame, MessageCircle, Copy,
+  CheckCircle, XCircle, HelpCircle, Info, AlertTriangle
+} from 'lucide-vue-next';
 
 // Reactive state
 const notificationPermission = ref(Notification.permission || "default");
@@ -480,13 +474,13 @@ const getStatusColor = (type) => {
   }
 };
 
-const getStatusIcon = (type) => {
+const getStatusIconComponent = (type) => {
   const color = getStatusColor(type);
   return color === "success"
-    ? "mdi-check-circle"
+    ? CheckCircle
     : color === "error"
-    ? "mdi-close-circle"
-    : "mdi-help-circle";
+    ? XCircle
+    : HelpCircle;
 };
 
 const getResultColor = (status) => {
@@ -499,14 +493,14 @@ const getResultColor = (status) => {
   return colors[status] || "grey";
 };
 
-const getResultIcon = (status) => {
+const getResultIconComponent = (status) => {
   const icons = {
-    pass: "mdi-check-circle",
-    fail: "mdi-close-circle",
-    warning: "mdi-alert",
-    info: "mdi-information",
+    pass: CheckCircle,
+    fail: XCircle,
+    warning: AlertTriangle,
+    info: Info,
   };
-  return icons[status] || "mdi-help-circle";
+  return icons[status] || HelpCircle;
 };
 
 // Lifecycle

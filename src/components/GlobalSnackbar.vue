@@ -117,7 +117,8 @@ const actionText = computed(() => {
   const typeMap = {
     'Order': 'View Order',
     'Product': 'View Product',
-    'Profile': 'Go to Profile'
+    'Profile': 'Go to Profile',
+    'ListingInquiry': 'View Messages'
   }
   return typeMap[currentNotification.value?.reference_type] || 'View Details'
 })
@@ -190,7 +191,8 @@ const handleAction = () => {
   const linkMap = {
     'Order': `/order-status/${currentNotification.value.reference_id}`,
     'Product': `/product/${currentNotification.value.reference_id}`,
-    'Profile': '/profile'
+    'Profile': '/profile',
+    'ListingInquiry': '/listing-inquiries'
   }
 
   const link = linkMap[currentNotification.value.reference_type]

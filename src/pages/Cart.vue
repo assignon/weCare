@@ -1,23 +1,6 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pb-24">
     <div class="p-4">
-      <!-- Header -->
-      <AppHeader 
-        :show-back="true" 
-        :back-route="{ name: 'Home' }"
-        custom-title="Cart Items"
-      >
-        <template #right-content>
-          <button 
-            v-if="cart.items.items && cart.items.items.length > 0"
-            @click="confirmClearCart"
-            class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-white/20 flex items-center justify-center"
-          >
-            <Trash2 class="w-5 h-5 text-red-500" />
-          </button>
-          <div v-else class="w-10"></div>
-        </template>
-      </AppHeader>
 
       <!-- Cart content -->
       <div v-if="cart.items.items && cart.items.items.length > 0" class="space-y-6">
@@ -250,7 +233,6 @@ import { useCRMStore } from '@/stores/crm'
 import { useRouter } from 'vue-router'
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useCurrency } from '@/composables/useCurrency'
-import AppHeader from '@/components/AppHeader.vue'
 import { 
   ArrowLeft, Trash2, Truck, Minus, Plus, ShoppingCart, AlertTriangle 
 } from 'lucide-vue-next'

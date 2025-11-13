@@ -1,58 +1,8 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-    <div class="p-4">
+  <div class="min-h-screen bg-white0">
+    <div class="p-4 pt-16">
       <!-- Enhanced Header -->
       <AppHeader />
-
-      <!-- Search bar -->
-      <transition name="slide-down">
-        <div v-if="showSearch" class="mb-6">
-          <div class="relative group">
-            <Search class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-            <input
-              v-model="search"
-              type="text"
-              placeholder="Search for products..."
-              class="w-full pl-12 pr-12 py-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200 shadow-sm hover:shadow-md"
-              @input="handleSearch"
-              @keyup="search.trim() === '' && clearSearch()"
-            />
-            <button 
-              v-if="search" 
-              @click="clearSearch"
-              class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <X class="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </transition>
-
-      <!-- Filter section -->
-      <div class="sticky top-0 z-10 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 pt-2 pb-4 mb-4">
-        <div class="flex justify-between items-center">
-          <button 
-            @click="showFilterOptions = !showFilterOptions"
-            class="flex items-center px-4 py-3 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl text-sm font-medium text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200 shadow-sm"
-          >
-            <Filter class="w-4 h-4 mr-2" />
-            Filter
-          </button>
-
-          <div class="flex-1 ml-4">
-            <div class="relative">
-              <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                v-model="productSearch"
-                type="text"
-                placeholder="Search products by name..."
-                class="w-full pl-10 pr-4 py-3 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200 shadow-sm hover:shadow-md text-sm"
-                @input="handleProductSearch"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
 
       <!-- Filter Bottom Sheet -->
       <div 
@@ -189,24 +139,59 @@
           <div 
             v-for="product in filteredProducts" 
             :key="product.id" 
-            @click="navigateToDetails(product.id)"
-            class="group bg-white rounded-lg border border-gray-100 hover:border-gray-200 transition-all duration-200 cursor-pointer overflow-hidden hover:shadow-md"
+            class="flex flex-col"
           >
-            <!-- Product Image -->
-            <div class="aspect-square overflow-hidden bg-gray-50">
+            <!-- Product Card - Only contains image -->
+            <div 
+              @click="navigateToDetails(product.id, product.item_type)"
+              class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square cursor-pointer relative"
+            >
               <img 
                 :src="product.main_image || packagingImage" 
                 :alt="product.name"
-                class="w-full h-full object-cover"
+                class="w-full h-full object-cover rounded-lg"
               />
+              <!-- Verified Badge (for all approved store products) -->
+              <button
+                v-if="product.item_type === 'store_product' && product.seller_account_status === 'APPROVED'"
+                @click.stop="showVerificationDialog = true; selectedProduct = product"
+                class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all z-10"
+              >
+                <BadgeCheck class="w-4 h-4 text-blue-600" />
+              </button>
             </div>
             
-            <!-- Product Info -->
-            <div class="p-3">
-              <h3 class="font-medium text-sm text-gray-900 mb-1 line-clamp-2 leading-tight">{{ product.name }}</h3>
-              <p class="text-xs text-gray-500 mb-2">{{ product.seller_name || 'weCare' }}</p>
+            <!-- Product Info - Outside the card -->
+            <div class="space-y-1">
+              <!-- Store Name Caption (only for store products, not shopper listings) -->
+              <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
+                {{ product.seller_name || product.store_name || 'weCare' }}
+              </p>
+              
+              <!-- Product Name -->
+              <h3 
+                @click="navigateToDetails(product.id, product.item_type)"
+                class="font-bold text-sm text-gray-900 mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors"
+              >
+                {{ product.name }}
+              </h3>
+              
+              <!-- Local Names/Description with Flag -->
+              <div v-if="product.local_name || product.description" class="flex items-start gap-1.5 mb-1">
+                <Flag class="w-3.5 h-3.5 text-gray-600 mt-0.5 flex-shrink-0" />
+                <p class="text-xs italic text-gray-600 line-clamp-1">
+                  {{ product.local_name || (product.description ? product.description.substring(0, 50) + '...' : '') }}
+                </p>
+              </div>
+              
+              <!-- Price and Quantity -->
               <div class="flex items-center justify-between">
-                <span class="font-semibold text-base text-blue-600">{{ formatApiPrice(product) }}</span>
+                <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
+                  {{ formatApiPrice(product) }}
+                  <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
+                    / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
+                  </span>
+                </span>
               </div>
             </div>
           </div>
@@ -248,6 +233,37 @@
       <!-- Bottom Navigation -->
       <BottomNavigation />
     </div>
+
+    <!-- Verification Dialog -->
+    <Transition name="dialog">
+      <div v-if="showVerificationDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showVerificationDialog = false"></div>
+        <div class="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 w-full max-w-md transform transition-all duration-300">
+          <!-- Header -->
+          <div class="p-6 pb-4">
+            <div class="flex items-center justify-center mb-4">
+              <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                <BadgeCheck class="w-8 h-8 text-blue-600" />
+              </div>
+            </div>
+            <h3 class="text-xl font-bold text-center text-slate-900 mb-2">Verified by AfriQExpress</h3>
+            <p class="text-center text-slate-600 text-sm leading-relaxed">
+              This product and seller have been verified by AfriQExpress. You can shop with confidence knowing that this seller has been authenticated and approved.
+            </p>
+          </div>
+
+          <!-- Actions -->
+          <div class="p-6 pt-4">
+            <button
+              @click="showVerificationDialog = false"
+              class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -265,7 +281,7 @@ import { useCurrency } from '@/composables/useCurrency'
 import AppHeader from '@/components/AppHeader.vue'
 import apiService from '@/services/api'
 import { 
-  Bell, User, Search, X, Filter, AlertCircle, CheckCircle, ShoppingBag, ArrowRight
+  Bell, User, Search, X, Filter, AlertCircle, CheckCircle, ShoppingBag, ArrowRight, Flag, BadgeCheck
 } from 'lucide-vue-next'
 
 const productStore = useProductStore()
@@ -416,6 +432,8 @@ const applyDynamicFilters = async () => {
 const loadingMore = ref(false)
 const hasMoreProducts = ref(true)
 const loadMoreTrigger = ref(null)
+const showVerificationDialog = ref(false)
+const selectedProduct = ref(null)
 let observer = null
 
 const loading = computed(() => productStore.loading)
@@ -496,8 +514,22 @@ const clearAllFilters = async () => {
   hasMoreProducts.value = hasMore
 }
 
-const navigateToDetails = (productId) => {
-  router.push({ name: 'ProductDetails', params: { id: productId } })
+const navigateToDetails = (productId, itemType = 'store_product') => {
+  if (itemType === 'shopper_listing') {
+    router.push({ name: 'ShopperProduct', params: { id: productId } })
+  } else {
+    router.push({ name: 'ProductDetails', params: { id: productId } })
+  }
+}
+
+const addToCart = async (product) => {
+  try {
+    await cart.addToCart(product, 1)
+    // Optionally show a success notification
+    console.log('Product added to cart:', product.name)
+  } catch (error) {
+    console.error('Failed to add product to cart:', error)
+  }
 }
 
 const filterByCategory = async (categoryId) => {
@@ -634,7 +666,14 @@ watch(() => productStore.products, () => {
   }
 }, { flush: 'post' })
 
+// Listen for filter button click from AppHeader
+const handleFilterButtonClick = () => {
+  showFilterOptions.value = !showFilterOptions.value
+}
+
 onMounted(async () => {
+  // Listen for filter button click from AppHeader
+  window.addEventListener('openFilter', handleFilterButtonClick)
   try {
     // Initialize cart state and fetch categories, skin types, skin concerns, and product types
     cart.initCartState()
@@ -653,27 +692,54 @@ onMounted(async () => {
     // Load dynamic attribute templates for current default store category
     await loadStoreAttributeTemplates()
 
-    // Fetch products filtered by default store category if set
-    const defaultStore = sessionStorage.getItem('defaultStore')
-    console.log('🏪 Explore: defaultStore from sessionStorage:', defaultStore)
+    // Check if filtering by seller
+    const filterBySeller = sessionStorage.getItem('filterBySeller')
+    let fetchedBySeller = false
     
-    if (defaultStore) {
+    if (filterBySeller) {
       try {
-        console.log('🏪 Explore: Fetching products for store category:', defaultStore)
-        const hasMoreFromInitialLoad = await productStore.fetchProducts({ store_category: defaultStore, page_size: 24 })
-        hasMoreProducts.value = hasMoreFromInitialLoad
-        console.log('✅ Explore: Products fetched for store, hasMore:', hasMoreFromInitialLoad)
+        // Fetch store products filtered by seller ID
+        const sellerId = parseInt(filterBySeller)
+        console.log('🔍 Explore: Filtering by seller ID:', sellerId)
+        
+        const hasMore = await productStore.fetchProducts({ 
+          seller: sellerId,
+          page_size: 24 
+        })
+        hasMoreProducts.value = hasMore
+        sessionStorage.removeItem('filterBySeller') // Clear after use
+        fetchedBySeller = true
+        console.log('✅ Explore: Filtered by seller, found', productStore.products.length, 'products')
       } catch (e) {
-        console.warn('⚠️ Explore: Failed to fetch products for store, falling back to all products:', e)
+        console.warn('⚠️ Explore: Failed to filter by seller:', e)
+        sessionStorage.removeItem('filterBySeller') // Clear on error too
+        // Fall through to normal fetch
+      }
+    }
+    
+    if (!fetchedBySeller) {
+      // Fetch products filtered by default store category if set
+      const defaultStore = sessionStorage.getItem('defaultStore')
+      console.log('🏪 Explore: defaultStore from sessionStorage:', defaultStore)
+      
+      if (defaultStore) {
+        try {
+          console.log('🏪 Explore: Fetching products for store category:', defaultStore)
+          const hasMoreFromInitialLoad = await productStore.fetchProducts({ store_category: defaultStore, page_size: 24 })
+          hasMoreProducts.value = hasMoreFromInitialLoad
+          console.log('✅ Explore: Products fetched for store, hasMore:', hasMoreFromInitialLoad)
+        } catch (e) {
+          console.warn('⚠️ Explore: Failed to fetch products for store, falling back to all products:', e)
+          const hasMoreFromInitialLoad = await productStore.fetchProducts()
+          hasMoreProducts.value = hasMoreFromInitialLoad
+          console.log('✅ Explore: Fallback products fetched, hasMore:', hasMoreFromInitialLoad)
+        }
+      } else {
+        console.log('🏪 Explore: No default store, fetching all products')
         const hasMoreFromInitialLoad = await productStore.fetchProducts()
         hasMoreProducts.value = hasMoreFromInitialLoad
-        console.log('✅ Explore: Fallback products fetched, hasMore:', hasMoreFromInitialLoad)
+        console.log('✅ Explore: All products fetched, hasMore:', hasMoreFromInitialLoad)
       }
-    } else {
-      console.log('🏪 Explore: No default store, fetching all products')
-      const hasMoreFromInitialLoad = await productStore.fetchProducts()
-      hasMoreProducts.value = hasMoreFromInitialLoad
-      console.log('✅ Explore: All products fetched, hasMore:', hasMoreFromInitialLoad)
     }
     
     console.log('🏪 Explore: Products in store after fetch:', productStore.products.length)
@@ -692,6 +758,8 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  // Remove event listener
+  window.removeEventListener('openFilter', handleFilterButtonClick)
   if (observer) {
     observer.disconnect()
   }

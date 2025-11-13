@@ -241,14 +241,14 @@ export const useOrderStore = defineStore('order', () => {
 
   function getOrderStatusIcon(status) {
     const icons = {
-      pending: 'mdi-clock-outline',
-      processing: 'mdi-package-variant',
-      ready_for_pickup: 'mdi-package-check',
-      picked_up: 'mdi-truck',
-      delivered: 'mdi-check-circle',
-      cancelled: 'mdi-close-circle'
+      pending: 'Clock',
+      processing: 'Package',
+      ready_for_pickup: 'PackageCheck',
+      picked_up: 'Truck',
+      delivered: 'CheckCircle',
+      cancelled: 'XCircle'
     }
-    return icons[status] || 'mdi-package-variant-closed'
+    return icons[status] || 'Package'
   }
 
   function formatOrderStatus(status) {

@@ -496,6 +496,7 @@ class NotificationService {
             Order: `/order-status/${notification.reference_id}`,
             Product: `/product/${notification.reference_id}`,
             Profile: "/profile",
+            ListingInquiry: "/listing-inquiries",
           };
           const link = linkMap[notification.reference_type];
           if (link) {

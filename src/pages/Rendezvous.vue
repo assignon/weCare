@@ -1,18 +1,13 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 pb-24">
+  <div class="min-h-screen bg-white pb-24">
     <!-- Header -->
-    <div class="sticky top-0 bg-white/80 backdrop-blur-sm border-b border-gray-200/50 px-4 py-3 z-40">
+    <div class="sticky top-0 bg-white px-4 py-3 z-40 border-b border-gray-100">
       <div class="flex items-center justify-between">
-        <button 
-          @click="$router.go(-1)"
-          class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm"
-        >
-          <ArrowLeft class="w-5 h-5 text-gray-700" />
-        </button>
+        <h1 class="text-xl font-semibold text-gray-900">Viewing Requests</h1>
         <button 
           @click="refreshRequests"
           :disabled="loading"
-          class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm disabled:opacity-50"
+          class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm disabled:opacity-50"
           style="background: linear-gradient(to right, #2563eb, #9333ea);"
         >
           <RefreshCw :class="['w-5 h-5 text-white', { 'animate-spin': loading }]" />
@@ -21,11 +16,11 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="px-4 pt-6 pb-4">
-      <div class="grid grid-cols-2 gap-4">
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+    <div class="px-4 pt-4 pb-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
           <div class="flex items-center">
-            <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
               <Calendar class="w-5 h-5 text-blue-600" />
             </div>
             <div class="ml-3">
@@ -35,9 +30,9 @@
           </div>
         </div>
         
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
           <div class="flex items-center">
-            <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
               <Clock class="w-5 h-5 text-orange-600" />
             </div>
             <div class="ml-3">
@@ -49,33 +44,12 @@
       </div>
     </div>
 
-    <!-- Filter Tabs -->
-    <div class="px-4 mb-6">
-      <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-1 border border-white/20">
-        <div class="grid grid-cols-4 gap-1">
-          <button
-            v-for="filter in filterOptions"
-            :key="filter.key"
-            @click="activeFilter = filter.key"
-            :class="[
-              'px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200',
-              activeFilter === filter.key
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-gray-600 hover:bg-gray-100'
-            ]"
-          >
-            {{ filter.label }}
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- Loading State -->
     <div v-if="loading && !viewingRequests.length" class="px-4">
-      <div class="space-y-4">
-        <div v-for="i in 3" :key="i" class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-white/20 animate-pulse">
+      <div class="space-y-3">
+        <div v-for="i in 3" :key="i" class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm animate-pulse">
           <div class="flex items-center space-x-4">
-            <div class="w-16 h-16 bg-gray-200 rounded-xl"></div>
+            <div class="w-16 h-16 bg-gray-200 rounded-lg"></div>
             <div class="flex-1 space-y-2">
               <div class="h-4 bg-gray-200 rounded w-3/4"></div>
               <div class="h-3 bg-gray-200 rounded w-1/2"></div>
@@ -88,7 +62,7 @@
 
     <!-- Error State -->
     <div v-if="error" class="px-4">
-      <div class="bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-2xl p-4">
+      <div class="bg-red-50 border border-red-200 rounded-xl p-4">
         <div class="flex items-center">
           <AlertCircle class="w-5 h-5 text-red-500 mr-3" />
           <span class="text-red-700 font-medium">{{ error }}</span>
@@ -97,17 +71,14 @@
     </div>
 
     <!-- Empty State -->
-    <div v-if="!loading && filteredRequests.length === 0" class="px-4">
-      <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 text-center border border-white/20">
-        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+    <div v-if="!loading && groupedProducts.length === 0" class="px-4">
+      <div class="bg-white rounded-xl p-8 text-center border border-gray-200 shadow-sm">
+        <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
           <Calendar class="w-8 h-8 text-gray-400" />
         </div>
         <h3 class="text-lg font-semibold text-gray-900 mb-2">No viewing requests</h3>
         <p class="text-gray-600 mb-6">
-          {{ activeFilter === 'all' 
-            ? "You haven't made any viewing requests yet. Browse our automobile and real estate sections to get started!" 
-            : `No ${activeFilter} viewing requests found.`
-          }}
+          You haven't made any viewing requests yet. Browse our automobile and real estate sections to get started!
         </p>
         <button 
           @click="$router.push({ name: 'Explore' })"
@@ -118,133 +89,86 @@
       </div>
     </div>
 
-    <!-- Viewing Requests List -->
-    <div v-if="!loading && filteredRequests.length > 0" class="px-4 space-y-4">
+    <!-- Viewing Requests List - Grouped by Product -->
+    <div v-if="!loading && groupedProducts.length > 0" class="px-4 space-y-3">
       <div
-        v-for="request in filteredRequests"
-        :key="request.id"
-        class="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden"
+        v-for="productGroup in groupedProducts"
+        :key="productGroup.product_id"
+        class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
       >
-        <!-- Accordion Header -->
+        <!-- Product Header (Clickable to expand/collapse) -->
         <div 
-          @click="toggleAccordion(request.id)"
-          class="p-4 cursor-pointer hover:bg-gray-50/50 transition-colors"
+          @click="toggleProduct(productGroup.product_id)"
+          class="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
         >
-          <div class="flex items-start justify-between">
-            <div class="flex items-center space-x-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3 flex-1">
               <img 
-                :src="request.product_main_image || '/placeholder.jpg'" 
-                :alt="request.product_name"
-                class="w-16 h-16 rounded-xl object-cover"
+                :src="productGroup.product_main_image || '/placeholder.jpg'" 
+                :alt="productGroup.product_name"
+                class="w-16 h-16 rounded-lg object-cover flex-shrink-0"
               />
-              <div>
-                <h3 class="font-semibold text-gray-900">{{ request.product_name }}</h3>
-                <p class="text-sm text-gray-500">{{ request.store_name }}</p>
-                <p class="text-xs text-gray-400">{{ formatDate(request.created_at) }}</p>
+              <div class="flex-1 min-w-0">
+                <h3 class="font-semibold text-gray-900 text-base mb-1 truncate">{{ productGroup.product_name }}</h3>
+                <p class="text-sm text-gray-500 mb-1">{{ productGroup.store_name }}</p>
+                <p class="text-xs text-gray-400">{{ productGroup.requests.length }} request{{ productGroup.requests.length !== 1 ? 's' : '' }}</p>
               </div>
             </div>
-            <div class="flex items-center space-x-3">
-              <div 
-                :class="[
-                  'px-3 py-1 rounded-full text-xs font-semibold',
-                  getStatusColor(request.status)
-                ]"
-              >
-                {{ request.status_display }}
-              </div>
-              <div class="w-6 h-6 flex items-center justify-center">
-                <ChevronDown 
-                  :class="[
-                    'w-5 h-5 text-gray-400 transition-transform duration-200',
-                    expandedItems.includes(request.id) ? 'rotate-180' : ''
-                  ]"
-                />
-              </div>
-            </div>
+            <ChevronDown 
+              :class="[
+                'w-5 h-5 text-gray-400 flex-shrink-0 ml-2 transition-transform duration-200',
+                expandedProducts.includes(productGroup.product_id) ? 'rotate-180' : ''
+              ]"
+            />
           </div>
         </div>
 
-        <!-- Accordion Content -->
-        <div 
-          v-if="expandedItems.includes(request.id)"
-          class="border-t border-gray-100"
+        <!-- Requests List (Shown when expanded) -->
+        <Transition
+          enter-active-class="transition-all duration-200 ease-out"
+          enter-from-class="opacity-0 max-h-0"
+          enter-to-class="opacity-100 max-h-96"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100 max-h-96"
+          leave-to-class="opacity-0 max-h-0"
         >
-          <div class="p-4 space-y-3">
-            <!-- Request Details -->
-            <div class="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p class="text-gray-500">Preferred Date</p>
-                <p class="font-medium">{{ formatDate(request.preferred_date) }}</p>
-              </div>
-              <div>
-                <p class="text-gray-500">Preferred Time</p>
-                <p class="font-medium">{{ formatTime(request.preferred_time) }}</p>
-              </div>
-            </div>
-
-            <!-- Scheduled Details (if scheduled) -->
-            <div v-if="request.status === 'SCHEDULED' && request.scheduled_date" class="bg-green-50 rounded-xl p-3">
-              <div class="flex items-center mb-2">
-                <CheckCircle class="w-4 h-4 text-green-600 mr-2" />
-                <span class="text-sm font-medium text-green-800">Viewing Scheduled</span>
-              </div>
-              <div class="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p class="text-green-600">Scheduled Date</p>
-                  <p class="font-medium text-green-800">{{ formatDate(request.scheduled_date) }}</p>
+          <div 
+            v-if="expandedProducts.includes(productGroup.product_id)"
+            class="border-t border-gray-100"
+          >
+            <div class="space-y-2 p-2">
+              <div
+                v-for="request in productGroup.requests"
+                :key="request.id"
+                @click.stop="navigateToDetail(request.id)"
+                class="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-all duration-200 active:scale-[0.98]"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center space-x-2 mb-2">
+                      <div 
+                        :class="[
+                          'px-2.5 py-1 rounded-full text-xs font-semibold',
+                          getStatusColor(request.status)
+                        ]"
+                      >
+                        {{ request.status_display }}
+                      </div>
+                      <span class="text-xs text-gray-500">{{ formatDate(request.created_at) }}</span>
+                    </div>
+                    <div class="text-xs text-gray-600">
+                      <span class="font-medium">Preferred:</span> {{ formatDate(request.preferred_date) }} at {{ formatTime(request.preferred_time) }}
+                    </div>
+                    <div v-if="request.status === 'SCHEDULED' && request.scheduled_date" class="text-xs text-green-600 mt-1">
+                      <span class="font-medium">Scheduled:</span> {{ formatDate(request.scheduled_date) }} at {{ formatTime(request.scheduled_time) }}
+                    </div>
+                  </div>
+                  <ChevronDown class="w-4 h-4 text-gray-400 flex-shrink-0 ml-2 rotate-[-90deg]" />
                 </div>
-                <div>
-                  <p class="text-green-600">Scheduled Time</p>
-                  <p class="font-medium text-green-800">{{ formatTime(request.scheduled_time) }}</p>
-                </div>
               </div>
-              <div v-if="request.viewing_location" class="mt-2">
-                <p class="text-green-600 text-sm">Location</p>
-                <p class="text-green-800 text-sm">{{ request.viewing_location }}</p>
-              </div>
-            </div>
-
-            <!-- Seller Notes -->
-            <div v-if="request.seller_notes" class="bg-blue-50 rounded-xl p-3">
-              <p class="text-blue-600 text-sm font-medium mb-1">Seller Notes</p>
-              <p class="text-blue-800 text-sm">{{ request.seller_notes }}</p>
-            </div>
-
-            <!-- Your Message -->
-            <div v-if="request.message" class="bg-gray-50 rounded-xl p-3">
-              <p class="text-gray-600 text-sm font-medium mb-1">Your Message</p>
-              <p class="text-gray-800 text-sm">{{ request.message }}</p>
             </div>
           </div>
-
-          <!-- Footer Actions -->
-          <div class="flex items-center justify-between px-4 py-3 bg-gray-50/50 border-t border-gray-100">
-            <div class="flex items-center space-x-4">
-              <button
-                @click="viewRequestHistory(request)"
-                class="flex items-center text-blue-600 text-sm font-medium hover:text-blue-700"
-              >
-                <Eye class="w-4 h-4 mr-1" />
-                View History
-              </button>
-              
-              <button
-                v-if="['NEW', 'ACCEPTED', 'SCHEDULED'].includes(request.status)"
-                @click="openChat(request)"
-                class="flex items-center text-green-600 text-sm font-medium hover:text-green-700"
-              >
-                <MessageCircle class="w-4 h-4 mr-1" />
-                Chat
-              </button>
-            </div>
-            
-            <div class="flex items-center space-x-2">
-              <span class="text-xs text-gray-500">
-                {{ request.days_since_request }} day{{ request.days_since_request !== 1 ? 's' : '' }} ago
-              </span>
-            </div>
-          </div>
-        </div>
+        </Transition>
       </div>
     </div>
 
@@ -314,12 +238,13 @@
     >
       <div 
         v-if="showChatModal"
-        class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-end"
+        class="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-end"
         @click="closeChat"
       >
         <div 
-          class="bg-white rounded-t-3xl w-full h-[95vh] flex flex-col shadow-2xl"
+          class="bg-white rounded-t-3xl w-full h-[80vh] flex flex-col shadow-2xl"
           @click.stop
+          style="margin-bottom: 0;"
         >
           <!-- Chat Header -->
           <div class="sticky top-0 bg-white border-b border-gray-100 px-6 py-5 rounded-t-3xl shadow-sm">
@@ -351,7 +276,7 @@
           </div>
           
           <!-- Chat Messages -->
-          <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-gray-50/50 to-white">
+          <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-gray-50/50 to-white min-h-0">
             <div v-if="loadingChat" class="flex justify-center py-12">
               <div class="flex flex-col items-center space-y-3">
                 <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-200 border-t-blue-600"></div>
@@ -378,7 +303,7 @@
               >
                 <div
                   :class="[
-                    'max-w-xs lg:max-w-md px-5 py-3 rounded-3xl shadow-sm',
+                    'max-w-xs lg:max-w-md px-5 py-3 rounded-xl shadow-sm',
                     message.sender_type === 'SELLER'
                       ? 'bg-purple-600 text-white ml-12' 
                       : 'bg-blue-600 text-white mr-12'
@@ -399,7 +324,7 @@
           </div>
           
           <!-- Chat Input -->
-          <div class="sticky bottom-0 bg-white border-t border-gray-100 p-6 shadow-lg">
+          <div class="bg-white border-t border-gray-100 p-6 shadow-lg flex-shrink-0">
             <div class="flex items-end space-x-3">
               <div class="flex-1 relative">
                 <input
@@ -427,6 +352,9 @@
         </div>
       </div>
     </Transition>
+
+    <!-- Bottom Navigation -->
+    <BottomNavigation />
   </div>
 </template>
 
@@ -434,6 +362,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiService } from '@/services/api'
+import BottomNavigation from '@/components/BottomNavigation.vue'
 import { 
   Calendar, Clock, RefreshCw, AlertCircle, CheckCircle, Eye, X, ArrowLeft, MessageCircle, ChevronDown, Send 
 } from 'lucide-vue-next'
@@ -444,7 +373,6 @@ const viewingRequests = ref([])
 const stats = ref({})
 const loading = ref(false)
 const error = ref('')
-const activeFilter = ref('all')
 
 // History modal
 const showHistoryModal = ref(false)
@@ -460,21 +388,67 @@ const loadingChat = ref(false)
 const newMessage = ref('')
 const sendingMessage = ref(false)
 
-// Accordion state
-const expandedItems = ref([])
+// Expanded products (for grouping)
+const expandedProducts = ref([])
 
-const filterOptions = [
-  { key: 'all', label: 'All' },
-  { key: 'NEW', label: 'New' },
-  { key: 'SCHEDULED', label: 'Scheduled' },
-  { key: 'COMPLETED', label: 'Completed' }
-]
+// Navigation
+const navigateToDetail = (requestId) => {
+  router.push({ name: 'ViewingRequestDetail', params: { id: requestId } })
+}
 
-const filteredRequests = computed(() => {
-  if (activeFilter.value === 'all') {
-    return viewingRequests.value
+const toggleProduct = (productId) => {
+  // Use string key for consistency
+  const key = String(productId)
+  const index = expandedProducts.value.indexOf(key)
+  if (index > -1) {
+    expandedProducts.value.splice(index, 1)
+  } else {
+    expandedProducts.value.push(key)
   }
-  return viewingRequests.value.filter(request => request.status === activeFilter.value)
+}
+
+const groupedProducts = computed(() => {
+  const groups = {}
+  
+  viewingRequests.value.forEach(request => {
+    // Handle product ID - it could be a number or an object with id
+    let productId
+    if (typeof request.product === 'object' && request.product !== null) {
+      productId = request.product.id || request.product
+    } else {
+      productId = request.product || request.product_id
+    }
+    
+    // Use a string key to ensure consistent grouping
+    const key = String(productId || 'unknown')
+    
+    if (!groups[key]) {
+      groups[key] = {
+        product_id: key, // Store string key for consistency with expandedProducts
+        product_name: request.product_name,
+        product_main_image: request.product_main_image,
+        store_name: request.store_name,
+        requests: []
+      }
+    }
+    
+    groups[key].requests.push(request)
+  })
+  
+  // Convert to array and sort by most recent request
+  return Object.values(groups).map(group => ({
+    ...group,
+    requests: group.requests.sort((a, b) => {
+      const dateA = new Date(a.created_at)
+      const dateB = new Date(b.created_at)
+      return dateB - dateA // Most recent first
+    })
+  })).sort((a, b) => {
+    // Sort products by most recent request
+    const dateA = new Date(a.requests[0].created_at)
+    const dateB = new Date(b.requests[0].created_at)
+    return dateB - dateA
+  })
 })
 
 const fetchViewingRequests = async () => {
@@ -669,14 +643,6 @@ const closeChat = () => {
   newMessage.value = ''
 }
 
-const toggleAccordion = (requestId) => {
-  const index = expandedItems.value.indexOf(requestId)
-  if (index > -1) {
-    expandedItems.value.splice(index, 1)
-  } else {
-    expandedItems.value.push(requestId)
-  }
-}
 
 onMounted(() => {
   fetchViewingRequests()

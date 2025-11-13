@@ -10,8 +10,10 @@ const routes = [
   { path: '/orders', name: 'Orders', component: () => import('@/pages/Orders.vue'), meta: { requiresAuth: true } },
   { path: '/explore', name: 'Explore', component: () => import('@/pages/Explore.vue'), meta: { requiresAuth: true } },
   // { path: '/explore', name: 'Explore', component: () => import('@/pages/EnhancedExplore.vue'), meta: { requiresAuth: true } },
+  { path: '/store-category', name: 'StoreCategory', component: () => import('@/pages/StoreCategory.vue'), meta: { requiresAuth: true } },
   { path: '/cart', name: 'Cart', component: () => import('@/pages/Cart.vue'), meta: { requiresAuth: true } },
   { path: '/rendezvous', name: 'Rendezvous', component: () => import('@/pages/Rendezvous.vue'), meta: { requiresAuth: true } },
+  { path: '/rendezvous/:id', name: 'ViewingRequestDetail', component: () => import('@/pages/ViewingRequestDetail.vue'), meta: { requiresAuth: true } },
  
   { path: '/register', name: 'Register', component: () => import('@/pages/Register.vue') },
   { path: '/shopper-goals', name: 'ShopperGoals', component: () => import('@/pages/ShopperGoals.vue'), meta: { requiresAuth: true } },
@@ -35,6 +37,18 @@ const routes = [
   { path: '/notifications', name: 'Notification', component: () => import('@/pages/Notification.vue'), meta: { requiresAuth: true } },
   { path: '/wishlist', name: 'Wishlist', component: () => import('@/pages/Wishlist.vue'), meta: { requiresAuth: true } },
   { path: '/fcm-test', name: 'FCMTest', component: () => import('@/pages/FCMTest.vue'), meta: { requiresAuth: true } },
+  
+  // Listing routes (Classified Ads)
+  { path: '/browse-listings', name: 'BrowseListings', component: () => import('@/pages/BrowseListings.vue'), meta: { requiresAuth: true } },
+  { path: '/my-listings', name: 'MyListings', component: () => import('@/pages/MyListings.vue'), meta: { requiresAuth: true } },
+  { path: '/create-listing', name: 'CreateListing', component: () => import('@/pages/CreateListing.vue'), meta: { requiresAuth: true } },
+  { path: '/edit-listing/:id', name: 'EditListing', component: () => import('@/pages/EditListing.vue'), meta: { requiresAuth: true } },
+  { path: '/listing/:id', name: 'ListingDetails', component: () => import('@/pages/ListingDetails.vue'), meta: { requiresAuth: true } },
+  { path: '/shopper-product/:id', name: 'ShopperProduct', component: () => import('@/pages/ShopperProduct.vue'), meta: { requiresAuth: true } },
+  { path: '/listing-inquiries', name: 'ListingInquiries', component: () => import('@/pages/ListingInquiries.vue'), meta: { requiresAuth: true } },
+  { path: '/messages', name: 'Messages', component: () => import('@/pages/Messages.vue'), meta: { requiresAuth: true } },
+  { path: '/liked-products', name: 'LikedProducts', component: () => import('@/pages/LikedProducts.vue'), meta: { requiresAuth: true } },
+  { path: '/listing-chat/:inquiryId', name: 'ListingChat', component: () => import('@/pages/ListingChat.vue'), meta: { requiresAuth: true } },
 ]
 
 const router = createRouter({

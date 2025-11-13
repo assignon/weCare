@@ -7,147 +7,249 @@
         :class="activeTab === 'home' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
       >
         <div class="relative">
-          <Home v-if="activeTab === 'home'" class="w-6 h-6 mb-1" />
-          <Home v-else class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+          <Home v-if="activeTab === 'home'" class="w-6 h-6" />
+          <Home v-else class="w-5 h-5 group-hover:scale-110 transition-transform" />
           <div 
             v-if="activeTab === 'home'" 
             class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
             style="background: linear-gradient(to right, #2563eb, #9333ea);"
           ></div>
         </div>
-        <span class="font-medium">Home</span>
       </router-link>
       
       <router-link 
-        v-if="!shouldHideExploreAndCart"
-        :to="{ name: 'Explore' }"
+        :to="{ name: 'StoreCategory' }"
         class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
-        :class="activeTab === 'explore' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+        :class="activeTab === 'storecategory' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
       >
         <div class="relative">
-          <Telescope v-if="activeTab === 'explore'" class="w-6 h-6 mb-1" />
-          <Telescope v-else class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+          <Search v-if="activeTab === 'storecategory'" class="w-6 h-6" />
+          <Search v-else class="w-5 h-5 group-hover:scale-110 transition-transform" />
           <div 
-            v-if="activeTab === 'explore'" 
+            v-if="activeTab === 'storecategory'" 
             class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
             style="background: linear-gradient(to right, #2563eb, #9333ea);"
           ></div>
         </div>
-        <span class="font-medium">Explore</span>
       </router-link>
       
+      <!-- Cart Tab -->
       <router-link 
-        :to="{ name: 'Orders' }"
+        :to="{ name: 'Cart' }"
         class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
-        :class="activeTab === 'orders' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+        :class="activeTab === 'cart' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
       >
         <div class="relative">
-          <Package v-if="activeTab === 'orders'" class="w-6 h-6 mb-1" />
-          <Package v-else class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
-          <div 
-            v-if="activeTab === 'orders'" 
-            class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
-            style="background: linear-gradient(to right, #2563eb, #9333ea);"
-          ></div>
-        </div>
-        <span class="font-medium">Orders</span>
-      </router-link>
-      
-      <!-- Dynamic Cart/Rendezvous Tab -->
-      <router-link 
-        v-if="!shouldHideExploreAndCart"
-        :to="{ name: shouldShowRendezvous ? 'Rendezvous' : 'Cart' }"
-        class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
-        :class="(activeTab === 'cart' || activeTab === 'rendezvous') ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
-      >
-        <div class="relative">
-          <Calendar v-if="shouldShowRendezvous && (activeTab === 'cart' || activeTab === 'rendezvous')" class="w-6 h-6 mb-1" />
-          <Calendar v-else-if="shouldShowRendezvous" class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
-          <ShoppingBag v-else-if="activeTab === 'cart'" class="w-6 h-6 mb-1" />
-          <ShoppingBag v-else class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+          <ShoppingCart v-if="activeTab === 'cart'" class="w-6 h-6" />
+          <ShoppingCart v-else class="w-5 h-5 group-hover:scale-110 transition-transform" />
           
           <!-- Cart item count badge -->
           <span 
-            v-if="!shouldShowRendezvous && cart.cartItemCount > 0"
+            v-if="cart.cartItemCount > 0"
             class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-sm"
           >
             {{ cart.cartItemCount > 99 ? '99+' : cart.cartItemCount }}
           </span>
           
+          <div 
+            v-if="activeTab === 'cart'" 
+            class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
+            style="background: linear-gradient(to right, #2563eb, #9333ea);"
+          ></div>
+        </div>
+      </router-link>
+
+      <!-- Rendezvous Tab - Always shown -->
+      <router-link 
+        :to="{ name: 'Rendezvous' }"
+        class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
+        :class="activeTab === 'rendezvous' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+      >
+        <div class="relative">
+          <Calendar v-if="activeTab === 'rendezvous'" class="w-6 h-6" />
+          <Calendar v-else class="w-5 h-5 group-hover:scale-110 transition-transform" />
+          
           <!-- Viewing requests badge -->
           <span 
-            v-if="shouldShowRendezvous && pendingViewingRequests > 0"
+            v-if="pendingViewingRequests > 0"
             class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-sm"
           >
             {{ pendingViewingRequests > 99 ? '99+' : pendingViewingRequests }}
           </span>
           
           <div 
-            v-if="activeTab === 'cart' || activeTab === 'rendezvous'" 
+            v-if="activeTab === 'rendezvous'" 
             class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
             style="background: linear-gradient(to right, #2563eb, #9333ea);"
           ></div>
         </div>
-        <span class="font-medium">{{ shouldShowRendezvous ? 'Rendezvous' : 'Cart' }}</span>
       </router-link>
 
-             <!-- Store selector -->
-       <button 
-         @click="openStoreDialog"
-         class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
-         :class="activeTab === 'store' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
-         type="button"
-       >
-                   <div class="relative">
-            <component :is="defaultStoreIcon" v-if="activeTab === 'store'" class="w-6 h-6 mb-1" />
-            <component :is="defaultStoreIcon" v-else class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
-           <div 
-             v-if="activeTab === 'store'" 
-             class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
-             style="background: linear-gradient(to right, #2563eb, #9333ea);"
-           ></div>
-         </div>
-         <span class="font-medium">Store</span>
-       </button>
+      <!-- More menu button -->
+      <button 
+        @click="openMoreMenu"
+        class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
+        :class="showMoreMenu ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+        type="button"
+      >
+        <div class="relative">
+          <MoreVertical v-if="showMoreMenu" class="w-6 h-6" />
+          <MoreVertical v-else class="w-5 h-5 group-hover:scale-110 transition-transform" />
+          <div 
+            v-if="showMoreMenu" 
+            class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
+            style="background: linear-gradient(to right, #2563eb, #9333ea);"
+          ></div>
+        </div>
+      </button>
     </div>
   </nav>
 
-  <!-- Store category floating selector -->
-  <div v-if="showStoreDialog" class="fixed inset-0 z-[60]">
-    <div class="absolute inset-0 bg-black/50" @click="closeStoreDialog"></div>
-    <div class="absolute right-4 bottom-20 space-y-3 flex flex-col items-end">
-      <button
-        v-for="cat in storeCategories"
-        :key="cat.id"
-        @click="selectStore(cat.id)"
-                 class="flex items-center space-x-3 p-3 rounded-full shadow-lg hover:shadow-xl transition-all"
-         :class="isDefault(cat.id) ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' : 'bg-white'"
-         :style="isDefault(cat.id) ? 'background: linear-gradient(to right, #2563eb, #9333ea);' : 'background: white;'"
-      >
-        <div class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center">
-          <component :is="getCategoryIcon(cat.name)" class="w-4 h-4 text-slate-600" />
+  <!-- More Menu Drawer (Right Side) -->
+  <Transition name="slide-left">
+    <div v-if="showMoreMenu" class="fixed inset-0 z-[60]">
+      <div class="absolute inset-0 bg-black/40" @click="closeMoreMenu"></div>
+      <div class="absolute right-0 top-0 bottom-0 w-72 bg-gray-100 flex flex-col">
+        <!-- Header -->
+        <div class="px-6 py-5 border-b border-gray-300">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-[#333333] rounded-lg flex items-center justify-center">
+                <span class="text-white font-bold text-lg">w</span>
+              </div>
+              <h2 class="text-base font-normal text-[#333333]">weCare</h2>
+            </div>
+            <button 
+              @click="navigateToNotification"
+              class="relative w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded transition-colors"
+            >
+              <Bell class="w-5 h-5 text-[#333333]" />
+              <span 
+                v-if="notification.hasUnreadNotifications"
+                class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold"
+              >
+                {{ notification.unreadCount > 99 ? '99+' : notification.unreadCount }}
+              </span>
+            </button>
+          </div>
         </div>
-        <span class="font-medium text-slate-800" :style="isDefault(cat.id) ? 'color: white;' : 'color: black;'">{{ cat.name }}</span>
-      </button>
+
+        <!-- Main Navigation -->
+        <div class="flex-1 px-6 py-4 border-b border-gray-300">
+          <div class="space-y-1">
+            <!-- Orders -->
+            <router-link 
+              :to="{ name: 'Orders' }"
+              @click="closeMoreMenu"
+              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
+              :class="activeTab === 'orders' ? 'bg-gray-200' : ''"
+            >
+              <Package class="w-5 h-5 text-[#333333]" />
+              <span class="text-base font-semibold text-[#333333]">Orders</span>
+            </router-link>
+            
+            <!-- My Ads -->
+            <router-link 
+              :to="{ name: 'MyListings' }"
+              @click="closeMoreMenu"
+              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
+            >
+              <Megaphone class="w-5 h-5 text-[#333333]" />
+              <span class="text-base font-semibold text-[#333333]">My Ads</span>
+            </router-link>
+            
+            <!-- Inquiries -->
+            <router-link 
+              :to="{ name: 'ListingInquiries' }"
+              @click="closeMoreMenu"
+              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group relative"
+            >
+              <div class="relative">
+                <MessageSquareQuote class="w-5 h-5 text-[#333333]" />
+                <span 
+                  v-if="listingStore.unreadInquiriesCount > 0"
+                  class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold"
+                >
+                  {{ listingStore.unreadInquiriesCount > 99 ? '99+' : listingStore.unreadInquiriesCount }}
+                </span>
+              </div>
+              <span class="text-base font-semibold text-[#333333]">Inquiries</span>
+            </router-link>
+            
+            <!-- Messages -->
+            <router-link 
+              :to="{ name: 'Messages' }"
+              @click="closeMoreMenu"
+              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
+            >
+              <MessageCircle class="w-5 h-5 text-[#333333]" />
+              <span class="text-base font-semibold text-[#333333]">Messages</span>
+            </router-link>
+            
+            <!-- Likes -->
+            <router-link 
+              :to="{ name: 'LikedProducts' }"
+              @click="closeMoreMenu"
+              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
+            >
+              <Heart class="w-5 h-5 text-[#333333]" />
+              <span class="text-base font-semibold text-[#333333]">Likes</span>
+            </router-link>
+          </div>
+        </div>
+
+        <!-- Bottom Section -->
+        <div class="px-6 pb-6 pt-4">
+          <div class="space-y-1">
+            <!-- User Info -->
+            <button 
+              @click="navigateToProfile"
+              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
+            >
+              <div class="w-8 h-8 rounded-xl bg-[#E0B95B] flex items-center justify-center overflow-hidden">
+                <img 
+                  v-if="auth.user?.profile_picture" 
+                  :src="auth.user.profile_picture" 
+                  alt="User" 
+                  class="w-full h-full object-cover"
+                />
+                <span v-else class="text-[#333333] font-semibold text-sm">
+                  {{ auth.user?.first_name?.charAt(0)?.toUpperCase() || auth.user?.email?.charAt(0)?.toUpperCase() || 'U' }}
+                </span>
+              </div>
+              <span class="text-base font-semibold text-[#333333]">
+                {{ auth.user?.first_name && auth.user?.last_name 
+                  ? `${auth.user.first_name} ${auth.user.last_name}` 
+                  : auth.user?.email?.split('@')[0] || 'User' }}
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useNotificationStore } from '@/stores/notification'
 import { useCRMStore } from '@/stores/crm'
 import { usePharmacyStore } from '@/stores/pharmacy'
-import { Home, Telescope, Package, ShoppingBag, Store, Sparkles, Shirt, Pill, Sofa, Monitor, Car, Calendar } from 'lucide-vue-next'
+import { useAuthStore } from '@/stores/auth'
+import { useListingStore } from '@/stores/listing'
+import { Home, Search, Receipt, ShoppingCart, Store, Sparkles, Shirt, Pill, Sofa, Monitor, Car, Calendar, MoreVertical, Bell, User, X, ChevronRight, Package, MessageCircle, MessageSquareQuote, Megaphone } from 'lucide-vue-next'
 import apiService from '@/services/api'
 
 const route = useRoute()
+const router = useRouter()
 const cart = useCartStore()
 const notification = useNotificationStore()
 const crmStore = useCRMStore()
 const pharmacyStore = usePharmacyStore()
+const auth = useAuthStore()
+const listingStore = useListingStore()
 
 const activeTab = ref('home')
 
@@ -164,6 +266,7 @@ const shouldHideExploreAndCart = computed(() => pharmacyStore.shouldHideExploreA
 const updateActiveTab = () => {
   const routeTabMap = {
     'Home': 'home',
+    'StoreCategory': 'storecategory',
     'Explore': 'explore',
     'Orders': 'orders',
     'Cart': 'cart',
@@ -183,6 +286,13 @@ onMounted(async () => {
     
     // Initialize notification store
     await notification.init()
+    
+    // Fetch seller inquiries to get unread count
+    try {
+      await listingStore.fetchSellerInquiries()
+    } catch (error) {
+      console.warn('Failed to fetch seller inquiries:', error)
+    }
     
     // Load store categories to ensure default store icon is displayed
     if (sessionStorage.getItem('defaultStore')) {
@@ -231,9 +341,37 @@ onUnmounted(() => {
   window.removeEventListener('storage', handleStorageChange)
 })
 
+// More menu state
+const showMoreMenu = ref(false)
+
 // Store dialog state
 const showStoreDialog = ref(false)
 const storeCategories = ref([])
+
+const openMoreMenu = async () => {
+  showMoreMenu.value = true
+  // Refresh inquiries count when opening the menu
+  try {
+    await listingStore.fetchSellerInquiries()
+  } catch (error) {
+    console.warn('Failed to refresh seller inquiries:', error)
+  }
+}
+
+const closeMoreMenu = () => {
+  showMoreMenu.value = false
+  updateActiveTab()
+}
+
+const navigateToNotification = () => {
+  closeMoreMenu()
+  router.push({ name: 'Notification' })
+}
+
+const navigateToProfile = () => {
+  closeMoreMenu()
+  router.push({ name: 'Profile' })
+}
 
 const openStoreDialog = async () => {
   activeTab.value = 'store'
@@ -314,5 +452,17 @@ const defaultStoreIcon = computed(() => getDefaultStoreIcon())
 </script>
 
 <style scoped>
-/* Additional styles if needed */
+/* Slide left animation for drawer */
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-left-enter-from .absolute.right-0 {
+  transform: translateX(100%);
+}
+
+.slide-left-leave-to .absolute.right-0 {
+  transform: translateX(100%);
+}
 </style> 

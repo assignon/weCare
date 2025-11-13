@@ -1,10 +1,10 @@
 <template>
   <div>
     <!-- Normal Home Interface -->
-    <div v-if="!shouldShowPharmacyInterface" class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <div class="p-4 pb-24">
+    <div v-if="!shouldShowPharmacyInterface" class="min-h-screen bg-white">
+      <div class="p-4 pb-24 pt-20">
       <!-- Enhanced Header -->
-      <AppHeader />
+      <AppHeader v-if="!shouldShowPharmacyInterface" />
 
       <!-- Select Default Store Category Dialog -->
       <Transition name="dialog">
@@ -17,9 +17,7 @@
               <p class="text-center text-slate-600 text-sm leading-relaxed">Select a store category to personalize your shopping experience</p>
               <div class="mt-3 text-center">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
-                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                  </svg>
+                  <AlertTriangle class="w-3 h-3 mr-1" />
                   Required
                 </span>
               </div>
@@ -33,18 +31,14 @@
                         class="group w-full text-left p-4 rounded-2xl border border-slate-200/60 hover:border-blue-400 hover:bg-gradient-to-r hover:from-blue-50/80 hover:to-indigo-50/80 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] bg-white/80 backdrop-blur-sm">
                   <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center group-hover:from-blue-100 group-hover:to-indigo-100 transition-all duration-300">
-                      <svg class="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                      </svg>
+                      <Tag class="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors duration-300" />
                     </div>
                     <div class="flex-1">
                       <div class="font-semibold text-slate-900 group-hover:text-blue-900 transition-colors duration-300">{{ cat.name }}</div>
                       <div class="text-xs text-slate-500 group-hover:text-blue-600 transition-colors duration-300">{{ cat.description || 'Explore amazing products' }}</div>
                     </div>
                     <div class="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors duration-300">
-                      <svg class="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                      </svg>
+                      <ChevronRight class="w-full h-full" />
                     </div>
                   </div>
                 </button>
@@ -55,9 +49,7 @@
             <div class="px-8 pb-8">
               <div class="text-center">
                 <div class="inline-flex items-center space-x-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-xl">
-                  <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
+                  <Info class="w-4 h-4 text-blue-600" />
                   <span class="text-sm text-blue-700 font-medium">Please select a store category to continue</span>
                 </div>
               </div>
@@ -95,29 +87,54 @@
 
         <!-- Popular products with horizontal scroll -->
         <div v-else class="overflow-x-auto overflow-y-hidden scrollbar-hide">
-          <div class="flex gap-4 pb-2">
+          <div class="flex gap-3 pb-2">
             <div 
               v-for="product in productStore.popularProducts.slice(0, 10)" 
               :key="product.id"
-              class="flex-shrink-0 w-44 bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-100 hover:border-gray-200"
-              @click="navigateToDetails(product.id)"
+              class="flex-shrink-0 w-44 flex flex-col"
             >
-              <div class="relative">
+              <!-- Product Card - Only contains image -->
+              <div 
+                @click="navigateToDetails(product.id, product.item_type)"
+                class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square cursor-pointer relative"
+              >
                 <img 
                   :src="product.main_image || packagingImage" 
-                  class="w-full h-40 object-cover" 
-                  alt="Product"
+                  :alt="product.name"
+                  class="w-full h-full object-cover rounded-lg"
                 />
-                <div class="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
-                  <span class="text-xs font-bold text-slate-700">🔥</span>
-                </div>
+                <!-- Verified Badge (only for verified store products) -->
+                <button
+                  v-if="product.item_type === 'store_product' && product.seller_is_verified && product.seller_account_status === 'APPROVED'"
+                  @click.stop="showVerificationDialog = true; selectedProduct = product"
+                  class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all z-10"
+                >
+                  <BadgeCheck class="w-4 h-4 text-blue-600" />
+                </button>
               </div>
-              <div class="p-3">
-                <h3 class="text-sm font-medium mb-1 line-clamp-2 capitalize text-slate-900">{{ product.name }}</h3>
-                <p class="text-xs text-slate-600 mb-2 truncate">{{ product.seller_name || 'weCare' }}</p>
-                <div class="flex justify-between items-center">
-                  <span class="text-sm font-semibold text-blue-600">
+              
+              <!-- Product Info - Outside the card -->
+              <div class="space-y-1">
+                <!-- Store Name Caption (only for store products, not shopper listings) -->
+                <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
+                  {{ product.seller_name || product.store_name || 'weCare' }}
+                </p>
+                
+                <!-- Product Name -->
+                <h3 
+                  @click="navigateToDetails(product.id, product.item_type)"
+                  class="font-bold text-xs text-gray-900 mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors capitalize"
+                >
+                  {{ product.name }}
+                </h3>
+                
+                <!-- Price and Quantity -->
+                <div class="flex items-center justify-between">
+                  <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
                     {{ formatApiPrice(product) }}
+                    <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
+                      / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
+                    </span>
                   </span>
                 </div>
               </div>
@@ -155,44 +172,120 @@
 
         <!-- New arrivals with horizontal scroll -->
         <div v-else class="overflow-x-auto overflow-y-hidden scrollbar-hide">
-          <div class="flex gap-4 pb-2">
+          <div class="flex gap-3 pb-2">
             <div 
               v-for="product in productStore.newArrivals.slice(0, 10)" 
               :key="product.id"
-              class="flex-shrink-0 w-72 h-40 bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-100 hover:border-gray-200"
-              @click="navigateToDetails(product.id)"
+              class="flex-shrink-0 w-44 flex flex-col"
             >
-              <div class="flex h-full">
-                <div class="relative w-32 h-full flex-shrink-0">
-                  <img 
-                    :src="product.main_image || packagingImage" 
-                    class="w-full h-full object-cover" 
-                    alt="Product"
-                  />
-                  <div class="absolute top-2 left-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
-                    <span class="text-xs font-bold text-slate-700">✨</span>
-                  </div>
-                </div>
-                <div class="p-4 flex flex-col justify-between flex-1">
-                  <div>
-                    <h3 class="text-sm font-medium mb-1 line-clamp-2 capitalize text-slate-900">{{ product.name }}</h3>
-                    <p class="text-xs text-slate-600 mb-2 truncate">{{ product.seller_name || 'weCare' }}</p>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <span 
-                        v-if="product.original_price && product.original_price > product.price"
-                        class="text-xs line-through text-slate-500 mr-2"
-                      >
-                        {{ formatApiPrice({ price: product.original_price }) }}
-                      </span>
-                      <span class="text-sm font-semibold text-blue-600">
-                        {{ formatApiPrice(product) }}
-                      </span>
-                    </div>
-                  </div>
+              <!-- Product Card - Only contains image -->
+              <div 
+                @click="navigateToDetails(product.id, product.item_type)"
+                class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square cursor-pointer relative"
+              >
+                <img 
+                  :src="product.main_image || packagingImage" 
+                  :alt="product.name"
+                  class="w-full h-full object-cover rounded-lg"
+                />
+                <!-- Verified Badge (only for verified store products) -->
+                <button
+                  v-if="product.item_type === 'store_product' && product.seller_is_verified && product.seller_account_status === 'APPROVED'"
+                  @click.stop="showVerificationDialog = true; selectedProduct = product"
+                  class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all z-10"
+                >
+                  <BadgeCheck class="w-4 h-4 text-blue-600" />
+                </button>
+              </div>
+              
+              <!-- Product Info - Outside the card -->
+              <div class="space-y-1">
+                <!-- Store Name Caption (only for store products, not shopper listings) -->
+                <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
+                  {{ product.seller_name || product.store_name || 'weCare' }}
+                </p>
+                
+                <!-- Product Name -->
+                <h3 
+                  @click="navigateToDetails(product.id, product.item_type)"
+                  class="font-bold text-xs text-gray-900 mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors capitalize"
+                >
+                  {{ product.name }}
+                </h3>
+                
+                <!-- Price and Quantity -->
+                <div class="flex items-center justify-between">
+                  <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
+                    {{ formatApiPrice(product) }}
+                    <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
+                      / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
+                    </span>
+                  </span>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- All Products Section -->
+      <div v-if="allProducts.length > 0" class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 mb-1">All Products</h2>
+            <p class="text-sm text-slate-600">Browse all available products</p>
+          </div>
+        </div>
+
+        <!-- All products grid -->
+        <div class="grid grid-cols-2 gap-3">
+          <div 
+            v-for="product in allProducts" 
+            :key="product.id" 
+            class="flex flex-col"
+          >
+            <!-- Product Card - Only contains image -->
+            <div class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square relative">
+              <img 
+                @click="navigateToDetails(product.id, product.item_type)"
+                :src="product.main_image || packagingImage" 
+                :alt="product.name"
+                class="w-full h-full object-cover rounded-lg"
+              />
+              <!-- Verified Badge (for all approved store products) -->
+              <button
+                v-if="product.item_type === 'store_product' && product.seller_account_status === 'APPROVED'"
+                @click.stop="showVerificationDialog = true; selectedProduct = product"
+                class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all z-10"
+              >
+                <BadgeCheck class="w-4 h-4 text-blue-600" />
+              </button>
+            </div>
+            
+            <!-- Product Info - Outside the card -->
+            <div class="space-y-1">
+              <!-- Store Name Caption (only for store products, not shopper listings) -->
+              <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
+                {{ product.seller_name || product.store_name || 'weCare' }}
+              </p>
+              
+              <!-- Product Name -->
+              <h3 
+                @click="navigateToDetails(product.id, product.item_type)"
+                class="font-bold text-xs text-gray-900 mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors capitalize"
+              >
+                {{ product.name }}
+              </h3>
+              
+                <!-- Price and Quantity -->
+                <div class="flex items-center justify-between">
+                  <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
+                    {{ formatApiPrice(product) }}
+                    <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
+                      / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
+                    </span>
+                  </span>
+                </div>
             </div>
           </div>
         </div>
@@ -227,29 +320,54 @@
 
         <!-- Recommended products in 2x2 grid -->
         <div v-else>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-2 gap-3">
             <div 
               v-for="product in productStore.recommendedProducts.slice(0, 4)" 
               :key="product.id"
-              class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-100 hover:border-gray-200"
-              @click="navigateToDetails(product.id)"
+              class="flex flex-col"
             >
-              <div class="relative">
+              <!-- Product Card - Only contains image -->
+              <div 
+                @click="navigateToDetails(product.id, product.item_type)"
+                class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square cursor-pointer relative"
+              >
                 <img 
                   :src="product.main_image || packagingImage" 
-                  class="w-full h-32 object-cover" 
-                  alt="Product"
+                  :alt="product.name"
+                  class="w-full h-full object-cover rounded-lg"
                 />
-                <div class="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
-                  <span class="text-xs font-bold text-slate-700">💫</span>
-                </div>
+                <!-- Verified Badge (only for verified store products) -->
+                <button
+                  v-if="product.item_type === 'store_product' && product.seller_is_verified && product.seller_account_status === 'APPROVED'"
+                  @click.stop="showVerificationDialog = true; selectedProduct = product"
+                  class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all z-10"
+                >
+                  <BadgeCheck class="w-4 h-4 text-blue-600" />
+                </button>
               </div>
-              <div class="p-3">
-                <h3 class="text-xs font-medium mb-1 line-clamp-2 capitalize text-slate-900">{{ product.name }}</h3>
-                <p class="text-xs text-slate-600 mb-2 truncate">{{ product.seller_name || 'weCare' }}</p>
-                <div class="flex justify-between items-center">
-                  <span class="text-sm font-semibold text-blue-600">
+              
+              <!-- Product Info - Outside the card -->
+              <div class="space-y-1">
+                <!-- Store Name Caption (only for store products, not shopper listings) -->
+                <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
+                  {{ product.seller_name || product.store_name || 'weCare' }}
+                </p>
+                
+                <!-- Product Name -->
+                <h3 
+                  @click="navigateToDetails(product.id, product.item_type)"
+                  class="font-bold text-xs text-gray-900 mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors capitalize"
+                >
+                  {{ product.name }}
+                </h3>
+                
+                <!-- Price and Quantity -->
+                <div class="flex items-center justify-between">
+                  <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
                     {{ formatApiPrice(product) }}
+                    <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
+                      / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
+                    </span>
                   </span>
                 </div>
               </div>
@@ -264,11 +382,6 @@
     <div v-else class="pharmacy-map-container relative">
       <!-- Full-screen OpenStreetMap -->
       <div id="pharmacy-map" class="w-full pharmacy-map-height"></div>
-      
-      <!-- Header overlay on map -->
-      <div class="absolute top-0 left-0 right-0 z-50 p-4">
-        <AppHeader />
-      </div>
       
       
       <!-- Search animation overlay on map -->
@@ -308,16 +421,11 @@
           <div class="flex-1 max-w-xs">
             <div class="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
               <div class="flex items-center justify-center space-x-2">
-                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
+                <MapPin class="w-4 h-4 text-blue-600" />
                 <span class="text-sm font-medium text-slate-700">{{ currentLocationText }}</span>
                 <!-- Pharmacy Count -->
                 <div class="pharmacy-count-inline">
-                  <svg class="pharmacy-count-icon-inline" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 8h-2V6a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v2H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1zM9 6h6v2H9V6zm8 12H7v-8h10v8zm-7-6h4v1h-4v-1zm0 2h4v1h-4v-1z"/>
-                  </svg>
+                  <Package class="pharmacy-count-icon-inline w-3.5 h-3.5" />
                   <span class="pharmacy-count-number pharmacy-count">0</span>
                 </div>
               </div>
@@ -354,10 +462,9 @@
           <div v-if="pharmacyRequestState === 'searching' && hasActiveSession" class="p-6 flex-1 overflow-y-auto">
             <div class="text-center">
               <div class="w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center mx-auto mb-4 shadow-lg animate-pulse">
-                <svg class="w-10 h-10 text-white animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <div class="animate-spin">
+                  <RefreshCw class="w-10 h-10 text-white" />
+                </div>
               </div>
               <h3 class="text-2xl font-bold text-slate-900 mb-2">Searching for Pharmacies</h3>
               <p class="text-base text-slate-600 mb-4">Finding the best pharmacy near you...</p>
@@ -381,9 +488,7 @@
           <div v-else-if="pharmacyRequestState === 'seller_acknowledged' && activeSession?.sellerData" class="p-6 flex-1 overflow-y-auto">
             <div class="text-center mb-6">
               <div class="w-20 h-20 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
+                <CheckCircle class="w-10 h-10 text-white" />
               </div>
               <h3 class="text-2xl font-bold text-slate-900 mb-2">Pharmacy Found! ✅</h3>
               <p class="text-base text-slate-600">Waiting for an offer...</p>
@@ -456,9 +561,7 @@
                   @click="selectPickupOption({ ...activeSession.sellerData, requestId: activeSession.requestId })"
                   class="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 flex items-center justify-center space-x-2"
                 >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                  </svg>
+                  <Package class="w-5 h-5" />
                   <span>Pick Up Myself</span>
                 </button>
                 
@@ -467,9 +570,7 @@
                   @click="selectDeliveryOption({ ...activeSession.sellerData, requestId: activeSession.requestId })"
                   class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 flex items-center justify-center space-x-2"
                 >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                  </svg>
+                  <Truck class="w-5 h-5" />
                   <span>Use AfriQExpress Delivery</span>
                 </button>
               </div>
@@ -547,9 +648,7 @@
                     class="ml-3 p-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-sm hover:shadow-md"
                     title="Chat with pharmacy"
                   >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                    </svg>
+                    <MessageCircle class="w-5 h-5" />
                   </button>
                 </div>
                 
@@ -597,9 +696,7 @@
           <div v-if="foundSellers.some(s => s.status === 'acknowledged') && !foundSellers.some(s => s.status === 'offered')" class="p-6 flex-1 overflow-y-auto">
             <div class="text-center mb-6">
               <div class="w-20 h-20 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
+                <CheckCircle class="w-10 h-10 text-white" />
               </div>
               <h3 class="text-2xl font-bold text-slate-900 mb-2">Seller Found</h3>
               <p class="text-base text-slate-600">Waiting for an offer from seller</p>
@@ -687,9 +784,7 @@
                     @click="selectPickupOption(seller)"
                     class="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 flex items-center justify-center space-x-2"
                   >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                    </svg>
+                    <Package class="w-5 h-5" />
                     <span>Pick Up Myself</span>
                   </button>
                   
@@ -698,9 +793,7 @@
                     @click="selectDeliveryOption(seller)"
                     class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 flex items-center justify-center space-x-2"
                   >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                    </svg>
+                    <Truck class="w-5 h-5" />
                     <span>Use AfriQExpress Delivery</span>
                   </button>
                 </div>
@@ -791,9 +884,7 @@
                     </div>
                     <button @click.stop="removeMedicine(medicine.id)" 
                       class="w-6 h-6 bg-red-100 hover:bg-red-200 rounded-full flex items-center justify-center transition-colors duration-200">
-                      <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                      </svg>
+                      <X class="w-3 h-3 text-red-600" />
                     </button>
                   </div>
                 </div>
@@ -839,9 +930,7 @@
                 <p v-if="isEditing" class="text-sm text-blue-600 mt-1">Updating existing medicine request</p>
               </div>
               <button @click="cancelEdit" class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center">
-                <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
+                <ChevronDown class="w-4 h-4 text-slate-600" />
               </button>
             </div>
 
@@ -1032,19 +1121,14 @@
                           <!-- Additional pharmacy info -->
                           <div class="mt-1 space-y-1">
                             <div class="flex items-center space-x-2 text-xs text-slate-600">
-                              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                              </svg>
+                              <MapPin class="w-3 h-3" />
                               <span>{{ seller.distance || seller.delivery_radius || 'Nearby' }}</span>
                               <span v-if="seller.response_time" class="w-1 h-1 bg-slate-400 rounded-full"></span>
                               <span v-if="seller.response_time">{{ seller.response_time }}</span>
                             </div>
                             
                             <div v-if="seller.phone_number" class="flex items-center space-x-2 text-xs text-slate-600">
-                              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                              </svg>
+                              <Phone class="w-3 h-3" />
                               <span>{{ seller.phone_number }}</span>
                             </div>
                           </div>
@@ -1079,10 +1163,7 @@
                         class="p-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 shadow-md hover:shadow-lg"
                         title="View offer"
                       >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                        </svg>
+                        <Eye class="w-5 h-5" />
                       </button>
                       
                       <!-- Chat Button -->
@@ -1092,9 +1173,7 @@
                         class="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-sm hover:shadow-md"
                         title="Chat with pharmacy"
                       >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                        </svg>
+                        <MessageCircle class="w-5 h-5" />
                       </button>
                       
                       <!-- Call Button -->
@@ -1104,9 +1183,7 @@
                         class="p-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-sm hover:shadow-md"
                         title="Call pharmacy"
                       >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                        </svg>
+                        <Phone class="w-5 h-5" />
                       </button>
                     </div>
                   </div>
@@ -1182,9 +1259,7 @@
       <div v-if="showRetryOptions" class="absolute inset-0 bg-black/50 backdrop-blur-sm z-70 flex items-center justify-center">
         <div class="bg-white rounded-3xl p-8 mx-4 max-w-sm w-full text-center shadow-2xl">
           <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>
-            </svg>
+            <AlertTriangle class="w-8 h-8 text-yellow-600" />
           </div>
           <h3 class="text-lg font-bold text-slate-900 mb-2">No Pharmacies Found</h3>
           <p class="text-sm text-slate-600 mb-6">No pharmacies responded within {{ searchRadius }}km. Your request has been sent to our admin team.</p>
@@ -1214,9 +1289,7 @@
           <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-200">
             <h3 class="text-xl font-bold text-slate-900">Pharmacy Offers</h3>
             <button @click="closeOffersModal" class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center hover:bg-slate-200 transition-colors">
-              <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
+              <X class="w-4 h-4 text-slate-600" />
             </button>
           </div>
           
@@ -1230,9 +1303,7 @@
                   <div class="flex items-center space-x-2 mt-1">
                     <!-- Rating -->
                     <div class="flex items-center">
-                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                      </svg>
+                      <Star class="w-4 h-4 text-yellow-400 fill-current" />
                       <span class="text-sm text-slate-600 ml-1">{{ offer.pharmacy_rating || '4.5' }}</span>
                     </div>
                     <!-- Distance -->
@@ -1258,9 +1329,7 @@
                   Accept Offer
                 </button>
                 <button @click="chatWithPharmacy(offer)" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-colors">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                  </svg>
+                  <MessageCircle class="w-4 h-4" />
                 </button>
                 <button @click="callPharmacy(offer)" class="px-4 py-2 bg-green-100 text-green-700 rounded-xl hover:bg-green-200 transition-colors">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1268,10 +1337,7 @@
                   </svg>
                 </button>
                 <button @click="viewRoute(offer)" class="px-4 py-2 bg-purple-100 text-purple-700 rounded-xl hover:bg-purple-200 transition-colors">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  </svg>
+                  <MapPin class="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -1280,9 +1346,7 @@
           <!-- No Offers Message -->
           <div v-if="pharmacyOffers.length === 0" class="text-center py-8">
             <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-2.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 009.586 13H7"></path>
-              </svg>
+              <Package class="w-8 h-8 text-slate-400" />
             </div>
             <p class="text-slate-600">No offers received yet...</p>
           </div>
@@ -1304,9 +1368,7 @@
               </div>
             </div>
             <button @click="closeChat" class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center hover:bg-slate-200 transition-colors">
-              <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
+              <X class="w-4 h-4 text-slate-600" />
             </button>
           </div>
           
@@ -1342,9 +1404,7 @@
                 :disabled="!newChatMessage.trim()"
                 class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full flex items-center justify-center hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                </svg>
+                <Send class="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -1357,9 +1417,7 @@
           <!-- Header -->
           <div class="text-center mb-6">
             <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-              </svg>
+              <RefreshCw class="w-8 h-8 text-blue-600" />
             </div>
             <h3 class="text-xl font-bold text-slate-900 mb-2">Choose Delivery Option</h3>
             <p class="text-sm text-slate-600">How would you like to receive your medicines?</p>
@@ -1371,9 +1429,7 @@
             <button @click="chooseDelivery" class="w-full p-4 border-2 border-slate-200 rounded-2xl text-left hover:border-blue-300 hover:bg-blue-50 transition-all group">
               <div class="flex items-start space-x-4">
                 <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
+                  <Info class="w-6 h-6 text-blue-600" />
                 </div>
                 <div class="flex-1">
                   <h4 class="font-semibold text-slate-900 mb-1">Delivery Service</h4>
@@ -1395,10 +1451,7 @@
             <button @click="choosePickup" class="w-full p-4 border-2 border-slate-200 rounded-2xl text-left hover:border-green-300 hover:bg-green-50 transition-all group">
               <div class="flex items-start space-x-4">
                 <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center group-hover:bg-green-200 transition-colors">
-                  <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  </svg>
+                  <MapPin class="w-6 h-6 text-green-600" />
                 </div>
                 <div class="flex-1">
                   <h4 class="font-semibold text-slate-900 mb-1">Pick up myself</h4>
@@ -1443,6 +1496,37 @@
         </div>
       </div>
     </div>
+
+    <!-- Verification Dialog -->
+    <Transition name="dialog">
+      <div v-if="showVerificationDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showVerificationDialog = false"></div>
+        <div class="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 w-full max-w-md transform transition-all duration-300">
+          <!-- Header -->
+          <div class="p-6 pb-4">
+            <div class="flex items-center justify-center mb-4">
+              <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                <BadgeCheck class="w-8 h-8 text-blue-600" />
+              </div>
+            </div>
+            <h3 class="text-xl font-bold text-center text-slate-900 mb-2">Verified by AfriQExpress</h3>
+            <p class="text-center text-slate-600 text-sm leading-relaxed">
+              This product and seller have been verified by AfriQExpress. You can shop with confidence knowing that this seller has been authenticated and approved.
+            </p>
+          </div>
+
+          <!-- Actions -->
+          <div class="p-6 pt-4">
+            <button
+              @click="showVerificationDialog = false"
+              class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -1460,6 +1544,13 @@ import AppHeader from '@/components/AppHeader.vue'
 import apiService from '@/services/api'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { 
+  Flag, AlertTriangle, Tag, ChevronRight, ChevronDown, Info, MapPin, Truck, 
+  Package, CheckCircle, XCircle, Clock, Star, Phone, Mail, BadgeCheck,
+  Navigation, ArrowRight, ArrowLeft, Plus, Minus, X, Search,
+  Heart, Share2, ShoppingCart, User, Bell, Settings, LogOut,
+  RefreshCw, Loader2, MessageCircle, Eye, Send
+} from 'lucide-vue-next'
 
 const productStore = useProductStore()
 const cart = useCartStore()
@@ -1473,6 +1564,9 @@ const loading = computed(() => productStore.loading)
 const error = computed(() => productStore.error)
 const showStoreDialog = ref(false)
 const storeCategories = ref([])
+const allProducts = ref([])
+const showVerificationDialog = ref(false)
+const selectedProduct = ref(null)
 
 // Check if pharmacy interface should be shown
 const shouldShowPharmacyInterface = computed(() => pharmacyStore.shouldShowPharmacyInterface)
@@ -1683,8 +1777,12 @@ const navigateToProfile = () => {
   router.push({ name: 'Profile' })
 }
 
-const navigateToDetails = (productId) => {
-  router.push({ name: 'ProductDetails', params: { id: productId } })
+const navigateToDetails = (productId, itemType = 'store_product') => {
+  if (itemType === 'shopper_listing') {
+    router.push({ name: 'ShopperProduct', params: { id: productId } })
+  } else {
+    router.push({ name: 'ProductDetails', params: { id: productId } })
+  }
 }
 
 // Developer helper function to clear stuck sessions
@@ -1742,22 +1840,18 @@ onMounted(async () => {
         console.warn('Failed to load store categories on Home:', e)
       }
 
-    // Fetch popular products, new arrivals, and store-filtered products
-    const defaultStore = sessionStorage.getItem('defaultStore')
-    const params = defaultStore ? { store_category: defaultStore } : {}
+    // Fetch popular products, new arrivals, and all products (no store filter)
     await Promise.all([
-      productStore.fetchPopularProducts(params),
-      productStore.fetchNewArrivals(params),
+      productStore.fetchPopularProducts({}),
+      productStore.fetchNewArrivals({}),
     ])
 
-    // Fetch products for selected store category (defaultStore) for home sections
-    if (defaultStore && productStore.setStoreProducts) {
-      try {
-        const { data } = await apiService.getProducts({ store_category: defaultStore, page_size: 12 })
-        productStore.setStoreProducts(data?.results || data || [])
-      } catch (e) {
-        console.warn('Failed to load products by store category for home:', e)
-      }
+    // Fetch all products for "All Products" section
+    try {
+      const { data } = await apiService.getProducts({ page_size: 24 })
+      allProducts.value = data?.results || data || []
+    } catch (e) {
+      console.warn('Failed to load all products for home:', e)
     }
   } catch (error) {
     console.error('Error during Home page initialization:', error)

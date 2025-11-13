@@ -45,7 +45,7 @@ export const useProductStore = defineStore('product', () => {
   })
   
   // Actions
-  const fetchProducts = async (params = {}, append = false) => {
+  const fetchProducts = async (params = {}, append = false, skipStoreCategory = false) => {
     loading.value = true
     error.value = null
     
@@ -80,7 +80,8 @@ export const useProductStore = defineStore('product', () => {
         // Backend expects 'categories' filter for M2M
         allParams.categories = categoryId
       }
-      if (defaultStore && !allParams.store_category) {
+      // Only apply store category filter if skipStoreCategory is false
+      if (defaultStore && !allParams.store_category && !skipStoreCategory) {
         allParams.store_category = defaultStore
       }
       console.log('🚀 Making API call with final params:', allParams)
@@ -221,10 +222,10 @@ export const useProductStore = defineStore('product', () => {
     }
   }
   
-  const searchProducts = async (query) => {
+  const searchProducts = async (query, skipStoreCategory = false) => {
     searchQuery.value = query
     currentPage.value = 1
-    return await fetchProducts()
+    return await fetchProducts({}, false, skipStoreCategory)
   }
   
   const filterByCategory = async (categoryId) => {

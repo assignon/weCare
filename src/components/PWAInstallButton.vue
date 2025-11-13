@@ -1,6 +1,7 @@
 <template>
     <v-btn v-if="showInstallButton" @click="handleInstall" :loading="installing" color="primary" variant="outlined"
-        class="pwa-install-btn" prepend-icon="mdi-download">
+        class="pwa-install-btn">
+        <Download class="w-4 h-4 mr-2" />
         {{ installText }}
     </v-btn>
 </template>
@@ -8,6 +9,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import pwaService from '@/services/pwaService'
+import { Download } from 'lucide-vue-next'
 
 const props = defineProps({
     text: {

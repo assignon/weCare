@@ -13,7 +13,9 @@
                 item.currency_info }) }}</v-card-subtitle>
             <v-card-actions>
               <v-btn color="primary" @click="addToCart(item)">Add to Cart</v-btn>
-              <v-btn icon color="error" @click="wishlist.remove(item.id)"><v-icon>mdi-delete</v-icon></v-btn>
+              <v-btn icon color="error" @click="wishlist.remove(item.id)">
+                <Trash2 class="w-5 h-5" />
+              </v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
@@ -26,6 +28,7 @@
 import { useWishlistStore } from '@/stores/wishlist'
 import { useCartStore } from '@/stores/cart'
 import { useCurrency } from '@/composables/useCurrency'
+import { Trash2 } from 'lucide-vue-next'
 
 const wishlist = useWishlistStore()
 const cart = useCartStore()
