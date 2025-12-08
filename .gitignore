@@ -24,3 +24,10 @@ dist-ssr
 *.sw?
 .env
 .vscode/extensions.json
+nginx.conf
+*.md
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+README.docker.md
+test-*.js

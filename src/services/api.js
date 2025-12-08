@@ -1073,7 +1073,46 @@ export const apiService = {
 
   markMessagesAsRead(inquiryId) {
     return api.post(`/products/listing-messages/${inquiryId}/mark_read/`)
-  }
+  },
+
+  // ============================================
+  // Parcel Delivery API
+  // ============================================
+  
+  // Create parcel delivery request
+  createParcelDelivery(parcelData) {
+    return api.post('/delivery/parcels/', parcelData)
+  },
+
+  // Get list of parcel deliveries (user's parcels)
+  getParcelDeliveries(params = {}) {
+    return api.get('/delivery/parcels/', { params })
+  },
+
+  // Get parcel details
+  getParcelDetails(id) {
+    return api.get(`/delivery/parcels/${id}/`)
+  },
+
+  // Cancel parcel
+  cancelParcel(id, data = {}) {
+    return api.post(`/delivery/parcels/${id}/cancel/`, data)
+  },
+
+  // Calculate delivery cost
+  calculateParcelCost(data) {
+    return api.post('/delivery/parcels/calculate-cost/', data)
+  },
+
+  // Get active drivers with GPS coordinates
+  getActiveDrivers() {
+    return api.get('/delivery/driver-locations/', {
+      params: {
+        is_online: true,
+        is_available: true
+      }
+    })
+  },
 }
 
 // Export both the axios instance and apiService for flexibility

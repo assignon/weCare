@@ -49,6 +49,11 @@ const routes = [
   { path: '/messages', name: 'Messages', component: () => import('@/pages/Messages.vue'), meta: { requiresAuth: true } },
   { path: '/liked-products', name: 'LikedProducts', component: () => import('@/pages/LikedProducts.vue'), meta: { requiresAuth: true } },
   { path: '/listing-chat/:inquiryId', name: 'ListingChat', component: () => import('@/pages/ListingChat.vue'), meta: { requiresAuth: true } },
+  
+  // Parcel delivery routes
+  { path: '/send-parcel', name: 'SendParcel', component: () => import('@/pages/SendParcel.vue'), meta: { requiresAuth: true } },
+  { path: '/parcels', name: 'ParcelsList', component: () => import('@/pages/ParcelsList.vue'), meta: { requiresAuth: true } },
+  { path: '/parcel/:id', name: 'ParcelTracking', component: () => import('@/pages/ParcelTracking.vue'), meta: { requiresAuth: true } },
 ]
 
 const router = createRouter({

@@ -59,26 +59,18 @@
         </div>
       </router-link>
 
-      <!-- Rendezvous Tab - Always shown -->
+      <!-- Send Parcel Tab -->
       <router-link 
-        :to="{ name: 'Rendezvous' }"
+        :to="{ name: 'SendParcel' }"
         class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
-        :class="activeTab === 'rendezvous' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+        :class="activeTab === 'sendparcel' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
       >
         <div class="relative">
-          <Calendar v-if="activeTab === 'rendezvous'" class="w-6 h-6" />
-          <Calendar v-else class="w-5 h-5 group-hover:scale-110 transition-transform" />
-          
-          <!-- Viewing requests badge -->
-          <span 
-            v-if="pendingViewingRequests > 0"
-            class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-sm"
-          >
-            {{ pendingViewingRequests > 99 ? '99+' : pendingViewingRequests }}
-          </span>
+          <Package2 v-if="activeTab === 'sendparcel'" class="w-6 h-6" />
+          <Package2 v-else class="w-5 h-5 group-hover:scale-110 transition-transform" />
           
           <div 
-            v-if="activeTab === 'rendezvous'" 
+            v-if="activeTab === 'sendparcel'" 
             class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
             style="background: linear-gradient(to right, #2563eb, #9333ea);"
           ></div>
@@ -148,6 +140,25 @@
               <span class="text-base font-semibold text-[#333333]">Orders</span>
             </router-link>
             
+            <!-- Rendezvous -->
+            <router-link 
+              :to="{ name: 'Rendezvous' }"
+              @click="closeMoreMenu"
+              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group relative"
+              :class="activeTab === 'rendezvous' ? 'bg-gray-200' : ''"
+            >
+              <div class="relative">
+                <Calendar class="w-5 h-5 text-[#333333]" />
+                <span 
+                  v-if="pendingViewingRequests > 0"
+                  class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold"
+                >
+                  {{ pendingViewingRequests > 99 ? '99+' : pendingViewingRequests }}
+                </span>
+              </div>
+              <span class="text-base font-semibold text-[#333333]">Viewing Requests</span>
+            </router-link>
+            
             <!-- My Ads -->
             <router-link 
               :to="{ name: 'MyListings' }"
@@ -184,6 +195,16 @@
             >
               <MessageCircle class="w-5 h-5 text-[#333333]" />
               <span class="text-base font-semibold text-[#333333]">Messages</span>
+            </router-link>
+            
+            <!-- Parcels -->
+            <router-link 
+              :to="{ name: 'ParcelsList' }"
+              @click="closeMoreMenu"
+              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
+            >
+              <Package2 class="w-5 h-5 text-[#333333]" />
+              <span class="text-base font-semibold text-[#333333]">Parcels</span>
             </router-link>
             
             <!-- Likes -->
@@ -239,7 +260,7 @@ import { useCRMStore } from '@/stores/crm'
 import { usePharmacyStore } from '@/stores/pharmacy'
 import { useAuthStore } from '@/stores/auth'
 import { useListingStore } from '@/stores/listing'
-import { Home, Search, Receipt, ShoppingCart, Store, Sparkles, Shirt, Pill, Sofa, Monitor, Car, Calendar, MoreVertical, Bell, User, X, ChevronRight, Package, MessageCircle, MessageSquareQuote, Megaphone } from 'lucide-vue-next'
+import { Home, Search, Receipt, ShoppingCart, Store, Sparkles, Shirt, Pill, Sofa, Monitor, Car, Calendar, MoreVertical, Bell, User, X, ChevronRight, Package, MessageCircle, MessageSquareQuote, Megaphone, Package2 } from 'lucide-vue-next'
 import apiService from '@/services/api'
 
 const route = useRoute()
@@ -270,7 +291,8 @@ const updateActiveTab = () => {
     'Explore': 'explore',
     'Orders': 'orders',
     'Cart': 'cart',
-    'Rendezvous': 'rendezvous'
+    'Rendezvous': 'rendezvous',
+    'SendParcel': 'sendparcel'
   }
   
   activeTab.value = routeTabMap[currentRouteName.value] || 'home'

@@ -215,6 +215,26 @@ class NotificationService {
         console.log('🚫 Skipping restock request confirmation to prevent duplicate snackbar');
         return;
       }
+      
+      // Skip parcel delivery notifications - they are handled via custom events and bottom sheet
+      if (title.toLowerCase().includes('parcel') || 
+          message.toLowerCase().includes('parcel') ||
+          title.toLowerCase().includes('driver') && message.toLowerCase().includes('parcel') ||
+          category === 'parcel_delivery' ||
+          data.data?.reference_type === 'ParcelDelivery') {
+        console.log('🚫 Skipping parcel delivery notification - will show in bottom sheet only');
+        
+        // Still dispatch custom events for bottom sheet updates
+        if (data.data?.event_type) {
+          window.dispatchEvent(new CustomEvent(data.data.event_type, {
+            detail: {
+              event_type: data.data.event_type,
+              data: data.data
+            }
+          }));
+        }
+        return;
+      }
 
       // Add new notification to store
       const notification = {
@@ -430,6 +450,30 @@ class NotificationService {
               requestId: eventData.requestId,
               pharmacy_id: eventData.pharmacy_id,
               pharmacy_name: eventData.pharmacy_name
+            }
+          }))
+          break
+          
+        // Parcel delivery events
+        case 'searching_driver':
+        case 'driver_found':
+        case 'driver_accepted':
+        case 'driver_declined':
+        case 'driver_timeout':
+        case 'no_driver_found':
+        case 'admin_fallback':
+          console.log(`📦 Dispatching parcel event: ${eventType}`, eventData)
+          window.dispatchEvent(new CustomEvent(eventType, {
+            detail: {
+              event_type: eventType,
+              data: eventData
+            }
+          }))
+          // Also dispatch as generic customEvent
+          window.dispatchEvent(new CustomEvent('customEvent', {
+            detail: {
+              event_type: eventType,
+              data: eventData
             }
           }))
           break
