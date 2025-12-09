@@ -26,7 +26,7 @@ dist-ssr
 .vscode/extensions.json
 nginx.conf
 *.md
-Dockerfile*
+Dockerfile.dev
 docker-compose*.yml
 .dockerignore
 README.docker.md
