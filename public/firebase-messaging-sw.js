@@ -9,13 +9,13 @@ importScripts(
 
 // Initialize Firebase with actual config values
 firebase.initializeApp({
-  apiKey: "AIzaSyCaqWsFGxHRHHGRseTLJKWuKjVR-hrkmtU",
-  authDomain: "afriqmarket-place.firebaseapp.com",
-  projectId: "afriqmarket-place",
-  storageBucket: "afriqmarket-place.firebasestorage.app",
-  messagingSenderId: "1055977022832",
-  appId: "1:1055977022832:web:f90d5495ab5c6d2f76dbb5",
-  measurementId: "G-YN6BC2P6LV",
+  apiKey: "{{VITE_FIREBASE_API_KEY}}",
+  authDomain: "{{VITE_FIREBASE_AUTH_DOMAIN}}",
+  projectId: "{{VITE_FIREBASE_PROJECT_ID}}",
+  storageBucket: "{{VITE_FIREBASE_STORAGE_BUCKET}}",
+  messagingSenderId: "{{VITE_FIREBASE_SENDER_ID}}",
+  appId: "{{VITE_FIREBASE_APP_ID}}",
+  measurementId: "{{VITE_FIREBASE_MEASUREMENT_ID}}",
 });
 
 // Retrieve an instance of Firebase Messaging

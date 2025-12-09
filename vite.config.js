@@ -11,7 +11,21 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        // Use more permissive patterns that will match files after build
+        globPatterns: [
+          "**/*.{js,css,html,ico,png,svg,woff2,woff,ttf,eot,json,webmanifest}",
+          "assets/**/*.{js,css,png,svg,woff2}"
+        ],
+        globIgnores: [
+          "**/node_modules/**/*",
+          "**/sw.js",
+          "**/workbox-*.js",
+          "**/firebase-messaging-sw.js",
+          "**/registerSW.js"
+        ],
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
