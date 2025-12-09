@@ -7,8 +7,6 @@ import { useAuthStore } from '@/stores/auth'
 import { useCRMStore } from '@/stores/crm'
 import BottomNavigation from '@/components/BottomNavigation.vue'
 import GlobalSnackbar from '@/components/GlobalSnackbar.vue'
-import { StagewiseToolbar } from '@stagewise/toolbar-vue'
-import { VuePlugin } from '@stagewise-plugins/vue'
 
 const route = useRoute()
 const cart = useCartStore()
@@ -48,9 +46,6 @@ onMounted(async () => {
 
     <!-- Global notification snackbar -->
     <GlobalSnackbar />
-
-    <!-- Stagewise Toolbar (development only) -->
-    <StagewiseToolbar :config="{ plugins: [VuePlugin] }" />
   </div>
 </template>
 
