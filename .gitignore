@@ -24,7 +24,6 @@ dist-ssr
 *.sw?
 .env
 .vscode/extensions.json
-nginx.conf
 *.md
 Dockerfile.dev
 docker-compose*.yml
