@@ -106,10 +106,10 @@
         <div class="px-6 py-5 border-b border-gray-300">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 bg-[#333333] rounded-lg flex items-center justify-center">
-                <span class="text-white font-bold text-lg">w</span>
+              <div class="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
+                <img src="/AE-no-text.svg" alt="AfriQExpress" class="w-10 h-10 object-contain" />
               </div>
-              <h2 class="text-base font-normal text-[#333333]">weCare</h2>
+              <h2 class="text-base font-semibold text-[#1a5f2a]">AfriQExpress</h2>
             </div>
             <button 
               @click="navigateToNotification"

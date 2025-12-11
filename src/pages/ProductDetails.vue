@@ -123,7 +123,7 @@
       <div class="px-4 space-y-4 mb-8">
         <!-- Brand and stock status -->
         <div class="flex justify-between items-center">
-          <div class="text-sm text-gray-500 font-medium">{{ product.seller_name || 'weCare' }}</div>
+          <div class="text-sm text-gray-500 font-medium">{{ product.seller_name || 'AfriQExpress Seller' }}</div>
           <div 
             v-if="currentStock > 0" 
             class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full"
@@ -451,7 +451,7 @@
           <div class="space-y-1">
             <!-- Store Name Caption (only for store products, not shopper listings) -->
             <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
-              {{ product.seller_name || product.store_name || 'weCare' }}
+              {{ product.seller_name || product.store_name || 'AfriQExpress Seller' }}
             </p>
             
             <!-- Product Name -->
@@ -517,7 +517,7 @@
           <div class="space-y-1">
             <!-- Store Name Caption (only for store products, not shopper listings) -->
             <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
-              {{ product.seller_name || product.store_name || 'weCare' }}
+              {{ product.seller_name || product.store_name || 'AfriQExpress Seller' }}
             </p>
             
             <!-- Product Name -->

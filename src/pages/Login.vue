@@ -106,7 +106,7 @@
             <div class="w-full border-t border-gray-300"></div>
           </div>
           <div class="relative flex justify-center text-xs">
-            <span class="px-2 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-gray-500">New to weCare?</span>
+            <span class="px-2 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-gray-500">New to AfriQExpress?</span>
           </div>
         </div>
 

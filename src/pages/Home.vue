@@ -117,7 +117,7 @@
               <div class="space-y-1">
                 <!-- Store Name Caption (only for store products, not shopper listings) -->
                 <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
-                  {{ product.seller_name || product.store_name || 'weCare' }}
+                  {{ product.seller_name || product.store_name || 'AfriQExpress Seller' }}
                 </p>
                 
                 <!-- Product Name -->
@@ -202,7 +202,7 @@
               <div class="space-y-1">
                 <!-- Store Name Caption (only for store products, not shopper listings) -->
                 <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
-                  {{ product.seller_name || product.store_name || 'weCare' }}
+                  {{ product.seller_name || product.store_name || 'AfriQExpress Seller' }}
                 </p>
                 
                 <!-- Product Name -->
@@ -266,7 +266,7 @@
             <div class="space-y-1">
               <!-- Store Name Caption (only for store products, not shopper listings) -->
               <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
-                {{ product.seller_name || product.store_name || 'weCare' }}
+                {{ product.seller_name || product.store_name || 'AfriQExpress Seller' }}
               </p>
               
               <!-- Product Name -->
@@ -350,7 +350,7 @@
               <div class="space-y-1">
                 <!-- Store Name Caption (only for store products, not shopper listings) -->
                 <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
-                  {{ product.seller_name || product.store_name || 'weCare' }}
+                  {{ product.seller_name || product.store_name || 'AfriQExpress Seller' }}
                 </p>
                 
                 <!-- Product Name -->

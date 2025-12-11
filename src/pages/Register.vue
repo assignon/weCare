@@ -7,7 +7,7 @@
           <User class="w-7 h-7 text-white" />
         </div>
         <h1 class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text mb-1">
-          Join weCare
+          Join AfriQExpress
         </h1>
         <p class="text-gray-600 text-xs">Create your account to get started</p>
       </div>

@@ -4,19 +4,21 @@
             <!-- Logo/Brand -->
             <div class="brand-section">
                 <div class="logo-container">
-                    <ShoppingBag class="logo-icon" size="80" color="white" />
+                    <img src="/AE-no-text.svg" alt="AfriQExpress Logo" class="logo-image" />
                 </div>
-                <h1 class="brand-title">weCare</h1>
-                <p class="brand-subtitle">Your Skin Care Store</p>
+                <h1 class="brand-title">AfriQExpress</h1>
+                <p class="brand-subtitle">Your African Marketplace</p>
             </div>
 
             <!-- Loading Animation -->
-            <!-- <div class="loading-section">
-                <div class="loading-spinner">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+            <div class="loading-section">
+                <div class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </div>
                 <p class="loading-text">{{ loadingText }}</p>
-            </div> -->
+            </div>
         </div>
 
         <!-- Version Info -->
@@ -30,7 +32,6 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { ShoppingBag } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -40,7 +41,7 @@ const loadingText = ref('Loading...')
 const loadingMessages = [
     'Loading...',
     'Preparing your experience...',
-    'Setting up your marketplace...',
+    'Discovering great products...',
     'Almost ready...'
 ]
 
@@ -141,6 +142,7 @@ onMounted(async () => {
     width: 100%;
     max-width: 400px;
     margin: 0 auto;
+    padding: 20px;
 }
 
 .brand-section {
@@ -154,43 +156,49 @@ onMounted(async () => {
 }
 
 .logo-container {
-    margin-bottom: 32px;
+    margin-bottom: 24px;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 120px;
-    height: 120px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
+    width: 140px;
+    height: 140px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 28px;
     backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
-.logo-icon {
+.logo-image {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
     animation: pulse 2s infinite;
 }
 
 .brand-title {
-    font-size: 48px;
+    font-size: 42px;
     font-weight: 700;
     color: white;
-    margin: 0 0 12px 0;
+    margin: 0 0 8px 0;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    letter-spacing: -1px;
+    letter-spacing: -0.5px;
     text-align: center;
     line-height: 1.1;
+    font-family: 'Poppins', sans-serif;
 }
 
 .brand-subtitle {
-    font-size: 18px;
+    font-size: 16px;
     color: rgba(255, 255, 255, 0.9);
     margin: 0;
-    font-weight: 300;
+    font-weight: 400;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     text-align: center;
     line-height: 1.4;
+    letter-spacing: 0.5px;
 }
 
 .loading-section {
@@ -200,13 +208,34 @@ onMounted(async () => {
     animation: fadeIn 1.5s ease-out;
 }
 
-.loading-spinner {
-    margin-bottom: 24px;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+.loading-dots {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.loading-dots span {
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    animation: bounce 1.4s infinite ease-in-out;
+}
+
+.loading-dots span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.loading-dots span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+.loading-dots span:nth-child(3) {
+    animation-delay: 0s;
 }
 
 .loading-text {
-    font-size: 16px;
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.8);
     margin: 0;
     font-weight: 400;
@@ -226,7 +255,7 @@ onMounted(async () => {
 
 .version-text {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.5);
     margin: 0;
     font-weight: 300;
     text-align: center;
@@ -256,14 +285,20 @@ onMounted(async () => {
 }
 
 @keyframes pulse {
-
-    0%,
-    100% {
+    0%, 100% {
         transform: scale(1);
     }
-
     50% {
         transform: scale(1.05);
+    }
+}
+
+@keyframes bounce {
+    0%, 80%, 100% {
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(1);
     }
 }
 
@@ -275,9 +310,20 @@ onMounted(async () => {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-    background-size: 50px 50px;
-    animation: float 20s infinite linear;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: float 30s infinite linear;
+    z-index: 1;
+}
+
+.splash-screen::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
     z-index: 1;
 }
 
@@ -285,9 +331,8 @@ onMounted(async () => {
     0% {
         transform: translate(0, 0) rotate(0deg);
     }
-
     100% {
-        transform: translate(-50px, -50px) rotate(360deg);
+        transform: translate(-40px, -40px) rotate(360deg);
     }
 }
 
@@ -298,17 +343,18 @@ onMounted(async () => {
     }
 
     .brand-subtitle {
-        font-size: 16px;
+        font-size: 15px;
     }
 
     .logo-container {
-        width: 100px;
-        height: 100px;
+        width: 120px;
+        height: 120px;
+        border-radius: 24px;
     }
 
-    .logo-icon {
-        width: 64px !important;
-        height: 64px !important;
+    .logo-image {
+        width: 80px;
+        height: 80px;
     }
 
     .brand-section {
@@ -326,13 +372,14 @@ onMounted(async () => {
     }
 
     .logo-container {
-        width: 80px;
-        height: 80px;
+        width: 100px;
+        height: 100px;
+        border-radius: 20px;
     }
 
-    .logo-icon {
-        width: 56px !important;
-        height: 56px !important;
+    .logo-image {
+        width: 70px;
+        height: 70px;
     }
 }
 
