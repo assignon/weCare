@@ -32,6 +32,7 @@ RUN addgroup -g 101 -S nginx || true
 RUN adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx || true
 
 # Copy custom nginx configuration
+COPY nginx.main.conf /etc/nginx/nginx.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built application from build stage
