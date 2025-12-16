@@ -27,7 +27,7 @@
                   <p class="text-sm text-gray-500 mb-2">{{ product.seller_name || '---' }}</p>
                   <div class="flex items-center text-blue-600 text-sm font-medium">
                     <Truck class="w-4 h-4 mr-2" />
-                    {{ product.delivery_info?.estimated_delivery_display || 'Standard Delivery' }}
+                    {{ product.delivery_info?.estimated_delivery_display || $t('cart.standard_delivery') }}
                   </div>
                 </div>
                 </div>
@@ -89,24 +89,24 @@
             class="flex items-center px-6 py-3 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl text-blue-600 hover:bg-white hover:shadow-md transition-all duration-200"
           >
             <ArrowLeft class="w-4 h-4 mr-2" />
-              Continue Shopping
+              {{ $t('cart.continue_shopping') }}
           </button>
           </div>
 
         <!-- Order summary -->
         <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm border border-white/20 p-6">
-          <h2 class="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
+          <h2 class="text-xl font-bold text-gray-900 mb-6">{{ $t('cart.order_summary') }}</h2>
 
           <div class="space-y-4">
             <div class="flex justify-between items-center">
-              <span class="text-gray-600">Items</span>
+              <span class="text-gray-600">{{ $t('cart.items') }}</span>
               <span class="font-semibold text-gray-900">
                 {{ formatPrice(cart.items.total_amount || 0) }}
               </span>
             </div>
 
             <div class="flex justify-between items-center">
-              <span class="text-gray-600">Delivery Fee</span>
+              <span class="text-gray-600">{{ $t('cart.delivery_fee') }}</span>
               <span class="font-semibold text-gray-900">
                 {{ formatPrice(estimatedDeliveryFee) }}
               </span>
@@ -114,7 +114,7 @@
 
             <div class="border-t border-gray-200 pt-4">
               <div class="flex justify-between items-center">
-                <span class="text-lg font-bold text-gray-900">Total</span>
+                <span class="text-lg font-bold text-gray-900">{{ $t('cart.total') }}</span>
                 <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
                   {{ formatPrice(totalWithDelivery) }}
                 </span>
@@ -129,16 +129,16 @@
         <div class="w-32 h-32 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6" style="background: linear-gradient(to right, #dbeafe, #e9d5ff);">
           <ShoppingCart class="w-16 h-16 text-gray-400" />
         </div>
-        <h3 class="text-2xl font-bold text-gray-900 mb-3">Your Cart is Empty</h3>
+        <h3 class="text-2xl font-bold text-gray-900 mb-3">{{ $t('cart.empty') }}</h3>
         <p class="text-gray-600 mb-8 max-w-md mx-auto">
-          Looks like you haven't added any items to your cart yet. Start shopping to discover amazing products!
+          {{ $t('cart.empty_subtitle') }}
         </p>
         <button 
           @click="$router.push({ name: 'Home' })"
           class="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           style="background: linear-gradient(to right, #2563eb, #9333ea);"
         >
-          Start Shopping
+          {{ $t('cart.start_shopping') }}
         </button>
       </div>
 
@@ -150,7 +150,7 @@
             class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
             style="background: linear-gradient(to right, #2563eb, #9333ea);"
           >
-            <span>Proceed to Checkout</span>
+            <span>{{ $t('cart.checkout') }}</span>
             <span class="ml-2">({{ formatPrice(totalWithDelivery) }})</span>
           </button>
         </div>

@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="sticky top-0 bg-white px-4 py-3 z-40 border-b border-gray-100">
       <div class="flex items-center justify-between">
-        <h1 class="text-xl font-semibold text-gray-900">Viewing Requests</h1>
+        <h1 class="text-xl font-semibold text-gray-900">{{ $t('rendezvous.title') }}</h1>
         <button 
           @click="refreshRequests"
           :disabled="loading"
@@ -24,7 +24,7 @@
               <Calendar class="w-5 h-5 text-blue-600" />
             </div>
             <div class="ml-3">
-              <p class="text-xs text-gray-500 font-medium">Total Requests</p>
+              <p class="text-xs text-gray-500 font-medium">{{ $t('rendezvous.total_requests') }}</p>
               <p class="text-lg font-bold text-gray-900">{{ stats.total_requests || 0 }}</p>
             </div>
           </div>
@@ -36,7 +36,7 @@
               <Clock class="w-5 h-5 text-orange-600" />
             </div>
             <div class="ml-3">
-              <p class="text-xs text-gray-500 font-medium">Pending</p>
+              <p class="text-xs text-gray-500 font-medium">{{ $t('rendezvous.pending') }}</p>
               <p class="text-lg font-bold text-gray-900">{{ stats.pending_requests || 0 }}</p>
             </div>
           </div>
@@ -76,15 +76,15 @@
         <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
           <Calendar class="w-8 h-8 text-gray-400" />
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">No viewing requests</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $t('rendezvous.no_requests') }}</h3>
         <p class="text-gray-600 mb-6">
-          You haven't made any viewing requests yet. Browse our automobile and real estate sections to get started!
+          {{ $t('rendezvous.no_requests_message') }}
         </p>
         <button 
           @click="$router.push({ name: 'Explore' })"
           class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
         >
-          Explore Products
+          {{ $t('rendezvous.explore_products') }}
         </button>
       </div>
     </div>
@@ -111,7 +111,7 @@
               <div class="flex-1 min-w-0">
                 <h3 class="font-semibold text-gray-900 text-base mb-1 truncate">{{ productGroup.product_name }}</h3>
                 <p class="text-sm text-gray-500 mb-1">{{ productGroup.store_name }}</p>
-                <p class="text-xs text-gray-400">{{ productGroup.requests.length }} request{{ productGroup.requests.length !== 1 ? 's' : '' }}</p>
+                <p class="text-xs text-gray-400">{{ productGroup.requests.length }} {{ productGroup.requests.length !== 1 ? $t('rendezvous.requests') : $t('rendezvous.request') }}</p>
               </div>
             </div>
             <ChevronDown 

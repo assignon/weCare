@@ -104,13 +104,7 @@
       <div class="absolute right-0 top-0 bottom-0 w-72 bg-gray-100 flex flex-col">
         <!-- Header -->
         <div class="px-6 py-5 border-b border-gray-300">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
-                <img src="/AE-no-text.svg" alt="AfriQExpress" class="w-10 h-10 object-contain" />
-              </div>
-              <h2 class="text-base font-semibold text-[#1a5f2a]">AfriQExpress</h2>
-            </div>
+          <div class="flex items-center justify-end">
             <button 
               @click="navigateToNotification"
               class="relative w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded transition-colors"
@@ -137,7 +131,7 @@
               :class="activeTab === 'orders' ? 'bg-gray-200' : ''"
             >
               <Package class="w-5 h-5 text-[#333333]" />
-              <span class="text-base font-semibold text-[#333333]">Orders</span>
+              <span class="text-base font-semibold text-[#333333]">{{ $t('navigation.orders') }}</span>
             </router-link>
             
             <!-- Rendezvous -->
@@ -156,7 +150,7 @@
                   {{ pendingViewingRequests > 99 ? '99+' : pendingViewingRequests }}
                 </span>
               </div>
-              <span class="text-base font-semibold text-[#333333]">Viewing Requests</span>
+              <span class="text-base font-semibold text-[#333333]">{{ $t('navigation.viewing_requests') }}</span>
             </router-link>
             
             <!-- My Ads -->
@@ -166,7 +160,7 @@
               class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
             >
               <Megaphone class="w-5 h-5 text-[#333333]" />
-              <span class="text-base font-semibold text-[#333333]">My Ads</span>
+              <span class="text-base font-semibold text-[#333333]">{{ $t('navigation.my_ads') }}</span>
             </router-link>
             
             <!-- Inquiries -->
@@ -184,7 +178,7 @@
                   {{ listingStore.unreadInquiriesCount > 99 ? '99+' : listingStore.unreadInquiriesCount }}
                 </span>
               </div>
-              <span class="text-base font-semibold text-[#333333]">Inquiries</span>
+              <span class="text-base font-semibold text-[#333333]">{{ $t('navigation.inquiries') }}</span>
             </router-link>
             
             <!-- Messages -->
@@ -194,7 +188,7 @@
               class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
             >
               <MessageCircle class="w-5 h-5 text-[#333333]" />
-              <span class="text-base font-semibold text-[#333333]">Messages</span>
+              <span class="text-base font-semibold text-[#333333]">{{ $t('navigation.messages') }}</span>
             </router-link>
             
             <!-- Parcels -->
@@ -204,7 +198,7 @@
               class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
             >
               <Package2 class="w-5 h-5 text-[#333333]" />
-              <span class="text-base font-semibold text-[#333333]">Parcels</span>
+              <span class="text-base font-semibold text-[#333333]">{{ $t('navigation.parcels') }}</span>
             </router-link>
             
             <!-- Likes -->
@@ -214,7 +208,7 @@
               class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
             >
               <Heart class="w-5 h-5 text-[#333333]" />
-              <span class="text-base font-semibold text-[#333333]">Likes</span>
+              <span class="text-base font-semibold text-[#333333]">{{ $t('navigation.likes') }}</span>
             </router-link>
           </div>
         </div>

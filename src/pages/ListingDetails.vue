@@ -32,8 +32,8 @@
         <!-- Price -->
         <div>
           <p v-if="listing.price_type === 'fixed'" class="text-2xl font-bold text-blue-600">{{ formatPrice(listing.price) }}</p>
-          <p v-else-if="listing.price_type === 'free'" class="text-2xl font-bold text-green-600">FREE</p>
-          <p v-else class="text-lg font-bold text-blue-600">Best Offer (Min: {{ formatPrice(listing.min_offer_price) }})</p>
+          <p v-else-if="listing.price_type === 'free'" class="text-2xl font-bold text-green-600">{{ $t('listings.free') }}</p>
+          <p v-else class="text-lg font-bold text-blue-600">{{ $t('listings.best_offer') }} ({{ $t('listings.min') }}: {{ formatPrice(listing.min_offer_price) }})</p>
         </div>
 
         <!-- Title & Details -->
@@ -41,14 +41,14 @@
           <h1 class="text-xl font-bold capitalize">{{ listing.title }}</h1>
           <div class="flex items-center gap-4 mt-2 text-sm text-gray-600">
             <div class="flex items-center gap-1"><MapPin class="w-4 h-4" />{{ listing.city }}{{ listing.neighborhood ? `, ${listing.neighborhood}` : '' }}</div>
-            <div class="flex items-center gap-1"><Eye class="w-4 h-4" />{{ listing.views_count }} views</div>
+            <div class="flex items-center gap-1"><Eye class="w-4 h-4" />{{ listing.views_count }} {{ $t('listings.views') }}</div>
             <div v-if="listing.category_name" class="flex items-center gap-1"><Tag class="w-4 h-4" />{{ listing.category_name }}</div>
           </div>
         </div>
 
         <!-- Status Badge -->
         <div v-if="isOwnListing" class="flex items-center gap-2">
-          <span class="text-sm font-medium text-gray-700">Status:</span>
+          <span class="text-sm font-medium text-gray-700">{{ $t('listings.status') }}:</span>
           <span :class="getStatusClass(listing.status)" class="px-3 py-1 rounded-full text-xs font-medium">
             {{ listing.status }}
           </span>
@@ -56,49 +56,49 @@
 
         <!-- Description -->
         <div>
-          <h3 class="font-medium mb-2">Description</h3>
+          <h3 class="font-medium mb-2">{{ $t('listings.description') }}</h3>
           <p class="text-gray-700 whitespace-pre-wrap">{{ listing.description }}</p>
         </div>
 
         <!-- Product Information -->
         <div class="bg-white rounded-lg p-4 space-y-3 border border-gray-200">
-          <h3 class="font-semibold text-gray-900 mb-3">Product Information</h3>
+          <h3 class="font-semibold text-gray-900 mb-3">{{ $t('listings.product_information') }}</h3>
           
           <!-- Category -->
           <div v-if="listing.category_name" class="flex items-center justify-between py-2 border-b border-gray-100">
-            <span class="text-sm text-gray-600">Category</span>
+            <span class="text-sm text-gray-600">{{ $t('listings.category') }}</span>
             <span class="text-sm font-medium text-gray-900">{{ listing.category_name }}</span>
           </div>
 
           <!-- Price Type -->
           <div class="flex items-center justify-between py-2 border-b border-gray-100">
-            <span class="text-sm text-gray-600">Price Type</span>
-            <span class="text-sm font-medium text-gray-900 capitalize">{{ listing.price_type }}</span>
+            <span class="text-sm text-gray-600">{{ $t('listings.price_type') }}</span>
+            <span class="text-sm font-medium text-gray-900 capitalize">{{ listing.price_type === 'fixed' ? $t('listings.fixed') : listing.price_type === 'offer' ? $t('listings.offer') : $t('listings.free') }}</span>
           </div>
 
           <!-- Location -->
           <div class="flex items-center justify-between py-2 border-b border-gray-100">
-            <span class="text-sm text-gray-600">Location</span>
+            <span class="text-sm text-gray-600">{{ $t('listings.location') }}</span>
             <span class="text-sm font-medium text-gray-900">{{ listing.city }}{{ listing.neighborhood ? `, ${listing.neighborhood}` : '' }}</span>
           </div>
 
           <!-- Contact Methods -->
           <div class="flex items-center justify-between py-2 border-b border-gray-100">
-            <span class="text-sm text-gray-600">Contact Methods</span>
+            <span class="text-sm text-gray-600">{{ $t('listings.contact_methods') }}</span>
             <div class="flex gap-2">
               <span v-for="method in listing.contact_methods" :key="method" class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs capitalize">
-                {{ method === 'in_app' ? 'In-App' : method }}
+                {{ method === 'in_app' ? $t('listings.in_app') : method }}
               </span>
             </div>
           </div>
 
           <!-- Views & Inquiries -->
           <div class="flex items-center justify-between py-2">
-            <span class="text-sm text-gray-600">Views</span>
+            <span class="text-sm text-gray-600">{{ $t('listings.views') }}</span>
             <span class="text-sm font-medium text-gray-900">{{ listing.views_count || 0 }}</span>
           </div>
           <div class="flex items-center justify-between py-2">
-            <span class="text-sm text-gray-600">Inquiries</span>
+            <span class="text-sm text-gray-600">{{ $t('listings.inquiries') }}</span>
             <div class="flex items-center gap-2">
               <span class="text-sm font-medium text-gray-900">{{ listing.inquiry_count || 0 }}</span>
               <button 
@@ -106,7 +106,7 @@
                 @click="goToInquiries"
                 class="text-xs text-blue-600 hover:text-blue-700 font-medium underline"
               >
-                View Chat
+                {{ $t('listings.view_chat') }}
               </button>
             </div>
           </div>
@@ -114,7 +114,7 @@
 
         <!-- Seller Info -->
         <div v-if="!listing.is_anonymous && !isOwnListing" class="p-3 bg-gray-100 rounded-lg">
-          <p class="text-sm font-medium">Seller: {{ listing.seller_name }}</p>
+          <p class="text-sm font-medium">{{ $t('listings.seller') }}: {{ listing.seller_name }}</p>
         </div>
 
         <!-- Owner Actions -->
@@ -123,8 +123,8 @@
           <div class="bg-white rounded-lg p-4 border border-gray-200">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="font-semibold text-gray-900 mb-1">Listing Status</h3>
-                <p class="text-sm text-gray-600">Toggle between active and inactive</p>
+                <h3 class="font-semibold text-gray-900 mb-1">{{ $t('listings.listing_status') }}</h3>
+                <p class="text-sm text-gray-600">{{ $t('listings.toggle_status') }}</p>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input 
@@ -148,7 +148,7 @@
               class="flex-1 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
             >
               <CheckCircle class="w-5 h-5" />
-              Mark as Sold
+              {{ $t('listings.mark_as_sold') }}
             </button>
             <button 
               @click="showDeleteDialog = true"
@@ -163,7 +163,7 @@
         <!-- Contact Buttons -->
         <div v-if="!isOwnListing" class="space-y-2">
           <button v-if="listing.contact_methods.includes('in_app')" @click="contactSeller" class="w-full py-3 bg-blue-600 text-white rounded-lg font-medium">
-            <MessageCircle class="w-5 h-5 inline mr-2" />Contact Seller
+            <MessageCircle class="w-5 h-5 inline mr-2" />{{ $t('listings.contact_seller') }}
           </button>
           <div class="grid grid-cols-2 gap-2">
             <a v-if="listing.contact_methods.includes('whatsapp')" :href="`https://wa.me/${listing.whatsapp_number}`" target="_blank" class="py-3 bg-green-600 text-white rounded-lg text-center font-medium">
@@ -206,8 +206,8 @@
                   <CheckCircle class="w-8 h-8 text-green-600" />
                 </div>
               </div>
-              <h3 class="text-xl font-bold text-center text-slate-900 mb-2">Mark as Sold?</h3>
-              <p class="text-center text-slate-600 text-sm leading-relaxed">Are you sure you want to mark this listing as sold? This action cannot be undone.</p>
+              <h3 class="text-xl font-bold text-center text-slate-900 mb-2">{{ $t('listings.mark_as_sold_confirm') }}</h3>
+              <p class="text-center text-slate-600 text-sm leading-relaxed">{{ $t('listings.mark_sold_message') }}</p>
             </div>
 
             <!-- Actions -->
@@ -219,14 +219,14 @@
               >
                 <Loader2 v-if="updatingStatus" class="w-5 h-5 animate-spin" />
                 <CheckCircle v-else class="w-5 h-5" />
-                {{ updatingStatus ? 'Updating...' : 'Yes, Mark as Sold' }}
+                {{ updatingStatus ? $t('listings.updating') : $t('listings.yes_mark_sold') }}
               </button>
               <button
                 @click="showSoldDialog = false"
                 :disabled="updatingStatus"
                 class="w-full py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl transition-all duration-200"
               >
-                Cancel
+                {{ $t('common.cancel') }}
               </button>
             </div>
           </div>
@@ -245,8 +245,8 @@
                   <Trash2 class="w-8 h-8 text-red-600" />
                 </div>
               </div>
-              <h3 class="text-xl font-bold text-center text-slate-900 mb-2">Delete Listing?</h3>
-              <p class="text-center text-slate-600 text-sm leading-relaxed">Are you sure you want to delete this listing? This action cannot be undone and the listing will be permanently removed from the database.</p>
+              <h3 class="text-xl font-bold text-center text-slate-900 mb-2">{{ $t('listings.delete_listing_confirm') }}</h3>
+              <p class="text-center text-slate-600 text-sm leading-relaxed">{{ $t('listings.delete_listing_message') }}</p>
             </div>
 
             <!-- Actions -->

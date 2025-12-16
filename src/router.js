@@ -69,9 +69,34 @@ const router = createRouter({
   }
 })
 
+// Prevent infinite redirect loops
+let redirectCount = 0
+const MAX_REDIRECTS = 5
+const redirectHistory = new Set()
+
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore()
   const crmStore = useCRMStore()
+  
+  // Prevent infinite redirect loops
+  const redirectKey = `${from.name || 'null'}->${to.name}`
+  if (redirectHistory.has(redirectKey)) {
+    redirectCount++
+    if (redirectCount > MAX_REDIRECTS) {
+      console.error('Infinite redirect loop detected, stopping navigation')
+      redirectCount = 0
+      redirectHistory.clear()
+      // Force navigation to login to break the loop
+      if (to.name !== 'Login') {
+        return next({ name: 'Login', replace: true })
+      }
+      return next(false) // Cancel navigation
+    }
+  } else {
+    redirectCount = 0
+    redirectHistory.clear()
+  }
+  redirectHistory.add(redirectKey)
   
   // Check for cart access restriction for CRM categories
   if (to.name === 'Cart' && crmStore.shouldRestrictCart) {
@@ -79,13 +104,18 @@ router.beforeEach(async (to, from, next) => {
     return next({ name: 'Rendezvous' })
   }
   
-  // After auth check, ensure default store category selection exists
+  // Skip auth checks for splash screen
+  if (to.name === 'SplashScreen') {
+    redirectHistory.clear()
+    redirectCount = 0
+    return next()
+  }
   
   // Check if this is a fresh app load (no previous route)
   const isFreshLoad = !from.name && to.name !== 'SplashScreen'
   
-  // Show splash screen for fresh loads (including PWA launches)
-  if (isFreshLoad) {
+  // Show splash screen for fresh loads (including PWA launches) - but only once
+  if (isFreshLoad && !sessionStorage.getItem('splashShown')) {
     // Check if we're in PWA mode or it's a fresh browser visit
     const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
                   window.navigator.standalone === true ||
@@ -93,13 +123,9 @@ router.beforeEach(async (to, from, next) => {
     
     // Always show splash for PWA or if going to login/home without auth
     if (isPWA || to.name === 'Login' || to.name === 'Home') {
+      sessionStorage.setItem('splashShown', 'true')
       return next({ name: 'SplashScreen' })
     }
-  }
-  
-  // Skip auth checks for splash screen
-  if (to.name === 'SplashScreen') {
-    return next()
   }
   
   // If route requires auth
@@ -107,9 +133,12 @@ router.beforeEach(async (to, from, next) => {
     // Check if we have a token in localStorage
     const token = localStorage.getItem('access_token')
     if (!token) {
+      redirectHistory.clear()
+      redirectCount = 0
       return next({ 
         name: 'Login', 
-        query: { redirect: to.fullPath } 
+        query: { redirect: to.fullPath },
+        replace: true
       })
     }
     
@@ -118,16 +147,22 @@ router.beforeEach(async (to, from, next) => {
       try {
         const isValid = await auth.checkAuth()
         if (!isValid) {
+          redirectHistory.clear()
+          redirectCount = 0
           return next({ 
             name: 'Login', 
-            query: { redirect: to.fullPath } 
+            query: { redirect: to.fullPath },
+            replace: true
           })
         }
       } catch (error) {
         console.error('Authentication error:', error)
+        redirectHistory.clear()
+        redirectCount = 0
         return next({ 
           name: 'Login', 
-          query: { redirect: to.fullPath } 
+          query: { redirect: to.fullPath },
+          replace: true
         })
       }
     }
@@ -150,7 +185,15 @@ router.beforeEach(async (to, from, next) => {
   // If user is authenticated and trying to access login/register pages
   if (auth.isAuthenticated && ['Login', 'Register', 'ForgotPassword', 'ResetPassword'].includes(to.name)) {
     // Always redirect authenticated users to home or requested page
-    return next(to.query.redirect || { name: 'Home' })
+    redirectHistory.clear()
+    redirectCount = 0
+    return next(to.query.redirect || { name: 'Home', replace: true })
+  }
+  
+  // Clear redirect tracking on successful navigation
+  if (to.name && from.name) {
+    redirectHistory.clear()
+    redirectCount = 0
   }
   
   next()

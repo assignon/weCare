@@ -7,16 +7,16 @@
           <Lock class="w-7 h-7 text-white" />
         </div>
         <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text mb-1 mt-5">
-          Sign In
+          {{ $t('auth.sign_in') }}
         </h1>
-        <p class="text-gray-600 text-base text-xs">Sign in to your account</p>
+        <p class="text-gray-600 text-base text-xs">{{ $t('auth.sign_in_subtitle') }}</p>
       </div>
 
       <form @submit.prevent="onLogin" class="space-y-4">
         <!-- Success alerts -->
         <div v-if="route.query.registered" class="alert alert-success">
           <CheckCircle class="w-4 h-4" />
-          <span>Registration successful! Please log in.</span>
+          <span>{{ $t('auth.registration_successful') }}</span>
         </div>
 
         <div v-if="route.query.message" class="alert alert-success">
@@ -43,7 +43,7 @@
               type="email"
               required
               class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter your email"
+              :placeholder="$t('auth.email_placeholder')"
               autocomplete="email"
             />
           </div>
@@ -62,7 +62,7 @@
               :type="showPassword ? 'text' : 'password'"
               required
               class="input pl-10 pr-10 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter your password"
+              :placeholder="$t('auth.password_placeholder')"
               autocomplete="current-password"
             />
             <button
@@ -79,7 +79,7 @@
         <!-- Forgot password link -->
         <div class="text-right">
           <router-link :to="{ name: 'ForgotPassword' }" class="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors">
-            Forgot your password?
+            {{ $t('auth.forgot_password') }}
           </router-link>
         </div>
 
@@ -92,11 +92,11 @@
         >
           <span v-if="authStore.loading" class="flex items-center justify-center">
             <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-            Signing In...
+            {{ $t('auth.signing_in') }}
           </span>
           <span v-else class="flex items-center justify-center">
             <Lock class="w-4 h-4 mr-2" />
-            Sign In
+            {{ $t('auth.sign_in') }}
           </span>
         </button>
 
@@ -106,7 +106,7 @@
             <div class="w-full border-t border-gray-300"></div>
           </div>
           <div class="relative flex justify-center text-xs">
-            <span class="px-2 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-gray-500">New to AfriQExpress?</span>
+            <span class="px-2 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-gray-500">{{ $t('auth.new_to_platform') }}</span>
           </div>
         </div>
 
@@ -114,7 +114,7 @@
         <div class="text-center">
           <router-link :to="{ name: 'Register' }" class="inline-flex items-center justify-center w-full h-12 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-blue-500 hover:text-blue-600 transition-all duration-200 transform hover:scale-[1.02]">
             <User class="w-4 h-4 mr-2" />
-            Create Account
+            {{ $t('auth.create_account') }}
           </router-link>
         </div>
       </form>
@@ -122,10 +122,10 @@
       <!-- Footer -->
       <div class="text-center mt-6">
         <p class="text-xs text-gray-500">
-          By signing in, you agree to our 
-          <a href="#" class="text-blue-600 hover:text-blue-700 font-medium">Terms of Service</a> 
-          and 
-          <a href="#" class="text-blue-600 hover:text-blue-700 font-medium">Privacy Policy</a>
+          {{ $t('auth.agree_terms') }} 
+          <a href="https://afriqxpress.com/terms" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 font-medium">{{ $t('auth.terms_of_service') }}</a> 
+          {{ $t('auth.and') }} 
+          <a href="https://afriqxpress.com/privacy" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 font-medium">{{ $t('auth.privacy_policy') }}</a>
         </p>
       </div>
     </div>

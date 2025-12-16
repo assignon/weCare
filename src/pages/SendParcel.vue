@@ -15,7 +15,7 @@
             >
               <ArrowLeft class="w-5 h-5 text-gray-700" />
             </button>
-            <h1 class="text-xl font-bold text-white">Send Parcel</h1>
+            <h1 class="text-xl font-bold text-white">{{ $t('send_parcel.title') }}</h1>
             <div class="w-10"></div>
           </div>
         </div>
@@ -25,7 +25,7 @@
       <div class="absolute top-20 left-1/2 transform -translate-x-1/2 z-30">
         <div class="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg flex items-center space-x-2">
           <Truck class="w-4 h-4 text-blue-600" />
-          <span class="text-sm font-semibold text-gray-900">{{ activeDriversCount }} Active Drivers</span>
+          <span class="text-sm font-semibold text-gray-900">{{ activeDriversCount }} {{ $t('send_parcel.active_drivers') }}</span>
         </div>
       </div>
 
@@ -42,11 +42,11 @@
 
           <!-- Step 1: Location Selection -->
           <div v-if="currentStep === 1" class="space-y-4">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Select Locations</h2>
+            <h2 class="text-xl font-bold text-gray-900 mb-4">{{ $t('send_parcel.select_locations') }}</h2>
             
             <!-- Pickup Location Search -->
             <div class="relative">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Pickup Location</label>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('send_parcel.pickup_location') }}</label>
               <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <MapPin class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
@@ -57,7 +57,7 @@
                   @focus="showPickupSuggestions = true"
                   @blur="hidePickupSuggestions"
                   type="text"
-                  placeholder="Search for pickup location in Lomé..."
+                  :placeholder="$t('send_parcel.pickup_placeholder')"
                   class="input pl-10 pr-10 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 <Search class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -93,7 +93,7 @@
 
             <!-- Dropoff Location Search -->
             <div class="relative">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Dropoff Location</label>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('send_parcel.dropoff_location') }}</label>
               <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <MapPin class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
@@ -104,7 +104,7 @@
                   @focus="showDropoffSuggestions = true"
                   @blur="hideDropoffSuggestions"
                   type="text"
-                  placeholder="Search for dropoff location in Lomé..."
+                  :placeholder="$t('send_parcel.dropoff_placeholder')"
                   class="input pl-10 pr-10 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 <Search class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -145,7 +145,7 @@
               class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               style="background: linear-gradient(to right, #2563eb, #9333ea);"
             >
-              Next
+              {{ $t('common.next') }}
             </button>
           </div>
 
@@ -239,7 +239,7 @@
                 <input 
                   v-model="form.pickup_landmark" 
                   type="text"
-                  placeholder="e.g., Opposite Kofi Market"
+                  :placeholder="$t('send_parcel.pickup_landmark_placeholder')"
                   class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -255,7 +255,7 @@
                 <input 
                   v-model="form.dropoff_landmark" 
                   type="text"
-                  placeholder="e.g., Near Ecobank"
+                  :placeholder="$t('send_parcel.dropoff_landmark_placeholder')"
                   class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -267,7 +267,7 @@
                 @click="goToStep(1)"
                 class="flex-1 py-3 bg-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-300 transition-all"
               >
-                Back
+                {{ $t('common.back') }}
               </button>
               <button
                 @click="goToStep(3)"
@@ -275,14 +275,14 @@
                 class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg disabled:opacity-50"
                 style="background: linear-gradient(to right, #2563eb, #9333ea);"
               >
-                Next
+                {{ $t('common.next') }}
               </button>
             </div>
           </div>
 
           <!-- Step 3: Recipient Details -->
           <div v-if="currentStep === 3" class="space-y-4">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Recipient Details</h2>
+            <h2 class="text-xl font-bold text-gray-900 mb-4">{{ $t('send_parcel.recipient_info') }}</h2>
 
             <!-- Recipient Name -->
             <div class="space-y-1">
@@ -293,7 +293,7 @@
                 <input 
                   v-model="form.recipient_name" 
                   type="text"
-                  placeholder="Full name"
+                  :placeholder="$t('send_parcel.recipient_name_placeholder')"
                   class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -308,7 +308,7 @@
                 <input 
                   v-model="form.recipient_phone" 
                   type="tel"
-                  placeholder="+228 XX XX XX XX"
+                  :placeholder="$t('send_parcel.recipient_phone_placeholder')"
                   class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -323,7 +323,7 @@
                 <textarea 
                   v-model="form.package_description" 
                   rows="3"
-                  placeholder="Describe what's in the package..."
+                  :placeholder="$t('send_parcel.package_description_placeholder')"
                   class="input pl-10 pr-3 pt-3 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                 ></textarea>
               </div>

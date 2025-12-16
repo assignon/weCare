@@ -4,7 +4,7 @@
       <!-- Modern Header -->
       <AppHeader 
         :show-back="true"
-        custom-title="My Addresses"
+        :custom-title="$t('profile.addresses_page.title')"
       />
 
       <!-- Loading State -->
@@ -12,8 +12,8 @@
         <div class="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
           <Loader2 class="w-10 h-10 text-blue-600 animate-spin" />
         </div>
-        <h3 class="text-xl font-semibold text-slate-800 mb-2">Loading Your Addresses</h3>
-        <p class="text-slate-600">Please wait while we fetch your delivery addresses</p>
+        <h3 class="text-xl font-semibold text-slate-800 mb-2">{{ $t('profile.addresses_page.loading') }}</h3>
+        <p class="text-slate-600">{{ $t('profile.addresses_page.loading_subtitle') }}</p>
       </div>
 
       <!-- Content -->
@@ -32,8 +32,8 @@
                   <MapPin class="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold text-slate-900">{{ address.address_label || 'Address' }}</h3>
-                  <p class="text-sm text-slate-600">Delivery location</p>
+                  <h3 class="text-lg font-bold text-slate-900">{{ address.address_label || $t('profile.addresses_page.address') }}</h3>
+                  <p class="text-sm text-slate-600">{{ $t('profile.addresses_page.delivery_location') }}</p>
                 </div>
               </div>
               
@@ -43,13 +43,13 @@
                   class="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full flex items-center space-x-1"
                 >
                   <Navigation class="w-3 h-3" />
-                  <span>GPS</span>
+                  <span>{{ $t('profile.addresses_page.gps') }}</span>
                 </span>
                 <span 
                   v-if="address.is_default" 
                   class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full"
                 >
-                  Default
+                  {{ $t('profile.addresses_page.default') }}
                 </span>
               </div>
             </div>
@@ -77,7 +77,7 @@
                 >
                   <Loader2 v-if="loading" class="w-4 h-4 animate-spin" />
                   <Star v-else class="w-4 h-4" />
-                  <span>Set as Default</span>
+                  <span>{{ $t('profile.addresses_page.set_as_default') }}</span>
                 </button>
               </div>
               
@@ -106,8 +106,8 @@
           <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <MapPinOff class="w-10 h-10 text-slate-400" />
           </div>
-          <h3 class="text-xl font-semibold text-slate-800 mb-2">No Addresses Yet</h3>
-          <p class="text-slate-600 mb-6">Add your delivery address to make your checkout process faster.</p>
+          <h3 class="text-xl font-semibold text-slate-800 mb-2">{{ $t('profile.addresses_page.no_addresses') }}</h3>
+          <p class="text-slate-600 mb-6">{{ $t('profile.addresses_page.no_addresses_message') }}</p>
         </div>
         
         <!-- Add New Address Button -->
@@ -119,7 +119,7 @@
           onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
         >
           <Plus class="w-5 h-5" />
-          <span>Add New Address</span>
+          <span>{{ $t('profile.addresses_page.add_new_address') }}</span>
         </button>
       </div>
     </div>
@@ -137,7 +137,7 @@
               <MapPin class="w-5 h-5 text-blue-600" />
             </div>
             <h2 class="text-xl font-bold text-slate-900">
-              {{ editIndex !== null ? 'Edit Address' : 'Add New Address' }}
+              {{ editIndex !== null ? $t('profile.addresses_page.edit_address') : $t('profile.addresses_page.add_new_address_title') }}
             </h2>
           </div>
           <button 
@@ -153,13 +153,13 @@
           <!-- Address Label -->
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">
-              Address Label *
+              {{ $t('profile.addresses_page.address_label') }} {{ $t('profile.addresses_page.address_label_required') }}
             </label>
             <input 
               v-model="addressForm.address_label"
               type="text"
               required
-              placeholder="E.g. Home, Office, Parent's House"
+              :placeholder="$t('profile.addresses_page.address_label_placeholder')"
               class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
             />
           </div>
@@ -167,13 +167,13 @@
           <!-- Street Address -->
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">
-              Street Address *
+              {{ $t('profile.addresses_page.street_address') }} {{ $t('profile.addresses_page.street_address_required') }}
             </label>
             <input 
               v-model="addressForm.address_line1"
               type="text"
               required
-              placeholder="Enter your street address"
+              :placeholder="$t('profile.addresses_page.street_address_placeholder')"
               class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
             />
           </div>
@@ -181,12 +181,12 @@
           <!-- Address Line 2 -->
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">
-              Address Line 2 (Optional)
+              {{ $t('profile.addresses_page.address_line2') }}
             </label>
             <input 
               v-model="addressForm.address_line2"
               type="text"
-              placeholder="Apartment, suite, unit, building, floor, etc."
+              :placeholder="$t('profile.addresses_page.address_line2_placeholder')"
               class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
             />
           </div>
@@ -195,24 +195,24 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-2">
-                City *
+                {{ $t('profile.addresses_page.city') }} {{ $t('profile.addresses_page.city_required') }}
               </label>
               <input 
                 v-model="addressForm.city"
                 type="text"
                 required
-                placeholder="City"
+                :placeholder="$t('profile.addresses_page.city_placeholder')"
                 class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               />
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-2">
-                State/Province
+                {{ $t('profile.addresses_page.state_province') }}
               </label>
               <input 
                 v-model="addressForm.state"
                 type="text"
-                placeholder="State"
+                :placeholder="$t('profile.addresses_page.state_placeholder')"
                 class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               />
             </div>
@@ -222,18 +222,18 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-2">
-                ZIP/Postal Code
+                {{ $t('profile.addresses_page.zip_postal_code') }}
               </label>
               <input 
                 v-model="addressForm.postal_code"
                 type="text"
-                placeholder="Postal code"
+                :placeholder="$t('profile.addresses_page.postal_code_placeholder')"
                 class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               />
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-2">
-                Country *
+                {{ $t('profile.addresses_page.country') }} {{ $t('profile.addresses_page.country_required') }}
               </label>
               <select 
                 v-model="addressForm.country"
@@ -241,7 +241,7 @@
                 :disabled="loadingCountries"
                 class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               >
-                <option value="" disabled>Select country</option>
+                <option value="" disabled>{{ $t('profile.addresses_page.select_country') }}</option>
                 <option 
                   v-for="country in countries" 
                   :key="country.name" 
@@ -262,7 +262,7 @@
               class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
             />
             <label for="default-address" class="text-sm text-slate-700">
-              Set as default address
+              {{ $t('profile.addresses_page.set_as_default_address') }}
             </label>
           </div>
 
@@ -273,7 +273,7 @@
               @click="showAddressDialog = false"
               class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
             >
-              Cancel
+              {{ $t('profile.cancel') }}
             </button>
             <button 
               type="submit"
@@ -285,7 +285,7 @@
             >
               <Loader2 v-if="loading" class="w-4 h-4 animate-spin" />
               <Save v-else class="w-4 h-4" />
-              <span>Save</span>
+              <span>{{ $t('profile.save') }}</span>
             </button>
           </div>
         </form>
@@ -302,11 +302,11 @@
           <div class="w-10 h-10 bg-red-100 rounded-2xl flex items-center justify-center">
             <AlertTriangle class="w-5 h-5 text-red-600" />
           </div>
-          <h2 class="text-xl font-bold text-slate-900">Delete Address</h2>
+          <h2 class="text-xl font-bold text-slate-900">{{ $t('profile.addresses_page.delete_address') }}</h2>
         </div>
         
         <p class="text-slate-600 mb-6">
-          Are you sure you want to delete this address? This action cannot be undone.
+          {{ $t('profile.addresses_page.delete_address_message') }}
         </p>
         
         <div class="flex space-x-3">
@@ -326,7 +326,7 @@
           >
             <Loader2 v-if="loading" class="w-4 h-4 animate-spin" />
             <Trash2 v-else class="w-4 h-4" />
-            <span>Delete</span>
+            <span>{{ $t('profile.addresses_page.delete') }}</span>
           </button>
         </div>
       </div>
@@ -369,6 +369,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { apiService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import AppHeader from '@/components/AppHeader.vue'
@@ -379,6 +380,7 @@ import {
 } from 'lucide-vue-next'
 
 const router = useRouter()
+const { t } = useI18n()
 const auth = useAuthStore()
 
 // State
@@ -439,7 +441,7 @@ const fetchAddresses = async () => {
     addresses.value = response.data.results || []
   } catch (error) {
     console.error('Failed to fetch addresses:', error)
-    showError('Failed to load addresses')
+    showError(t('profile.addresses_page.failed_to_load'))
   } finally {
     loading.value = false
   }
@@ -453,7 +455,7 @@ const fetchCountries = async () => {
     countries.value = response.data.results || response.data || []
   } catch (error) {
     console.error('Failed to fetch countries:', error)
-    showError('Failed to load countries')
+    showError(t('profile.addresses_page.failed_to_load_countries'))
   } finally {
     loadingCountries.value = false
   }
@@ -550,11 +552,11 @@ const performAddressSave = async (addressData, coordinates = null) => {
     if (editingAddressId.value) {
       // Update existing address
       savedAddress = await apiService.updateAddress(editingAddressId.value, addressData)
-      successMessage.value = 'Address updated successfully'
+      successMessage.value = t('profile.addresses_page.address_updated')
     } else {
       // Create new address
       savedAddress = await apiService.createAddress(addressData)
-      successMessage.value = 'Address added successfully'
+      successMessage.value = t('profile.addresses_page.address_added')
     }
     
     // If setting as default, make API call to set default
@@ -578,7 +580,7 @@ const performAddressSave = async (addressData, coordinates = null) => {
     const errorMessage = error.response?.data?.error || 
                         error.response?.data?.message || 
                         Object.values(error.response?.data || {}).flat().join(', ') ||
-                        'Failed to save address'
+                        t('profile.addresses_page.failed_to_save')
     showError(errorMessage)
   } finally {
     loading.value = false
@@ -602,7 +604,7 @@ const deleteAddress = async () => {
     await apiService.deleteAddress(address.id)
     
     // Show success message
-    successMessage.value = 'Address deleted successfully'
+    successMessage.value = t('profile.addresses_page.address_deleted')
     showSuccessMessage.value = true
     
     // Refresh addresses list
@@ -614,7 +616,7 @@ const deleteAddress = async () => {
     console.error('Failed to delete address:', error)
     const errorMessage = error.response?.data?.error || 
                         error.response?.data?.message || 
-                        'Failed to delete address'
+                        t('profile.addresses_page.failed_to_delete')
     showError(errorMessage)
   } finally {
     loading.value = false
@@ -645,7 +647,7 @@ const setAsDefault = async (id) => {
 const performSetAsDefault = async (id, coordinates = null) => {
   if (!id) {
     console.error('performSetAsDefault: No address ID provided')
-    showError('Address ID missing')
+    showError(t('profile.addresses_page.address_id_missing'))
     return
   }
   
@@ -671,7 +673,7 @@ const performSetAsDefault = async (id, coordinates = null) => {
     console.log('Set default response:', response)
     
     // Show success message
-    successMessage.value = 'Default address updated successfully'
+    successMessage.value = t('profile.addresses_page.default_address_updated')
     showSuccessMessage.value = true
     
     // Refresh addresses list to get updated data
@@ -682,7 +684,7 @@ const performSetAsDefault = async (id, coordinates = null) => {
     
     const errorMessage = error.response?.data?.error || 
                         error.response?.data?.message || 
-                        `Failed to update default address: ${error.response?.status || error.message}`
+                        t('profile.addresses_page.failed_to_update_default')
     showError(errorMessage)
   } finally {
     loading.value = false
@@ -703,7 +705,7 @@ const handleLocationConfirmed = async (coordinates) => {
     }
   } catch (error) {
     console.error('Error in handleLocationConfirmed:', error)
-    showError('Failed to save location')
+    showError(t('profile.addresses_page.failed_to_save_location'))
   }
   
   // Clear pending data

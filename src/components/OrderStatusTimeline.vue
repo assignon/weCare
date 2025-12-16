@@ -49,8 +49,8 @@
               <div class="flex items-center space-x-2 text-xs text-gray-500">
                 <Calendar class="w-3 h-3" />
                 <span v-if="tracking.timestamp">{{ formatDate(tracking.timestamp) }}</span>
-                <span v-else-if="tracking.completed">Just now</span>
-                <span v-else>Pending</span>
+                <span v-else-if="tracking.completed">{{ t('timeline.just_now') }}</span>
+                <span v-else>{{ t('timeline.pending_status') }}</span>
               </div>
             </div>
             
@@ -74,14 +74,14 @@
           <!-- Additional details -->
           <div v-if="tracking.created_by" class="flex items-center space-x-2 text-xs text-gray-500">
             <User class="w-3 h-3" />
-            <span>Updated by {{ tracking.created_by }}</span>
+            <span>{{ t('timeline.updated_by') }} {{ tracking.created_by }}</span>
           </div>
 
           <!-- Progress indicator for current step -->
           <div v-if="tracking.completed && index === getCurrentStepIndex()" class="mt-3">
             <div class="flex items-center space-x-2 text-xs text-blue-600 font-medium">
               <Loader2 class="w-3 h-3 animate-spin" />
-              <span>Currently in progress</span>
+              <span>{{ t('timeline.currently_in_progress') }}</span>
             </div>
           </div>
         </div>
@@ -92,7 +92,7 @@
     <div v-if="isOrderCompleted()" class="mt-8 text-center">
       <div class="inline-flex items-center space-x-2 px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium">
         <CheckCircle class="w-4 h-4" />
-        <span>Order completed successfully!</span>
+        <span>{{ t('timeline.order_completed') }}</span>
       </div>
     </div>
 
@@ -100,7 +100,7 @@
     <div v-if="order.status === 'cancelled'" class="mt-8 text-center">
       <div class="inline-flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-full text-sm font-medium">
         <XCircle class="w-4 h-4" />
-        <span>Order has been cancelled</span>
+        <span>{{ t('timeline.order_cancelled') }}</span>
       </div>
     </div>
   </div>
@@ -108,10 +108,13 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { 
   Clock, CheckCircle, Package, Truck, User, Calendar, 
   Loader2, XCircle, ShoppingBag, AlertTriangle
 } from 'lucide-vue-next'
+
+const { t } = useI18n()
 
 const props = defineProps({
   order: {
@@ -148,7 +151,7 @@ const timeline = computed(() => {
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString('fr-FR', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -158,7 +161,14 @@ const formatDate = (dateString) => {
 }
 
 const formatStatus = (status) => {
-  return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  const statusMap = {
+    'pending': t('timeline.pending'),
+    'assigned_to_driver': t('timeline.assigned_to_driver'),
+    'picked_up': t('timeline.picked_up'),
+    'delivered': t('timeline.delivered'),
+    'cancelled': t('timeline.cancelled')
+  }
+  return statusMap[status] || status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
 }
 
 const getStatusClasses = (status) => {
@@ -185,10 +195,10 @@ const getStatusIcon = (status) => {
 
 const getDefaultStatusNote = (status) => {
   const notes = {
-    pending: 'Order has been placed and is awaiting processing',
-    assigned_to_driver: 'Order has been assigned to a delivery driver',
-    picked_up: 'Order has been picked up and is on the way to you',
-    delivered: 'Order has been successfully delivered to your address'
+    pending: t('timeline.pending_note'),
+    assigned_to_driver: t('timeline.assigned_note'),
+    picked_up: t('timeline.picked_up_note'),
+    delivered: t('timeline.delivered_note')
   }
   return notes[status] || ''
 }

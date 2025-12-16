@@ -6,11 +6,11 @@
         <div class="flex items-center justify-between mb-2">
           <div>
             <h1 class="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text">
-              My Orders
+              {{ $t('orders.title') }}
             </h1>
             <p class="text-slate-600 text-sm mt-0.5 flex items-center">
               <ShoppingBag class="w-3 h-3 mr-1" />
-              {{ totalOrders }} orders total
+              {{ totalOrders }} {{ $t('orders.orders_total') }}
             </p>
           </div>
           <div class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-white/20 flex items-center justify-center">
@@ -30,7 +30,7 @@
             <input
               v-model="searchTerm"
               type="text"
-              placeholder="Search orders by ID, product name..."
+              :placeholder="$t('orders.search_placeholder')"
               class="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm text-sm"
               @input="debouncedSearch"
             />
@@ -70,8 +70,8 @@
              style="background: linear-gradient(to right, #dbeafe, #e0e7ff);">
           <Loader2 class="w-10 h-10 text-blue-600 animate-spin" />
         </div>
-        <h3 class="text-xl font-semibold text-slate-800 mb-2">Loading your orders...</h3>
-        <p class="text-slate-600">Please wait while we fetch your order history</p>
+        <h3 class="text-xl font-semibold text-slate-800 mb-2">{{ $t('orders.loading') }}</h3>
+        <p class="text-slate-600">{{ $t('orders.loading_subtitle') }}</p>
       </div>
 
       <!-- Error State -->
@@ -81,7 +81,7 @@
             <AlertCircle class="w-5 h-5 text-red-600" />
           </div>
           <div class="flex-1">
-            <h4 class="font-semibold text-red-800 mb-1">Error Loading Orders</h4>
+            <h4 class="font-semibold text-red-800 mb-1">{{ $t('orders.error_loading') }}</h4>
             <p class="text-red-700 text-sm">{{ error }}</p>
           </div>
           <button @click="error = null" class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-full flex items-center justify-center transition-colors">
@@ -106,7 +106,7 @@
                   <ShoppingBag class="w-4 h-4 text-blue-600" />
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold text-slate-900">Order #{{ order.id }}</h3>
+                  <h3 class="text-lg font-bold text-slate-900">{{ $t('orders.order') }} #{{ order.id }}</h3>
                   <p class="text-xs text-slate-600 flex items-center mt-0.5">
                     <Calendar class="w-3 h-3 mr-1" />
                     {{ formatDate(order.created_at) }}
@@ -126,7 +126,7 @@
                   <span>{{ formatStatus(order.status) }}</span>
                 </div>
                 <span class="text-xs text-slate-500">
-                  {{ order.items?.length || 0 }} item{{ order.items?.length !== 1 ? 's' : '' }}
+                  {{ order.items?.length || 0 }} {{ order.items?.length !== 1 ? $t('orders.items') : $t('orders.item') }}
                 </span>
               </div>
             </div>
@@ -147,7 +147,7 @@
               <div class="w-6 h-6 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg flex items-center justify-center">
                 <Package class="w-3 h-3 text-purple-600" />
               </div>
-              <span class="text-xs font-semibold text-slate-700">Products</span>
+              <span class="text-xs font-semibold text-slate-700">{{ $t('orders.products') }}</span>
             </div>
             <div class="space-y-2">
               <div 
@@ -228,7 +228,7 @@
               class="px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 text-slate-700 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center space-x-1 shadow-sm group-hover:shadow-md"
             >
               <ArrowRight class="w-3 h-3" />
-              <span>View Details</span>
+              <span>{{ $t('order_detail.view_details') }}</span>
             </button>
           </div>
         </div>
@@ -741,7 +741,7 @@ const canCancelOrder = (status) => {
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString('fr-FR', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

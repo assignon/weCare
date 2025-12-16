@@ -5,6 +5,7 @@ import router from './router'
 import { createPinia } from 'pinia'
 import { useAuthStore } from './stores/auth'
 import LucideIcons from './plugins/lucide'
+import i18n, { initializeLocale } from './i18n'
 
 
 
@@ -14,29 +15,30 @@ const app = createApp(App)
 app.use(pinia)
 app.use(router)
 app.use(LucideIcons)
+app.use(i18n)
 
 // PWA Service Worker Registration and Update Handling
+// Clean up any stuck or problematic service workers on app load
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        console.log('SW registered: ', registration)
-        
-        // Handle service worker updates
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // New content is available, show update notification
-              console.log('New content is available; please refresh.')
-              // You can show a snackbar or notification here
-            }
-          })
-        })
-      })
-      .catch((registrationError) => {
-        console.log('SW registration failed: ', registrationError)
-      })
+  window.addEventListener('load', async () => {
+    try {
+      // Unregister any existing service workers that might be causing issues
+      // (except firebase-messaging-sw.js which is handled by Firebase)
+      const registrations = await navigator.serviceWorker.getRegistrations()
+      for (const registration of registrations) {
+        // Only unregister if it's not the Firebase messaging service worker
+        if (registration.scope && !registration.scope.includes('firebase')) {
+          try {
+            await registration.unregister()
+            console.log('Unregistered problematic service worker:', registration.scope)
+          } catch (unregError) {
+            console.warn('Failed to unregister service worker:', unregError)
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Error cleaning up service workers:', error)
+    }
   })
 }
 
@@ -57,6 +59,9 @@ window.addEventListener('appinstalled', (evt) => {
 
 // Mount the app directly - let router guards handle authentication when needed
 app.mount('#app')
+
+// Initialize locale after mounting
+initializeLocale()
 
 // createApp(App)
 //   .use(router)

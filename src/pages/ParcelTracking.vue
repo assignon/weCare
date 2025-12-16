@@ -43,19 +43,19 @@
               <component :is="statusIcons[parcel.status]" class="w-6 h-6 text-gray-900" />
             </div>
             <div>
-              <p class="text-white text-sm opacity-90">Status</p>
+              <p class="text-white text-sm opacity-90">{{ $t('parcels.status') }}</p>
               <p class="text-white text-xl font-bold">{{ parcel.status_display }}</p>
             </div>
           </div>
         </div>
         <p v-if="parcel.estimated_delivery_time" class="text-white text-sm opacity-90">
-          Est. delivery: {{ parcel.estimated_delivery_time }} minutes
+          {{ $t('parcels.est_delivery') }}: {{ parcel.estimated_delivery_time }} {{ $t('parcels.minutes') }}
         </p>
       </div>
 
       <!-- Status Timeline -->
       <div class="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 class="text-lg font-bold text-gray-900 mb-4">Delivery Timeline</h2>
+        <h2 class="text-lg font-bold text-gray-900 mb-4">{{ $t('parcels.delivery_timeline') }}</h2>
         <div class="space-y-4">
           <div 
             v-for="(step, index) in timelineSteps" 
@@ -96,15 +96,15 @@
 
       <!-- Driver Info (if assigned) -->
       <div v-if="parcel.driver" class="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 class="text-lg font-bold text-gray-900 mb-4">Driver Information</h2>
+        <h2 class="text-lg font-bold text-gray-900 mb-4">{{ $t('parcels.driver_information') }}</h2>
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
             <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center">
               <User class="w-7 h-7 text-blue-600" />
             </div>
             <div>
-              <p class="font-semibold text-gray-900">{{ parcel.driver.full_name || 'Driver' }}</p>
-              <p class="text-sm text-gray-600">{{ parcel.driver.phone_number || 'No phone' }}</p>
+              <p class="font-semibold text-gray-900">{{ parcel.driver.full_name || $t('parcels.driver') }}</p>
+              <p class="text-sm text-gray-600">{{ parcel.driver.phone_number || $t('parcels.no_phone') }}</p>
             </div>
           </div>
           <button
@@ -113,14 +113,14 @@
             class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 flex items-center space-x-2"
           >
             <Phone class="w-4 h-4" />
-            <span>Call</span>
+            <span>{{ $t('parcels.call') }}</span>
           </button>
         </div>
       </div>
 
       <!-- Location Details -->
       <div class="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 class="text-lg font-bold text-gray-900 mb-4">Delivery Details</h2>
+        <h2 class="text-lg font-bold text-gray-900 mb-4">{{ $t('parcels.delivery_details') }}</h2>
         <div class="space-y-4">
           <!-- Pickup -->
           <div class="flex items-start space-x-3">
@@ -128,9 +128,9 @@
               <MapPin class="w-5 h-5 text-green-600" />
             </div>
             <div class="flex-1">
-              <p class="text-sm font-semibold text-gray-900">Pickup Location</p>
+              <p class="text-sm font-semibold text-gray-900">{{ $t('parcels.pickup_location') }}</p>
               <p class="text-sm text-gray-600">
-                {{ parcel.pickup_location.landmark || parcel.pickup_location.address || 'No landmark' }}
+                {{ parcel.pickup_location.landmark || parcel.pickup_location.address || $t('parcels.no_landmark') }}
               </p>
               <p class="text-xs text-gray-400 mt-1">
                 {{ parcel.pickup_location.latitude }}, {{ parcel.pickup_location.longitude }}
@@ -149,7 +149,7 @@
               <MapPin class="w-5 h-5 text-red-600" />
             </div>
             <div class="flex-1">
-              <p class="text-sm font-semibold text-gray-900">Dropoff Location</p>
+              <p class="text-sm font-semibold text-gray-900">{{ $t('parcels.dropoff_location') }}</p>
               <p class="text-sm text-gray-600">
                 {{ parcel.dropoff_location.landmark || parcel.dropoff_location.address || 'No landmark' }}
               </p>
@@ -163,7 +163,7 @@
 
       <!-- Recipient Details -->
       <div class="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 class="text-lg font-bold text-gray-900 mb-4">Recipient Information</h2>
+        <h2 class="text-lg font-bold text-gray-900 mb-4">{{ $t('parcels.recipient') }}</h2>
         <div class="space-y-4">
           <div class="relative group">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -188,7 +188,7 @@
               <Package class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
             </div>
             <div class="pl-10">
-              <p class="text-xs text-gray-500 mb-1">Package Description</p>
+              <p class="text-xs text-gray-500 mb-1">{{ $t('parcels.package_description') }}</p>
               <p class="text-sm text-gray-700">{{ parcel.package_description }}</p>
             </div>
           </div>

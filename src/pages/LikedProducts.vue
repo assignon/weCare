@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-white pb-24">
-    <BackButtonHeader title="Liked Products" />
+    <BackButtonHeader :title="$t('liked_products.title')" />
     
     <div v-if="loading" class="flex justify-center items-center py-20">
       <Loader2 class="w-8 h-8 animate-spin text-blue-600" />
@@ -14,7 +14,7 @@
           @click="fetchLikedProducts"
           class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
-          Try Again
+          {{ $t('liked_products.try_again') }}
         </button>
       </div>
     </div>
@@ -22,8 +22,8 @@
     <div v-else-if="products.length === 0" class="px-4 py-8">
       <div class="bg-white rounded-xl p-6 text-center">
         <Heart class="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <h3 class="text-lg font-semibold text-gray-800 mb-2">No Liked Products</h3>
-        <p class="text-gray-600">Products and listings you like will appear here</p>
+        <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ $t('liked_products.no_liked') }}</h3>
+        <p class="text-gray-600">{{ $t('liked_products.no_liked_message') }}</p>
       </div>
     </div>
     

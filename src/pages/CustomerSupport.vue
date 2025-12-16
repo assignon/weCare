@@ -4,7 +4,7 @@
       <!-- Modern Header -->
       <AppHeader 
         :show-back="true"
-        custom-title="Customer Support"
+        :custom-title="$t('profile.customer_support_page.title')"
       />
 
       <!-- Support Hero Section -->
@@ -13,8 +13,8 @@
           <div class="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <Headphones class="w-10 h-10 text-blue-600" />
           </div>
-          <h1 class="text-2xl font-bold text-slate-900 mb-2">We're Here to Help</h1>
-          <p class="text-slate-600">Get in touch with our support team for any questions or assistance you need.</p>
+          <h1 class="text-2xl font-bold text-slate-900 mb-2">{{ $t('profile.customer_support_page.were_here_to_help') }}</h1>
+          <p class="text-slate-600">{{ $t('profile.customer_support_page.get_in_touch') }}</p>
         </div>
       </div>
 
@@ -28,15 +28,15 @@
                 <Phone class="w-6 h-6 text-green-600" />
               </div>
               <div class="flex-1">
-                <h3 class="text-lg font-semibold text-slate-900">Phone Support</h3>
-                <p class="text-slate-600 text-sm">Call us for immediate assistance</p>
+                <h3 class="text-lg font-semibold text-slate-900">{{ $t('profile.customer_support_page.phone_support') }}</h3>
+                <p class="text-slate-600 text-sm">{{ $t('profile.customer_support_page.call_us') }}</p>
               </div>
             </div>
             <div class="mt-4">
               <div class="p-4 bg-slate-50 rounded-2xl">
                 <div class="text-center">
-                  <p class="font-medium text-slate-900 mb-2">Main Line</p>
-                  <p class="text-2xl font-bold text-slate-900">{{ companyContact.phone }}</p>
+                  <p class="font-medium text-slate-900 mb-2">{{ $t('profile.customer_support_page.main_line') }}</p>
+                  <p class="text-2xl font-bold text-slate-900">+228 97 78 38 64</p>
                        </div>
               </div>
             </div>
@@ -51,16 +51,16 @@
                 <Mail class="w-6 h-6 text-blue-600" />
               </div>
               <div class="flex-1">
-                <h3 class="text-lg font-semibold text-slate-900">Email Support</h3>
-                <p class="text-slate-600 text-sm">Send us a detailed message</p>
+                <h3 class="text-lg font-semibold text-slate-900">{{ $t('profile.customer_support_page.email_support') }}</h3>
+                <p class="text-slate-600 text-sm">{{ $t('profile.customer_support_page.send_detailed_message') }}</p>
               </div>
             </div>
             <div class="mt-4">
               <div class="p-4 bg-slate-50 rounded-2xl">
                 <div class="text-center">
-                  <p class="font-medium text-slate-900 mb-2">Support Email</p>
-                  <p class="text-lg font-medium text-slate-900 break-all">{{ companyContact.email }}</p>
-                  <p class="text-sm text-slate-600 mt-1">We'll respond within 24 hours</p>
+                  <p class="font-medium text-slate-900 mb-2">{{ $t('profile.customer_support_page.support_email') }}</p>
+                  <p class="text-lg font-medium text-slate-900 break-all">afriqxpress@gmail.com</p>
+                  <p class="text-sm text-slate-600 mt-1">{{ $t('profile.customer_support_page.respond_within_24h') }}</p>
                 </div>
               </div>
             </div>
@@ -75,8 +75,8 @@
                 <Building2 class="w-6 h-6 text-purple-600" />
               </div>
               <div class="flex-1">
-                <h3 class="text-lg font-semibold text-slate-900">Company Information</h3>
-                <p class="text-slate-600 text-sm">About {{ companyContact.companyName }}</p>
+                <h3 class="text-lg font-semibold text-slate-900">{{ $t('profile.customer_support_page.company_information') }}</h3>
+                <p class="text-slate-600 text-sm">{{ $t('profile.customer_support_page.about_company') }} AfriQExpress</p>
               </div>
             </div>
             
@@ -85,8 +85,8 @@
                 <div class="flex items-start space-x-3">
                   <MapPin class="w-5 h-5 text-slate-600 mt-0.5" />
                   <div>
-                    <p class="font-medium text-slate-900">Address</p>
-                    <p class="text-slate-600 text-sm">{{ companyContact.address }}</p>
+                    <p class="font-medium text-slate-900">{{ $t('profile.customer_support_page.address') }}</p>
+                    <p class="text-slate-600 text-sm">Adoboukome, Rue 88, Lomé, Togo</p>
                   </div>
                 </div>
               </div>
@@ -95,7 +95,7 @@
                 <div class="flex items-start space-x-3">
                   <Clock class="w-5 h-5 text-slate-600 mt-0.5" />
                   <div>
-                    <p class="font-medium text-slate-900">Business Hours</p>
+                    <p class="font-medium text-slate-900">{{ $t('profile.customer_support_page.business_hours') }}</p>
                     <p class="text-slate-600 text-sm">{{ companyContact.businessHours }}</p>
                   </div>
                 </div>
@@ -105,13 +105,13 @@
                 <div class="flex items-start space-x-3">
                   <Globe class="w-5 h-5 text-slate-600 mt-0.5" />
                   <div>
-                    <p class="font-medium text-slate-900">Website</p>
+                    <p class="font-medium text-slate-900">{{ $t('profile.customer_support_page.website') }}</p>
                     <a 
-                      :href="companyContact.website" 
+                      href="https://afriqxpress.com" 
                       target="_blank"
                       class="text-blue-600 text-sm hover:underline"
                     >
-                      {{ companyContact.website }}
+                      afriqxpress.com
                     </a>
                   </div>
                 </div>
@@ -128,8 +128,8 @@
                 <HelpCircle class="w-6 h-6 text-orange-600" />
               </div>
               <div class="flex-1">
-                <h3 class="text-lg font-semibold text-slate-900">Frequently Asked Questions</h3>
-                <p class="text-slate-600 text-sm">Quick answers to common questions</p>
+                <h3 class="text-lg font-semibold text-slate-900">{{ $t('profile.customer_support_page.frequently_asked_questions') }}</h3>
+                <p class="text-slate-600 text-sm">{{ $t('profile.customer_support_page.quick_answers') }}</p>
               </div>
             </div>
             
@@ -164,12 +164,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/AppHeader.vue'
 import { 
   Headphones, Phone, Mail, Building2, 
   MapPin, Clock, Globe, HelpCircle, ChevronDown
 } from 'lucide-vue-next'
+
+const { t } = useI18n()
 
 // Company contact details from environment variables
 const companyContact = ref({
@@ -181,31 +184,31 @@ const companyContact = ref({
   website: import.meta.env.VITE_COMPANY_WEBSITE || 'https://afriqexpress.com'
 })
 
-// FAQ data
-const faqs = ref([
+// FAQ data - computed to use translations
+const faqs = computed(() => [
   {
-    question: "How do I track my order?",
-    answer: "You can track your order by going to the Orders page in your profile. Click on any order to see its current status and delivery timeline."
+    question: t('profile.customer_support_page.faq_how_track_order'),
+    answer: t('profile.customer_support_page.faq_how_track_order_answer')
   },
   {
-    question: "What payment methods do you accept?",
-    answer: "We accept all major credit cards, mobile money, and bank transfers. All payments are processed securely through our encrypted payment gateway."
+    question: t('profile.customer_support_page.faq_payment_methods'),
+    answer: t('profile.customer_support_page.faq_payment_methods_answer')
   },
   {
-    question: "How long does delivery take?",
-    answer: "Delivery times vary by location. Standard delivery is 2-5 business days, while express delivery is 1-2 business days. You'll receive tracking updates via SMS and email."
+    question: t('profile.customer_support_page.faq_delivery_time'),
+    answer: t('profile.customer_support_page.faq_delivery_time_answer')
   },
   {
-    question: "Can I return or exchange items?",
-    answer: "Yes! We offer a 30-day return policy for unused items in original packaging. Contact our support team to initiate a return or exchange."
+    question: t('profile.customer_support_page.faq_return_exchange'),
+    answer: t('profile.customer_support_page.faq_return_exchange_answer')
   },
   {
-    question: "How do I update my delivery address?",
-    answer: "Go to your Profile > Addresses to add, edit, or remove delivery addresses. You can also update your address during checkout."
+    question: t('profile.customer_support_page.faq_update_address'),
+    answer: t('profile.customer_support_page.faq_update_address_answer')
   },
   {
-    question: "What if I'm not satisfied with my purchase?",
-    answer: "We want you to be completely satisfied! Contact our support team within 30 days of purchase, and we'll work with you to resolve any issues."
+    question: t('profile.customer_support_page.faq_not_satisfied'),
+    answer: t('profile.customer_support_page.faq_not_satisfied_answer')
   }
 ])
 

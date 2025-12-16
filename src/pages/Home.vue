@@ -62,11 +62,8 @@
       <div v-if="productStore.popularProducts.length > 0" class="mb-8">
         <div class="flex justify-between items-center mb-4">
           <div>
-            <h2 class="text-xl font-bold text-slate-900 mb-1">Popular Products</h2>
-            <p class="text-sm text-slate-600">Trending items you'll love</p>
-          </div>
-          <div class="w-8 h-8 bg-gradient-to-r from-orange-400 to-red-400 rounded-full flex items-center justify-center">
-            <span class="text-white text-xs font-bold">🔥</span>
+            <h2 class="text-xl font-bold text-slate-900 mb-1">{{ $t('home.popular_products') }}</h2>
+            <p class="text-sm text-slate-600">{{ $t('home.popular_products_subtitle') }}</p>
           </div>
         </div>
 
@@ -147,11 +144,8 @@
       <div v-if="productStore.newArrivals.length > 0" class="mb-8">
         <div class="flex justify-between items-center mb-4">
           <div>
-            <h2 class="text-xl font-bold text-slate-900 mb-1">New Arrivals</h2>
-            <p class="text-sm text-slate-600">Fresh products just for you</p>
-          </div>
-          <div class="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center">
-            <span class="text-white text-xs font-bold">✨</span>
+            <h2 class="text-xl font-bold text-slate-900 mb-1">{{ $t('home.new_arrivals') }}</h2>
+            <p class="text-sm text-slate-600">{{ $t('home.new_arrivals_subtitle') }}</p>
           </div>
         </div>
 

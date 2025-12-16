@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pb-24">
     <!-- Modern Header -->
-    <BackButtonHeader title="Notifications">
+    <BackButtonHeader :title="$t('notifications.title')">
       <template #right>
         <button 
           v-if="notifications.length > 0 && hasUnreadNotifications"
@@ -14,7 +14,7 @@
         >
           <Loader2 v-if="markingAllAsRead" class="w-4 h-4 animate-spin" />
           <CheckCheck v-else class="w-4 h-4" />
-          <span>Mark all read</span>
+          <span>{{ $t('notifications.mark_all_read_button') }}</span>
         </button>
       </template>
     </BackButtonHeader>
@@ -26,7 +26,7 @@
         <div class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl border border-blue-200/50">
           <div class="w-2 h-2 bg-blue-600 rounded-full mr-3 animate-pulse"></div>
           <span class="text-sm font-semibold text-blue-800">
-            {{ unreadCount }} unread notification{{ unreadCount === 1 ? '' : 's' }}
+            {{ unreadCount }} {{ unreadCount === 1 ? $t('notifications.unread_notification') : $t('notifications.unread_notifications') }}
           </span>
         </div>
       </div>
@@ -36,8 +36,8 @@
         <div class="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
           <Loader2 class="w-10 h-10 text-blue-600 animate-spin" />
         </div>
-        <h3 class="text-xl font-semibold text-slate-800 mb-2">Loading Notifications</h3>
-        <p class="text-slate-600">Please wait while we fetch your notifications</p>
+        <h3 class="text-xl font-semibold text-slate-800 mb-2">{{ $t('notifications.loading_notifications') }}</h3>
+        <p class="text-slate-600">{{ $t('notifications.loading_subtitle') }}</p>
       </div>
 
       <!-- Error state -->
@@ -47,7 +47,7 @@
             <AlertCircle class="w-5 h-5 text-red-600" />
           </div>
           <div class="flex-1">
-            <h4 class="font-semibold text-red-800 mb-1">Error Loading Notifications</h4>
+            <h4 class="font-semibold text-red-800 mb-1">{{ $t('notifications.error_loading') }}</h4>
             <p class="text-red-700 text-sm">{{ error }}</p>
           </div>
           <button @click="clearError" class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-full flex items-center justify-center transition-colors">
@@ -153,7 +153,7 @@
               <div class="p-6">
                 <!-- Full message content -->
                 <div class="mb-4">
-                  <h4 class="text-sm font-semibold text-slate-700 mb-2">Full Message:</h4>
+                  <h4 class="text-sm font-semibold text-slate-700 mb-2">{{ $t('notifications.full_message') }}</h4>
                   <p class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere">
                     {{ notification.message }}
                   </p>
@@ -163,26 +163,26 @@
                 <div class="space-y-3">
                   <!-- Notification type -->
                   <div class="flex items-center justify-between text-sm">
-                    <span class="text-slate-500">Type:</span>
+                    <span class="text-slate-500">{{ $t('notifications.type') }}</span>
                     <span class="font-medium text-slate-700 capitalize">{{ notification.type }}</span>
                   </div>
 
                   <!-- Created date (full format) -->
                   <div class="flex items-center justify-between text-sm">
-                    <span class="text-slate-500">Created:</span>
+                    <span class="text-slate-500">{{ $t('notifications.created') }}</span>
                     <span class="font-medium text-slate-700">{{ formatFullDate(notification.created_at) }}</span>
                   </div>
 
                   <!-- Read status -->
                   <div class="flex items-center justify-between text-sm">
-                    <span class="text-slate-500">Status:</span>
+                    <span class="text-slate-500">{{ $t('notifications.status') }}</span>
                     <span :class="[
                       'font-medium px-2 py-1 rounded-full text-xs',
                       notification.is_read 
                         ? 'bg-green-100 text-green-700' 
                         : 'bg-blue-100 text-blue-700'
                     ]">
-                      {{ notification.is_read ? 'Read' : 'Unread' }}
+                      {{ notification.is_read ? $t('notifications.read') : $t('notifications.unread') }}
                     </span>
                   </div>
                 </div>
@@ -198,7 +198,7 @@
                      onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
                    >
                     <ArrowRight class="w-4 h-4" />
-                    <span>View {{ notification.reference_type }}</span>
+                    <span>{{ $t('notifications.view') }} {{ notification.reference_type }}</span>
                   </button>
                   
                   <button 
@@ -209,7 +209,7 @@
                   >
                     <Loader2 v-if="markingAsRead[notification.id]" class="w-4 h-4 animate-spin" />
                     <Check v-else class="w-4 h-4" />
-                    <span>Mark as Read</span>
+                    <span>{{ $t('notifications.mark_as_read') }}</span>
                   </button>
                 </div>
               </div>
@@ -225,7 +225,7 @@
             class="px-8 py-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-3xl text-slate-700 font-semibold hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 mx-auto"
           >
             <Loader2 v-if="loadingMore" class="w-5 h-5 animate-spin" />
-            <span>{{ loadingMore ? 'Loading...' : 'Load more notifications' }}</span>
+            <span>{{ loadingMore ? $t('notifications.loading') : $t('notifications.load_more') }}</span>
           </button>
         </div>
 
@@ -234,7 +234,7 @@
           <div class="w-16 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full mx-auto mb-6"></div>
           <CheckCircle class="w-8 h-8 text-slate-400 mx-auto mb-3" />
           <p class="text-sm text-slate-600 font-medium">
-            You've seen all {{ notifications.length }} notifications
+            {{ $t('notifications.seen_all', { count: notifications.length }) }}
           </p>
         </div>
       </div>
@@ -244,9 +244,9 @@
         <div class="w-32 h-32 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
           <Bell class="w-16 h-16 text-blue-600 opacity-60" />
         </div>
-        <h3 class="text-xl font-bold text-slate-900 mb-2">No notifications yet</h3>
+        <h3 class="text-xl font-bold text-slate-900 mb-2">{{ $t('notifications.no_notifications_yet') }}</h3>
         <p class="text-slate-600 max-w-md mx-auto">
-          You'll see order updates, promotions, and other important information here when they arrive.
+          {{ $t('notifications.no_notifications_message') }}
         </p>
       </div>
     </div>
@@ -256,6 +256,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/stores/notification'
 import BackButtonHeader from '@/components/BackButtonHeader.vue'
 import { 
@@ -264,6 +265,7 @@ import {
 } from 'lucide-vue-next'
 
 const router = useRouter()
+const { t } = useI18n()
 const notificationStore = useNotificationStore()
 
 // Local state
@@ -291,12 +293,24 @@ const formatDate = (dateString) => {
   const diffHours = Math.floor(diffMins / 60)
   const diffDays = Math.floor(diffHours / 24)
 
-  if (diffMins < 1) return 'Just now'
-  if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`
-  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`
-  if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`
+  if (diffMins < 1) return t('notifications.just_now')
+  if (diffMins < 60) {
+    return diffMins === 1 
+      ? t('notifications.minute_ago', { count: diffMins })
+      : t('notifications.minutes_ago', { count: diffMins })
+  }
+  if (diffHours < 24) {
+    return diffHours === 1
+      ? t('notifications.hour_ago', { count: diffHours })
+      : t('notifications.hours_ago', { count: diffHours })
+  }
+  if (diffDays < 7) {
+    return diffDays === 1
+      ? t('notifications.day_ago', { count: diffDays })
+      : t('notifications.days_ago', { count: diffDays })
+  }
 
-  return date.toLocaleDateString()
+  return date.toLocaleDateString('fr-FR')
 }
 
 const getNotificationIcon = (type) => {
@@ -399,7 +413,7 @@ const formatFullDate = (dateString) => {
   if (!dateString) return ''
   
   const date = new Date(dateString)
-  return date.toLocaleString('en-US', {
+  return date.toLocaleString('fr-FR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

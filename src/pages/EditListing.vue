@@ -1,15 +1,15 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-24">
-    <BackButtonHeader title="Edit Listing" />
+    <BackButtonHeader :title="$t('listings.edit_listing')" />
 
     <div class="p-4">
       <div v-if="!loading && listingStatus === 'sold'" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-        <p class="text-red-800 text-sm font-medium">This listing has been marked as sold and cannot be edited.</p>
+        <p class="text-red-800 text-sm font-medium">{{ $t('listings.cannot_edit_sold') }}</p>
       </div>
       <form v-if="!loading && listingStatus !== 'sold'" @submit.prevent="submit" class="space-y-4">
         <!-- Images -->
         <div class="space-y-1">
-          <label class="block text-sm font-semibold text-gray-700">Photos (max 2)</label>
+          <label class="block text-sm font-semibold text-gray-700">{{ $t('listings.photos_max') }}</label>
           <div class="grid grid-cols-2 gap-3">
             <div v-for="(img, i) in images" :key="i" class="aspect-square bg-gray-200 rounded-lg relative overflow-hidden">
               <img :src="img.preview || img.image_url" class="w-full h-full object-cover" />
@@ -21,7 +21,7 @@
               <input type="file" @change="addImage" accept="image/*" class="hidden" />
               <div class="text-center">
                 <Plus class="w-8 h-8 text-gray-400 mx-auto mb-1" />
-                <span class="text-xs text-gray-500">Add Photo</span>
+                <span class="text-xs text-gray-500">{{ $t('listings.add_photo') }}</span>
               </div>
             </label>
           </div>
@@ -38,7 +38,7 @@
               type="text"
               required
               class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter listing title"
+              :placeholder="$t('listings.title_placeholder')"
             />
           </div>
         </div>
@@ -54,7 +54,7 @@
               required
               rows="4"
               class="textarea pl-10 pr-3 py-3 h-24 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-              placeholder="Describe your item..."
+              :placeholder="$t('listings.description_placeholder')"
             ></textarea>
           </div>
         </div>
@@ -69,7 +69,7 @@
               v-model="form.category"
               class="select pl-10 pr-8 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">Select category</option>
+              <option value="">{{ $t('listings.select_category') }}</option>
               <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
             </select>
           </div>
@@ -77,7 +77,7 @@
 
         <!-- Price Type -->
         <div class="space-y-1">
-          <label class="block text-sm font-semibold text-gray-700">Price Type *</label>
+          <label class="block text-sm font-semibold text-gray-700">{{ $t('listings.price_type') }}</label>
           <div class="grid grid-cols-3 gap-2">
             <button
               type="button"
@@ -85,7 +85,7 @@
               :class="form.price_type === 'fixed' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300'"
               class="px-2 py-3 border-2 rounded-lg text-xs font-medium transition-all duration-200 hover:scale-[1.02]"
             >
-              Fixed
+              {{ $t('listings.fixed') }}
             </button>
             <button
               type="button"
@@ -93,7 +93,7 @@
               :class="form.price_type === 'offer' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300'"
               class="px-2 py-3 border-2 rounded-lg text-xs font-medium transition-all duration-200 hover:scale-[1.02]"
             >
-              Offer
+              {{ $t('listings.offer') }}
             </button>
             <button
               type="button"
@@ -101,7 +101,7 @@
               :class="form.price_type === 'free' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300'"
               class="px-2 py-3 border-2 rounded-lg text-xs font-medium transition-all duration-200 hover:scale-[1.02]"
             >
-              Free
+              {{ $t('listings.free') }}
             </button>
           </div>
         </div>
@@ -119,7 +119,7 @@
               min="0"
               step="0.01"
               class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter price"
+              :placeholder="$t('listings.price_placeholder')"
             />
           </div>
         </div>
@@ -137,14 +137,14 @@
               min="0"
               step="0.01"
               class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Minimum offer price"
+              :placeholder="$t('listings.min_offer_placeholder')"
             />
           </div>
         </div>
 
         <!-- City and Neighborhood -->
         <div class="space-y-1">
-          <label class="block text-sm font-semibold text-gray-700">Location *</label>
+          <label class="block text-sm font-semibold text-gray-700">{{ $t('listings.location') }}</label>
           <div class="grid grid-cols-2 gap-2">
             <!-- City -->
             <div class="relative group">
@@ -156,7 +156,7 @@
                 type="text"
                 required
                 class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="City (ex. Lome)"
+                :placeholder="$t('listings.city_placeholder')"
               />
             </div>
             <!-- Neighborhood -->
@@ -168,7 +168,7 @@
                 v-model="form.neighborhood"
                 type="text"
                 class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Neighborhood"
+                :placeholder="$t('listings.neighborhood_placeholder')"
               />
             </div>
           </div>
@@ -219,7 +219,7 @@
               type="tel"
               required
               class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="WhatsApp number"
+              :placeholder="$t('listings.whatsapp_placeholder')"
             />
           </div>
         </div>
@@ -235,7 +235,7 @@
               type="email"
               required
               class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Contact email"
+              :placeholder="$t('listings.email_placeholder')"
             />
           </div>
         </div>

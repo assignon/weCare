@@ -29,7 +29,7 @@
             <p class="text-sm text-slate-600">@{{ userHandle }}</p>
             <div class="flex items-center space-x-2 mt-2">
               <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span class="text-xs text-slate-500">Active</span>
+              <span class="text-xs text-slate-500">{{ $t('profile.active') }}</span>
             </div>
           </div>
 
@@ -42,7 +42,7 @@
             onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
           >
             <Edit3 class="w-4 h-4" />
-            <span>Edit</span>
+            <span>{{ $t('profile.edit') }}</span>
           </button>
         </div>
       </div>
@@ -52,7 +52,7 @@
         <!-- Profile Settings Section -->
         <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 overflow-hidden">
           <div class="p-4 border-b border-slate-100">
-            <h3 class="text-lg font-semibold text-slate-900">Profile Settings</h3>
+            <h3 class="text-lg font-semibold text-slate-900">{{ $t('profile.profile_settings') }}</h3>
           </div>
           
           <!-- Edit Profile -->
@@ -65,8 +65,8 @@
                 <User class="w-5 h-5 text-blue-600" />
               </div>
               <div class="text-left">
-                <p class="font-semibold text-slate-900">Edit Profile</p>
-                <p class="text-sm text-slate-600">Update your personal information</p>
+                <p class="font-semibold text-slate-900">{{ $t('profile.edit_profile') }}</p>
+                <p class="text-sm text-slate-600">{{ $t('profile.edit_profile_subtitle') }}</p>
               </div>
             </div>
             <ChevronRight class="w-5 h-5 text-slate-400" />
@@ -82,8 +82,8 @@
                 <Sparkles class="w-5 h-5 text-purple-600" />
               </div>
               <div class="text-left">
-                <p class="font-semibold text-slate-900">Skin Profile</p>
-                <p class="text-sm text-slate-600">Manage your skin preferences</p>
+                <p class="font-semibold text-slate-900">{{ $t('profile.skin_profile') }}</p>
+                <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_subtitle') }}</p>
               </div>
             </div>
             <ChevronRight class="w-5 h-5 text-slate-400" />
@@ -99,8 +99,8 @@
                 <MapPin class="w-5 h-5 text-green-600" />
               </div>
               <div class="text-left">
-                <p class="font-semibold text-slate-900">Addresses</p>
-                <p class="text-sm text-slate-600">Manage your delivery addresses</p>
+                <p class="font-semibold text-slate-900">{{ $t('profile.addresses') }}</p>
+                <p class="text-sm text-slate-600">{{ $t('profile.addresses_subtitle') }}</p>
               </div>
             </div>
             <ChevronRight class="w-5 h-5 text-slate-400" />
@@ -110,7 +110,7 @@
         <!-- Marketplace Section -->
         <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 overflow-hidden">
           <div class="p-4 border-b border-slate-100">
-            <h3 class="text-lg font-semibold text-slate-900">Marketplace</h3>
+            <h3 class="text-lg font-semibold text-slate-900">{{ $t('profile.marketplace') }}</h3>
           </div>
           
           <!-- My Listings -->
@@ -123,8 +123,8 @@
                 <Package class="w-5 h-5 text-blue-600" />
               </div>
               <div class="text-left">
-                <p class="font-semibold text-slate-900">My Listings</p>
-                <p class="text-sm text-slate-600">Manage your classified ads</p>
+                <p class="font-semibold text-slate-900">{{ $t('profile.my_listings') }}</p>
+                <p class="text-sm text-slate-600">{{ $t('profile.my_listings_subtitle') }}</p>
               </div>
             </div>
             <ChevronRight class="w-5 h-5 text-slate-400" />
@@ -140,8 +140,8 @@
                 <MessageCircle class="w-5 h-5 text-green-600" />
               </div>
               <div class="text-left">
-                <p class="font-semibold text-slate-900">Inquiries</p>
-                <p class="text-sm text-slate-600">View buyer messages</p>
+                <p class="font-semibold text-slate-900">{{ $t('profile.inquiries') }}</p>
+                <p class="text-sm text-slate-600">{{ $t('profile.inquiries_subtitle') }}</p>
               </div>
             </div>
             <ChevronRight class="w-5 h-5 text-slate-400" />
@@ -151,7 +151,7 @@
         <!-- Preferences Section -->
         <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 overflow-hidden">
           <div class="p-4 border-b border-slate-100">
-            <h3 class="text-lg font-semibold text-slate-900">Preferences</h3>
+            <h3 class="text-lg font-semibold text-slate-900">{{ $t('profile.preferences') }}</h3>
           </div>
           
           <!-- Language -->
@@ -164,7 +164,7 @@
                 <Globe class="w-5 h-5 text-orange-600" />
               </div>
               <div class="text-left">
-                <p class="font-semibold text-slate-900">Language</p>
+                <p class="font-semibold text-slate-900">{{ $t('profile.language') }}</p>
                 <p class="text-sm text-slate-600">{{ currentLanguageName }}</p>
               </div>
             </div>
@@ -181,7 +181,7 @@
                 <Store class="w-5 h-5 text-blue-600" />
               </div>
               <div class="text-left">
-                <p class="font-semibold text-slate-900">Default Store</p>
+                <p class="font-semibold text-slate-900">{{ $t('profile.default_store') }}</p>
                 <p class="text-sm text-slate-600">{{ defaultStoreLabel }}</p>
               </div>
             </div>
@@ -192,7 +192,7 @@
         <!-- Support Section -->
         <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 overflow-hidden">
           <div class="p-4 border-b border-slate-100">
-            <h3 class="text-lg font-semibold text-slate-900">Support</h3>
+            <h3 class="text-lg font-semibold text-slate-900">{{ $t('profile.support') }}</h3>
           </div>
           
           <!-- Customer Support -->
@@ -205,8 +205,8 @@
                 <Headphones class="w-5 h-5 text-blue-600" />
               </div>
               <div class="text-left">
-                <p class="font-semibold text-slate-900">Customer Support</p>
-                <p class="text-sm text-slate-600">Get help and contact us</p>
+                <p class="font-semibold text-slate-900">{{ $t('profile.customer_support') }}</p>
+                <p class="text-sm text-slate-600">{{ $t('profile.customer_support_subtitle') }}</p>
               </div>
             </div>
             <ChevronRight class="w-5 h-5 text-slate-400" />
@@ -216,7 +216,7 @@
         <!-- Account Section -->
         <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 overflow-hidden">
           <div class="p-4 border-b border-slate-100">
-            <h3 class="text-lg font-semibold text-slate-900">Account</h3>
+            <h3 class="text-lg font-semibold text-slate-900">{{ $t('profile.account') }}</h3>
           </div>
           
           <!-- Logout -->
@@ -229,8 +229,8 @@
                 <LogOut class="w-5 h-5 text-red-600" />
               </div>
               <div class="text-left">
-                <p class="font-semibold text-red-600">Log Out</p>
-                <p class="text-sm text-slate-600">Sign out of your account</p>
+                <p class="font-semibold text-red-600">{{ $t('profile.log_out') }}</p>
+                <p class="text-sm text-slate-600">{{ $t('profile.log_out_subtitle') }}</p>
               </div>
             </div>
             <ChevronRight class="w-5 h-5 text-red-400" />
@@ -253,8 +253,8 @@
               <Globe class="w-6 h-6 text-orange-600" />
             </div>
             <div>
-              <h3 class="text-xl font-bold text-slate-900">Select Language</h3>
-              <p class="text-slate-600 text-sm">Current: {{ currentLanguageName }}</p>
+              <h3 class="text-xl font-bold text-slate-900">{{ $t('profile.select_language') }}</h3>
+              <p class="text-slate-600 text-sm">{{ $t('profile.current') }}: {{ currentLanguageName }}</p>
             </div>
           </div>
 
@@ -262,7 +262,7 @@
             <div class="w-12 h-12 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
               <Loader2 class="w-6 h-6 text-blue-600 animate-spin" />
             </div>
-            <p class="text-slate-600">Loading languages...</p>
+            <p class="text-slate-600">{{ $t('profile.loading_languages') }}</p>
           </div>
 
           <div v-else class="space-y-3 max-h-64 overflow-y-auto">
@@ -286,7 +286,7 @@
               @click="showLanguageDialog = false"
               class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
             >
-              Cancel
+              {{ $t('profile.cancel') }}
             </button>
             <button 
               @click="changeLanguage"
@@ -298,7 +298,7 @@
             >
               <Loader2 v-if="loadingLanguages" class="w-4 h-4 animate-spin" />
               <Check v-else class="w-4 h-4" />
-              <span>Save</span>
+              <span>{{ $t('profile.save') }}</span>
             </button>
           </div>
         </div>
@@ -319,8 +319,8 @@
               <Store class="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <h3 class="text-xl font-bold text-slate-900">Select Default Store</h3>
-              <p class="text-slate-600 text-sm">Choose your preferred store category</p>
+              <h3 class="text-xl font-bold text-slate-900">{{ $t('profile.select_default_store') }}</h3>
+              <p class="text-slate-600 text-sm">{{ $t('profile.choose_preferred_category') }}</p>
             </div>
           </div>
 
@@ -328,7 +328,7 @@
             <div class="w-12 h-12 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
               <Loader2 class="w-6 h-6 text-blue-600 animate-spin" />
             </div>
-            <p class="text-slate-600">Loading store categories...</p>
+            <p class="text-slate-600">{{ $t('profile.loading_store_categories') }}</p>
           </div>
 
           <div v-else class="flex flex-wrap gap-2 max-h-64 overflow-y-auto">
@@ -348,7 +348,7 @@
               @click="showDefaultStoreDialog = false"
               class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
             >
-              Close
+              {{ $t('profile.close') }}
             </button>
           </div>
         </div>
@@ -369,8 +369,8 @@
               <LogOut class="w-6 h-6 text-red-600" />
             </div>
             <div>
-              <h3 class="text-xl font-bold text-slate-900">Log Out</h3>
-              <p class="text-slate-600 text-sm">Are you sure you want to log out?</p>
+              <h3 class="text-xl font-bold text-slate-900">{{ $t('profile.log_out_confirm') }}</h3>
+              <p class="text-slate-600 text-sm">{{ $t('profile.log_out_confirm_message') }}</p>
             </div>
           </div>
 
@@ -379,14 +379,14 @@
               @click="showLogoutDialog = false"
               class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
             >
-              Cancel
+              {{ $t('profile.cancel') }}
             </button>
             <button 
               @click="logout"
               class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-2xl transition-all duration-200 flex items-center justify-center space-x-2"
             >
               <LogOut class="w-4 h-4" />
-              <span>Log Out</span>
+              <span>{{ $t('profile.log_out') }}</span>
             </button>
           </div>
         </div>
@@ -401,6 +401,7 @@
 <script setup>
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ref, computed, onMounted } from 'vue'
 import { apiService } from '@/services/api'
 import BottomNavigation from '@/components/BottomNavigation.vue'
@@ -411,6 +412,7 @@ import {
 
 const auth = useAuthStore()
 const router = useRouter()
+const { t } = useI18n()
 const user = auth.user
 
 // Dialog states
@@ -481,7 +483,7 @@ const defaultStoreLabel = computed(() => {
   const currentId = String(defaultStoreId.value || '')
   const found = storeCategories.value.find(c => String(c.id) === currentId)
   if (found) return found.name
-  if (!currentId) return 'Not set'
+  if (!currentId) return t('profile.not_set')
   return `Category #${currentId}`
 })
 

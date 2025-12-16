@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 pb-24">
-    <BackButtonHeader title="My Parcels" />
+    <BackButtonHeader :title="$t('parcels.title')" />
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center items-center py-20">
@@ -20,12 +20,12 @@
     <!-- Empty State -->
     <div v-else-if="parcels.length === 0" class="flex flex-col items-center justify-center py-20 px-4">
       <Package class="w-16 h-16 text-gray-300 mb-4" />
-      <p class="text-gray-600 text-center mb-2">No parcels sent yet</p>
+      <p class="text-gray-600 text-center mb-2">{{ $t('parcels.no_parcels') }}</p>
       <router-link 
         :to="{ name: 'SendParcel' }"
         class="mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all"
       >
-        Send Your First Parcel
+        {{ $t('parcels.send_first') }}
       </router-link>
     </div>
 
@@ -51,11 +51,11 @@
               <span class="text-xs text-gray-500">#{{ parcel.id }}</span>
             </div>
             <p class="text-sm font-semibold text-gray-900 mb-1">
-              To: {{ parcel.recipient_name }}
+              {{ $t('parcels.to') }}: {{ parcel.recipient_name }}
             </p>
             <p class="text-xs text-gray-600 mb-2">
-              {{ parcel.pickup_landmark || parcel.pickup_address || 'Pickup location' }} → 
-              {{ parcel.dropoff_landmark || parcel.dropoff_address || 'Dropoff location' }}
+              {{ parcel.pickup_landmark || parcel.pickup_address || $t('parcels.pickup_location') }} → 
+              {{ parcel.dropoff_landmark || parcel.dropoff_address || $t('parcels.dropoff_location') }}
             </p>
           </div>
           <ChevronRight class="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" />
@@ -77,11 +77,13 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useParcelStore } from '@/stores/parcel'
+import { useI18n } from 'vue-i18n'
 import BackButtonHeader from '@/components/BackButtonHeader.vue'
 import { Loader2, AlertCircle, Package, ChevronRight } from 'lucide-vue-next'
 
 const router = useRouter()
 const parcelStore = useParcelStore()
+const { t } = useI18n()
 
 const parcels = ref([])
 const loading = ref(false)
@@ -105,7 +107,7 @@ const fetchParcels = async () => {
     await parcelStore.fetchParcels()
     parcels.value = parcelStore.parcels
   } catch (err) {
-    error.value = 'Failed to load parcels'
+    error.value = t('parcels.failed_to_load')
     console.error('Error fetching parcels:', err)
   } finally {
     loading.value = false
@@ -119,7 +121,7 @@ const viewParcel = (id) => {
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString('fr-FR', {
     month: 'short',
     day: 'numeric',
     year: 'numeric'

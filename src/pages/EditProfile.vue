@@ -4,7 +4,7 @@
       <!-- Modern Header -->
       <AppHeader 
         :show-back="true"
-        custom-title="Edit Profile"
+        :custom-title="$t('profile.edit_profile_page.title')"
       />
 
       <!-- Loading state for initial data -->
@@ -12,8 +12,8 @@
         <div class="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
           <Loader2 class="w-10 h-10 text-blue-600 animate-spin" />
         </div>
-        <h3 class="text-xl font-semibold text-slate-800 mb-2">Loading Profile</h3>
-        <p class="text-slate-600">Please wait while we fetch your information</p>
+        <h3 class="text-xl font-semibold text-slate-800 mb-2">{{ $t('profile.edit_profile_page.loading_profile') }}</h3>
+        <p class="text-slate-600">{{ $t('profile.edit_profile_page.loading_subtitle') }}</p>
       </div>
 
       <!-- Form content -->
@@ -49,7 +49,7 @@
                 @change="handleFileUpload" 
               />
             </div>
-            <p class="text-sm text-slate-600 mt-3">Tap to change profile picture</p>
+            <p class="text-sm text-slate-600 mt-3">{{ $t('profile.edit_profile_page.tap_to_change') }}</p>
           </div>
         </div>
 
@@ -59,70 +59,70 @@
             <div class="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
               <User class="w-4 h-4 text-blue-600" />
             </div>
-            <h3 class="text-lg font-semibold text-slate-900">Personal Information</h3>
+            <h3 class="text-lg font-semibold text-slate-900">{{ $t('profile.edit_profile_page.personal_information') }}</h3>
           </div>
 
           <div class="space-y-4">
             <!-- First Name -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">First Name</label>
+              <label class="block text-sm font-medium text-slate-700 mb-2">{{ $t('profile.edit_profile_page.first_name_label') }}</label>
               <input 
                 v-model="formData.first_name"
                 type="text"
                 class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
-                placeholder="Enter your first name"
+                :placeholder="$t('profile.edit_profile_page.first_name_placeholder')"
               />
             </div>
 
             <!-- Last Name -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">Last Name</label>
+              <label class="block text-sm font-medium text-slate-700 mb-2">{{ $t('profile.edit_profile_page.last_name_label') }}</label>
               <input 
                 v-model="formData.last_name"
                 type="text"
                 class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
-                placeholder="Enter your last name"
+                :placeholder="$t('profile.edit_profile_page.last_name_placeholder')"
               />
             </div>
 
             <!-- Email -->
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-2">
-                Email Address <span class="text-red-500">*</span>
+                {{ $t('profile.edit_profile_page.email_label') }} <span class="text-red-500">{{ $t('profile.edit_profile_page.email_required') }}</span>
               </label>
               <input 
                 v-model="formData.email"
                 type="email"
                 required
                 class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
-                placeholder="Enter your email address"
+                :placeholder="$t('profile.edit_profile_page.email_placeholder')"
               />
-              <p class="text-xs text-slate-500 mt-1">We'll send a verification email if you change this</p>
+              <p class="text-xs text-slate-500 mt-1">{{ $t('profile.edit_profile_page.email_verification_note') }}</p>
             </div>
 
             <!-- Phone Number -->
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-2">
-                Phone Number <span class="text-red-500">*</span>
+                {{ $t('profile.edit_profile_page.phone_label') }} <span class="text-red-500">{{ $t('profile.edit_profile_page.phone_required') }}</span>
               </label>
               <input 
                 v-model="formData.phone_number"
                 type="tel"
                 required
                 class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
-                placeholder="Enter your phone number"
+                :placeholder="$t('profile.edit_profile_page.phone_placeholder')"
               />
             </div>
 
             <!-- Language Preference -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">Preferred Language</label>
+              <label class="block text-sm font-medium text-slate-700 mb-2">{{ $t('profile.edit_profile_page.preferred_language') }}</label>
               <select 
                 v-model="formData.default_language"
                 :disabled="loadingLanguages"
                 class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
               >
-                <option value="">Select a language</option>
+                <option value="">{{ $t('profile.edit_profile_page.select_language_placeholder') }}</option>
                 <option 
                   v-for="lang in languages" 
                   :key="lang.id" 
@@ -133,7 +133,7 @@
               </select>
               <div v-if="loadingLanguages" class="flex items-center space-x-2 mt-2">
                 <Loader2 class="w-4 h-4 text-blue-600 animate-spin" />
-                <span class="text-xs text-slate-500">Loading languages...</span>
+                <span class="text-xs text-slate-500">{{ $t('profile.edit_profile_page.loading_languages') }}</span>
               </div>
             </div>
           </div>
@@ -145,20 +145,20 @@
             <div class="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center">
               <Lock class="w-4 h-4 text-green-600" />
             </div>
-            <h3 class="text-lg font-semibold text-slate-900">Change Password</h3>
+            <h3 class="text-lg font-semibold text-slate-900">{{ $t('profile.edit_profile_page.change_password') }}</h3>
           </div>
-          <p class="text-sm text-slate-600 mb-4">Leave these fields empty if you don't want to change your password</p>
+          <p class="text-sm text-slate-600 mb-4">{{ $t('profile.edit_profile_page.password_change_note') }}</p>
 
           <div class="space-y-4">
             <!-- New Password -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">New Password</label>
+              <label class="block text-sm font-medium text-slate-700 mb-2">{{ $t('profile.edit_profile_page.new_password') }}</label>
               <div class="relative">
                 <input 
                   v-model="formData.new_password"
                   :type="showNewPassword ? 'text' : 'password'"
                   class="w-full px-4 py-3 pr-12 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
-                  placeholder="Enter new password"
+                  :placeholder="$t('profile.edit_profile_page.new_password_placeholder')"
                   autocomplete="new-password"
                 />
                 <button 
@@ -170,18 +170,18 @@
                   <EyeOff v-else class="w-5 h-5" />
                 </button>
               </div>
-              <p class="text-xs text-slate-500 mt-1">Must be at least 8 characters long</p>
+              <p class="text-xs text-slate-500 mt-1">{{ $t('profile.edit_profile_page.password_requirements') }}</p>
             </div>
 
             <!-- Confirm Password -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">Confirm New Password</label>
+              <label class="block text-sm font-medium text-slate-700 mb-2">{{ $t('profile.edit_profile_page.confirm_new_password') }}</label>
               <div class="relative">
                 <input 
                   v-model="formData.confirm_password"
                   :type="showConfirmPassword ? 'text' : 'password'"
                   class="w-full px-4 py-3 pr-12 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
-                  placeholder="Confirm new password"
+                  :placeholder="$t('profile.edit_profile_page.confirm_password_placeholder')"
                   autocomplete="new-password"
                 />
                 <button 
@@ -203,19 +203,19 @@
             <div class="w-8 h-8 bg-amber-100 rounded-xl flex items-center justify-center">
               <Shield class="w-4 h-4 text-amber-600" />
             </div>
-            <h3 class="text-lg font-semibold text-slate-900">Confirm Changes</h3>
+            <h3 class="text-lg font-semibold text-slate-900">{{ $t('profile.edit_profile_page.confirm_changes') }}</h3>
           </div>
-          <p class="text-sm text-slate-600 mb-4">Please enter your current password to save changes</p>
+          <p class="text-sm text-slate-600 mb-4">{{ $t('profile.edit_profile_page.confirm_changes_note') }}</p>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">Current Password</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">{{ $t('profile.edit_profile_page.current_password') }}</label>
             <div class="relative">
               <input 
                 v-model="formData.current_password"
                 :type="showCurrentPassword ? 'text' : 'password'"
                 required
                 class="w-full px-4 py-3 pr-12 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
-                placeholder="Enter your current password"
+                :placeholder="$t('profile.edit_profile_page.current_password_placeholder')"
                 autocomplete="current-password"
               />
               <button 
@@ -283,6 +283,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { apiService } from '@/services/api'
 import EmailVerificationDialog from '@/components/EmailVerificationDialog.vue'
 import AppHeader from '@/components/AppHeader.vue'
@@ -293,6 +294,7 @@ import {
 
 const auth = useAuthStore()
 const router = useRouter()
+const { t } = useI18n()
 const user = auth.user
 
 // Form refs and state
@@ -374,7 +376,7 @@ const loadUserData = async () => {
     }
   } catch (error) {
     console.error('Failed to load user data:', error)
-    showError('Failed to load profile information')
+    showError(t('profile.edit_profile_page.failed_to_load'))
   } finally {
     initialLoading.value = false
   }
@@ -408,13 +410,13 @@ const saveButtonText = computed(() => {
   const hasProfileChanges = hasFormChanges.value
   const hasPasswordChange = formData.value.new_password
   if (!hasProfileChanges && !hasPasswordChange) {
-    return 'No Changes to Save'
+    return t('profile.edit_profile_page.no_changes')
   } else if (hasProfileChanges && hasPasswordChange) {
-    return 'Save Profile & Password'
+    return t('profile.edit_profile_page.save_profile_password')
   } else if (hasPasswordChange) {
-    return 'Change Password'
+    return t('profile.edit_profile_page.change_password_button')
   } else {
-    return 'Save Profile Changes'
+    return t('profile.edit_profile_page.save_profile_changes')
   }
 })
 
@@ -433,12 +435,12 @@ const handleFileUpload = (event) => {
 
   // Check file type and size
   if (!file.type.includes('image/')) {
-    showError('Please select an image file')
+    showError(t('profile.edit_profile_page.select_image_file'))
     return
   }
 
   if (file.size > 5 * 1024 * 1024) { // 5MB limit
-    showError('Image size should be less than 5MB')
+    showError(t('profile.edit_profile_page.image_size_limit'))
     return
   }
 
@@ -459,7 +461,7 @@ const showEmailVerification = (newEmail) => {
 const onEmailVerified = async () => {
   showSnackbar.value = false
   snackbarColor.value = 'success'
-  snackbarText.value = 'Email updated successfully!'
+  snackbarText.value = t('profile.edit_profile_page.email_updated')
   showSnackbar.value = true
 
   // Refresh user data
@@ -477,14 +479,14 @@ const onEmailVerified = async () => {
 // Handle email verification cancellation
 const onEmailVerificationCancelled = () => {
   pendingEmailChange.value = null
-  showError('Email change cancelled. Your email remains unchanged.')
+  showError(t('profile.edit_profile_page.email_change_cancelled'))
 }
 
 // Handle email verification resend
 const onEmailVerificationResend = () => {
   showSnackbar.value = false
   snackbarColor.value = 'info'
-  snackbarText.value = 'Verification code resent to your new email address.'
+  snackbarText.value = t('profile.edit_profile_page.verification_code_resent')
   showSnackbar.value = true
 }
 
@@ -507,19 +509,19 @@ const submitForm = async () => {
 
   // Check if there are any changes to save
   if (!hasProfileChanges && !hasPasswordChange) {
-    showError('No changes detected. Please modify some fields before saving.')
+    showError(t('profile.edit_profile_page.no_changes_detected'))
     return
   }
 
   // Validate password match if changing password
   if (hasPasswordChange && formData.value.new_password !== formData.value.confirm_password) {
-    showError('New passwords do not match')
+    showError(t('profile.edit_profile_page.passwords_no_match'))
     return
   }
 
   // Validate password length if changing password
   if (hasPasswordChange && formData.value.new_password.length < 8) {
-    showError('Password must be at least 8 characters long')
+    showError(t('profile.edit_profile_page.password_too_short'))
     return
   }
 
@@ -565,11 +567,11 @@ const submitForm = async () => {
 
     // Show success message
     snackbarColor.value = 'success'
-    let successMessage = 'Profile updated successfully'
+    let successMessage = t('profile.edit_profile_page.profile_updated')
     if (hasProfileChanges && hasPasswordChange) {
-      successMessage = 'Profile and password updated successfully'
+      successMessage = t('profile.edit_profile_page.profile_password_updated')
     } else if (hasPasswordChange) {
-      successMessage = 'Password changed successfully'
+      successMessage = t('profile.edit_profile_page.password_changed')
     }
     snackbarText.value = successMessage
     showSnackbar.value = true
@@ -592,7 +594,7 @@ const submitForm = async () => {
     const errorMessage = error.response?.data?.error ||
       error.response?.data?.message ||
       Object.values(error.response?.data || {}).flat().join(', ') ||
-      'Failed to update profile'
+      t('profile.edit_profile_page.failed_to_update')
     showError(errorMessage)
   } finally {
     loading.value = false

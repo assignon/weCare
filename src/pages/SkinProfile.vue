@@ -4,7 +4,7 @@
       <!-- Modern Header -->
       <AppHeader 
         :show-back="true"
-        custom-title="Skin Profile"
+        :custom-title="$t('profile.skin_profile_page.title')"
       />
 
       <!-- Loading State -->
@@ -12,8 +12,8 @@
         <div class="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
           <Loader2 class="w-10 h-10 text-blue-600 animate-spin" />
         </div>
-        <h3 class="text-xl font-semibold text-slate-800 mb-2">Loading Your Skin Profile</h3>
-        <p class="text-slate-600">Please wait while we fetch your skin preferences</p>
+        <h3 class="text-xl font-semibold text-slate-800 mb-2">{{ $t('profile.skin_profile_page.loading') }}</h3>
+        <p class="text-slate-600">{{ $t('profile.skin_profile_page.loading_subtitle') }}</p>
       </div>
 
       <!-- Content -->
@@ -25,8 +25,8 @@
               <Sparkles class="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 class="text-lg font-bold text-slate-900">Your Skin Type Profile</h2>
-              <p class="text-sm text-slate-600">Personalized recommendations based on your skin</p>
+              <h2 class="text-lg font-bold text-slate-900">{{ $t('profile.skin_profile_page.your_skin_type_profile') }}</h2>
+              <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.personalized_recommendations') }}</p>
             </div>
           </div>
 
@@ -34,8 +34,8 @@
             <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <User class="w-8 h-8 text-slate-400" />
             </div>
-            <p class="text-slate-600 mb-2">No skin profile data found</p>
-            <p class="text-xs text-slate-500">Complete the sections below to build your profile</p>
+            <p class="text-slate-600 mb-2">{{ $t('profile.skin_profile_page.no_profile_data') }}</p>
+            <p class="text-xs text-slate-500">{{ $t('profile.skin_profile_page.complete_sections') }}</p>
           </div>
 
           <div v-else class="space-y-4">
@@ -46,8 +46,8 @@
                   <User class="w-4 h-4 text-blue-600" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-slate-700">Skin Type</p>
-                  <p class="text-xs text-slate-500">{{ currentProfile.skin_type_detail?.name || 'Not set' }}</p>
+                  <p class="text-sm font-medium text-slate-700">{{ $t('profile.skin_profile_page.skin_type') }}</p>
+                  <p class="text-xs text-slate-500">{{ currentProfile.skin_type_detail?.name || $t('profile.skin_profile_page.not_set') }}</p>
                 </div>
               </div>
             </div>
@@ -59,7 +59,7 @@
                   <Calendar class="w-4 h-4 text-green-600" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-slate-700">Age Group</p>
+                  <p class="text-sm font-medium text-slate-700">{{ $t('profile.skin_profile_page.age_group') }}</p>
                   <p class="text-xs text-slate-500">{{ getAgeGroupLabel(currentProfile.age_group) }}</p>
                 </div>
               </div>
@@ -71,7 +71,7 @@
                 <div class="w-8 h-8 bg-red-100 rounded-xl flex items-center justify-center">
                   <Heart class="w-4 h-4 text-red-600" />
                 </div>
-                <p class="text-sm font-medium text-slate-700">Skin Concerns</p>
+                <p class="text-sm font-medium text-slate-700">{{ $t('profile.skin_profile_page.skin_concerns') }}</p>
               </div>
               <div v-if="currentProfile.skin_concerns && currentProfile.skin_concerns.length > 0" class="flex flex-wrap gap-2">
                 <span 
@@ -82,7 +82,7 @@
                   {{ concern.name }}
                 </span>
               </div>
-              <p v-else class="text-xs text-slate-500">None selected</p>
+              <p v-else class="text-xs text-slate-500">{{ $t('profile.skin_profile_page.none_selected') }}</p>
             </div>
 
             <!-- Product Types -->
@@ -91,7 +91,7 @@
                 <div class="w-8 h-8 bg-purple-100 rounded-xl flex items-center justify-center">
                   <Package class="w-4 h-4 text-purple-600" />
                 </div>
-                <p class="text-sm font-medium text-slate-700">Product Types</p>
+                <p class="text-sm font-medium text-slate-700">{{ $t('profile.skin_profile_page.product_types') }}</p>
               </div>
               <div v-if="currentProfile.product_types && currentProfile.product_types.length > 0" class="flex flex-wrap gap-2">
                 <span 
@@ -102,7 +102,7 @@
                   {{ productType.name }}
                 </span>
               </div>
-              <p v-else class="text-xs text-slate-500">None selected</p>
+              <p v-else class="text-xs text-slate-500">{{ $t('profile.skin_profile_page.none_selected') }}</p>
             </div>
           </div>
         </div>
@@ -117,15 +117,15 @@
                   <User class="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold text-slate-900">Skin Type</h3>
-                  <p class="text-sm text-slate-600">Select your primary skin type</p>
+                  <h3 class="text-lg font-bold text-slate-900">{{ $t('profile.skin_profile_page.skin_type') }}</h3>
+                  <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.select_primary_skin_type') }}</p>
                 </div>
               </div>
               <button 
                 @click="editSection = editSection === 'skinType' ? null : 'skinType'"
                 class="px-4 py-2 text-blue-600 hover:text-blue-700 font-semibold text-sm bg-blue-50 hover:bg-blue-100 rounded-2xl transition-all duration-200"
               >
-                {{ selectedSkinType ? 'Change' : 'Select' }}
+                {{ selectedSkinType ? $t('profile.skin_profile_page.change') : $t('profile.skin_profile_page.select') }}
               </button>
             </div>
 
@@ -133,12 +133,12 @@
               <!-- Loading state for skin types -->
               <div v-if="availableSkinTypes.length === 0" class="text-center py-8">
                 <Loader2 class="w-8 h-8 text-blue-600 animate-spin mx-auto mb-3" />
-                <p class="text-sm text-slate-600">Loading skin types...</p>
+                <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.loading_skin_types') }}</p>
               </div>
               
               <!-- Available skin types -->
               <div v-else class="space-y-3">
-                <p class="text-sm text-slate-600 mb-3">Choose your primary skin type:</p>
+                <p class="text-sm text-slate-600 mb-3">{{ $t('profile.skin_profile_page.choose_primary_skin_type') }}</p>
                 <label 
                   v-for="skinType in availableSkinTypes" 
                   :key="skinType.id"
@@ -171,13 +171,13 @@
                 >
                   <Loader2 v-if="saving" class="w-4 h-4 animate-spin" />
                   <Check v-else class="w-4 h-4" />
-                  <span>Save</span>
+                  <span>{{ $t('profile.save') }}</span>
                 </button>
                 <button 
                   @click="editSection = null"
                   class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
                 >
-                  Cancel
+                  {{ $t('profile.cancel') }}
                 </button>
               </div>
             </div>
@@ -191,21 +191,21 @@
                   <Calendar class="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold text-slate-900">Age Group</h3>
-                  <p class="text-sm text-slate-600">Select your age range for targeted care</p>
+                  <h3 class="text-lg font-bold text-slate-900">{{ $t('profile.skin_profile_page.age_group') }}</h3>
+                  <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.select_age_range') }}</p>
                 </div>
               </div>
               <button 
                 @click="editSection = editSection === 'ageGroup' ? null : 'ageGroup'"
                 class="px-4 py-2 text-green-600 hover:text-green-700 font-semibold text-sm bg-green-50 hover:bg-green-100 rounded-2xl transition-all duration-200"
               >
-                {{ selectedAgeGroup ? 'Change' : 'Select' }}
+                {{ selectedAgeGroup ? $t('profile.skin_profile_page.change') : $t('profile.skin_profile_page.select') }}
               </button>
             </div>
 
             <div v-if="editSection === 'ageGroup'" class="space-y-4">
               <div class="space-y-3">
-                <p class="text-sm text-slate-600 mb-3">Choose your age range for targeted care:</p>
+                <p class="text-sm text-slate-600 mb-3">{{ $t('profile.skin_profile_page.select_age_range') }}</p>
                 <label 
                   v-for="ageGroup in ageGroups" 
                   :key="ageGroup.value"
@@ -238,13 +238,13 @@
                 >
                   <Loader2 v-if="saving" class="w-4 h-4 animate-spin" />
                   <Check v-else class="w-4 h-4" />
-                  <span>Save</span>
+                  <span>{{ $t('profile.save') }}</span>
                 </button>
                 <button 
                   @click="editSection = null"
                   class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
                 >
-                  Cancel
+                  {{ $t('profile.cancel') }}
                 </button>
               </div>
             </div>
@@ -258,15 +258,15 @@
                   <Heart class="w-5 h-5 text-red-600" />
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold text-slate-900">Skin Concerns</h3>
-                  <p class="text-sm text-slate-600">Select all that apply to your skin</p>
+                  <h3 class="text-lg font-bold text-slate-900">{{ $t('profile.skin_profile_page.skin_concerns') }}</h3>
+                  <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.select_all_that_apply') }}</p>
                 </div>
               </div>
               <button 
                 @click="editSection = editSection === 'skinConcerns' ? null : 'skinConcerns'"
                 class="px-4 py-2 text-red-600 hover:text-red-700 font-semibold text-sm bg-red-50 hover:bg-red-100 rounded-2xl transition-all duration-200"
               >
-                {{ selectedSkinConcerns.length > 0 ? 'Edit' : 'Select' }}
+                {{ selectedSkinConcerns.length > 0 ? $t('profile.skin_profile_page.edit') : $t('profile.skin_profile_page.select') }}
               </button>
             </div>
 
@@ -274,12 +274,12 @@
               <!-- Loading state for skin concerns -->
               <div v-if="availableSkinConcerns.length === 0" class="text-center py-8">
                 <Loader2 class="w-8 h-8 text-red-600 animate-spin mx-auto mb-3" />
-                <p class="text-sm text-slate-600">Loading skin concerns...</p>
+                <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.loading_skin_concerns') }}</p>
               </div>
               
               <!-- Available skin concerns -->
               <div v-else>
-                <p class="text-sm text-slate-600 mb-3">Select all skin concerns that apply to you:</p>
+                <p class="text-sm text-slate-600 mb-3">{{ $t('profile.skin_profile_page.select_all_skin_concerns') }}</p>
                 <div class="flex flex-wrap gap-2">
                   <button 
                     v-for="concern in availableSkinConcerns" 
@@ -297,7 +297,7 @@
                   </button>
                 </div>
                 <p class="text-xs text-slate-500 mt-3">
-                  Selected: {{ selectedSkinConcerns.length }} concern{{ selectedSkinConcerns.length !== 1 ? 's' : '' }}
+                  {{ $t('profile.skin_profile_page.selected') }}: {{ selectedSkinConcerns.length }} {{ selectedSkinConcerns.length !== 1 ? $t('profile.skin_profile_page.concerns') : $t('profile.skin_profile_page.concern') }}
                 </p>
               </div>
               <div class="flex space-x-3 pt-4 border-t border-slate-200">
@@ -311,13 +311,13 @@
                 >
                   <Loader2 v-if="saving" class="w-4 h-4 animate-spin" />
                   <Check v-else class="w-4 h-4" />
-                  <span>Save</span>
+                  <span>{{ $t('profile.save') }}</span>
                 </button>
                 <button 
                   @click="editSection = null"
                   class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
                 >
-                  Cancel
+                  {{ $t('profile.cancel') }}
                 </button>
               </div>
             </div>
@@ -331,15 +331,15 @@
                   <Package class="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold text-slate-900">Product Types</h3>
-                  <p class="text-sm text-slate-600">Select products you currently use</p>
+                  <h3 class="text-lg font-bold text-slate-900">{{ $t('profile.skin_profile_page.product_types') }}</h3>
+                  <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.select_products_you_use') }}</p>
                 </div>
               </div>
               <button 
                 @click="editSection = editSection === 'productTypes' ? null : 'productTypes'"
                 class="px-4 py-2 text-purple-600 hover:text-purple-700 font-semibold text-sm bg-purple-50 hover:bg-purple-100 rounded-2xl transition-all duration-200"
               >
-                {{ selectedProductTypes.length > 0 ? 'Edit' : 'Select' }}
+                {{ selectedProductTypes.length > 0 ? $t('profile.skin_profile_page.edit') : $t('profile.skin_profile_page.select') }}
               </button>
             </div>
 
@@ -347,12 +347,12 @@
               <!-- Loading state for product types -->
               <div v-if="availableProductTypes.length === 0" class="text-center py-8">
                 <Loader2 class="w-8 h-8 text-purple-600 animate-spin mx-auto mb-3" />
-                <p class="text-sm text-slate-600">Loading product types...</p>
+                <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.loading_product_types') }}</p>
               </div>
               
               <!-- Available product types -->
               <div v-else>
-                <p class="text-sm text-slate-600 mb-3">Select products you currently use:</p>
+                <p class="text-sm text-slate-600 mb-3">{{ $t('profile.skin_profile_page.select_products_you_use') }}</p>
                 <div class="flex flex-wrap gap-2">
                   <button 
                     v-for="productType in availableProductTypes" 
@@ -370,7 +370,7 @@
                   </button>
                 </div>
                 <p class="text-xs text-slate-500 mt-3">
-                  Selected: {{ selectedProductTypes.length }} product type{{ selectedProductTypes.length !== 1 ? 's' : '' }}
+                  {{ $t('profile.skin_profile_page.selected') }}: {{ selectedProductTypes.length }} {{ selectedProductTypes.length !== 1 ? $t('profile.skin_profile_page.product_types_plural') : $t('profile.skin_profile_page.product_type') }}
                 </p>
               </div>
               <div class="flex space-x-3 pt-4 border-t border-slate-200">
@@ -384,13 +384,13 @@
                 >
                   <Loader2 v-if="saving" class="w-4 h-4 animate-spin" />
                   <Check v-else class="w-4 h-4" />
-                  <span>Save</span>
+                  <span>{{ $t('profile.save') }}</span>
                 </button>
                 <button 
                   @click="editSection = null"
                   class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
                 >
-                  Cancel
+                  {{ $t('profile.cancel') }}
                 </button>
               </div>
             </div>
@@ -428,6 +428,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { apiService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import AppHeader from '@/components/AppHeader.vue'
@@ -437,6 +438,7 @@ import {
 } from 'lucide-vue-next'
 
 const router = useRouter()
+const { t } = useI18n()
 const auth = useAuthStore()
 
 // State
@@ -574,7 +576,7 @@ const fetchProfileData = async () => {
     originalProductTypes.value = [...selectedProductTypes.value]
   } catch (error) {
     console.error('Failed to fetch profile data:', error)
-    showError('Failed to load profile data')
+    showError(t('profile.skin_profile_page.failed_to_load'))
   }
 }
 
@@ -620,7 +622,7 @@ const fetchOptions = async () => {
     })
   } catch (error) {
     console.error('Failed to fetch options:', error)
-    showError('Failed to load options')
+    showError(t('profile.skin_profile_page.failed_to_load_options'))
   }
 }
 
@@ -659,10 +661,13 @@ const saveSection = async (section) => {
     await auth.fetchUserData()
 
     editSection.value = null
-    showSuccess(`${section === 'skinType' ? 'Skin type' :
-      section === 'ageGroup' ? 'Age group' :
-        section === 'skinConcerns' ? 'Skin concerns' :
-          'Product types'} updated successfully`)
+    const sectionNames = {
+      skinType: t('profile.skin_profile_page.skin_type_updated'),
+      ageGroup: t('profile.skin_profile_page.age_group_updated'),
+      skinConcerns: t('profile.skin_profile_page.skin_concerns_updated'),
+      productTypes: t('profile.skin_profile_page.product_types_updated')
+    }
+    showSuccess(sectionNames[section] || t('profile.skin_profile_page.profile_updated'))
   } catch (error) {
     console.error('Failed to save section:', error)
     showError('Failed to save changes')
@@ -690,7 +695,7 @@ const saveAllChanges = async () => {
     await auth.fetchUserData()
 
     editSection.value = null
-    showSuccess('Skin profile updated successfully')
+    showSuccess(t('profile.skin_profile_page.profile_updated'))
   } catch (error) {
     console.error('Failed to save all changes:', error)
     showError('Failed to save changes')

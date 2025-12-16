@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <BackButtonHeader title="My Listings">
+    <BackButtonHeader :title="$t('listings.my_listings')">
       <template #right>
         <button @click="handleAddListing" class="p-2 text-white rounded-lg" style="background: linear-gradient(to right, #8c36ea, #3060eb);">
           <Plus class="w-5 h-5" />
@@ -21,13 +21,13 @@
       </div>
       <div v-else-if="listings.length === 0" class="text-center py-12">
         <Package class="w-16 h-16 text-gray-300 mx-auto mb-3" />
-        <p class="text-gray-500 mb-4">No listings yet</p>
+        <p class="text-gray-500 mb-4">{{ $t('listings.no_listings') }}</p>
         <button 
           @click="handleAddListing"
           class="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           style="background: linear-gradient(to right, #2563eb, #9333ea);"
         >
-          Create First Listing
+          {{ $t('listings.create_first') }}
         </button>
       </div>
       <div v-else class="grid grid-cols-2 gap-4">
@@ -77,7 +77,7 @@
                 <AlertCircle class="w-8 h-8 text-red-600" />
               </div>
             </div>
-            <h3 class="text-xl font-bold text-center text-slate-900 mb-2">Listing Limit Reached</h3>
+            <h3 class="text-xl font-bold text-center text-slate-900 mb-2">{{ $t('listings.listing_limit_reached') }}</h3>
             <p class="text-center text-slate-600 text-sm leading-relaxed">{{ dialogMessage }}</p>
             <div v-if="sellerPortalUrl" class="mt-4 text-center">
               <a 
@@ -86,7 +86,7 @@
                 rel="noopener noreferrer"
                 class="text-blue-600 hover:text-blue-700 underline font-medium"
               >
-                Visit Seller Platform →
+                {{ $t('listings.visit_seller_platform') }}
               </a>
             </div>
           </div>
@@ -97,7 +97,7 @@
               @click="closeDialog"
               class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
             >
-              Got it
+              {{ $t('listings.got_it') }}
             </button>
           </div>
         </div>

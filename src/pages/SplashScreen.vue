@@ -6,8 +6,8 @@
                 <div class="logo-container">
                     <img src="/AE-no-text.svg" alt="AfriQExpress Logo" class="logo-image" />
                 </div>
-                <h1 class="brand-title">AfriQExpress</h1>
-                <p class="brand-subtitle">Your African Marketplace</p>
+                <h1 class="brand-title">{{ $t('splash.title') }}</h1>
+                <p class="brand-subtitle">{{ $t('splash.subtitle') }}</p>
             </div>
 
             <!-- Loading Animation -->
@@ -23,7 +23,7 @@
 
         <!-- Version Info -->
         <div class="version-info">
-            <p class="version-text">Version 1.0.0</p>
+            <p class="version-text">{{ $t('splash.version') }}</p>
         </div>
     </div>
 </template>
@@ -32,17 +32,19 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
-const loadingText = ref('Loading...')
+const loadingText = ref(t('splash.loading'))
 
 const loadingMessages = [
-    'Loading...',
-    'Preparing your experience...',
-    'Discovering great products...',
-    'Almost ready...'
+    t('splash.loading'),
+    t('splash.preparing'),
+    t('splash.discovering'),
+    t('splash.almost_ready')
 ]
 
 let messageIndex = 0
@@ -69,21 +71,30 @@ const initializeApp = async () => {
 
         // Check if user is already authenticated
         if (authStore.accessToken) {
-            loadingText.value = 'Verifying authentication...'
-            const isValid = await authStore.checkAuth()
+            loadingText.value = t('splash.verifying')
+            try {
+                const isValid = await authStore.checkAuth()
 
-            if (isValid) {
-                loadingText.value = 'Welcome back!'
-                setTimeout(() => {
-                    router.replace({ name: 'Home' })
-                }, 500)
-                return
+                if (isValid) {
+                    loadingText.value = t('splash.welcome_back')
+                    setTimeout(() => {
+                        // Clear splash flag before navigating
+                        sessionStorage.removeItem('splashShown')
+                        router.replace({ name: 'Home' })
+                    }, 500)
+                    return
+                }
+            } catch (authError) {
+                console.error('Auth check failed:', authError)
+                // Fall through to login
             }
         }
 
         // Not authenticated, go to login
-        loadingText.value = 'Redirecting to login...'
+        loadingText.value = t('splash.redirecting')
         setTimeout(() => {
+            // Clear splash flag before navigating
+            sessionStorage.removeItem('splashShown')
             router.replace({ name: 'Login' })
         }, 1500)
 
@@ -91,6 +102,8 @@ const initializeApp = async () => {
         console.error('Splash screen initialization error:', error)
         // On error, still redirect to login
         setTimeout(() => {
+            // Clear splash flag before navigating
+            sessionStorage.removeItem('splashShown')
             router.replace({ name: 'Login' })
         }, 1500)
     }

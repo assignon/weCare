@@ -13,11 +13,11 @@
             </button>
             <div>
               <h1 class="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                Order #{{ orderId }}
+                #{{ orderId }}
               </h1>
               <p v-if="order" class="text-slate-600 text-sm mt-0.5 flex items-center">
                 <Calendar class="w-3 h-3 mr-1" />
-                Placed on {{ formatDate(order.created_at) }}
+                {{ $t('order_detail.placed_on') }} {{ formatDate(order.created_at) }}
               </p>
             </div>
           </div>
@@ -41,8 +41,8 @@
              style="background: linear-gradient(to right, #dbeafe, #e0e7ff);">
           <Loader2 class="w-10 h-10 text-blue-600 animate-spin" />
         </div>
-        <h3 class="text-xl font-semibold text-slate-800 mb-2">Loading Order Details</h3>
-        <p class="text-slate-600">Please wait while we fetch your order information</p>
+        <h3 class="text-xl font-semibold text-slate-800 mb-2">{{ $t('order_detail.loading') }}</h3>
+        <p class="text-slate-600">{{ $t('order_detail.loading_subtitle') }}</p>
       </div>
 
       <!-- Error State -->
@@ -52,7 +52,7 @@
             <AlertCircle class="w-5 h-5 text-red-600" />
           </div>
           <div class="flex-1">
-            <h4 class="font-semibold text-red-800 mb-1">Error Loading Order</h4>
+            <h4 class="font-semibold text-red-800 mb-1">{{ $t('order_detail.error_loading') }}</h4>
             <p class="text-red-700 text-sm">{{ error }}</p>
           </div>
           <button @click="error = null" class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-full flex items-center justify-center transition-colors">
@@ -69,7 +69,7 @@
             <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
               <FileText class="w-4 h-4 text-blue-600" />
             </div>
-            <h3 class="text-base font-semibold text-slate-900">Order Notes</h3>
+            <h3 class="text-base font-semibold text-slate-900">{{ $t('order_detail.order_notes') }}</h3>
           </div>
           
           <!-- On Hold Status Special Notes -->
@@ -77,16 +77,16 @@
             <div class="flex items-start space-x-3">
               <AlertTriangle class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p class="font-semibold text-amber-800 mb-2">Order On Hold</p>
+                <p class="font-semibold text-amber-800 mb-2">{{ $t('order_detail.order_on_hold') }}</p>
                 <p class="text-amber-700 text-sm mb-3">
-                  Your order has been temporarily placed on hold. You can proceed with the order using the button below.
+                  {{ $t('order_detail.order_on_hold_message') }}
                 </p>
                 
                 <!-- Show new expected delivery date if available -->
                 <div v-if="order.expected_delivery_date" class="bg-amber-100 p-3 rounded-lg border border-amber-300">
                   <div class="flex items-center space-x-2 mb-1">
                     <Calendar class="w-4 h-4 text-amber-700" />
-                    <span class="text-sm font-medium text-amber-800">New Expected Delivery Date</span>
+                    <span class="text-sm font-medium text-amber-800">{{ $t('order_detail.new_expected_delivery_date') }}</span>
                   </div>
                   <p class="text-amber-700 text-sm">
                     <strong>{{ formatDate(order.expected_delivery_date) }}</strong>
@@ -100,7 +100,7 @@
                 <div v-if="order.expected_delivery_time" class="bg-amber-100 p-3 rounded-lg border border-amber-300 mt-2">
                   <div class="flex items-center space-x-2 mb-1">
                     <Clock class="w-4 h-4 text-amber-700" />
-                    <span class="text-sm font-medium text-amber-800">Expected Delivery Time</span>
+                    <span class="text-sm font-medium text-amber-800">{{ $t('order_detail.expected_delivery_time') }}</span>
                   </div>
                   <p class="text-amber-700 text-sm">
                     <strong>{{ formatTimeSlot(order.expected_delivery_time) }}</strong>
@@ -118,10 +118,9 @@
             <div class="flex items-start space-x-3">
               <AlertTriangle class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p class="font-semibold text-amber-800 mb-2">Wrong Delivery Reported</p>
+                <p class="font-semibold text-amber-800 mb-2">{{ $t('order_detail.wrong_delivery_reported') }}</p>
                 <p class="text-amber-700 text-sm">
-                  Between 3 working days, one of our drivers will come and collect the items. 
-                  From there, you will be refunded the full amount of the order or the correct items will be delivered to you.
+                  {{ $t('order_detail.wrong_delivery_message') }}
                 </p>
               </div>
             </div>
@@ -139,7 +138,7 @@
           >
             <Loader2 v-if="updatingStatus" class="w-3 h-3 animate-spin" />
             <CheckCircle v-else class="w-3 h-3" />
-            <span>Confirm Delivery</span>
+            <span>{{ $t('order_detail.confirm_delivery') }}</span>
           </button>
 
           <!-- Wrong Delivery Report Button -->
@@ -150,7 +149,7 @@
             class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1 shadow-sm text-sm"
           >
             <AlertTriangle class="w-3 h-3" />
-            <span>Report Wrong Delivery</span>
+            <span>{{ $t('order_detail.report_wrong_delivery') }}</span>
           </button>
         </div>
 
@@ -160,7 +159,7 @@
             <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
               <Package class="w-4 h-4 text-purple-600" />
             </div>
-            <h3 class="text-base font-semibold text-slate-900">Order Items</h3>
+            <h3 class="text-base font-semibold text-slate-900">{{ $t('order_detail.order_items') }}</h3>
           </div>
           
           <div class="space-y-3">
@@ -183,19 +182,19 @@
 
               <div class="flex-1 min-w-0">
                 <h4 class="text-sm font-semibold text-slate-900 truncate">
-                  {{ item.product?.name || 'Product' }}
+                  {{ item.product?.name || $t('order_detail.product') }}
                 </h4>
                 <p class="text-xs text-slate-600 mt-1">
-                  Variant: {{ item.product_variant?.name || 'Standard' }} ML
+                  {{ $t('order_detail.variant') }}: {{ item.product_variant?.name || $t('order_detail.standard') }} ML
                 </p>
                 <p class="text-xs text-slate-600">
-                  Quantity: {{ item.quantity }}
+                  {{ $t('order_detail.quantity') }}: {{ item.quantity }}
                 </p>
                 <!-- Delivery info for each product -->
                 <div v-if="item.delivery_date || item.delivery_timeslot || order.expected_delivery_date" class="mt-2 p-2 bg-amber-50 rounded-lg border border-amber-200">
                   <div class="flex items-center space-x-1 mb-1">
                     <Truck class="w-3 h-3 text-amber-600" />
-                    <span class="text-xs font-medium text-amber-700">Delivery Info</span>
+                    <span class="text-xs font-medium text-amber-700">{{ $t('order_detail.delivery_info') }}</span>
                   </div>
                   <div v-if="item.delivery_date || order.expected_delivery_date" class="text-xs text-amber-600">
                     <strong>Date:</strong> {{ formatDate(item.delivery_date || order.expected_delivery_date) }}
@@ -221,7 +220,7 @@
             <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
               <Truck class="w-4 h-4 text-green-600" />
             </div>
-            <h3 class="text-base font-semibold text-slate-900">Delivery Information</h3>
+            <h3 class="text-base font-semibold text-slate-900">{{ $t('order_detail.delivery_information') }}</h3>
             </div>
 
           <div class="space-y-2">
@@ -231,7 +230,7 @@
             </div>
             <div v-if="order.expected_delivery_time" class="flex items-center space-x-2 text-sm">
               <Clock class="w-3 h-3 text-slate-500" />
-              <span class="text-slate-700">Expected: {{ formatDeliveryTime(order.expected_delivery_time) }}</span>
+              <span class="text-slate-700">{{ $t('order_detail.expected') }}: {{ formatDeliveryTime(order.expected_delivery_time) }}</span>
             </div>
           </div>
         </div>
@@ -242,13 +241,13 @@
             <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
               <Receipt class="w-4 h-4 text-blue-600" />
             </div>
-            <h3 class="text-base font-semibold text-slate-900">Order Summary</h3>
+            <h3 class="text-base font-semibold text-slate-900">{{ $t('order_detail.order_summary') }}</h3>
           </div>
           
           <div class="space-y-3">
             <!-- Product Breakdown -->
             <div v-if="order.items && order.items.length > 0" class="space-y-2">
-              <h4 class="text-xs font-semibold text-slate-700 mb-2">Product Details:</h4>
+              <h4 class="text-xs font-semibold text-slate-700 mb-2">{{ $t('order_detail.product_details') }}:</h4>
               <div class="space-y-2 max-h-32 overflow-y-auto">
                 <div 
                   v-for="(item, index) in order.items" 
@@ -273,34 +272,34 @@
                       </h5>
                       <div class="space-y-0.5 mt-1">
                         <div class="flex justify-between items-center text-xs">
-                          <span class="text-slate-600">Variant:</span>
-                          <span class="font-medium text-slate-900">{{ item.product_variant?.name || 'Standard' }} ML</span>
+                          <span class="text-slate-600">{{ $t('order_detail.variant') }}:</span>
+                          <span class="font-medium text-slate-900">{{ item.product_variant?.name || $t('order_detail.standard') }} ML</span>
                         </div>
                         <div class="flex justify-between items-center text-xs">
-                          <span class="text-slate-600">Quantity:</span>
+                          <span class="text-slate-600">{{ $t('order_detail.quantity') }}:</span>
                           <span class="font-medium text-slate-900">{{ item.quantity }}</span>
                         </div>
                         <div class="flex justify-between items-center text-xs">
-                          <span class="text-slate-600">Price:</span>
+                          <span class="text-slate-600">{{ $t('order_detail.price') }}:</span>
                           <span class="font-medium text-slate-900">
-                            {{ formatApiPrice({ price: item.price, currency_info: order.currency_info }) }} each
+                            {{ formatApiPrice({ price: item.price, currency_info: order.currency_info }) }} {{ $t('order_detail.each') }}
                           </span>
                         </div>
                         <div class="flex justify-between items-center text-xs font-semibold text-slate-900 pt-0.5 border-t border-slate-200">
-                          <span>Subtotal:</span>
+                          <span>{{ $t('order_detail.subtotal') }}:</span>
                           <span>{{ formatApiPrice({ price: item.price * item.quantity, currency_info: order.currency_info }) }}</span>
                         </div>
                         <!-- Delivery info for each product in summary -->
                         <div v-if="item.delivery_date || item.delivery_timeslot || order.expected_delivery_date" class="mt-2 pt-2 border-t border-slate-200">
                           <div class="flex items-center space-x-1 mb-1">
                             <Truck class="w-3 h-3 text-green-600" />
-                            <span class="text-xs font-medium text-green-700">Delivery</span>
+                            <span class="text-xs font-medium text-green-700">{{ $t('order_detail.delivery') }}</span>
                           </div>
                           <div v-if="item.delivery_date || order.expected_delivery_date" class="text-xs text-slate-600">
-                            <strong>Date:</strong> {{ formatDate(item.delivery_date || order.expected_delivery_date) }}
+                            <strong>{{ $t('order_detail.date') }}:</strong> {{ formatDate(item.delivery_date || order.expected_delivery_date) }}
                           </div>
                           <div v-if="item.delivery_timeslot || order.expected_delivery_time" class="text-xs text-slate-600">
-                            <strong>Time:</strong> {{ formatTimeSlot(item.delivery_timeslot || order.expected_delivery_time) }}
+                            <strong>{{ $t('order_detail.time') }}:</strong> {{ formatTimeSlot(item.delivery_timeslot || order.expected_delivery_time) }}
                           </div>
                         </div>
                       </div>
@@ -312,24 +311,20 @@
             
             <!-- Price Summary -->
             <div class="space-y-2 pt-2 border-t border-slate-200">
-              <!-- Debug info - remove after testing -->
-              <div class="text-xs text-gray-500 bg-gray-100 p-2 rounded">
-                Debug: total_amount={{ order.total_amount }}, delivery_fee={{ order.delivery_fee }}, type={{ typeof order.delivery_fee }}
-              </div>
               <div class="flex justify-between items-center text-sm">
-                <span class="text-slate-600">Subtotal</span>
+                <span class="text-slate-600">{{ $t('order_detail.subtotal') }}</span>
                 <span class="font-semibold text-slate-900">
                   {{ formatApiPrice({ price: parseFloat(order.total_amount) || 0, currency_info: order.currency_info }) }}
                 </span>
                   </div>
               <div v-if="order.delivery_fee && parseFloat(order.delivery_fee) > 0" class="flex justify-between items-center text-sm">
-                <span class="text-slate-600">Delivery Fee</span>
+                <span class="text-slate-600">{{ $t('order_detail.delivery_fee') }}</span>
                 <span class="font-semibold text-slate-900">
                   {{ formatApiPrice({ price: parseFloat(order.delivery_fee) || 0, currency_info: order.currency_info }) }}
                 </span>
                   </div>
               <div class="flex justify-between items-center pt-2 border-t border-slate-200">
-                <span class="text-base font-bold text-slate-900">Total</span>
+                <span class="text-base font-bold text-slate-900">{{ $t('order_detail.total') }}</span>
                 <span class="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text">
                       {{ formatApiPrice({ price: (parseFloat(order.total_amount) || 0) + (parseFloat(order.delivery_fee) || 0), currency_info: order.currency_info }) }}
                     </span>
@@ -344,21 +339,21 @@
             <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
               <CreditCard class="w-4 h-4 text-green-600" />
             </div>
-            <h3 class="text-base font-semibold text-slate-900">Payment Information</h3>
+            <h3 class="text-base font-semibold text-slate-900">{{ $t('order_detail.payment_information') }}</h3>
           </div>
           
           <div class="space-y-2">
             <div v-if="order.payment" class="flex justify-between items-center text-sm">
-              <span class="text-slate-600">Method:</span>
+              <span class="text-slate-600">{{ $t('order_detail.payment_method') }}:</span>
               <span class="font-medium text-slate-900 capitalize">
-                {{ order.payment.payment_method?.replace('_', ' ') || 'Not specified' }}
+                {{ formatPaymentMethod(order.payment.payment_method) || $t('order_detail.not_specified') }}
               </span>
             </div>
             
             <div v-if="order.payment" class="flex justify-between items-center text-sm">
-              <span class="text-slate-600">Status:</span>
+              <span class="text-slate-600">{{ $t('order_detail.payment_status') }}:</span>
               <span class="font-medium text-slate-900 capitalize">
-                {{ order.payment.payment_status?.replace('_', ' ') || 'Not specified' }}
+                {{ formatPaymentStatus(order.payment.payment_status) || $t('order_detail.not_specified') }}
               </span>
             </div>
             
@@ -366,7 +361,7 @@
               <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-2">
                 <CreditCard class="w-6 h-6 text-slate-400" />
               </div>
-              <p class="text-slate-500 text-sm">No payment information available</p>
+              <p class="text-slate-500 text-sm">{{ $t('order_detail.no_payment_info') }}</p>
             </div>
           </div>
                 </div>
@@ -377,7 +372,7 @@
             <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
               <Clock class="w-4 h-4 text-purple-600" />
             </div>
-            <h3 class="text-base font-semibold text-slate-900">Order Timeline</h3>
+            <h3 class="text-base font-semibold text-slate-900">{{ $t('order_detail.order_timeline') }}</h3>
                 </div>
           
           <OrderStatusTimeline :order="order" />
@@ -397,7 +392,7 @@
           class="flex-1 px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-sm flex items-center justify-center space-x-2 text-sm"
         >
           <CheckCircle class="w-4 h-4" />
-          <span>Proceed with Order</span>
+            <span>{{ $t('order_detail.proceed_with_order') }}</span>
         </button>
 
         <!-- Cancel Order Button -->
@@ -407,7 +402,7 @@
           class="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-sm flex items-center justify-center space-x-2 text-sm"
         >
           <X class="w-4 h-4" />
-          <span>Cancel Order</span>
+          <span>{{ $t('order_detail.cancel_order') }}</span>
         </button>
 
         <!-- Reorder Items Button -->
@@ -420,7 +415,7 @@
           onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
         >
           <RefreshCw class="w-4 h-4" />
-          <span>Reorder Items</span>
+          <span>{{ $t('order_detail.reorder_items') }}</span>
         </button>
       </div>
     </div>
@@ -544,7 +539,7 @@
             <CheckCircle class="w-7 h-7 text-blue-600" />
           </div>
           <div>
-            <h3 class="text-xl font-bold text-slate-900">Confirm Delivery</h3>
+            <h3 class="text-xl font-bold text-slate-900">{{ $t('order_detail.confirm_delivery') }}</h3>
             <p class="text-slate-600 text-sm">Order #{{ orderId }}</p>
           </div>
         </div>
@@ -563,7 +558,7 @@
           >
             <Loader2 v-if="updatingStatus" class="w-4 h-4 animate-spin" />
             <CheckCircle v-else class="w-4 h-4" />
-            <span>Confirm Delivery</span>
+            <span>{{ $t('order_detail.confirm_delivery') }}</span>
           </button>
         </div>
       </div>
@@ -609,7 +604,7 @@
           >
             <Loader2 v-if="updatingStatus" class="w-4 h-4 animate-spin" />
             <AlertTriangle v-else class="w-4 h-4" />
-            <span>Report Issue</span>
+            <span>{{ $t('order_detail.report_wrong_delivery') }}</span>
           </button>
         </div>
       </div>
@@ -620,6 +615,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { apiService } from '@/services/api'
 import OrderStatusTimeline from '@/components/OrderStatusTimeline.vue'
 import { useCurrency } from '@/composables/useCurrency'
@@ -632,6 +628,7 @@ import {
 const route = useRoute()
 const router = useRouter()
 const { formatApiPrice } = useCurrency()
+const { t } = useI18n()
 
 // Reactive data
 const order = ref(null)
@@ -755,7 +752,7 @@ const truncateText = (text, maxLength) => {
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString('fr-FR', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -780,7 +777,39 @@ const formatTimeSlot = (timeSlot) => {
 }
 
 const formatStatus = (status) => {
-  return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  const statusMap = {
+    'pending': t('timeline.pending'),
+    'processing': t('orders.processing'),
+    'assigned_to_driver': t('timeline.assigned_to_driver'),
+    'picked_up': t('timeline.picked_up'),
+    'delivered': t('timeline.delivered'),
+    'delivered_no_confirmation': t('timeline.delivered'),
+    'cancelled': t('timeline.cancelled'),
+    'on_hold': t('orders.pending')
+  }
+  return statusMap[status] || status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+}
+
+const formatPaymentMethod = (method) => {
+  if (!method) return null
+  const methodMap = {
+    'mobile_money': t('payment_methods.mobile_money'),
+    'card': t('payment_methods.card'),
+    'cash': t('payment_methods.cash'),
+    'bank_transfer': t('payment_methods.bank_transfer')
+  }
+  return methodMap[method] || method.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+}
+
+const formatPaymentStatus = (status) => {
+  if (!status) return null
+  const statusMap = {
+    'pending': t('timeline.pending'),
+    'completed': t('timeline.delivered'),
+    'failed': t('errors.generic'),
+    'cancelled': t('timeline.cancelled')
+  }
+  return statusMap[status] || status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
 }
 
 const getStatusClasses = (status) => {

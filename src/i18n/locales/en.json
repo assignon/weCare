@@ -1,0 +1,43 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "view": "View",
+    "add": "Add",
+    "remove": "Remove"
+  },
+  "home": {
+    "popular_products": "Popular Products",
+    "popular_products_subtitle": "Trending items you'll love",
+    "new_arrivals": "New Arrivals",
+    "new_arrivals_subtitle": "Fresh products just for you"
+  },
+  "navigation": {
+    "home": "Home",
+    "explore": "Explore",
+    "orders": "Orders",
+    "cart": "Cart",
+    "profile": "Profile",
+    "viewing_requests": "Viewing Requests",
+    "my_ads": "My Ads",
+    "inquiries": "Inquiries",
+    "messages": "Messages",
+    "wishlist": "Wishlist",
+    "settings": "Settings",
+    "logout": "Logout"
+  }
+}
+

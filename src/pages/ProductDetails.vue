@@ -128,13 +128,13 @@
             v-if="currentStock > 0" 
             class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full"
           >
-            {{ currentStock }} In Stock
+            {{ currentStock }} {{ $t('product.in_stock') }}
           </div>
           <div 
             v-else 
             class="px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full"
           >
-            Out of Stock
+            {{ $t('product.out_of_stock') }}
           </div>
         </div>
 
@@ -151,7 +151,7 @@
         <!-- Size and Quantity - Only show if in stock -->
         <div v-if="product.variants && product.variants.length > 0" class="space-y-3">
           <div class="flex justify-between items-center">
-            <h3 class="text-sm font-semibold text-gray-900">Variants</h3>
+            <h3 class="text-sm font-semibold text-gray-900">{{ $t('product.variants') }}</h3>
           </div>
 
           <!-- Size options -->
@@ -186,7 +186,7 @@
                   : 'text-gray-600 hover:text-gray-900'
               ]"
             >
-              Description
+              {{ $t('product.description') }}
             </button>
             <button 
               @click="activeTab = 'reviews'"
@@ -197,7 +197,7 @@
                   : 'text-gray-600 hover:text-gray-900'
               ]"
             >
-              Reviews ({{ product.review_stats.count }})
+              {{ $t('product.reviews') }} ({{ product.review_stats.count }})
             </button>
             <button 
               @click="activeTab = 'attributes'"
@@ -208,7 +208,7 @@
                   : 'text-gray-600 hover:text-gray-900'
               ]"
             >
-              Details
+              {{ $t('product.details') }}
             </button>
           </div>
 
@@ -216,12 +216,12 @@
           <div class="space-y-4">
             <!-- Description tab -->
             <div v-if="activeTab === 'description'" class="space-y-4">
-              <p class="text-gray-700 leading-relaxed text-sm">{{ product.description || "No description available." }}</p>
+              <p class="text-gray-700 leading-relaxed text-sm">{{ product.description || $t('product.no_description') }}</p>
 
 
               <!-- Skin Types Section -->
               <div v-if="product.suitable_for && product.suitable_for.length > 0" class="space-y-3">
-                <h6 class="text-lg font-semibold text-gray-900">Suitable for Skin Types</h6>
+                <h6 class="text-lg font-semibold text-gray-900">{{ $t('product.suitable_for_skin_types') }}</h6>
                 <div class="flex flex-wrap gap-2">
                   <span 
                     v-for="skinType in product.suitable_for" 
@@ -235,7 +235,7 @@
 
               <!-- Skin Concerns Section -->
               <div v-if="product.skin_concerns && product.skin_concerns.length > 0" class="space-y-3">
-                <h6 class="text-lg font-semibold text-gray-900">Addresses Skin Concerns</h6>
+                <h6 class="text-lg font-semibold text-gray-900">{{ $t('product.addresses_skin_concerns') }}</h6>
                 <div class="flex flex-wrap gap-2">
                   <span 
                     v-for="concern in product.skin_concerns" 
@@ -611,7 +611,7 @@
             style="background: linear-gradient(to right, #2563eb, #9333ea);"
           >
             <ShoppingBag class="w-5 h-5 mr-2" />
-            Add to Cart
+            {{ $t('product.add_to_cart') }}
           </button>
 
           <button 
