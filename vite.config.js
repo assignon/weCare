@@ -108,6 +108,21 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  build: {
+    // Disable CSS code splitting to avoid preload errors
+    // All CSS will be bundled into a single file
+    cssCodeSplit: false,
+    rollupOptions: {
+      output: {
+        // Ensure consistent chunk naming
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash][extname]',
+      },
+    },
+    // Increase chunk size warning limit to avoid warnings
+    chunkSizeWarningLimit: 1000,
+  },
   server: {
     host: "shopper.local",
     port: 3000,
