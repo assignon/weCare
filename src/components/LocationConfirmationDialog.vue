@@ -11,12 +11,12 @@
           <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4" style="background: linear-gradient(to right, #2563eb, #9333ea);">
             <MapPin class="w-8 h-8 text-white" />
           </div>
-          <h3 class="text-xl font-bold text-gray-900">Location Confirmation</h3>
+          <h3 class="text-xl font-bold text-gray-900">{{ $t('location_confirmation.title') }}</h3>
         </div>
         
         <div class="text-center mb-6">
           <p class="text-gray-700 mb-4">
-            Are you currently at this address right now?
+            {{ $t('location_confirmation.question') }}
           </p>
           <div class="p-4 bg-gray-50 rounded-2xl border-l-4 border-blue-500">
             <div class="flex items-center text-gray-700">
@@ -25,7 +25,7 @@
             </div>
           </div>
           <p class="text-xs text-gray-500 mt-3">
-            This helps us provide better delivery services
+            {{ $t('location_confirmation.help_text') }}
           </p>
         </div>
         
@@ -35,7 +35,7 @@
               :disabled="loading"
             class="w-full py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-gray-400 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
-              No, I'm not there
+              {{ $t('location_confirmation.no') }}
           </button>
           <button 
               @click="handleYes"
@@ -43,7 +43,7 @@
             class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
             style="background: linear-gradient(to right, #2563eb, #9333ea);"
             >
-              Yes, I'm here now
+              {{ $t('location_confirmation.yes') }}
           </button>
           </div>
       </div>
@@ -54,29 +54,29 @@
           <div class="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <Crosshair class="w-8 h-8 text-white" />
           </div>
-          <h3 class="text-xl font-bold text-gray-900">Location Access</h3>
+          <h3 class="text-xl font-bold text-gray-900">{{ $t('location_confirmation.location_access') }}</h3>
         </div>
         
         <div class="text-center mb-6">
           <p class="text-gray-700 mb-4">
-            We need access to your location to save precise GPS coordinates for this address.
+            {{ $t('location_confirmation.permission_message') }}
           </p>
           <div class="text-left mb-4 max-w-xs mx-auto">
             <div class="flex items-center mb-2">
               <CheckCircle class="w-4 h-4 text-green-600 mr-2" />
-              <span class="text-sm text-gray-700">Faster delivery location</span>
+              <span class="text-sm text-gray-700">{{ $t('location_confirmation.benefit_faster') }}</span>
             </div>
             <div class="flex items-center mb-2">
               <CheckCircle class="w-4 h-4 text-green-600 mr-2" />
-              <span class="text-sm text-gray-700">More accurate address</span>
+              <span class="text-sm text-gray-700">{{ $t('location_confirmation.benefit_accurate') }}</span>
             </div>
             <div class="flex items-center">
               <CheckCircle class="w-4 h-4 text-green-600 mr-2" />
-              <span class="text-sm text-gray-700">Better driver navigation</span>
+              <span class="text-sm text-gray-700">{{ $t('location_confirmation.benefit_navigation') }}</span>
             </div>
           </div>
           <p class="text-xs text-gray-500">
-            Your location data is only used for delivery purposes
+            {{ $t('location_confirmation.privacy_note') }}
           </p>
         </div>
         
@@ -86,7 +86,7 @@
               :disabled="loading"
             class="w-full py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-gray-400 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
-              Skip for now
+              {{ $t('location_confirmation.skip') }}
           </button>
           <button 
               @click="requestLocation"
@@ -95,11 +95,11 @@
             style="background: linear-gradient(to right, #2563eb, #9333ea);"
             >
             <Crosshair class="w-4 h-4 mr-2" />
-            <span v-if="loading">Getting Location...</span>
-            <span v-else>Grant Location Access</span>
+            <span v-if="loading">{{ $t('location_confirmation.getting_location') }}...</span>
+            <span v-else>{{ $t('location_confirmation.grant_access') }}</span>
           </button>
           <p class="text-xs text-gray-500 text-center">
-              👆 Clicking this button will prompt your browser to request location permission
+              👆 {{ $t('location_confirmation.permission_hint') }}
             </p>
           </div>
       </div>
@@ -110,16 +110,16 @@
           <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin" style="background: linear-gradient(to right, #2563eb, #9333ea);">
             <Crosshair class="w-8 h-8 text-white" />
           </div>
-          <h3 class="text-xl font-bold text-gray-900">Getting Your Location</h3>
+          <h3 class="text-xl font-bold text-gray-900">{{ $t('location_confirmation.getting_location_title') }}</h3>
         </div>
         
         <div class="text-center">
           <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
           <p class="text-gray-700 mb-2">
-            Please wait while we get your GPS coordinates...
+            {{ $t('location_confirmation.getting_location_message') }}
           </p>
           <p class="text-xs text-gray-500">
-            Make sure location services are enabled
+            {{ $t('location_confirmation.enable_services') }}
           </p>
         </div>
       </div>
@@ -130,23 +130,23 @@
           <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle class="w-8 h-8 text-white" />
           </div>
-          <h3 class="text-xl font-bold text-gray-900">Location Saved</h3>
+          <h3 class="text-xl font-bold text-gray-900">{{ $t('location_confirmation.location_saved') }}</h3>
         </div>
         
         <div class="text-center mb-6">
           <p class="text-gray-700 mb-4">
-            Great! Your GPS coordinates have been saved.
+            {{ $t('location_confirmation.success_message') }}
           </p>
           <div class="p-4 bg-green-50 rounded-2xl border-l-4 border-green-500">
             <div class="text-sm text-gray-700 mb-1">
-              <strong>Latitude:</strong> {{ coordinates.latitude?.toFixed(6) }}
+              <strong>{{ $t('location_confirmation.latitude') }}:</strong> {{ coordinates.latitude?.toFixed(6) }}
             </div>
             <div class="text-sm text-gray-700">
-              <strong>Longitude:</strong> {{ coordinates.longitude?.toFixed(6) }}
+              <strong>{{ $t('location_confirmation.longitude') }}:</strong> {{ coordinates.longitude?.toFixed(6) }}
             </div>
           </div>
           <p class="text-xs text-gray-500 mt-3">
-            This will help our drivers find you more easily
+            {{ $t('location_confirmation.success_help') }}
           </p>
         </div>
         
@@ -154,7 +154,7 @@
             @click="close"
           class="w-full py-4 bg-green-500 text-white font-semibold rounded-2xl hover:bg-green-600 transition-all duration-200"
           >
-            Continue
+            {{ $t('location_confirmation.continue') }}
         </button>
       </div>
       
@@ -164,7 +164,7 @@
           <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <AlertCircle class="w-8 h-8 text-white" />
           </div>
-          <h3 class="text-xl font-bold text-gray-900">Location Error</h3>
+          <h3 class="text-xl font-bold text-gray-900">{{ $t('location_confirmation.location_error') }}</h3>
         </div>
         
         <div class="text-center mb-6">
@@ -178,7 +178,7 @@
             @click="handleSkipLocation"
             class="w-full py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
           >
-            Skip for now
+            {{ $t('location_confirmation.skip') }}
           </button>
           <button 
             @click="requestLocation"
@@ -186,8 +186,8 @@
             class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
             style="background: linear-gradient(to right, #2563eb, #9333ea);"
           >
-            <span v-if="loading">Getting Location...</span>
-            <span v-else>Try Again</span>
+            <span v-if="loading">{{ $t('location_confirmation.getting_location') }}...</span>
+            <span v-else>{{ $t('location_confirmation.try_again') }}</span>
           </button>
         </div>
       </div>
@@ -197,9 +197,12 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { 
   MapPin, Crosshair, CheckCircle, AlertCircle 
 } from 'lucide-vue-next'
+
+const { t } = useI18n()
 
 // Props
 const props = defineProps({
@@ -236,14 +239,18 @@ const addressSummary = computed(() => {
 
 // Watch for model value changes
 watch(() => props.modelValue, (newVal) => {
-  show.value = newVal
-  if (newVal) {
-    resetDialog()
+  if (show.value !== newVal) {
+    show.value = newVal
+    if (newVal) {
+      resetDialog()
+    }
   }
 })
 
 watch(show, (newVal) => {
-  emit('update:modelValue', newVal)
+  if (props.modelValue !== newVal) {
+    emit('update:modelValue', newVal)
+  }
   if (!newVal) {
     resetDialog()
   }
@@ -279,7 +286,7 @@ const requestLocation = async () => {
   console.log('LocationConfirmationDialog: requestLocation clicked')
   
   if (!navigator.geolocation) {
-    showError('Geolocation is not supported by this browser')
+    showError(t('location_confirmation.error_not_supported'))
     return
   }
 
@@ -290,7 +297,7 @@ const requestLocation = async () => {
       console.log('Current permission state:', permission.state)
       
       if (permission.state === 'denied') {
-        showError('Location access was previously denied. Please enable it in your browser settings and refresh the page.')
+        showError(t('location_confirmation.error_previously_denied'))
         return
       }
     } catch (error) {
@@ -349,20 +356,20 @@ const requestLocation = async () => {
 }
 
 const handleGeolocationError = (error) => {
-  let message = 'Unable to get your location. '
+  let message = ''
   
   switch (error.code) {
     case error.PERMISSION_DENIED:
-      message = 'Location access was denied. Please:\n\n1. Click the location icon in your browser\'s address bar\n2. Select "Allow" for location access\n3. Refresh the page and try again\n\nOr check your browser settings to enable location for this site.'
+      message = t('location_confirmation.error_permission_denied')
       break
     case error.POSITION_UNAVAILABLE:
-      message += 'Location information is unavailable. Please check if:\n\n• Location services are enabled on your device\n• You have a stable internet connection\n• GPS is turned on (for mobile devices)'
+      message = t('location_confirmation.error_position_unavailable')
       break
     case error.TIMEOUT:
-      message += 'Location request timed out. This might be due to:\n\n• Weak GPS signal\n• Location services being disabled\n• Network connectivity issues\n\nPlease try again or move to an area with better signal.'
+      message = t('location_confirmation.error_timeout')
       break
     default:
-      message += 'An unknown error occurred. Please try again or contact support if the problem persists.'
+      message = t('location_confirmation.error_unknown')
       break
   }
   

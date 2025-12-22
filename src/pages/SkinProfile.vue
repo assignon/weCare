@@ -1,181 +1,173 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pb-24">
-    <div class="p-4">
-      <!-- Modern Header -->
-      <AppHeader 
-        :show-back="true"
-        :custom-title="$t('profile.skin_profile_page.title')"
-      />
-
+  <div class="min-h-screen bg-white pb-24">
+    <BackButtonHeader :title="$t('profile.skin_profile_page.title')" />
+    <div class="p-3 pt-4">
       <!-- Loading State -->
-      <div v-if="loading" class="text-center py-16">
-        <div class="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-          <Loader2 class="w-10 h-10 text-blue-600 animate-spin" />
+      <div v-if="loading" class="text-center py-12">
+        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Loader2 class="w-6 h-6 text-blue-600 animate-spin" />
         </div>
-        <h3 class="text-xl font-semibold text-slate-800 mb-2">{{ $t('profile.skin_profile_page.loading') }}</h3>
-        <p class="text-slate-600">{{ $t('profile.skin_profile_page.loading_subtitle') }}</p>
+        <h3 class="text-sm font-semibold text-gray-800 mb-1">{{ $t('profile.skin_profile_page.loading') }}</h3>
+        <p class="text-xs text-gray-600">{{ $t('profile.skin_profile_page.loading_subtitle') }}</p>
       </div>
 
       <!-- Content -->
-      <div v-else class="space-y-6">
+      <div v-else class="space-y-2">
         <!-- Current Profile Summary -->
-        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6">
-          <div class="flex items-center space-x-3 mb-4">
-            <div class="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Sparkles class="w-5 h-5 text-white" />
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+          <div class="flex items-center space-x-2 mb-3">
+            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Sparkles class="w-4 h-4 text-purple-600" />
             </div>
             <div>
-              <h2 class="text-lg font-bold text-slate-900">{{ $t('profile.skin_profile_page.your_skin_type_profile') }}</h2>
-              <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.personalized_recommendations') }}</p>
+              <h2 class="text-sm font-bold text-gray-900">{{ $t('profile.skin_profile_page.your_skin_type_profile') }}</h2>
+              <p class="text-xs text-gray-600">{{ $t('profile.skin_profile_page.personalized_recommendations') }}</p>
             </div>
           </div>
 
-          <div v-if="!hasProfileData" class="text-center py-8">
-            <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <User class="w-8 h-8 text-slate-400" />
+          <div v-if="!hasProfileData" class="text-center py-6">
+            <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <User class="w-6 h-6 text-gray-400" />
             </div>
-            <p class="text-slate-600 mb-2">{{ $t('profile.skin_profile_page.no_profile_data') }}</p>
-            <p class="text-xs text-slate-500">{{ $t('profile.skin_profile_page.complete_sections') }}</p>
+            <p class="text-xs text-gray-600 mb-1">{{ $t('profile.skin_profile_page.no_profile_data') }}</p>
+            <p class="text-xs text-gray-500">{{ $t('profile.skin_profile_page.complete_sections') }}</p>
           </div>
 
-          <div v-else class="space-y-4">
+          <div v-else class="space-y-2">
             <!-- Skin Type -->
-            <div class="flex items-center justify-between p-3 bg-slate-50/50 rounded-2xl">
-              <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <User class="w-4 h-4 text-blue-600" />
+            <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+              <div class="flex items-center space-x-2">
+                <div class="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <User class="w-3 h-3 text-blue-600" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-slate-700">{{ $t('profile.skin_profile_page.skin_type') }}</p>
-                  <p class="text-xs text-slate-500">{{ currentProfile.skin_type_detail?.name || $t('profile.skin_profile_page.not_set') }}</p>
+                  <p class="text-xs font-medium text-gray-700">{{ $t('profile.skin_profile_page.skin_type') }}</p>
+                  <p class="text-xs text-gray-500">{{ currentProfile.skin_type_detail?.name || $t('profile.skin_profile_page.not_set') }}</p>
                 </div>
               </div>
             </div>
 
             <!-- Age Group -->
-            <div v-if="currentProfile.age_group" class="flex items-center justify-between p-3 bg-slate-50/50 rounded-2xl">
-              <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center">
-                  <Calendar class="w-4 h-4 text-green-600" />
+            <div v-if="currentProfile.age_group" class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+              <div class="flex items-center space-x-2">
+                <div class="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Calendar class="w-3 h-3 text-green-600" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-slate-700">{{ $t('profile.skin_profile_page.age_group') }}</p>
-                  <p class="text-xs text-slate-500">{{ getAgeGroupLabel(currentProfile.age_group) }}</p>
+                  <p class="text-xs font-medium text-gray-700">{{ $t('profile.skin_profile_page.age_group') }}</p>
+                  <p class="text-xs text-gray-500">{{ getAgeGroupLabel(currentProfile.age_group) }}</p>
                 </div>
               </div>
             </div>
 
             <!-- Skin Concerns -->
-            <div class="p-3 bg-slate-50/50 rounded-2xl">
-              <div class="flex items-center space-x-3 mb-2">
-                <div class="w-8 h-8 bg-red-100 rounded-xl flex items-center justify-center">
-                  <Heart class="w-4 h-4 text-red-600" />
+            <div class="p-2 bg-gray-50 rounded-lg">
+              <div class="flex items-center space-x-2 mb-1.5">
+                <div class="w-6 h-6 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Heart class="w-3 h-3 text-red-600" />
                 </div>
-                <p class="text-sm font-medium text-slate-700">{{ $t('profile.skin_profile_page.skin_concerns') }}</p>
+                <p class="text-xs font-medium text-gray-700">{{ $t('profile.skin_profile_page.skin_concerns') }}</p>
               </div>
-              <div v-if="currentProfile.skin_concerns && currentProfile.skin_concerns.length > 0" class="flex flex-wrap gap-2">
+              <div v-if="currentProfile.skin_concerns && currentProfile.skin_concerns.length > 0" class="flex flex-wrap gap-1.5">
                 <span 
                   v-for="concern in currentProfile.skin_concerns_detail" 
                   :key="concern.id"
-                  class="px-3 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full"
+                  class="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded-full"
                 >
                   {{ concern.name }}
                 </span>
               </div>
-              <p v-else class="text-xs text-slate-500">{{ $t('profile.skin_profile_page.none_selected') }}</p>
+              <p v-else class="text-xs text-gray-500">{{ $t('profile.skin_profile_page.none_selected') }}</p>
             </div>
 
             <!-- Product Types -->
-            <div class="p-3 bg-slate-50/50 rounded-2xl">
-              <div class="flex items-center space-x-3 mb-2">
-                <div class="w-8 h-8 bg-purple-100 rounded-xl flex items-center justify-center">
-                  <Package class="w-4 h-4 text-purple-600" />
+            <div class="p-2 bg-gray-50 rounded-lg">
+              <div class="flex items-center space-x-2 mb-1.5">
+                <div class="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Package class="w-3 h-3 text-purple-600" />
                 </div>
-                <p class="text-sm font-medium text-slate-700">{{ $t('profile.skin_profile_page.product_types') }}</p>
+                <p class="text-xs font-medium text-gray-700">{{ $t('profile.skin_profile_page.product_types') }}</p>
               </div>
-              <div v-if="currentProfile.product_types && currentProfile.product_types.length > 0" class="flex flex-wrap gap-2">
+              <div v-if="currentProfile.product_types && currentProfile.product_types.length > 0" class="flex flex-wrap gap-1.5">
                 <span 
                   v-for="productType in currentProfile.product_types_detail" 
                   :key="productType.id"
-                  class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full"
+                  class="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded-full"
                 >
                   {{ productType.name }}
                 </span>
               </div>
-              <p v-else class="text-xs text-slate-500">{{ $t('profile.skin_profile_page.none_selected') }}</p>
+              <p v-else class="text-xs text-gray-500">{{ $t('profile.skin_profile_page.none_selected') }}</p>
             </div>
           </div>
         </div>
 
         <!-- Edit Sections -->
-        <div class="space-y-4">
+        <div class="space-y-2">
           <!-- Skin Type Section -->
-          <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6">
-            <div class="flex items-center justify-between mb-4">
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center">
-                  <User class="w-5 h-5 text-blue-600" />
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <div class="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <User class="w-3 h-3 text-blue-600" />
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold text-slate-900">{{ $t('profile.skin_profile_page.skin_type') }}</h3>
-                  <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.select_primary_skin_type') }}</p>
+                  <h3 class="text-sm font-bold text-gray-900">{{ $t('profile.skin_profile_page.skin_type') }}</h3>
+                  <p class="text-xs text-gray-600">{{ $t('profile.skin_profile_page.select_primary_skin_type') }}</p>
                 </div>
               </div>
               <button 
                 @click="editSection = editSection === 'skinType' ? null : 'skinType'"
-                class="px-4 py-2 text-blue-600 hover:text-blue-700 font-semibold text-sm bg-blue-50 hover:bg-blue-100 rounded-2xl transition-all duration-200"
+                class="px-2.5 py-1.5 text-blue-600 hover:text-blue-700 text-xs font-semibold bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200"
               >
                 {{ selectedSkinType ? $t('profile.skin_profile_page.change') : $t('profile.skin_profile_page.select') }}
               </button>
             </div>
 
-            <div v-if="editSection === 'skinType'" class="space-y-4">
+            <div v-if="editSection === 'skinType'" class="space-y-2.5">
               <!-- Loading state for skin types -->
-              <div v-if="availableSkinTypes.length === 0" class="text-center py-8">
-                <Loader2 class="w-8 h-8 text-blue-600 animate-spin mx-auto mb-3" />
-                <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.loading_skin_types') }}</p>
+              <div v-if="availableSkinTypes.length === 0" class="text-center py-6">
+                <Loader2 class="w-6 h-6 text-blue-600 animate-spin mx-auto mb-2" />
+                <p class="text-xs text-gray-600">{{ $t('profile.skin_profile_page.loading_skin_types') }}</p>
               </div>
               
               <!-- Available skin types -->
-              <div v-else class="space-y-3">
-                <p class="text-sm text-slate-600 mb-3">{{ $t('profile.skin_profile_page.choose_primary_skin_type') }}</p>
+              <div v-else class="space-y-2">
+                <p class="text-xs text-gray-600 mb-2">{{ $t('profile.skin_profile_page.choose_primary_skin_type') }}</p>
                 <label 
                   v-for="skinType in availableSkinTypes" 
                   :key="skinType.id"
-                  class="flex items-start space-x-3 p-3 border border-slate-200 rounded-2xl hover:border-blue-300 transition-colors cursor-pointer"
-                  :class="{ 'border-blue-500 bg-blue-50 shadow-md': selectedSkinType === skinType.id }"
+                  class="flex items-start space-x-2 p-2 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
+                  :class="{ 'border-blue-500 bg-blue-50': selectedSkinType === skinType.id }"
                 >
                   <input 
                     type="radio" 
                     :value="skinType.id" 
                     v-model="selectedSkinType"
-                    class="mt-1 w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+                    class="mt-0.5 w-3.5 h-3.5 text-blue-600 border-gray-300 focus:ring-blue-500"
                   />
                   <div class="flex-1">
-                    <p class="font-medium text-slate-900">{{ skinType.name }}</p>
-                    <p class="text-sm text-slate-600 mt-1">{{ skinType.description }}</p>
+                    <p class="text-xs font-medium text-gray-900">{{ skinType.name }}</p>
+                    <p class="text-xs text-gray-600 mt-0.5">{{ skinType.description }}</p>
                   </div>
-                  <div v-if="selectedSkinType === skinType.id" class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                    <Check class="w-4 h-4 text-white" />
+                  <div v-if="selectedSkinType === skinType.id" class="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Check class="w-3 h-3 text-white" />
                   </div>
                 </label>
               </div>
-              <div class="flex space-x-3 pt-4 border-t border-slate-200">
+              <div class="flex space-x-2 pt-3 border-t border-gray-200">
                 <button 
                   @click="saveSection('skinType')"
                   :disabled="saving"
-                  class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg"
-                  style="background: linear-gradient(to right, #2563eb, #4f46e5);"
-                  onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
-                  onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
+                  class="flex-1 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
                 >
-                  <Loader2 v-if="saving" class="w-4 h-4 animate-spin" />
-                  <Check v-else class="w-4 h-4" />
+                  <Loader2 v-if="saving" class="w-3.5 h-3.5 animate-spin" />
+                  <Check v-else class="w-3.5 h-3.5" />
                   <span>{{ $t('profile.save') }}</span>
                 </button>
                 <button 
                   @click="editSection = null"
-                  class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
+                  class="flex-1 py-2 border border-gray-300 text-gray-700 text-xs font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
                 >
                   {{ $t('profile.cancel') }}
                 </button>
@@ -184,65 +176,62 @@
           </div>
 
           <!-- Age Group Section -->
-          <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6">
-            <div class="flex items-center justify-between mb-4">
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-green-100 rounded-2xl flex items-center justify-center">
-                  <Calendar class="w-5 h-5 text-green-600" />
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <div class="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Calendar class="w-3 h-3 text-green-600" />
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold text-slate-900">{{ $t('profile.skin_profile_page.age_group') }}</h3>
-                  <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.select_age_range') }}</p>
+                  <h3 class="text-sm font-bold text-gray-900">{{ $t('profile.skin_profile_page.age_group') }}</h3>
+                  <p class="text-xs text-gray-600">{{ $t('profile.skin_profile_page.select_age_range') }}</p>
                 </div>
               </div>
               <button 
                 @click="editSection = editSection === 'ageGroup' ? null : 'ageGroup'"
-                class="px-4 py-2 text-green-600 hover:text-green-700 font-semibold text-sm bg-green-50 hover:bg-green-100 rounded-2xl transition-all duration-200"
+                class="px-2.5 py-1.5 text-green-600 hover:text-green-700 text-xs font-semibold bg-green-50 hover:bg-green-100 rounded-lg transition-all duration-200"
               >
                 {{ selectedAgeGroup ? $t('profile.skin_profile_page.change') : $t('profile.skin_profile_page.select') }}
               </button>
             </div>
 
-            <div v-if="editSection === 'ageGroup'" class="space-y-4">
-              <div class="space-y-3">
-                <p class="text-sm text-slate-600 mb-3">{{ $t('profile.skin_profile_page.select_age_range') }}</p>
+            <div v-if="editSection === 'ageGroup'" class="space-y-2.5">
+              <div class="space-y-2">
+                <p class="text-xs text-gray-600 mb-2">{{ $t('profile.skin_profile_page.select_age_range') }}</p>
                 <label 
                   v-for="ageGroup in ageGroups" 
                   :key="ageGroup.value"
-                  class="flex items-start space-x-3 p-3 border border-slate-200 rounded-2xl hover:border-green-300 transition-colors cursor-pointer"
-                  :class="{ 'border-green-500 bg-green-50 shadow-md': selectedAgeGroup === ageGroup.value }"
+                  class="flex items-start space-x-2 p-2 border border-gray-200 rounded-lg hover:border-green-300 transition-colors cursor-pointer"
+                  :class="{ 'border-green-500 bg-green-50': selectedAgeGroup === ageGroup.value }"
                 >
                   <input 
                     type="radio" 
                     :value="ageGroup.value" 
                     v-model="selectedAgeGroup"
-                    class="mt-1 w-4 h-4 text-green-600 border-slate-300 focus:ring-green-500"
+                    class="mt-0.5 w-3.5 h-3.5 text-green-600 border-gray-300 focus:ring-green-500"
                   />
                   <div class="flex-1">
-                    <p class="font-medium text-slate-900">{{ ageGroup.label }}</p>
-                    <p class="text-sm text-slate-600 mt-1">{{ ageGroup.description }}</p>
+                    <p class="text-xs font-medium text-gray-900">{{ ageGroup.label }}</p>
+                    <p class="text-xs text-gray-600 mt-0.5">{{ ageGroup.description }}</p>
                   </div>
-                  <div v-if="selectedAgeGroup === ageGroup.value" class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                    <Check class="w-4 h-4 text-white" />
+                  <div v-if="selectedAgeGroup === ageGroup.value" class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Check class="w-3 h-3 text-white" />
                   </div>
                 </label>
               </div>
-              <div class="flex space-x-3 pt-4 border-t border-slate-200">
+              <div class="flex space-x-2 pt-3 border-t border-gray-200">
                 <button 
                   @click="saveSection('ageGroup')"
                   :disabled="saving"
-                  class="flex-1 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg"
-                  style="background: linear-gradient(to right, #16a34a, #059669);"
-                  onmouseover="this.style.background='linear-gradient(to right, #15803d, #047857)'"
-                  onmouseout="this.style.background='linear-gradient(to right, #16a34a, #059669)'"
+                  class="flex-1 py-2 bg-green-600 text-white text-xs font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
                 >
-                  <Loader2 v-if="saving" class="w-4 h-4 animate-spin" />
-                  <Check v-else class="w-4 h-4" />
+                  <Loader2 v-if="saving" class="w-3.5 h-3.5 animate-spin" />
+                  <Check v-else class="w-3.5 h-3.5" />
                   <span>{{ $t('profile.save') }}</span>
                 </button>
                 <button 
                   @click="editSection = null"
-                  class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
+                  class="flex-1 py-2 border border-gray-300 text-gray-700 text-xs font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
                 >
                   {{ $t('profile.cancel') }}
                 </button>
@@ -251,71 +240,68 @@
           </div>
 
           <!-- Skin Concerns Section -->
-          <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6">
-            <div class="flex items-center justify-between mb-4">
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-red-100 rounded-2xl flex items-center justify-center">
-                  <Heart class="w-5 h-5 text-red-600" />
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <div class="w-6 h-6 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Heart class="w-3 h-3 text-red-600" />
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold text-slate-900">{{ $t('profile.skin_profile_page.skin_concerns') }}</h3>
-                  <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.select_all_that_apply') }}</p>
+                  <h3 class="text-sm font-bold text-gray-900">{{ $t('profile.skin_profile_page.skin_concerns') }}</h3>
+                  <p class="text-xs text-gray-600">{{ $t('profile.skin_profile_page.select_all_that_apply') }}</p>
                 </div>
               </div>
               <button 
                 @click="editSection = editSection === 'skinConcerns' ? null : 'skinConcerns'"
-                class="px-4 py-2 text-red-600 hover:text-red-700 font-semibold text-sm bg-red-50 hover:bg-red-100 rounded-2xl transition-all duration-200"
+                class="px-2.5 py-1.5 text-red-600 hover:text-red-700 text-xs font-semibold bg-red-50 hover:bg-red-100 rounded-lg transition-all duration-200"
               >
                 {{ selectedSkinConcerns.length > 0 ? $t('profile.skin_profile_page.edit') : $t('profile.skin_profile_page.select') }}
               </button>
             </div>
 
-            <div v-if="editSection === 'skinConcerns'" class="space-y-4">
+            <div v-if="editSection === 'skinConcerns'" class="space-y-2.5">
               <!-- Loading state for skin concerns -->
-              <div v-if="availableSkinConcerns.length === 0" class="text-center py-8">
-                <Loader2 class="w-8 h-8 text-red-600 animate-spin mx-auto mb-3" />
-                <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.loading_skin_concerns') }}</p>
+              <div v-if="availableSkinConcerns.length === 0" class="text-center py-6">
+                <Loader2 class="w-6 h-6 text-red-600 animate-spin mx-auto mb-2" />
+                <p class="text-xs text-gray-600">{{ $t('profile.skin_profile_page.loading_skin_concerns') }}</p>
               </div>
               
               <!-- Available skin concerns -->
               <div v-else>
-                <p class="text-sm text-slate-600 mb-3">{{ $t('profile.skin_profile_page.select_all_skin_concerns') }}</p>
-                <div class="flex flex-wrap gap-2">
+                <p class="text-xs text-gray-600 mb-2">{{ $t('profile.skin_profile_page.select_all_skin_concerns') }}</p>
+                <div class="flex flex-wrap gap-1.5">
                   <button 
                     v-for="concern in availableSkinConcerns" 
                     :key="concern.id"
                     @click="toggleSkinConcern(concern.id)"
                     :class="[
-                      'px-4 py-2 rounded-2xl text-sm font-medium transition-all duration-200 flex items-center space-x-2',
+                      'px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 flex items-center space-x-1.5',
                       selectedSkinConcerns.includes(concern.id)
-                        ? 'bg-red-500 text-white shadow-lg'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        ? 'bg-red-500 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     ]"
                   >
                     <span>{{ concern.name }}</span>
-                    <Check v-if="selectedSkinConcerns.includes(concern.id)" class="w-4 h-4" />
+                    <Check v-if="selectedSkinConcerns.includes(concern.id)" class="w-3 h-3" />
                   </button>
                 </div>
-                <p class="text-xs text-slate-500 mt-3">
+                <p class="text-xs text-gray-500 mt-2">
                   {{ $t('profile.skin_profile_page.selected') }}: {{ selectedSkinConcerns.length }} {{ selectedSkinConcerns.length !== 1 ? $t('profile.skin_profile_page.concerns') : $t('profile.skin_profile_page.concern') }}
                 </p>
               </div>
-              <div class="flex space-x-3 pt-4 border-t border-slate-200">
+              <div class="flex space-x-2 pt-3 border-t border-gray-200">
                 <button 
                   @click="saveSection('skinConcerns')"
                   :disabled="saving"
-                  class="flex-1 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg"
-                  style="background: linear-gradient(to right, #dc2626, #db2777);"
-                  onmouseover="this.style.background='linear-gradient(to right, #b91c1c, #be185d)'"
-                  onmouseout="this.style.background='linear-gradient(to right, #dc2626, #db2777)'"
+                  class="flex-1 py-2 bg-red-600 text-white text-xs font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
                 >
-                  <Loader2 v-if="saving" class="w-4 h-4 animate-spin" />
-                  <Check v-else class="w-4 h-4" />
+                  <Loader2 v-if="saving" class="w-3.5 h-3.5 animate-spin" />
+                  <Check v-else class="w-3.5 h-3.5" />
                   <span>{{ $t('profile.save') }}</span>
                 </button>
                 <button 
                   @click="editSection = null"
-                  class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
+                  class="flex-1 py-2 border border-gray-300 text-gray-700 text-xs font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
                 >
                   {{ $t('profile.cancel') }}
                 </button>
@@ -324,71 +310,68 @@
           </div>
 
           <!-- Product Types Section -->
-          <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6">
-            <div class="flex items-center justify-between mb-4">
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-purple-100 rounded-2xl flex items-center justify-center">
-                  <Package class="w-5 h-5 text-purple-600" />
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <div class="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Package class="w-3 h-3 text-purple-600" />
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold text-slate-900">{{ $t('profile.skin_profile_page.product_types') }}</h3>
-                  <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.select_products_you_use') }}</p>
+                  <h3 class="text-sm font-bold text-gray-900">{{ $t('profile.skin_profile_page.product_types') }}</h3>
+                  <p class="text-xs text-gray-600">{{ $t('profile.skin_profile_page.select_products_you_use') }}</p>
                 </div>
               </div>
               <button 
                 @click="editSection = editSection === 'productTypes' ? null : 'productTypes'"
-                class="px-4 py-2 text-purple-600 hover:text-purple-700 font-semibold text-sm bg-purple-50 hover:bg-purple-100 rounded-2xl transition-all duration-200"
+                class="px-2.5 py-1.5 text-purple-600 hover:text-purple-700 text-xs font-semibold bg-purple-50 hover:bg-purple-100 rounded-lg transition-all duration-200"
               >
                 {{ selectedProductTypes.length > 0 ? $t('profile.skin_profile_page.edit') : $t('profile.skin_profile_page.select') }}
               </button>
             </div>
 
-            <div v-if="editSection === 'productTypes'" class="space-y-4">
+            <div v-if="editSection === 'productTypes'" class="space-y-2.5">
               <!-- Loading state for product types -->
-              <div v-if="availableProductTypes.length === 0" class="text-center py-8">
-                <Loader2 class="w-8 h-8 text-purple-600 animate-spin mx-auto mb-3" />
-                <p class="text-sm text-slate-600">{{ $t('profile.skin_profile_page.loading_product_types') }}</p>
+              <div v-if="availableProductTypes.length === 0" class="text-center py-6">
+                <Loader2 class="w-6 h-6 text-purple-600 animate-spin mx-auto mb-2" />
+                <p class="text-xs text-gray-600">{{ $t('profile.skin_profile_page.loading_product_types') }}</p>
               </div>
               
               <!-- Available product types -->
               <div v-else>
-                <p class="text-sm text-slate-600 mb-3">{{ $t('profile.skin_profile_page.select_products_you_use') }}</p>
-                <div class="flex flex-wrap gap-2">
+                <p class="text-xs text-gray-600 mb-2">{{ $t('profile.skin_profile_page.select_products_you_use') }}</p>
+                <div class="flex flex-wrap gap-1.5">
                   <button 
                     v-for="productType in availableProductTypes" 
                     :key="productType.id"
                     @click="toggleProductType(productType.id)"
                     :class="[
-                      'px-4 py-2 rounded-2xl text-sm font-medium transition-all duration-200 flex items-center space-x-2',
+                      'px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 flex items-center space-x-1.5',
                       selectedProductTypes.includes(productType.id)
-                        ? 'bg-purple-500 text-white shadow-lg'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        ? 'bg-purple-500 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     ]"
                   >
                     <span>{{ productType.name }}</span>
-                    <Check v-if="selectedProductTypes.includes(productType.id)" class="w-4 h-4" />
+                    <Check v-if="selectedProductTypes.includes(productType.id)" class="w-3 h-3" />
                   </button>
                 </div>
-                <p class="text-xs text-slate-500 mt-3">
+                <p class="text-xs text-gray-500 mt-2">
                   {{ $t('profile.skin_profile_page.selected') }}: {{ selectedProductTypes.length }} {{ selectedProductTypes.length !== 1 ? $t('profile.skin_profile_page.product_types_plural') : $t('profile.skin_profile_page.product_type') }}
                 </p>
               </div>
-              <div class="flex space-x-3 pt-4 border-t border-slate-200">
+              <div class="flex space-x-2 pt-3 border-t border-gray-200">
                 <button 
                   @click="saveSection('productTypes')"
                   :disabled="saving"
-                  class="flex-1 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg"
-                  style="background: linear-gradient(to right, #9333ea, #4f46e5);"
-                  onmouseover="this.style.background='linear-gradient(to right, #7c3aed, #4338ca)'"
-                  onmouseout="this.style.background='linear-gradient(to right, #9333ea, #4f46e5)'"
+                  class="flex-1 py-2 bg-purple-600 text-white text-xs font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
                 >
-                  <Loader2 v-if="saving" class="w-4 h-4 animate-spin" />
-                  <Check v-else class="w-4 h-4" />
+                  <Loader2 v-if="saving" class="w-3.5 h-3.5 animate-spin" />
+                  <Check v-else class="w-3.5 h-3.5" />
                   <span>{{ $t('profile.save') }}</span>
                 </button>
                 <button 
                   @click="editSection = null"
-                  class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition-all duration-200"
+                  class="flex-1 py-2 border border-gray-300 text-gray-700 text-xs font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
                 >
                   {{ $t('profile.cancel') }}
                 </button>
@@ -402,24 +385,24 @@
     <!-- Success Toast -->
     <div 
       v-if="showSuccessMessage" 
-      class="fixed bottom-4 left-4 right-4 z-50 bg-green-500 text-white p-4 rounded-2xl shadow-lg flex items-center space-x-3"
+      class="fixed bottom-4 left-4 right-4 z-50 bg-green-500 text-white p-3 rounded-lg shadow-lg flex items-center space-x-2"
     >
-      <CheckCircle class="w-5 h-5 flex-shrink-0" />
-      <span class="flex-1">{{ successMessage }}</span>
+      <CheckCircle class="w-4 h-4 flex-shrink-0" />
+      <span class="flex-1 text-xs">{{ successMessage }}</span>
       <button @click="showSuccessMessage = false" class="text-white/80 hover:text-white">
-        <X class="w-4 h-4" />
+        <X class="w-3.5 h-3.5" />
       </button>
     </div>
 
     <!-- Error Toast -->
     <div 
       v-if="showErrorMessage" 
-      class="fixed bottom-4 left-4 right-4 z-50 bg-red-500 text-white p-4 rounded-2xl shadow-lg flex items-center space-x-3"
+      class="fixed bottom-4 left-4 right-4 z-50 bg-red-500 text-white p-3 rounded-lg shadow-lg flex items-center space-x-2"
     >
-      <AlertCircle class="w-5 h-5 flex-shrink-0" />
-      <span class="flex-1">{{ errorMessage }}</span>
+      <AlertCircle class="w-4 h-4 flex-shrink-0" />
+      <span class="flex-1 text-xs">{{ errorMessage }}</span>
       <button @click="showErrorMessage = false" class="text-white/80 hover:text-white">
-        <X class="w-4 h-4" />
+        <X class="w-3.5 h-3.5" />
       </button>
     </div>
   </div>
@@ -431,7 +414,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { apiService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
-import AppHeader from '@/components/AppHeader.vue'
+import BackButtonHeader from '@/components/BackButtonHeader.vue'
 import { 
   Sparkles, User, Calendar, Heart, Package, Loader2, Check, X, 
   CheckCircle, AlertCircle

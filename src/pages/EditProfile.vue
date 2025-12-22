@@ -1,45 +1,38 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pb-24">
-    <div class="p-4">
-      <!-- Modern Header -->
-      <AppHeader 
-        :show-back="true"
-        :custom-title="$t('profile.edit_profile_page.title')"
-      />
+  <div class="min-h-screen bg-white pb-24">
+    <BackButtonHeader :title="$t('profile.edit_profile_page.title')" />
+    <div class="p-3 pt-4">
 
       <!-- Loading state for initial data -->
-      <div v-if="initialLoading" class="text-center py-16">
-        <div class="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-          <Loader2 class="w-10 h-10 text-blue-600 animate-spin" />
+      <div v-if="initialLoading" class="text-center py-12">
+        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Loader2 class="w-6 h-6 text-blue-600 animate-spin" />
         </div>
-        <h3 class="text-xl font-semibold text-slate-800 mb-2">{{ $t('profile.edit_profile_page.loading_profile') }}</h3>
-        <p class="text-slate-600">{{ $t('profile.edit_profile_page.loading_subtitle') }}</p>
+        <h3 class="text-sm font-semibold text-gray-800 mb-1">{{ $t('profile.edit_profile_page.loading_profile') }}</h3>
+        <p class="text-xs text-gray-600">{{ $t('profile.edit_profile_page.loading_subtitle') }}</p>
       </div>
 
       <!-- Form content -->
-      <form v-else @submit.prevent="submitForm" class="space-y-6">
+      <form v-else @submit.prevent="submitForm" class="space-y-3">
         <!-- Profile Picture Section -->
-        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
           <div class="text-center">
             <div class="relative inline-block">
-              <div class="w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center shadow-lg mx-auto">
+              <div class="w-16 h-16 rounded-lg overflow-hidden bg-blue-100 flex items-center justify-center mx-auto">
                 <img 
                   v-if="formData.profile_picture" 
                   :src="formData.profile_picture" 
                   :alt="formData.first_name || 'Profile'"
                   class="w-full h-full object-cover"
                 />
-                <span v-else class="text-3xl font-bold text-slate-700">{{ userInitials }}</span>
+                <span v-else class="text-xl font-bold text-gray-700">{{ userInitials }}</span>
               </div>
               <button 
                 type="button"
                 @click="openFileInput"
-                class="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center shadow-lg border-2 border-white hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
-                style="background: linear-gradient(to right, #2563eb, #4f46e5);"
-                onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
-                onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
+                class="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white hover:bg-blue-700 transition-all duration-200"
               >
-                <Camera class="w-4 h-4 text-white" />
+                <Camera class="w-3 h-3 text-white" />
               </button>
               <input 
                 type="file" 
@@ -49,78 +42,78 @@
                 @change="handleFileUpload" 
               />
             </div>
-            <p class="text-sm text-slate-600 mt-3">{{ $t('profile.edit_profile_page.tap_to_change') }}</p>
+            <p class="text-xs text-gray-600 mt-2">{{ $t('profile.edit_profile_page.tap_to_change') }}</p>
           </div>
         </div>
 
         <!-- Personal Information Section -->
-        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6">
-          <div class="flex items-center space-x-3 mb-6">
-            <div class="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
-              <User class="w-4 h-4 text-blue-600" />
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+          <div class="flex items-center space-x-2 mb-3">
+            <div class="w-5 h-5 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <User class="w-3 h-3 text-blue-600" />
             </div>
-            <h3 class="text-lg font-semibold text-slate-900">{{ $t('profile.edit_profile_page.personal_information') }}</h3>
+            <h3 class="text-sm font-semibold text-gray-900">{{ $t('profile.edit_profile_page.personal_information') }}</h3>
           </div>
 
-          <div class="space-y-4">
+          <div class="space-y-2.5">
             <!-- First Name -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">{{ $t('profile.edit_profile_page.first_name_label') }}</label>
+              <label class="block text-xs font-medium text-gray-700 mb-1">{{ $t('profile.edit_profile_page.first_name_label') }}</label>
               <input 
                 v-model="formData.first_name"
                 type="text"
-                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                class="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 :placeholder="$t('profile.edit_profile_page.first_name_placeholder')"
               />
             </div>
 
             <!-- Last Name -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">{{ $t('profile.edit_profile_page.last_name_label') }}</label>
+              <label class="block text-xs font-medium text-gray-700 mb-1">{{ $t('profile.edit_profile_page.last_name_label') }}</label>
               <input 
                 v-model="formData.last_name"
                 type="text"
-                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                class="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 :placeholder="$t('profile.edit_profile_page.last_name_placeholder')"
               />
             </div>
 
             <!-- Email -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">
+              <label class="block text-xs font-medium text-gray-700 mb-1">
                 {{ $t('profile.edit_profile_page.email_label') }} <span class="text-red-500">{{ $t('profile.edit_profile_page.email_required') }}</span>
               </label>
               <input 
                 v-model="formData.email"
                 type="email"
                 required
-                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                class="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 :placeholder="$t('profile.edit_profile_page.email_placeholder')"
               />
-              <p class="text-xs text-slate-500 mt-1">{{ $t('profile.edit_profile_page.email_verification_note') }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">{{ $t('profile.edit_profile_page.email_verification_note') }}</p>
             </div>
 
             <!-- Phone Number -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">
+              <label class="block text-xs font-medium text-gray-700 mb-1">
                 {{ $t('profile.edit_profile_page.phone_label') }} <span class="text-red-500">{{ $t('profile.edit_profile_page.phone_required') }}</span>
               </label>
               <input 
                 v-model="formData.phone_number"
                 type="tel"
                 required
-                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                class="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 :placeholder="$t('profile.edit_profile_page.phone_placeholder')"
               />
             </div>
 
             <!-- Language Preference -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">{{ $t('profile.edit_profile_page.preferred_language') }}</label>
+              <label class="block text-xs font-medium text-gray-700 mb-1">{{ $t('profile.edit_profile_page.preferred_language') }}</label>
               <select 
                 v-model="formData.default_language"
                 :disabled="loadingLanguages"
-                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                class="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
               >
                 <option value="">{{ $t('profile.edit_profile_page.select_language_placeholder') }}</option>
                 <option 
@@ -131,66 +124,66 @@
                   {{ lang.name }}
                 </option>
               </select>
-              <div v-if="loadingLanguages" class="flex items-center space-x-2 mt-2">
-                <Loader2 class="w-4 h-4 text-blue-600 animate-spin" />
-                <span class="text-xs text-slate-500">{{ $t('profile.edit_profile_page.loading_languages') }}</span>
+              <div v-if="loadingLanguages" class="flex items-center space-x-1.5 mt-1.5">
+                <Loader2 class="w-3.5 h-3.5 text-blue-600 animate-spin" />
+                <span class="text-xs text-gray-500">{{ $t('profile.edit_profile_page.loading_languages') }}</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Password Change Section -->
-        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6">
-          <div class="flex items-center space-x-3 mb-6">
-            <div class="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center">
-              <Lock class="w-4 h-4 text-green-600" />
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+          <div class="flex items-center space-x-2 mb-3">
+            <div class="w-5 h-5 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Lock class="w-3 h-3 text-green-600" />
             </div>
-            <h3 class="text-lg font-semibold text-slate-900">{{ $t('profile.edit_profile_page.change_password') }}</h3>
+            <h3 class="text-sm font-semibold text-gray-900">{{ $t('profile.edit_profile_page.change_password') }}</h3>
           </div>
-          <p class="text-sm text-slate-600 mb-4">{{ $t('profile.edit_profile_page.password_change_note') }}</p>
+          <p class="text-xs text-gray-600 mb-3">{{ $t('profile.edit_profile_page.password_change_note') }}</p>
 
-          <div class="space-y-4">
+          <div class="space-y-2.5">
             <!-- New Password -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">{{ $t('profile.edit_profile_page.new_password') }}</label>
+              <label class="block text-xs font-medium text-gray-700 mb-1">{{ $t('profile.edit_profile_page.new_password') }}</label>
               <div class="relative">
                 <input 
                   v-model="formData.new_password"
                   :type="showNewPassword ? 'text' : 'password'"
-                  class="w-full px-4 py-3 pr-12 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                  class="w-full px-3 py-2 pr-10 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                   :placeholder="$t('profile.edit_profile_page.new_password_placeholder')"
                   autocomplete="new-password"
                 />
                 <button 
                   type="button"
                   @click="showNewPassword = !showNewPassword"
-                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  <Eye v-if="showNewPassword" class="w-5 h-5" />
-                  <EyeOff v-else class="w-5 h-5" />
+                  <Eye v-if="showNewPassword" class="w-3.5 h-3.5" />
+                  <EyeOff v-else class="w-3.5 h-3.5" />
                 </button>
               </div>
-              <p class="text-xs text-slate-500 mt-1">{{ $t('profile.edit_profile_page.password_requirements') }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">{{ $t('profile.edit_profile_page.password_requirements') }}</p>
             </div>
 
             <!-- Confirm Password -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">{{ $t('profile.edit_profile_page.confirm_new_password') }}</label>
+              <label class="block text-xs font-medium text-gray-700 mb-1">{{ $t('profile.edit_profile_page.confirm_new_password') }}</label>
               <div class="relative">
                 <input 
                   v-model="formData.confirm_password"
                   :type="showConfirmPassword ? 'text' : 'password'"
-                  class="w-full px-4 py-3 pr-12 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                  class="w-full px-3 py-2 pr-10 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                   :placeholder="$t('profile.edit_profile_page.confirm_password_placeholder')"
                   autocomplete="new-password"
                 />
                 <button 
                   type="button"
                   @click="showConfirmPassword = !showConfirmPassword"
-                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  <Eye v-if="showConfirmPassword" class="w-5 h-5" />
-                  <EyeOff v-else class="w-5 h-5" />
+                  <Eye v-if="showConfirmPassword" class="w-3.5 h-3.5" />
+                  <EyeOff v-else class="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -198,33 +191,33 @@
         </div>
 
         <!-- Current Password Confirmation -->
-        <div v-if="hasChangesToSave" class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-white/30 p-6">
-          <div class="flex items-center space-x-3 mb-6">
-            <div class="w-8 h-8 bg-amber-100 rounded-xl flex items-center justify-center">
-              <Shield class="w-4 h-4 text-amber-600" />
+        <div v-if="hasChangesToSave" class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+          <div class="flex items-center space-x-2 mb-3">
+            <div class="w-5 h-5 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Shield class="w-3 h-3 text-amber-600" />
             </div>
-            <h3 class="text-lg font-semibold text-slate-900">{{ $t('profile.edit_profile_page.confirm_changes') }}</h3>
+            <h3 class="text-sm font-semibold text-gray-900">{{ $t('profile.edit_profile_page.confirm_changes') }}</h3>
           </div>
-          <p class="text-sm text-slate-600 mb-4">{{ $t('profile.edit_profile_page.confirm_changes_note') }}</p>
+          <p class="text-xs text-gray-600 mb-3">{{ $t('profile.edit_profile_page.confirm_changes_note') }}</p>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">{{ $t('profile.edit_profile_page.current_password') }}</label>
+            <label class="block text-xs font-medium text-gray-700 mb-1">{{ $t('profile.edit_profile_page.current_password') }}</label>
             <div class="relative">
               <input 
                 v-model="formData.current_password"
                 :type="showCurrentPassword ? 'text' : 'password'"
                 required
-                class="w-full px-4 py-3 pr-12 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200"
+                class="w-full px-3 py-2 pr-10 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 :placeholder="$t('profile.edit_profile_page.current_password_placeholder')"
                 autocomplete="current-password"
               />
               <button 
                 type="button"
                 @click="showCurrentPassword = !showCurrentPassword"
-                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                <Eye v-if="showCurrentPassword" class="w-5 h-5" />
-                <EyeOff v-else class="w-5 h-5" />
+                <Eye v-if="showCurrentPassword" class="w-3.5 h-3.5" />
+                <EyeOff v-else class="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -234,13 +227,10 @@
         <button 
           type="submit"
           :disabled="!hasChangesToSave || loading"
-          class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
-          style="background: linear-gradient(to right, #2563eb, #4f46e5);"
-          onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
-          onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
+          class="w-full py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
         >
-          <Loader2 v-if="loading" class="w-5 h-5 animate-spin" />
-          <Save v-else class="w-5 h-5" />
+          <Loader2 v-if="loading" class="w-4 h-4 animate-spin" />
+          <Save v-else class="w-4 h-4" />
           <span>{{ saveButtonText }}</span>
         </button>
       </form>
@@ -249,19 +239,19 @@
       <div 
         v-if="showSnackbar"
         :class="[
-          'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-2xl shadow-lg max-w-sm w-full',
+          'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-4 py-3 rounded-lg shadow-lg max-w-sm w-full',
           snackbarColor === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
         ]"
       >
-        <div class="flex items-center space-x-3">
-          <CheckCircle v-if="snackbarColor === 'success'" class="w-5 h-5 flex-shrink-0" />
-          <AlertCircle v-else class="w-5 h-5 flex-shrink-0" />
-          <p class="text-sm font-medium">{{ snackbarText }}</p>
+        <div class="flex items-center space-x-2">
+          <CheckCircle v-if="snackbarColor === 'success'" class="w-4 h-4 flex-shrink-0" />
+          <AlertCircle v-else class="w-4 h-4 flex-shrink-0" />
+          <p class="text-xs font-medium">{{ snackbarText }}</p>
           <button 
             @click="showSnackbar = false"
             class="ml-auto text-white/80 hover:text-white"
           >
-            <X class="w-4 h-4" />
+            <X class="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -286,7 +276,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { apiService } from '@/services/api'
 import EmailVerificationDialog from '@/components/EmailVerificationDialog.vue'
-import AppHeader from '@/components/AppHeader.vue'
+import BackButtonHeader from '@/components/BackButtonHeader.vue'
 import { 
   User, Camera, Lock, Shield, Save, Loader2, CheckCircle, AlertCircle, X,
   Eye, EyeOff

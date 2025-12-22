@@ -157,10 +157,10 @@
                       <span class="text-xs text-gray-500">{{ formatDate(request.created_at) }}</span>
                     </div>
                     <div class="text-xs text-gray-600">
-                      <span class="font-medium">Preferred:</span> {{ formatDate(request.preferred_date) }} at {{ formatTime(request.preferred_time) }}
+                      <span class="font-medium">{{ $t('rendezvous.preferred') }}:</span> {{ formatDate(request.preferred_date) }} {{ $t('rendezvous.at') }} {{ formatTime(request.preferred_time) }}
                     </div>
                     <div v-if="request.status === 'SCHEDULED' && request.scheduled_date" class="text-xs text-green-600 mt-1">
-                      <span class="font-medium">Scheduled:</span> {{ formatDate(request.scheduled_date) }} at {{ formatTime(request.scheduled_time) }}
+                      <span class="font-medium">{{ $t('rendezvous.scheduled') }}:</span> {{ formatDate(request.scheduled_date) }} {{ $t('rendezvous.at') }} {{ formatTime(request.scheduled_time) }}
                     </div>
                   </div>
                   <ChevronDown class="w-4 h-4 text-gray-400 flex-shrink-0 ml-2 rotate-[-90deg]" />
@@ -184,7 +184,7 @@
       >
         <div class="sticky top-0 bg-white rounded-t-3xl border-b border-gray-100 px-6 py-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-bold text-gray-900">Request History</h3>
+            <h3 class="text-lg font-bold text-gray-900">{{ $t('rendezvous.request_history') }}</h3>
             <button 
               @click="showHistoryModal = false"
               class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
@@ -203,7 +203,7 @@
           </div>
           
           <div v-else-if="requestHistory.length === 0" class="text-center py-8">
-            <p class="text-gray-500">No history available</p>
+            <p class="text-gray-500">{{ $t('rendezvous.no_history_available') }}</p>
           </div>
           
           <div v-else class="space-y-4">
@@ -219,7 +219,7 @@
                 </span>
                 <span class="text-xs text-gray-500">{{ formatDateTime(history.changed_at) }}</span>
               </div>
-              <p class="text-sm text-gray-600">by {{ history.changed_by_name }}</p>
+              <p class="text-sm text-gray-600">{{ $t('rendezvous.by') }} {{ history.changed_by_name }}</p>
               <p v-if="history.notes" class="text-sm text-gray-700 mt-1">{{ history.notes }}</p>
             </div>
           </div>
@@ -280,7 +280,7 @@
             <div v-if="loadingChat" class="flex justify-center py-12">
               <div class="flex flex-col items-center space-y-3">
                 <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-200 border-t-blue-600"></div>
-                <p class="text-sm text-gray-500">Loading messages...</p>
+                <p class="text-sm text-gray-500">{{ $t('rendezvous.loading_messages') }}</p>
               </div>
             </div>
             
@@ -288,8 +288,8 @@
               <div class="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageCircle class="w-10 h-10 text-blue-600" />
               </div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">Start the conversation!</h3>
-              <p class="text-gray-500">Send a message to discuss this product with the seller.</p>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $t('rendezvous.start_conversation') }}</h3>
+              <p class="text-gray-500">{{ $t('rendezvous.start_conversation_message') }}</p>
             </div>
             
             <div v-else class="space-y-4">
@@ -324,28 +324,28 @@
           </div>
           
           <!-- Chat Input -->
-          <div class="bg-white border-t border-gray-100 p-6 shadow-lg flex-shrink-0">
-            <div class="flex items-end space-x-3">
+          <div class="bg-white border-t border-gray-100 p-3 shadow-lg flex-shrink-0">
+            <div class="flex items-end space-x-2">
               <div class="flex-1 relative">
                 <input
                   v-model="newMessage"
                   @keyup.enter="sendMessage"
                   type="text"
-                  placeholder="Type your message..."
-                  class="w-full px-5 py-4 pr-12 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200 placeholder-gray-400"
+                  :placeholder="$t('rendezvous.type_your_message')"
+                  class="w-full px-3 py-2 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200 placeholder-gray-400 text-sm"
                   :disabled="sendingMessage"
                 />
-                <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <div v-if="sendingMessage" class="animate-spin rounded-full h-5 w-5 border-2 border-blue-200 border-t-blue-600"></div>
+                <div class="absolute right-2 top-1/2 transform -translate-y-1/2">
+                  <div v-if="sendingMessage" class="animate-spin rounded-full h-4 w-4 border-2 border-blue-200 border-t-blue-600"></div>
                 </div>
               </div>
               <button
                 @click="sendMessage"
                 :disabled="!newMessage.trim() || sendingMessage"
                 style="background: linear-gradient(to right, #2563eb, #9333ea);"
-                class="w-14 h-14 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:scale-105"
+                class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
               >
-                <Send v-if="!sendingMessage" class="w-6 h-6 text-white" />
+                <Send v-if="!sendingMessage" class="w-4 h-4 text-white" />
               </button>
             </div>
           </div>
@@ -361,12 +361,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { apiService } from '@/services/api'
 import BottomNavigation from '@/components/BottomNavigation.vue'
 import { 
   Calendar, Clock, RefreshCw, AlertCircle, CheckCircle, Eye, X, ArrowLeft, MessageCircle, ChevronDown, Send 
 } from 'lucide-vue-next'
 
+const { t } = useI18n()
 const router = useRouter()
 
 const viewingRequests = ref([])
@@ -466,7 +468,7 @@ const fetchViewingRequests = async () => {
     
   } catch (err) {
     console.error('Failed to fetch viewing requests:', err)
-    error.value = 'Failed to load viewing requests'
+    error.value = t('rendezvous.failed_to_load')
   } finally {
     loading.value = false
   }
@@ -513,7 +515,7 @@ const getStatusColor = (status) => {
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', { 
+  return date.toLocaleDateString('fr-FR', { 
     year: 'numeric', 
     month: 'short', 
     day: 'numeric' 
@@ -525,23 +527,23 @@ const formatTime = (timeString) => {
   const [hours, minutes] = timeString.split(':')
   const date = new Date()
   date.setHours(parseInt(hours), parseInt(minutes))
-  return date.toLocaleTimeString('en-US', { 
+  return date.toLocaleTimeString('fr-FR', { 
     hour: 'numeric', 
     minute: '2-digit',
-    hour12: true 
+    hour12: false 
   })
 }
 
 const formatDateTime = (dateTimeString) => {
   if (!dateTimeString) return ''
   const date = new Date(dateTimeString)
-  return date.toLocaleString('en-US', { 
+  return date.toLocaleString('fr-FR', { 
     year: 'numeric', 
     month: 'short', 
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true
+    hour12: false
   })
 }
 

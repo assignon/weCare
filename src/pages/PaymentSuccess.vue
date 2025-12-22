@@ -3,27 +3,24 @@
     <div class="w-full max-w-md">
       <!-- Success Card -->
       <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-8 text-center">
-        <!-- Success Animation/Icon -->
+        <!-- Success Icon -->
         <div class="mb-8">
-          <div class="w-24 h-24 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg animate-pulse" style="background: linear-gradient(to right, #4ade80, #10b981);">
+          <div class="w-24 h-24 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg" style="background: linear-gradient(to right, #4ade80, #10b981);">
             <CheckCircle class="w-12 h-12 text-white" />
-          </div>
-          <div class="w-32 h-32 bg-gradient-to-r from-green-100 to-emerald-100 rounded-full flex items-center justify-center mx-auto -mt-16 opacity-50 animate-ping" style="background: linear-gradient(to right, #dcfce7, #d1fae5);">
-            <CheckCircle class="w-16 h-16 text-green-500" />
           </div>
         </div>
 
         <!-- Success Message -->
         <h1 class="text-3xl font-bold text-gray-900 mb-3">
-          Payment Successful!
+          {{ $t('payment_success.title') }}
         </h1>
 
         <p class="text-lg text-gray-700 mb-2">
-          Your order has been placed successfully
+          {{ $t('payment_success.order_placed') }}
         </p>
 
         <p class="text-gray-600 mb-8">
-          Thank you for your purchase. You will receive a confirmation email shortly.
+          {{ $t('payment_success.thank_you') }}
         </p>
 
         <!-- Order Details (if available) -->
@@ -32,15 +29,15 @@
             <div class="flex justify-between items-center">
               <div class="flex items-center space-x-2">
                 <Receipt class="w-4 h-4 text-green-600" />
-                <span class="text-sm font-medium text-gray-700">Order Number:</span>
+                <span class="text-sm font-medium text-gray-700">{{ $t('payment_success.order_number') }}:</span>
               </div>
-              <span class="text-sm font-bold text-gray-900">#{{ orderDetails.order_number || 'N/A' }}</span>
+              <span class="text-sm font-bold text-gray-900">#{{ orderDetails.order_number || $t('payment_success.na') }}</span>
             </div>
 
             <div class="flex justify-between items-center">
               <div class="flex items-center space-x-2">
                 <CreditCard class="w-4 h-4 text-green-600" />
-                <span class="text-sm font-medium text-gray-700">Total Amount:</span>
+                <span class="text-sm font-medium text-gray-700">{{ $t('payment_success.total_amount') }}:</span>
               </div>
               <span class="text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text">
                 {{ formatApiPrice({
@@ -53,9 +50,9 @@
             <div class="flex justify-between items-center">
               <div class="flex items-center space-x-2">
                 <Smartphone class="w-4 h-4 text-green-600" />
-                <span class="text-sm font-medium text-gray-700">Payment Method:</span>
+                <span class="text-sm font-medium text-gray-700">{{ $t('payment_success.payment_method') }}:</span>
               </div>
-              <span class="text-sm font-bold text-gray-900 capitalize">{{ orderDetails.payment_method || 'N/A' }}</span>
+              <span class="text-sm font-bold text-gray-900">{{ getPaymentMethodLabel(orderDetails.payment_method) }}</span>
             </div>
           </div>
         </div>
@@ -64,7 +61,7 @@
         <div v-if="loading" class="mb-8">
           <div class="flex items-center justify-center space-x-3">
             <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
-            <p class="text-gray-600">Processing your order...</p>
+            <p class="text-gray-600">{{ $t('payment_success.processing') }}</p>
           </div>
         </div>
 
@@ -72,11 +69,11 @@
         <div class="space-y-4">
           <button 
             @click="$router.push({ name: 'Orders' })"
-            class="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center"
+            class="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
             style="background: linear-gradient(to right, #16a34a, #10b981);"
           >
             <Package class="w-5 h-5 mr-2" />
-            View My Orders
+            {{ $t('payment_success.view_orders') }}
           </button>
 
           <button 
@@ -84,15 +81,10 @@
             class="w-full py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-green-500 hover:text-green-600 transition-all duration-200 flex items-center justify-center"
           >
             <Home class="w-5 h-5 mr-2" />
-            Continue Shopping
+            {{ $t('payment_success.continue_shopping') }}
           </button>
         </div>
       </div>
-
-      <!-- Success Animation Elements -->
-      <div class="fixed top-10 left-10 w-4 h-4 bg-green-400 rounded-full animate-ping opacity-75"></div>
-      <div class="fixed top-20 right-20 w-3 h-3 bg-blue-400 rounded-full animate-ping opacity-75" style="animation-delay: 0.5s;"></div>
-      <div class="fixed bottom-20 left-20 w-2 h-2 bg-purple-400 rounded-full animate-ping opacity-75" style="animation-delay: 1s;"></div>
     </div>
 
     <!-- Snackbar for notifications -->
@@ -125,12 +117,15 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { apiService } from '@/services/api'
 import { useCartStore } from '@/stores/cart'
 import { useCurrency } from '@/composables/useCurrency'
 import { 
   CheckCircle, Package, Home, Receipt, CreditCard, Smartphone, X, XCircle 
 } from 'lucide-vue-next'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -186,6 +181,13 @@ const clearCart = async () => {
   }
 }
 
+// Get payment method label
+const getPaymentMethodLabel = (method) => {
+  if (!method) return t('payment_success.na')
+  if (method === 'mobile_money') return t('payment_success.mobile_money')
+  return method.charAt(0).toUpperCase() + method.slice(1).replace('_', ' ')
+}
+
 // Show error message
 const showError = (message) => {
   snackbarColor.value = 'error'
@@ -193,34 +195,3 @@ const showError = (message) => {
   showSnackbar.value = true
 }
 </script>
-
-<style scoped>
-/* Additional animations */
-@keyframes successPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.8;
-  }
-}
-
-.animate-pulse {
-  animation: successPulse 2s ease-in-out infinite;
-}
-
-/* Custom animation delays for floating elements */
-.animate-ping:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.animate-ping:nth-child(2) {
-  animation-delay: 0.5s;
-}
-
-.animate-ping:nth-child(3) {
-  animation-delay: 1s;
-}
-</style>

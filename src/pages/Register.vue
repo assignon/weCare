@@ -361,19 +361,19 @@ const onRegister = async () => {
   const success = await authStore.register(registrationData)
 
   if (success) {
-    // If registration includes login (tokens), redirect to shopper goals
+    // If registration includes login (tokens), redirect to home
     if (authStore.isAuthenticated) {
-      // Always redirect to shopper goals after successful registration
-      router.push({ name: 'ShopperGoals' })
+      // Always redirect to home after successful registration
+      router.push({ name: 'Home' })
     }
     // Otherwise, login page with registered=true will be handled by the store
   }
 }
 
 onMounted(async () => {
-  // If already authenticated, redirect to shopper goals
+  // If already authenticated, redirect to home
   if (authStore.isAuthenticated) {
-    router.replace({ name: 'ShopperGoals' })
+    router.replace({ name: 'Home' })
   }
 
   // Fetch countries and languages for selection

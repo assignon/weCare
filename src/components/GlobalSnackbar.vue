@@ -7,17 +7,11 @@
     leave-from-class="transform scale-100 opacity-100 -translate-x-1/2 -translate-y-1/2"
     leave-to-class="transform scale-95 opacity-0 -translate-x-1/2 -translate-y-1/2"
   >
-    <div v-if="show" class="fixed inset-0 snackbar-container">
-      <!-- Backdrop -->
-      <div
-        class="fixed inset-0 bg-black bg-opacity-20"
-        @click="closeSnackbar"
-      ></div>
-      
+    <div v-if="show" class="fixed inset-0 snackbar-container pointer-events-none">
       <!-- Snackbar -->
       <div
         @click="handleSnackbarClick"
-        class="fixed left-1/2 transform -translate-x-1/2 max-w-sm w-11/12 sm:w-full bg-white shadow-2xl rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden cursor-pointer snackbar-content"
+        class="fixed left-1/2 transform -translate-x-1/2 max-w-sm w-11/12 sm:w-full bg-white rounded-lg pointer-events-auto border border-gray-200 overflow-hidden cursor-pointer snackbar-content"
         style="top: 2%;"
       >
       <div class="p-4">
@@ -27,10 +21,10 @@
           </div>
           <div class="ml-3 w-0 flex-1 pt-0.5">
             <p v-if="currentNotification?.title" class="text-sm font-medium text-grey-900 mb-1">
-              {{ currentNotification.title }}
+              {{ getTranslatedTitle(currentNotification.title) }}
             </p>
             <p class="text-sm text-grey-500">
-              {{ currentNotification?.message }}
+              {{ getTranslatedMessage(currentNotification?.message) }}
             </p>
           </div>
           <div class="ml-4 flex flex-shrink-0">
@@ -38,7 +32,7 @@
               @click="closeSnackbar"
               class="bg-white rounded-md inline-flex text-grey-400 hover:text-grey-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             >
-              <span class="sr-only">Close</span>
+              <span class="sr-only">{{ $t('snackbar.close') }}</span>
               <X class="h-5 w-5" />
             </button>
           </div>
@@ -60,9 +54,11 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { X, CheckCircle, Info, AlertTriangle, AlertCircle } from 'lucide-vue-next'
 import notificationService from '@/services/notificationService'
 
+const { t } = useI18n()
 const router = useRouter()
 
 // State
@@ -115,13 +111,32 @@ const hasAction = computed(() => {
 
 const actionText = computed(() => {
   const typeMap = {
-    'Order': 'View Order',
-    'Product': 'View Product',
-    'Profile': 'Go to Profile',
-    'ListingInquiry': 'View Messages'
+    'Order': t('snackbar.view_order'),
+    'Product': t('snackbar.view_product'),
+    'Profile': t('snackbar.go_to_profile'),
+    'ListingInquiry': t('snackbar.view_messages')
   }
-  return typeMap[currentNotification.value?.reference_type] || 'View Details'
+  return typeMap[currentNotification.value?.reference_type] || t('snackbar.view_details')
 })
+
+// Translation helpers
+const getTranslatedTitle = (title) => {
+  if (!title) return ''
+  const translationMap = {
+    'New Notification': t('snackbar.new_notification'),
+    'New Chat Message': t('snackbar.new_chat_message'),
+    'System Announcement': t('snackbar.system_announcement')
+  }
+  return translationMap[title] || title
+}
+
+const getTranslatedMessage = (message) => {
+  if (!message) return ''
+  const translationMap = {
+    'You have a new message': t('snackbar.you_have_new_message')
+  }
+  return translationMap[message] || message
+}
 
 // Methods
 const displayNotification = (notification) => {

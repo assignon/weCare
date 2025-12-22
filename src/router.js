@@ -3,57 +3,116 @@ import { useAuthStore } from '@/stores/auth'
 import { useCRMStore } from '@/stores/crm'
 import apiService from '@/services/api'
 
+// Helper function to handle dynamic imports with error recovery
+const loadComponent = (importFn, componentName) => {
+  return async () => {
+    try {
+      return await importFn()
+    } catch (error) {
+      console.error(`Error loading component ${componentName}:`, error)
+      
+      // If it's a module loading error (404, network error, etc.), try to reload the page
+      if (error.message && (
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('Loading') ||
+        error.message.includes('dynamically imported module') ||
+        error.code === 'ERR_MODULE_NOT_FOUND'
+      )) {
+        console.warn('Module loading error detected, clearing cache and reloading...')
+        
+        // Clear service worker and caches
+        if ('serviceWorker' in navigator) {
+          try {
+            const registrations = await navigator.serviceWorker.getRegistrations()
+            for (const registration of registrations) {
+              if (!registration.scope.includes('firebase')) {
+                await registration.unregister()
+              }
+            }
+          } catch (e) {
+            console.warn('Error unregistering service workers:', e)
+          }
+        }
+        
+        if ('caches' in window) {
+          try {
+            const cacheNames = await caches.keys()
+            for (const cacheName of cacheNames) {
+              if (!cacheName.includes('firebase') && !cacheName.includes('google-fonts')) {
+                await caches.delete(cacheName)
+              }
+            }
+          } catch (e) {
+            console.warn('Error clearing caches:', e)
+          }
+        }
+        
+        // Reload the page after a short delay
+        setTimeout(() => {
+          window.location.reload()
+        }, 1000)
+        
+        // Return a loading component while reloading
+        return { default: { template: '<div>Loading...</div>' } }
+      }
+      
+      // For other errors, throw to let Vue Router handle it
+      throw error
+    }
+  }
+}
+
 const routes = [
-  { path: '/splash', name: 'SplashScreen', component: () => import('@/pages/SplashScreen.vue') },
-  { path: '/login', name: 'Login', component: () => import('@/pages/Login.vue') },
-  { path: '/', name: 'Home', component: () => import('@/pages/Home.vue'), meta: { requiresAuth: true } },
-  { path: '/orders', name: 'Orders', component: () => import('@/pages/Orders.vue'), meta: { requiresAuth: true } },
-  { path: '/explore', name: 'Explore', component: () => import('@/pages/Explore.vue'), meta: { requiresAuth: true } },
-  // { path: '/explore', name: 'Explore', component: () => import('@/pages/EnhancedExplore.vue'), meta: { requiresAuth: true } },
-  { path: '/store-category', name: 'StoreCategory', component: () => import('@/pages/StoreCategory.vue'), meta: { requiresAuth: true } },
-  { path: '/cart', name: 'Cart', component: () => import('@/pages/Cart.vue'), meta: { requiresAuth: true } },
-  { path: '/rendezvous', name: 'Rendezvous', component: () => import('@/pages/Rendezvous.vue'), meta: { requiresAuth: true } },
-  { path: '/rendezvous/:id', name: 'ViewingRequestDetail', component: () => import('@/pages/ViewingRequestDetail.vue'), meta: { requiresAuth: true } },
+  { path: '/splash', name: 'SplashScreen', component: loadComponent(() => import('@/pages/SplashScreen.vue'), 'SplashScreen') },
+  { path: '/login', name: 'Login', component: loadComponent(() => import('@/pages/Login.vue'), 'Login') },
+  { path: '/', name: 'Home', component: loadComponent(() => import('@/pages/Home.vue'), 'Home'), meta: { requiresAuth: true } },
+  { path: '/orders', name: 'Orders', component: loadComponent(() => import('@/pages/Orders.vue'), 'Orders'), meta: { requiresAuth: true } },
+  { path: '/explore', name: 'Explore', component: loadComponent(() => import('@/pages/Explore.vue'), 'Explore'), meta: { requiresAuth: true } },
+  // { path: '/explore', name: 'Explore', component: loadComponent(() => import('@/pages/EnhancedExplore.vue'), 'EnhancedExplore'), meta: { requiresAuth: true } },
+  { path: '/store-category', name: 'StoreCategory', component: loadComponent(() => import('@/pages/StoreCategory.vue'), 'StoreCategory'), meta: { requiresAuth: true } },
+  { path: '/cart', name: 'Cart', component: loadComponent(() => import('@/pages/Cart.vue'), 'Cart'), meta: { requiresAuth: true } },
+  { path: '/rendezvous', name: 'Rendezvous', component: loadComponent(() => import('@/pages/Rendezvous.vue'), 'Rendezvous'), meta: { requiresAuth: true } },
+  { path: '/rendezvous/:id', name: 'ViewingRequestDetail', component: loadComponent(() => import('@/pages/ViewingRequestDetail.vue'), 'ViewingRequestDetail'), meta: { requiresAuth: true } },
  
-  { path: '/register', name: 'Register', component: () => import('@/pages/Register.vue') },
-  { path: '/shopper-goals', name: 'ShopperGoals', component: () => import('@/pages/ShopperGoals.vue'), meta: { requiresAuth: true } },
-  { path: '/forgot-password', name: 'ForgotPassword', component: () => import('@/pages/ForgotPassword.vue') },
-  { path: '/reset-password/:code', name: 'ResetPassword', component: () => import('@/pages/ResetPassword.vue') },
-  { path: '/product/:id', name: 'ProductDetails', component: () => import('@/pages/ProductDetails.vue'), meta: { requiresAuth: true } },
-  // { path: '/stores', name: 'StoreDirectory', component: () => import('@/pages/StoreDirectory.vue'), meta: { requiresAuth: true } },
-  // { path: '/store/:id', name: 'StoreDetails', component: () => import('@/pages/StoreDetails.vue'), meta: { requiresAuth: true } },
-  { path: '/order-status/:id', name: 'OrderStatus', component: () => import('@/pages/OrderStatus.vue'), meta: { requiresAuth: true } },
-  { path: '/profile', name: 'Profile', component: () => import('@/pages/Profile.vue'), meta: { requiresAuth: true } },
-  { path: '/profile/edit', name: 'EditProfile', component: () => import('@/pages/EditProfile.vue'), meta: { requiresAuth: true } },
-  { path: '/profile/skin-profile', name: 'SkinProfile', component: () => import('@/pages/SkinProfile.vue'), meta: { requiresAuth: true } },
-  { path: '/profile/addresses', name: 'Addresses', component: () => import('@/pages/Addresses.vue'), meta: { requiresAuth: true } },
-  { path: '/profile/customer-support', name: 'CustomerSupport', component: () => import('@/pages/CustomerSupport.vue'), meta: { requiresAuth: true } },
-  { path: '/checkout', name: 'Checkout', component: () => import('@/pages/Checkout.vue'), meta: { requiresAuth: true } },
-  { path: '/checkout-test', name: 'CheckoutTest', component: () => import('@/pages/CheckoutTest.vue'), meta: { requiresAuth: true } },
-  { path: '/delivery-cost-demo', name: 'DeliveryCostDemo', component: () => import('@/pages/DeliveryCostDemo.vue'), meta: { requiresAuth: true } },
-  { path: '/debug-delivery', name: 'DebugDeliveryCost', component: () => import('@/pages/DebugDeliveryCost.vue'), meta: { requiresAuth: true } },
-  { path: '/payment-success', name: 'PaymentSuccess', component: () => import('@/pages/PaymentSuccess.vue'), meta: { requiresAuth: true } },
-  { path: '/payment-failed', name: 'PaymentFailed', component: () => import('@/pages/PaymentFailed.vue'), meta: { requiresAuth: true } },
-  { path: '/notifications', name: 'Notification', component: () => import('@/pages/Notification.vue'), meta: { requiresAuth: true } },
-  { path: '/wishlist', name: 'Wishlist', component: () => import('@/pages/Wishlist.vue'), meta: { requiresAuth: true } },
-  { path: '/fcm-test', name: 'FCMTest', component: () => import('@/pages/FCMTest.vue'), meta: { requiresAuth: true } },
+  { path: '/register', name: 'Register', component: loadComponent(() => import('@/pages/Register.vue'), 'Register') },
+  // { path: '/shopper-goals', name: 'ShopperGoals', component: loadComponent(() => import('@/pages/ShopperGoals.vue'), 'ShopperGoals'), meta: { requiresAuth: true } },
+  { path: '/forgot-password', name: 'ForgotPassword', component: loadComponent(() => import('@/pages/ForgotPassword.vue'), 'ForgotPassword') },
+  { path: '/reset-password/:code', name: 'ResetPassword', component: loadComponent(() => import('@/pages/ResetPassword.vue'), 'ResetPassword') },
+  { path: '/product/:id', name: 'ProductDetails', component: loadComponent(() => import('@/pages/ProductDetails.vue'), 'ProductDetails'), meta: { requiresAuth: true } },
+  // { path: '/stores', name: 'StoreDirectory', component: loadComponent(() => import('@/pages/StoreDirectory.vue'), 'StoreDirectory'), meta: { requiresAuth: true } },
+  // { path: '/store/:id', name: 'StoreDetails', component: loadComponent(() => import('@/pages/StoreDetails.vue'), 'StoreDetails'), meta: { requiresAuth: true } },
+  { path: '/order-status/:id', name: 'OrderStatus', component: loadComponent(() => import('@/pages/OrderStatus.vue'), 'OrderStatus'), meta: { requiresAuth: true } },
+  { path: '/profile', name: 'Profile', component: loadComponent(() => import('@/pages/Profile.vue'), 'Profile'), meta: { requiresAuth: true } },
+  { path: '/profile/edit', name: 'EditProfile', component: loadComponent(() => import('@/pages/EditProfile.vue'), 'EditProfile'), meta: { requiresAuth: true } },
+  { path: '/profile/skin-profile', name: 'SkinProfile', component: loadComponent(() => import('@/pages/SkinProfile.vue'), 'SkinProfile'), meta: { requiresAuth: true } },
+  { path: '/profile/addresses', name: 'Addresses', component: loadComponent(() => import('@/pages/Addresses.vue'), 'Addresses'), meta: { requiresAuth: true } },
+  { path: '/profile/customer-support', name: 'CustomerSupport', component: loadComponent(() => import('@/pages/CustomerSupport.vue'), 'CustomerSupport'), meta: { requiresAuth: true } },
+  { path: '/checkout', name: 'Checkout', component: loadComponent(() => import('@/pages/Checkout.vue'), 'Checkout'), meta: { requiresAuth: true } },
+  { path: '/checkout-test', name: 'CheckoutTest', component: loadComponent(() => import('@/pages/CheckoutTest.vue'), 'CheckoutTest'), meta: { requiresAuth: true } },
+  { path: '/delivery-cost-demo', name: 'DeliveryCostDemo', component: loadComponent(() => import('@/pages/DeliveryCostDemo.vue'), 'DeliveryCostDemo'), meta: { requiresAuth: true } },
+  { path: '/debug-delivery', name: 'DebugDeliveryCost', component: loadComponent(() => import('@/pages/DebugDeliveryCost.vue'), 'DebugDeliveryCost'), meta: { requiresAuth: true } },
+  { path: '/payment-success', name: 'PaymentSuccess', component: loadComponent(() => import('@/pages/PaymentSuccess.vue'), 'PaymentSuccess'), meta: { requiresAuth: true } },
+  { path: '/payment-failed', name: 'PaymentFailed', component: loadComponent(() => import('@/pages/PaymentFailed.vue'), 'PaymentFailed'), meta: { requiresAuth: true } },
+  { path: '/notifications', name: 'Notification', component: loadComponent(() => import('@/pages/Notification.vue'), 'Notification'), meta: { requiresAuth: true } },
+  { path: '/wishlist', name: 'Wishlist', component: loadComponent(() => import('@/pages/Wishlist.vue'), 'Wishlist'), meta: { requiresAuth: true } },
+  { path: '/fcm-test', name: 'FCMTest', component: loadComponent(() => import('@/pages/FCMTest.vue'), 'FCMTest'), meta: { requiresAuth: true } },
   
   // Listing routes (Classified Ads)
-  { path: '/browse-listings', name: 'BrowseListings', component: () => import('@/pages/BrowseListings.vue'), meta: { requiresAuth: true } },
-  { path: '/my-listings', name: 'MyListings', component: () => import('@/pages/MyListings.vue'), meta: { requiresAuth: true } },
-  { path: '/create-listing', name: 'CreateListing', component: () => import('@/pages/CreateListing.vue'), meta: { requiresAuth: true } },
-  { path: '/edit-listing/:id', name: 'EditListing', component: () => import('@/pages/EditListing.vue'), meta: { requiresAuth: true } },
-  { path: '/listing/:id', name: 'ListingDetails', component: () => import('@/pages/ListingDetails.vue'), meta: { requiresAuth: true } },
-  { path: '/shopper-product/:id', name: 'ShopperProduct', component: () => import('@/pages/ShopperProduct.vue'), meta: { requiresAuth: true } },
-  { path: '/listing-inquiries', name: 'ListingInquiries', component: () => import('@/pages/ListingInquiries.vue'), meta: { requiresAuth: true } },
-  { path: '/messages', name: 'Messages', component: () => import('@/pages/Messages.vue'), meta: { requiresAuth: true } },
-  { path: '/liked-products', name: 'LikedProducts', component: () => import('@/pages/LikedProducts.vue'), meta: { requiresAuth: true } },
-  { path: '/listing-chat/:inquiryId', name: 'ListingChat', component: () => import('@/pages/ListingChat.vue'), meta: { requiresAuth: true } },
+  { path: '/browse-listings', name: 'BrowseListings', component: loadComponent(() => import('@/pages/BrowseListings.vue'), 'BrowseListings'), meta: { requiresAuth: true } },
+  { path: '/my-listings', name: 'MyListings', component: loadComponent(() => import('@/pages/MyListings.vue'), 'MyListings'), meta: { requiresAuth: true } },
+  { path: '/create-listing', name: 'CreateListing', component: loadComponent(() => import('@/pages/CreateListing.vue'), 'CreateListing'), meta: { requiresAuth: true } },
+  { path: '/edit-listing/:id', name: 'EditListing', component: loadComponent(() => import('@/pages/EditListing.vue'), 'EditListing'), meta: { requiresAuth: true } },
+  { path: '/listing/:id', name: 'ListingDetails', component: loadComponent(() => import('@/pages/ListingDetails.vue'), 'ListingDetails'), meta: { requiresAuth: true } },
+  { path: '/shopper-product/:id', name: 'ShopperProduct', component: loadComponent(() => import('@/pages/ShopperProduct.vue'), 'ShopperProduct'), meta: { requiresAuth: true } },
+  { path: '/listing-inquiries', name: 'ListingInquiries', component: loadComponent(() => import('@/pages/ListingInquiries.vue'), 'ListingInquiries'), meta: { requiresAuth: true } },
+  { path: '/messages', name: 'Messages', component: loadComponent(() => import('@/pages/Messages.vue'), 'Messages'), meta: { requiresAuth: true } },
+  { path: '/liked-products', name: 'LikedProducts', component: loadComponent(() => import('@/pages/LikedProducts.vue'), 'LikedProducts'), meta: { requiresAuth: true } },
+  { path: '/listing-chat/:inquiryId', name: 'ListingChat', component: loadComponent(() => import('@/pages/ListingChat.vue'), 'ListingChat'), meta: { requiresAuth: true } },
   
   // Parcel delivery routes
-  { path: '/send-parcel', name: 'SendParcel', component: () => import('@/pages/SendParcel.vue'), meta: { requiresAuth: true } },
-  { path: '/parcels', name: 'ParcelsList', component: () => import('@/pages/ParcelsList.vue'), meta: { requiresAuth: true } },
-  { path: '/parcel/:id', name: 'ParcelTracking', component: () => import('@/pages/ParcelTracking.vue'), meta: { requiresAuth: true } },
+  { path: '/send-parcel', name: 'SendParcel', component: loadComponent(() => import('@/pages/SendParcel.vue'), 'SendParcel'), meta: { requiresAuth: true } },
+  { path: '/parcels', name: 'ParcelsList', component: loadComponent(() => import('@/pages/ParcelsList.vue'), 'ParcelsList'), meta: { requiresAuth: true } },
+  { path: '/parcel/:id', name: 'ParcelTracking', component: loadComponent(() => import('@/pages/ParcelTracking.vue'), 'ParcelTracking'), meta: { requiresAuth: true } },
 ]
 
 const router = createRouter({

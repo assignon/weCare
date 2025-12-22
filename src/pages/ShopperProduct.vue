@@ -77,8 +77,8 @@
         <!-- Price -->
         <div>
           <p v-if="listing.price_type === 'fixed'" class="text-xl font-bold text-gray-900">{{ formatPrice(listing.price) }}</p>
-          <p v-else-if="listing.price_type === 'free'" class="text-xl font-bold text-green-600">FREE</p>
-          <p v-else class="text-xl font-bold text-gray-900">Best Offer (Min: {{ formatPrice(listing.min_offer_price) }})</p>
+          <p v-else-if="listing.price_type === 'free'" class="text-xl font-bold text-green-600">{{ $t('listings.free') }}</p>
+          <p v-else class="text-xl font-bold text-gray-900">{{ $t('listings.best_offer') }} ({{ $t('listings.min') }}: {{ formatPrice(listing.min_offer_price) }})</p>
         </div>
 
         <!-- Action Buttons -->
@@ -90,7 +90,7 @@
             class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <MessageCircle class="w-5 h-5" />
-            Messages
+            {{ $t('listings.messages') }}
           </button>
           
           <!-- Send Message and Make Offer Buttons (if no inquiry exists) -->
@@ -100,7 +100,7 @@
               class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               <MessageCircle class="w-5 h-5" />
-              Send Message
+              {{ $t('listings.send_message') }}
             </button>
             <button
               v-if="listing.price_type === 'offer'"
@@ -108,7 +108,7 @@
               class="w-full py-3 bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-900 font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               <Gavel class="w-5 h-5" />
-              Make an Offer
+              {{ $t('listings.make_offer') }}
             </button>
           </template>
         </div>
@@ -123,7 +123,7 @@
               <User class="w-6 h-6 text-gray-600" />
             </div>
             <div class="flex-1">
-              <p class="text-sm font-semibold text-gray-900">{{ listing.seller_name || 'Anonymous' }}</p>
+              <p class="text-sm font-semibold text-gray-900">{{ listing.seller_name || $t('listings.anonymous') }}</p>
               <p class="text-xs text-gray-500">{{ sellerActiveDuration }}</p>
             </div>
             <ChevronRight class="w-5 h-5 text-gray-400" />
@@ -135,25 +135,25 @@
 
         <!-- Bids Section (for offer type) -->
         <div v-if="listing.price_type === 'offer' && !isOwnListing" class="space-y-2">
-          <h3 class="text-sm font-semibold text-gray-900">Bids (0)</h3>
+          <h3 class="text-sm font-semibold text-gray-900">{{ $t('listings.bids') }} (0)</h3>
           <button
             @click="showOfferSheet = true"
             class="text-blue-600 text-sm font-medium flex items-center gap-1"
           >
-            Now make the first bid
+            {{ $t('listings.make_first_bid') }}
             <ChevronRight class="w-4 h-4" />
           </button>
         </div>
 
         <!-- Description -->
         <div class="space-y-2">
-          <h3 class="text-sm font-semibold text-gray-900">Description</h3>
+          <h3 class="text-sm font-semibold text-gray-900">{{ $t('listings.description') }}</h3>
           <p class="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{{ listing.description }}</p>
         </div>
 
         <!-- Product Details -->
         <div class="space-y-2">
-          <h3 class="text-sm font-semibold text-gray-900">Details</h3>
+          <h3 class="text-sm font-semibold text-gray-900">{{ $t('listings.details') }}</h3>
           <div class="space-y-2 text-sm text-gray-700">
             <div class="flex items-center gap-2">
               <MapPin class="w-4 h-4 text-gray-500" />
@@ -161,7 +161,7 @@
             </div>
             <div class="flex items-center gap-2">
               <Eye class="w-4 h-4 text-gray-500" />
-              <span>{{ listing.views_count }} views</span>
+              <span>{{ listing.views_count }} {{ $t('listings.views') }}</span>
             </div>
             <div v-if="listing.category_name" class="flex items-center gap-2">
               <Tag class="w-4 h-4 text-gray-500" />
@@ -172,15 +172,15 @@
 
         <!-- Contact Methods Section -->
         <div v-if="listing.contact_methods && listing.contact_methods.length > 0" class="bg-white rounded-lg border border-gray-200 p-4 space-y-3">
-          <h3 class="text-base font-bold text-gray-900">Contact Methods</h3>
+          <h3 class="text-base font-bold text-gray-900">{{ $t('listings.contact_methods') }}</h3>
           
           <div class="space-y-2">
             <!-- In-App Message -->
             <div v-if="listing.contact_methods.includes('in_app')" class="flex items-center gap-3">
               <MessageCircle class="w-5 h-5 text-blue-600 flex-shrink-0" />
               <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900">In-App Message</p>
-                <p class="text-xs text-gray-500">Send a message through the app</p>
+                <p class="text-sm font-medium text-gray-900">{{ $t('listings.in_app') }}</p>
+                <p class="text-xs text-gray-500">{{ $t('listings.send_message_through_app') }}</p>
               </div>
             </div>
             
@@ -217,7 +217,7 @@
 
         <!-- About the Seller Section -->
         <div class="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
-          <h3 class="text-base font-bold text-gray-900">About the advertiser</h3>
+          <h3 class="text-base font-bold text-gray-900">{{ $t('listings.about_advertiser') }}</h3>
           
           <!-- Seller Profile -->
           <div class="flex items-start gap-3">
@@ -225,7 +225,7 @@
               <User class="w-6 h-6 text-gray-600" />
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-blue-600">{{ listing.seller_name || 'Anonymous' }}</p>
+              <p class="text-sm font-semibold text-blue-600">{{ listing.seller_name || $t('listings.anonymous') }}</p>
               <p class="text-xs text-gray-500">{{ sellerActiveDuration }}</p>
             </div>
           </div>
@@ -234,12 +234,12 @@
           <div class="flex items-start gap-3">
             <FileText class="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
             <div class="flex-1">
-              <p class="text-sm font-medium text-gray-900">All ads</p>
+              <p class="text-sm font-medium text-gray-900">{{ $t('listings.all_ads') }}</p>
               <button
                 @click="viewSellerListings"
                 class="text-xs text-blue-600 mt-1"
               >
-                See all ads
+                {{ $t('listings.see_all_ads') }}
               </button>
             </div>
           </div>
@@ -247,9 +247,7 @@
           <!-- Disclaimer -->
           <div class="pt-3 border-t border-gray-200">
             <p class="text-xs text-gray-600 leading-relaxed">
-              <span class="font-semibold">⚠️ Important:</span> This seller is an anonymous seller and is not verified by AfriQExpress. 
-              Never make any payment (online or cash) before seeing the product and confirming it yourself. 
-              You are responsible for your own safety and transactions. AfriQExpress is not liable for any fraud.
+              <span class="font-semibold">{{ $t('listings.important') }}:</span> {{ $t('listings.disclaimer_text') }}
             </p>
           </div>
         </div>
@@ -263,7 +261,7 @@
         <div class="relative bg-white rounded-t-3xl w-full h-[500px] overflow-hidden flex flex-col">
           <!-- Header -->
           <div class="flex items-center justify-between p-4 border-b border-gray-200">
-            <h3 class="text-base font-bold text-gray-900">Send Message</h3>
+            <h3 class="text-base font-bold text-gray-900">{{ $t('listings.send_message') }}</h3>
             <button @click="showMessageSheet = false" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
               <X class="w-5 h-5 text-gray-600" />
             </button>
@@ -287,19 +285,19 @@
                 @click="customMessageMode = true"
                 class="w-full text-left py-3 text-sm text-blue-600 font-medium hover:text-blue-700 transition-colors"
               >
-                ✏️ Write a message yourself
+                ✏️ {{ $t('listings.write_message_yourself') }}
               </button>
             </div>
 
             <!-- Custom Message Form -->
             <div v-else class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Your Message</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('listings.your_message') }}</label>
                 <textarea
                   v-model="customMessage"
                   rows="4"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                  placeholder="Type your message here..."
+                  :placeholder="$t('listings.type_message_placeholder')"
                 ></textarea>
               </div>
               <button
@@ -308,8 +306,8 @@
                 class="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                 style="background: linear-gradient(to right, #2563eb, #9333ea);"
               >
-                <span v-if="sendingMessage">Sending...</span>
-                <span v-else>Send Message</span>
+                <span v-if="sendingMessage">{{ $t('listings.sending') }}</span>
+                <span v-else>{{ $t('listings.send_message') }}</span>
               </button>
             </div>
           </div>
@@ -324,7 +322,7 @@
         <div class="relative bg-white rounded-t-3xl w-full h-[500px] overflow-hidden flex flex-col">
           <!-- Header -->
           <div class="flex items-center justify-between p-4 border-b border-gray-200">
-            <h3 class="text-base font-bold text-gray-900">Make an Offer</h3>
+            <h3 class="text-base font-bold text-gray-900">{{ $t('listings.make_offer') }}</h3>
             <button @click="showOfferSheet = false" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
               <X class="w-5 h-5 text-gray-600" />
             </button>
@@ -334,25 +332,25 @@
           <div class="flex-1 overflow-y-auto p-4 space-y-4">
             <!-- Price Field -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Your Offer (FCA)</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('listings.your_offer') }} (FCA)</label>
               <input 
                 v-model.number="offerPrice" 
                 type="number" 
                 :min="listing.min_offer_price" 
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter your offer"
+                :placeholder="$t('listings.enter_offer_placeholder')"
               />
-              <p class="text-xs text-gray-500 mt-1">Minimum: {{ formatPrice(listing.min_offer_price) }}</p>
+              <p class="text-xs text-gray-500 mt-1">{{ $t('listings.minimum') }}: {{ formatPrice(listing.min_offer_price) }}</p>
             </div>
 
             <!-- Message Textarea -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Message (Optional)</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('listings.message_optional') }}</label>
               <textarea
                 v-model="offerMessage"
                 rows="4"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                placeholder="Add a message to your offer..."
+                :placeholder="$t('listings.add_message_to_offer_placeholder')"
               ></textarea>
             </div>
 
@@ -363,8 +361,8 @@
               class="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
               style="background: linear-gradient(to right, #2563eb, #9333ea);"
             >
-              <span v-if="sendingOffer">Sending Offer...</span>
-              <span v-else>Send Offer</span>
+              <span v-if="sendingOffer">{{ $t('listings.sending_offer') }}</span>
+              <span v-else>{{ $t('listings.send_offer') }}</span>
             </button>
           </div>
         </div>
@@ -383,13 +381,13 @@
               </div>
             </div>
             <div class="flex-1 min-w-0">
-              <h3 class="text-lg font-bold text-gray-900 mb-2">Error</h3>
+              <h3 class="text-lg font-bold text-gray-900 mb-2">{{ $t('common.error') }}</h3>
               <p class="text-sm text-gray-700 mb-4">{{ errorMessage }}</p>
               <button
                 @click="showErrorDialog = false"
                 class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
               >
-                OK
+                {{ $t('common.ok') }}
               </button>
             </div>
           </div>
@@ -402,11 +400,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useListingStore } from '@/stores/listing'
 import { useAuthStore } from '@/stores/auth'
 import { useCurrency } from '@/composables/useCurrency'
 import { MapPin, Eye, Tag, Loader2, X, MessageCircle, Gavel, User, ChevronRight, FileText, Phone, Mail, AlertCircle, ArrowLeft, Heart, Share2 } from 'lucide-vue-next'
 import apiService from '@/services/api'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -439,8 +440,8 @@ const isOwnListing = computed(() => {
 
 const messageTemplates = computed(() => {
   return [
-    "Is it still for sale?",
-    "I will like to buy it for the asking price"
+    t('listings.message_template_still_for_sale'),
+    t('listings.message_template_buy_asking_price')
   ]
 })
 
@@ -450,22 +451,24 @@ const currentImage = computed(() => {
 })
 
 const sellerActiveDuration = computed(() => {
-  if (!sellerFirstListingDate.value) return 'Recently active'
+  if (!sellerFirstListingDate.value) return t('listings.recently_active')
   
   const now = new Date()
   const firstDate = new Date(sellerFirstListingDate.value)
   const diffTime = Math.abs(now - firstDate)
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
   
-  if (diffDays === 0) return 'Today'
-  if (diffDays === 1) return '1 day'
-  if (diffDays < 30) return `${diffDays} days`
+  if (diffDays === 0) return t('listings.today')
+  if (diffDays === 1) return t('listings.one_day')
+  if (diffDays < 30) return t('listings.days_active', { count: diffDays })
   if (diffDays < 365) {
     const months = Math.floor(diffDays / 30)
-    return `${months} ${months === 1 ? 'month' : 'months'}`
+    return t('listings.months_active', { count: months })
   }
   const years = Math.floor(diffDays / 365)
-  return `${years} ${years === 1 ? 'year' : 'years'}`
+  return years === 1 
+    ? t('listings.years_active', { count: years })
+    : t('listings.years_active_plural', { count: years })
 })
 
 function extractErrorMessage(err) {
@@ -662,13 +665,13 @@ async function sendMessage(message) {
 async function sendOffer() {
   // Validate offer price on frontend
   if (!offerPrice.value) {
-    errorMessage.value = 'Please enter an offer price'
+    errorMessage.value = t('listings.please_enter_offer_price')
     showErrorDialog.value = true
     return
   }
   
   if (offerPrice.value < listing.value.min_offer_price) {
-    errorMessage.value = `Please enter an offer of at least ${formatPrice(listing.value.min_offer_price)}`
+    errorMessage.value = t('listings.offer_at_least', { price: formatPrice(listing.value.min_offer_price) })
     showErrorDialog.value = true
     return
   }
@@ -678,7 +681,7 @@ async function sendOffer() {
     // Create inquiry with offer
     const inquiryData = {
       listing: listing.value.id,
-      message: offerMessage.value || `I'd like to buy it for ${formatPrice(offerPrice.value)}`,
+      message: offerMessage.value || t('listings.like_to_buy_for', { price: formatPrice(offerPrice.value) }),
       offer_price: offerPrice.value
     }
     
@@ -791,7 +794,7 @@ const shareListing = () => {
   if (!listing.value) return
   
   const listingUrl = `${window.location.origin}/shopper-product/${listing.value.id}`
-  const listingTitle = listing.value.title || 'Check out this listing'
+  const listingTitle = listing.value.title || t('listings.check_out_listing')
   const shareText = `${listingTitle}\n\n${listingUrl}`
   
   // Encode the message for WhatsApp

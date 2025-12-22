@@ -1,25 +1,25 @@
 <template>
   <div class="min-h-screen bg-white">
-    <div class="p-4 pb-24 pt-20">
+    <div class="p-3 pb-24 pt-6">
       <!-- Header -->
       <AppHeader />
 
       <!-- Loading state -->
-      <div v-if="loading" class="flex justify-center items-center py-20">
-        <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full flex items-center justify-center">
-          <div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+      <div v-if="loading" class="flex justify-center items-center py-12">
+        <div class="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center">
+          <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
         </div>
       </div>
 
       <!-- Error state -->
-      <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-2xl mb-4 flex items-center space-x-2">
-        <AlertCircle class="w-5 h-5 text-red-600" />
-        <span class="text-sm">{{ error }}</span>
+      <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded-lg mb-3 flex items-center space-x-2">
+        <AlertCircle class="w-4 h-4 text-red-600 flex-shrink-0" />
+        <span class="text-xs">{{ error }}</span>
       </div>
 
       <!-- Search Results -->
-      <div v-if="hasSearchQuery && !loadingProducts" class="mt-6">
-        <div v-if="searchProducts.length > 0" class="grid grid-cols-2 gap-3">
+      <div v-if="hasSearchQuery && !loadingProducts" class="mt-3">
+        <div v-if="searchProducts.length > 0" class="grid grid-cols-2 gap-2">
           <div 
             v-for="product in searchProducts" 
             :key="product.id" 
@@ -28,7 +28,7 @@
             <!-- Product Card - Only contains image -->
             <div 
               @click="navigateToDetails(product.id, product.item_type)"
-              class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square cursor-pointer"
+              class="group bg-gray-100 rounded-lg border border-gray-200 transition-all duration-200 overflow-hidden mb-1.5 aspect-square cursor-pointer"
             >
               <img 
                 :src="product.main_image || packagingImage" 
@@ -38,25 +38,25 @@
             </div>
             
             <!-- Product Info - Outside the card -->
-            <div class="space-y-1">
+            <div class="space-y-0.5">
               <!-- Store Name Caption (only for store products, not shopper listings) -->
-              <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
+              <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-400 mb-0.5">
                 {{ product.seller_name || product.store_name || 'AfriQExpress Seller' }}
               </p>
               
               <!-- Product Name -->
               <h3 
                 @click="navigateToDetails(product.id, product.item_type)"
-                class="font-bold text-xs text-gray-900 mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors capitalize"
+                class="font-semibold text-xs text-gray-900 mb-0.5 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors capitalize"
               >
                 {{ product.name }}
               </h3>
               
               <!-- Price and Quantity -->
               <div class="flex items-center justify-between">
-                <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
+                <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-xs text-orange-600' : 'font-bold text-xs text-blue-600'">
                   {{ formatApiPrice(product) }}
-                  <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
+                  <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-500">
                     / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
                   </span>
                 </span>
@@ -66,49 +66,56 @@
         </div>
         
         <!-- Empty search results -->
-        <div v-else class="text-center py-20">
-          <Package class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <p class="text-gray-600">No products found</p>
+        <div v-else class="text-center py-12">
+          <Package class="w-12 h-12 text-gray-300 mx-auto mb-2" />
+          <p class="text-xs text-gray-500">No products found</p>
         </div>
       </div>
 
       <!-- Store Categories Grid -->
-      <div v-else-if="storeCategories.length > 0 && !hasSearchQuery" class="grid grid-cols-2 gap-4 mt-6">
+      <div v-else-if="storeCategories.length > 0 && !hasSearchQuery" class="grid grid-cols-2 gap-2 mt-16">
         <button
           v-for="category in storeCategories"
           :key="category.id"
           @click="selectCategory(category.id)"
-          class="group rounded-2xl hover:bg-gradient-to-br hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 hover:scale-[1.02] p-6 flex flex-col items-center justify-center space-y-3"
-          :class="isDefault(category.id) ? 'bg-blue-500 text-white' : 'bg-blue-200/50'"
+          class="group rounded-lg transition-all duration-200 p-[1px] flex flex-col items-center justify-center relative overflow-hidden"
+          style="background: linear-gradient(to right, #2563eb, #9333ea);"
         >
-          <!-- Category Icon -->
-          <div class="w-16 h-16 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl flex items-center justify-center transition-all duration-300">
-            <component :is="getCategoryIcon(category.name)" 
-                       class="w-8 h-8 text-blue-600 transition-colors duration-300" :class="isDefault(category.id) ? 'text-white' : 'text-blue-600'" />
+          <!-- Inner content area -->
+          <div class="w-full h-full rounded-lg p-3 flex flex-col items-center justify-center space-y-2"
+               :class="isDefault(category.id) 
+                 ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white' 
+                 : 'bg-white'">
+            <!-- Category Icon -->
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200"
+                 :class="isDefault(category.id) ? 'bg-white/20' : 'bg-blue-50'">
+              <component :is="getCategoryIcon(category.name)" 
+                         class="w-5 h-5 transition-colors duration-200" :class="isDefault(category.id) ? 'text-white' : 'text-blue-600'" />
+            </div>
+            
+            <!-- Category Name -->
+            <h3 class="font-semibold text-xs text-center line-clamp-2" :class="isDefault(category.id) ? 'text-white' : 'text-gray-900'">
+              {{ category.name }}
+            </h3>
+            
+            <!-- Category Description -->
+            <p v-if="category.description" 
+               class="text-xs text-center line-clamp-2" :class="isDefault(category.id) ? 'text-white/90' : 'text-gray-500'">
+              {{ category.description }}
+            </p>
+            
+            <!-- Default Badge -->
+            <span v-if="isDefault(category.id)" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/20 text-white">
+              Selected
+            </span>
           </div>
-          
-          <!-- Category Name -->
-          <h3 class="font-bold text-lg text-slate-900 group-hover:text-blue-900 transition-colors duration-300 text-center" :class="isDefault(category.id) ? 'text-white' : 'text-slate-900'">
-            {{ category.name }}
-          </h3>
-          
-          <!-- Category Description -->
-          <p v-if="category.description" 
-             class="text-xs text-slate-600 text-center line-clamp-2" :class="isDefault(category.id) ? 'text-white' : 'text-slate-600'">
-            {{ category.description }}
-          </p>
-          
-          <!-- Default Badge -->
-          <span v-if="isDefault(category.id)" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
-            Selected
-          </span>
         </button>
       </div>
 
       <!-- Empty state -->
-      <div v-else class="text-center py-20">
-        <Package class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <p class="text-gray-600">No store categories available</p>
+      <div v-else class="text-center py-12">
+        <Package class="w-12 h-12 text-gray-300 mx-auto mb-2" />
+        <p class="text-xs text-gray-500">No store categories available</p>
       </div>
     </div>
 

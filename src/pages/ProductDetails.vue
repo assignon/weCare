@@ -249,7 +249,7 @@
 
               <!-- Product Types Section -->
               <div v-if="product.product_types && product.product_types.length > 0" class="space-y-3">
-                <h6 class="text-lg font-semibold text-gray-900">Product Types</h6>
+                <h6 class="text-lg font-semibold text-gray-900">{{ $t('product.product_types') }}</h6>
                 <div class="flex flex-wrap gap-2">
                   <span 
                     v-for="type in product.product_types" 
@@ -268,7 +268,7 @@
                 <div class="flex items-center">
                   <Star v-for="i in 5" :key="i" class="w-5 h-5" :class="i <= Math.round(product.review_stats.avg_rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'" />
                 </div>
-                <span class="text-gray-600 font-medium">({{ product.review_stats.count }} reviews)</span>
+                <span class="text-gray-600 font-medium">({{ product.review_stats.count }} {{ $t('product.reviews') }})</span>
               </div>
 
               <!-- Sample reviews -->
@@ -290,7 +290,7 @@
               </div>
               <div v-else class="text-center py-8">
                 <MessageCircle class="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p class="text-gray-600 font-medium">No reviews yet. Be the first to review this product.</p>
+                <p class="text-gray-600 font-medium">{{ $t('product.no_reviews_yet') }}</p>
               </div>
             </div>
 
@@ -304,7 +304,7 @@
                   <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-200" style="border-color: #dbeafe;"></div>
                   <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent absolute top-0 left-0" style="border-color: #2563eb;"></div>
                 </div>
-                <p class="text-sm text-gray-600 font-medium">Loading product details...</p>
+                <p class="text-sm text-gray-600 font-medium">{{ $t('product.loading_details') }}</p>
               </div>
 
               <!-- Attributes loaded successfully -->
@@ -313,8 +313,8 @@
                 <div>
                   <!-- Header -->
                   <div class="pb-4 border-b border-gray-100">
-                    <h3 class="text-xl font-bold text-gray-900">Product Specifications</h3>
-                    <p class="text-sm text-gray-600 mt-1">Technical details and specifications</p>
+                    <h3 class="text-xl font-bold text-gray-900">{{ $t('product.specifications') }}</h3>
+                    <p class="text-sm text-gray-600 mt-1">{{ $t('product.technical_details') }}</p>
                   </div>
                   
                   <!-- Specifications list -->
@@ -332,13 +332,13 @@
                         <!-- Text, Number, Decimal values -->
                         <p v-if="['text', 'number', 'decimal'].includes(attr.field_type)" 
                            class="text-gray-700 text-sm leading-relaxed">
-                          {{ getFormattedAttributeValue(attr) || 'Not specified' }}
+                          {{ getFormattedAttributeValue(attr) || $t('product.not_specified') }}
                         </p>
 
                         <!-- Select value -->
                         <p v-else-if="attr.field_type === 'select'" 
                            class="text-gray-700 text-sm leading-relaxed">
-                          {{ getFormattedAttributeValue(attr) || 'Not specified' }}
+                          {{ getFormattedAttributeValue(attr) || $t('product.not_specified') }}
                         </p>
 
                         <!-- Multiselect values -->
@@ -352,7 +352,7 @@
                               {{ choice }}
                             </span>
                           </div>
-                          <p v-else class="text-sm text-gray-500 italic">Not specified</p>
+                          <p v-else class="text-sm text-gray-500 italic">{{ $t('product.not_specified') }}</p>
                         </div>
 
                         <!-- Boolean value -->
@@ -367,14 +367,14 @@
                             </svg>
                           </div>
                           <span class="text-sm text-gray-700 font-medium">
-                            {{ attr.attribute_value && attr.attribute_value.boolean_value ? 'Yes' : 'No' }}
+                            {{ attr.attribute_value && attr.attribute_value.boolean_value ? $t('common.yes') : $t('common.no') }}
                           </span>
                         </div>
 
                         <!-- Date value -->
                         <p v-else-if="attr.field_type === 'date'" 
                            class="text-gray-700 text-sm leading-relaxed">
-                          {{ getFormattedAttributeValue(attr) || 'Not specified' }}
+                          {{ getFormattedAttributeValue(attr) || $t('product.not_specified') }}
                         </p>
 
                         <!-- File value -->
@@ -383,13 +383,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
                           </svg>
                           <span class="text-sm text-gray-700">
-                            {{ getFormattedAttributeValue(attr) ? 'File attached' : 'No file' }}
+                            {{ getFormattedAttributeValue(attr) ? $t('product.file_attached') : $t('product.no_file') }}
                           </span>
                         </div>
 
                         <!-- Default fallback -->
                         <p v-else class="text-gray-700 text-sm leading-relaxed">
-                          {{ getFormattedAttributeValue(attr) || 'Not specified' }}
+                          {{ getFormattedAttributeValue(attr) || $t('product.not_specified') }}
                         </p>
                       </div>
                     </div>
@@ -404,8 +404,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                   </svg>
                 </div>
-                <h3 class="text-sm font-semibold text-gray-900 mb-2">No Additional Details</h3>
-                <p class="text-gray-600 text-xs max-w-sm mx-auto">This product doesn't have additional details available at the moment.</p>
+                <h3 class="text-sm font-semibold text-gray-900 mb-2">{{ $t('product.no_additional_details') }}</h3>
+                <p class="text-gray-600 text-xs max-w-sm mx-auto">{{ $t('product.no_additional_details_message') }}</p>
               </div>
             </div>
           </div>
@@ -420,8 +420,8 @@
     <!-- Similar Products Section (Same Store Category) -->
     <div v-if="similarProducts.length > 0" class="px-4 py-6">
       <div class="mb-4">
-        <h2 class="text-xl font-bold text-gray-900 mb-1">Similar Products</h2>
-        <p class="text-sm text-gray-600">Products from the same category</p>
+        <h2 class="text-xl font-bold text-gray-900 mb-1">{{ $t('product.similar_products') }}</h2>
+        <p class="text-sm text-gray-600">{{ $t('product.products_from_same_category') }}</p>
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div 
@@ -466,7 +466,7 @@
               <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
                 {{ formatApiPrice(product) }}
                 <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
-                  / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
+                  / {{ product.quantity ? product.quantity + ' ' + (product.unit || $t('product.unit')) : product.weight || '' }}
                 </span>
               </span>
             </div>
@@ -479,14 +479,14 @@
     <div v-if="sellerProducts.length > 0" class="px-4 py-6">
       <div class="flex justify-between items-center mb-4">
         <div>
-          <h2 class="text-xl font-bold text-gray-900 mb-1">More from {{ product?.seller_name || product?.store_name || 'Seller' }}</h2>
-          <p class="text-sm text-gray-600">Other products from this seller</p>
+          <h2 class="text-xl font-bold text-gray-900 mb-1">{{ $t('product.more_from') }} {{ product?.seller_name || product?.store_name || $t('product.seller') }}</h2>
+          <p class="text-sm text-gray-600">{{ $t('product.other_products_from_seller') }}</p>
         </div>
         <button 
           @click="viewAllSellerProducts"
           class="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
         >
-          View All
+          {{ $t('product.view_all') }}
         </button>
       </div>
       <div class="grid grid-cols-2 gap-3">
@@ -532,7 +532,7 @@
               <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
                 {{ formatApiPrice(product) }}
                 <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
-                  / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
+                  / {{ product.quantity ? product.quantity + ' ' + (product.unit || $t('product.unit')) : product.weight || '' }}
                 </span>
               </span>
             </div>
@@ -554,9 +554,9 @@
         >
           <span v-if="notificationStatus === 'loading'" class="flex items-center justify-center">
             <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-            Registering...
+            {{ $t('product.registering') }}
           </span>
-          <span v-else>Keep Me Updated</span>
+          <span v-else>{{ $t('product.keep_me_updated') }}</span>
         </button>
 
         <!-- In stock action buttons -->
@@ -586,7 +586,7 @@
             style="background: linear-gradient(to right, #2563eb, #9333ea);"
           >
             <Calendar class="w-5 h-5 mr-2" />
-            {{ backendHasActiveViewingRequest ? 'Request Pending' : 'Request Viewing' }}
+            {{ backendHasActiveViewingRequest ? $t('product.request_pending') : $t('product.request_viewing') }}
           </button>
 
           <button 
@@ -697,6 +697,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useCartStore } from '@/stores/cart'
 import { useProductStore } from '@/stores/product'
 import { useCRMStore } from '@/stores/crm'
@@ -704,6 +705,8 @@ import { apiService } from '@/services/api'
 import { useCurrency } from '@/composables/useCurrency'
 import packagingImage from '@/assets/packaging_10471395.png'
 import ViewingRequestForm from '@/components/ViewingRequestForm.vue'
+
+const { t } = useI18n()
 import { 
   ArrowLeft, Heart, Share2, AlertCircle, Star, MessageCircle, 
   Minus, Plus, ShoppingBag, ShoppingCart, CheckCircle, X, Calendar, Info,
@@ -971,7 +974,7 @@ const getFormattedAttributeValue = (attr) => {
     case 'multiselect':
       return Array.isArray(rawValue) ? rawValue : [] // Ensure it's an array
     case 'file':
-      return rawValue ? 'File attached' : null
+      return rawValue ? t('product.file_attached') : null
     default:
       return rawValue // Return as-is for text, select, etc.
   }
@@ -1002,7 +1005,7 @@ const getAttributeValue = (attr) => {
         return attributeValue.date_value || null
       case 'file':
       case 'image':
-        return attributeValue.file_value ? 'File attached' : null
+        return attributeValue.file_value ? t('product.file_attached') : null
       case 'select':
         // For select, return the first choice or the choice itself
         const selectChoices = attributeValue.selected_choices || []
@@ -1170,12 +1173,12 @@ const toggleLike = async () => {
     isLiked.value = response.data.liked || false
     
     // Show feedback
-    snackbarText.value = response.data.liked ? 'Product liked' : 'Product unliked'
+    snackbarText.value = response.data.liked ? t('product.product_liked') : t('product.product_unliked')
     snackbarColor.value = 'success'
     showSnackbar.value = true
   } catch (error) {
     console.error('Failed to toggle like:', error)
-    snackbarText.value = 'Failed to update like status'
+    snackbarText.value = t('product.failed_to_update_like')
     snackbarColor.value = 'error'
     showSnackbar.value = true
   } finally {

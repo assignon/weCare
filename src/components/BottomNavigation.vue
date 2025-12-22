@@ -59,24 +59,6 @@
         </div>
       </router-link>
 
-      <!-- Send Parcel Tab -->
-      <router-link 
-        :to="{ name: 'SendParcel' }"
-        class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
-        :class="activeTab === 'sendparcel' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
-      >
-        <div class="relative">
-          <Package2 v-if="activeTab === 'sendparcel'" class="w-6 h-6" />
-          <Package2 v-else class="w-5 h-5 group-hover:scale-110 transition-transform" />
-          
-          <div 
-            v-if="activeTab === 'sendparcel'" 
-            class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
-            style="background: linear-gradient(to right, #2563eb, #9333ea);"
-          ></div>
-        </div>
-      </router-link>
-
       <!-- More menu button -->
       <button 
         @click="openMoreMenu"
@@ -191,16 +173,6 @@
               <span class="text-base font-semibold text-[#333333]">{{ $t('navigation.messages') }}</span>
             </router-link>
             
-            <!-- Parcels -->
-            <router-link 
-              :to="{ name: 'ParcelsList' }"
-              @click="closeMoreMenu"
-              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
-            >
-              <Package2 class="w-5 h-5 text-[#333333]" />
-              <span class="text-base font-semibold text-[#333333]">{{ $t('navigation.parcels') }}</span>
-            </router-link>
-            
             <!-- Likes -->
             <router-link 
               :to="{ name: 'LikedProducts' }"
@@ -254,7 +226,7 @@ import { useCRMStore } from '@/stores/crm'
 import { usePharmacyStore } from '@/stores/pharmacy'
 import { useAuthStore } from '@/stores/auth'
 import { useListingStore } from '@/stores/listing'
-import { Home, Search, Receipt, ShoppingCart, Store, Sparkles, Shirt, Pill, Sofa, Monitor, Car, Calendar, MoreVertical, Bell, User, X, ChevronRight, Package, MessageCircle, MessageSquareQuote, Megaphone, Package2 } from 'lucide-vue-next'
+import { Home, Search, Receipt, ShoppingCart, Store, Sparkles, Shirt, Pill, Sofa, Monitor, Car, Calendar, MoreVertical, Bell, User, X, ChevronRight, Package, MessageCircle, MessageSquareQuote, Megaphone } from 'lucide-vue-next'
 import apiService from '@/services/api'
 
 const route = useRoute()
@@ -285,8 +257,7 @@ const updateActiveTab = () => {
     'Explore': 'explore',
     'Orders': 'orders',
     'Cart': 'cart',
-    'Rendezvous': 'rendezvous',
-    'SendParcel': 'sendparcel'
+    'Rendezvous': 'rendezvous'
   }
   
   activeTab.value = routeTabMap[currentRouteName.value] || 'home'

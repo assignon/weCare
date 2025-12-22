@@ -18,9 +18,11 @@ app.use(LucideIcons)
 app.use(i18n)
 
 // PWA Service Worker Registration and Update Handling
-// Clean up any stuck or problematic service workers on app load
+// Clean up any stuck or problematic service workers IMMEDIATELY on app load
+// This must happen before any dynamic imports to prevent loading errors
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
+  // Unregister service workers immediately (synchronously if possible)
+  (async () => {
     try {
       // Unregister any existing service workers that might be causing issues
       // (except firebase-messaging-sw.js which is handled by Firebase)
@@ -36,8 +38,42 @@ if ('serviceWorker' in navigator) {
           }
         }
       }
+      
+      // Also clear all caches to remove stale files
+      if ('caches' in window) {
+        const cacheNames = await caches.keys()
+        for (const cacheName of cacheNames) {
+          // Keep Firebase caches, clear others
+          if (!cacheName.includes('firebase') && !cacheName.includes('google-fonts')) {
+            try {
+              await caches.delete(cacheName)
+              console.log('Cleared cache:', cacheName)
+            } catch (cacheError) {
+              console.warn('Failed to clear cache:', cacheName, cacheError)
+            }
+          }
+        }
+      }
     } catch (error) {
       console.warn('Error cleaning up service workers:', error)
+    }
+  })()
+  
+  // Also handle on page load as backup
+  window.addEventListener('load', async () => {
+    try {
+      const registrations = await navigator.serviceWorker.getRegistrations()
+      for (const registration of registrations) {
+        if (registration.scope && !registration.scope.includes('firebase')) {
+          try {
+            await registration.unregister()
+          } catch (unregError) {
+            // Silent fail on retry
+          }
+        }
+      }
+    } catch (error) {
+      // Silent fail
     }
   })
 }
