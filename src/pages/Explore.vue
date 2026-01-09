@@ -271,6 +271,7 @@
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useProductStore } from '@/stores/product'
+import { useListingStore } from '@/stores/listing'
 import { useRouter } from 'vue-router'
 import packagingImage from '@/assets/packaging_10471395.png'
 import emptyBoxImage from '@/assets/unboxing_empty.png'
@@ -285,6 +286,7 @@ import {
 } from 'lucide-vue-next'
 
 const productStore = useProductStore()
+const listingStore = useListingStore()
 const cart = useCartStore()
 const router = useRouter()
 const auth = useAuthStore()
@@ -692,15 +694,71 @@ onMounted(async () => {
     // Load dynamic attribute templates for current default store category
     await loadStoreAttributeTemplates()
 
-    // Check if filtering by seller
+    // Check if filtering by seller (for shopper listings)
     const filterBySeller = sessionStorage.getItem('filterBySeller')
+    const filterBySellerType = sessionStorage.getItem('filterBySellerType')
     let fetchedBySeller = false
     
-    if (filterBySeller) {
+    if (filterBySeller && filterBySellerType === 'shopper_listing') {
       try {
-        // Fetch store products filtered by seller ID
+        // Fetch shopper listings filtered by seller ID
         const sellerId = parseInt(filterBySeller)
-        console.log('🔍 Explore: Filtering by seller ID:', sellerId)
+        console.log('🔍 Explore: Filtering shopper listings by seller ID:', sellerId)
+        
+        // Fetch all active shopper listings (API may not support seller filter, so we filter client-side)
+        const listingsResponse = await listingStore.fetchAllListings({ 
+          status: 'active' // Only active listings
+        })
+        
+        // Get listings array
+        const allListings = listingsResponse?.results || listingsResponse || []
+        
+        // Filter by seller ID (client-side filtering since API may not support it)
+        const sellerListings = allListings.filter(listing => {
+          const listingSellerId = typeof listing.seller === 'object' 
+            ? listing.seller?.id 
+            : listing.seller
+          return listingSellerId === sellerId
+        })
+        
+        console.log('🔍 Explore: Found', sellerListings.length, 'active listings for seller', sellerId)
+        
+        // Convert shopper listings to product format for display
+        const formattedListings = sellerListings.map(listing => ({
+          id: listing.id,
+          name: listing.title,
+          main_image: listing.main_image || (listing.images && listing.images.length > 0 ? listing.images[0].image_url : null),
+          price: listing.price,
+          price_type: listing.price_type,
+          min_offer_price: listing.min_offer_price,
+          item_type: 'shopper_listing',
+          seller: listing.seller,
+          seller_name: listing.seller_name,
+          city: listing.city,
+          neighborhood: listing.neighborhood,
+          category_name: listing.category_name,
+          views_count: listing.views_count,
+          formatted_price: listing.price_type === 'free' ? 'Free' : listing.price_type === 'offer' ? 'Best Offer' : null
+        }))
+        
+        // Set products to the formatted listings
+        productStore.products = formattedListings
+        hasMoreProducts.value = false // No pagination for now
+        sessionStorage.removeItem('filterBySeller') // Clear after use
+        sessionStorage.removeItem('filterBySellerType') // Clear after use
+        fetchedBySeller = true
+        console.log('✅ Explore: Filtered shopper listings by seller, found', formattedListings.length, 'listings')
+      } catch (e) {
+        console.warn('⚠️ Explore: Failed to filter shopper listings by seller:', e)
+        sessionStorage.removeItem('filterBySeller') // Clear on error too
+        sessionStorage.removeItem('filterBySellerType') // Clear on error too
+        // Fall through to normal fetch
+      }
+    } else if (filterBySeller) {
+      // Legacy: Filter store products by seller ID
+      try {
+        const sellerId = parseInt(filterBySeller)
+        console.log('🔍 Explore: Filtering store products by seller ID:', sellerId)
         
         const hasMore = await productStore.fetchProducts({ 
           seller: sellerId,
@@ -709,9 +767,9 @@ onMounted(async () => {
         hasMoreProducts.value = hasMore
         sessionStorage.removeItem('filterBySeller') // Clear after use
         fetchedBySeller = true
-        console.log('✅ Explore: Filtered by seller, found', productStore.products.length, 'products')
+        console.log('✅ Explore: Filtered store products by seller, found', productStore.products.length, 'products')
       } catch (e) {
-        console.warn('⚠️ Explore: Failed to filter by seller:', e)
+        console.warn('⚠️ Explore: Failed to filter store products by seller:', e)
         sessionStorage.removeItem('filterBySeller') // Clear on error too
         // Fall through to normal fetch
       }

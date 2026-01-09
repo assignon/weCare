@@ -14,7 +14,10 @@
         <div v-for="inquiry in inquiries" :key="inquiry.id" @click="$router.push(`/listing-chat/${inquiry.id}`)"
           class="bg-white rounded-lg border border-gray-200 p-2.5 cursor-pointer hover:bg-gray-50 transition">
           <div class="flex gap-2">
-            <img v-if="inquiry.listing_main_image" :src="inquiry.listing_main_image" class="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
+            <div class="w-12 h-12 rounded-lg flex-shrink-0 overflow-hidden bg-gray-200 flex items-center justify-center">
+              <img v-if="inquiry.seller_avatar" :src="inquiry.seller_avatar" class="w-full h-full object-cover" />
+              <User v-else class="w-8 h-8 text-gray-400" />
+            </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between gap-2 mb-0.5">
                 <h3 class="text-xs font-semibold text-gray-900 truncate">{{ inquiry.listing_title }}</h3>
@@ -42,7 +45,7 @@ import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { apiService } from '@/services/api'
 import { useCurrency } from '@/composables/useCurrency'
-import { MessageCircle, Loader2 } from 'lucide-vue-next'
+import { MessageCircle, Loader2, User } from 'lucide-vue-next'
 import BottomNavigation from '@/components/BottomNavigation.vue'
 import BackButtonHeader from '@/components/BackButtonHeader.vue'
 

@@ -291,7 +291,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useListingStore } from '@/stores/listing'
 import { Plus, X, Loader2, FileText, Tag, DollarSign, MapPin, MessageCircle, Phone, Mail, AlertCircle, CheckCircle, Info } from 'lucide-vue-next'
@@ -306,6 +306,7 @@ const loading = ref(true)
 const submitting = ref(false)
 const categories = ref([])
 const images = ref([])
+const originalImages = ref([]) // Store original images to track deletions
 const listingStatus = ref(null)
 const showDialog = ref(false)
 const dialogType = ref('info') // 'info', 'error', 'success'
@@ -360,18 +361,27 @@ onMounted(async () => {
       is_anonymous: listing.is_anonymous || false
     }
 
-    // Prefill images
-    if (listing.images && listing.images.length > 0) {
-      images.value = listing.images.map(img => ({
+    // Prefill images (use listing_images from API response, fallback to images)
+    const listingImages = listing.listing_images || listing.images || []
+    if (listingImages.length > 0) {
+      images.value = listingImages.map(img => ({
         image_url: img.image_url,
         preview: img.image_url,
         id: img.id
       }))
+      // Store original images for comparison
+      originalImages.value = listingImages.map(img => ({
+        id: img.id,
+        image_url: img.image_url
+      }))
+      console.log('EditListing: Loaded images:', images.value)
+      console.log('EditListing: Original images:', originalImages.value)
     } else if (listing.main_image) {
       images.value = [{
         image_url: listing.main_image,
         preview: listing.main_image
       }]
+      originalImages.value = []
     }
   } catch (error) {
     console.error('Failed to fetch listing:', error)
@@ -381,18 +391,52 @@ onMounted(async () => {
   }
 })
 
+onBeforeUnmount(() => {
+  // Clean up all object URLs to prevent memory leaks (only blob URLs)
+  images.value.forEach(image => {
+    if (image.preview && image.preview.startsWith('blob:')) {
+      URL.revokeObjectURL(image.preview)
+    }
+  })
+})
+
 function addImage(e) {
   const file = e.target.files[0]
-  if (file && images.value.length < 2) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      images.value.push({ file, preview: e.target.result })
-    }
-    reader.readAsDataURL(file)
+  if (!file) return
+  
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    showErrorDialog('Invalid File', 'Please select an image file.')
+    e.target.value = ''
+    return
+  }
+  
+  // Validate file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    showErrorDialog('File Too Large', 'Image size should be less than 5MB.')
+    e.target.value = ''
+    return
+  }
+  
+  if (images.value.length < 2) {
+    // Create preview using URL.createObjectURL (simpler and faster)
+    const preview = URL.createObjectURL(file)
+    images.value.push({ file, preview })
+    
+    // Reset input to allow selecting the same file again
+    e.target.value = ''
+  } else {
+    showErrorDialog('Limit Reached', 'You can only upload up to 2 images.')
+    e.target.value = ''
   }
 }
 
 function removeImage(index) {
+  const image = images.value[index]
+  // Revoke object URL to free memory (only for blob URLs, not server URLs)
+  if (image.preview && image.preview.startsWith('blob:')) {
+    URL.revokeObjectURL(image.preview)
+  }
   images.value.splice(index, 1)
 }
 
@@ -474,11 +518,41 @@ async function submit() {
 
   submitting.value = true
   try {
+    // Identify images to delete (original images that are no longer in the current images array)
+    const currentImageIds = images.value
+      .filter(img => img.id)
+      .map(img => img.id)
+    const imagesToDelete = originalImages.value
+      .filter(originalImg => !currentImageIds.includes(originalImg.id))
+      .map(img => img.id)
+
+    // Get new images (those with a file property)
+    const newImages = images.value.filter(img => img.file).map(img => img.file)
+
+    // Prepare image orders with IDs for existing images
+    const imageOrders = images.value.map((img, index) => {
+      if (img.id) {
+        // Existing image - send its ID and order
+        return { id: img.id, order: index }
+      }
+      // New image - will be handled by the backend
+      return { order: index }
+    })
+
+    console.log('EditListing Submit:')
+    console.log('  - Current images:', images.value)
+    console.log('  - Current image IDs:', currentImageIds)
+    console.log('  - Original images:', originalImages.value)
+    console.log('  - Images to delete:', imagesToDelete)
+    console.log('  - New images count:', newImages.length)
+    console.log('  - Image orders:', imageOrders)
+
     // Prepare update data
     const updateData = {
       ...form.value,
-      images: images.value.filter(img => img.file).map(img => img.file), // Only new images
-      image_orders: images.value.map((_, i) => i)
+      images: newImages, // New images to upload
+      images_to_delete: imagesToDelete, // IDs of images to delete from server
+      image_orders: imageOrders // Order of all images (existing + new)
     }
 
     // Remove undefined/null values
@@ -487,6 +561,14 @@ async function submit() {
         delete updateData[key]
       }
     })
+
+    // Keep images_to_delete and image_orders even if empty - needed for proper FormData handling
+    // Only remove truly empty new images array
+    if (updateData.images && updateData.images.length === 0) {
+      delete updateData.images
+    }
+
+    console.log('  - Final updateData:', updateData)
 
     await listingStore.updateListing(route.params.id, updateData)
     showSuccessDialog('Success!', 'Your listing has been updated successfully.')

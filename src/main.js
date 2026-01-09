@@ -18,79 +18,61 @@ app.use(LucideIcons)
 app.use(i18n)
 
 // PWA Service Worker Registration and Update Handling
-// Clean up any stuck or problematic service workers IMMEDIATELY on app load
-// This must happen before any dynamic imports to prevent loading errors
+// Note: We preserve the vite-plugin-pwa service worker for PWA installation
+// Only clean up problematic service workers that are not PWA-related
 if ('serviceWorker' in navigator) {
-  // Unregister service workers immediately (synchronously if possible)
+  // Clean up only problematic service workers, preserve PWA service worker
   (async () => {
     try {
-      // Unregister any existing service workers that might be causing issues
-      // (except firebase-messaging-sw.js which is handled by Firebase)
       const registrations = await navigator.serviceWorker.getRegistrations()
       for (const registration of registrations) {
-        // Only unregister if it's not the Firebase messaging service worker
-        if (registration.scope && !registration.scope.includes('firebase')) {
-          try {
-            await registration.unregister()
-            console.log('Unregistered problematic service worker:', registration.scope)
-          } catch (unregError) {
-            console.warn('Failed to unregister service worker:', unregError)
-          }
+        // Keep Firebase messaging service worker
+        if (registration.scope && registration.scope.includes('firebase')) {
+          continue
         }
-      }
-      
-      // Also clear all caches to remove stale files
-      if ('caches' in window) {
-        const cacheNames = await caches.keys()
-        for (const cacheName of cacheNames) {
-          // Keep Firebase caches, clear others
-          if (!cacheName.includes('firebase') && !cacheName.includes('google-fonts')) {
-            try {
-              await caches.delete(cacheName)
-              console.log('Cleared cache:', cacheName)
-            } catch (cacheError) {
-              console.warn('Failed to clear cache:', cacheName, cacheError)
-            }
-          }
+        // Keep vite-plugin-pwa service worker (usually at root scope)
+        // The PWA service worker is typically registered at the root scope
+        // and is needed for PWA installation
+        const isPWAServiceWorker = registration.scope === window.location.origin + '/' ||
+                                   registration.active?.scriptURL?.includes('sw.js') ||
+                                   registration.active?.scriptURL?.includes('workbox')
+        if (isPWAServiceWorker) {
+          console.log('Preserving PWA service worker:', registration.scope)
+          continue
+        }
+        // Only unregister other problematic service workers
+        try {
+          await registration.unregister()
+          console.log('Unregistered problematic service worker:', registration.scope)
+        } catch (unregError) {
+          console.warn('Failed to unregister service worker:', unregError)
         }
       }
     } catch (error) {
-      console.warn('Error cleaning up service workers:', error)
+      console.warn('Error managing service workers:', error)
     }
   })()
-  
-  // Also handle on page load as backup
-  window.addEventListener('load', async () => {
-    try {
-      const registrations = await navigator.serviceWorker.getRegistrations()
-      for (const registration of registrations) {
-        if (registration.scope && !registration.scope.includes('firebase')) {
-          try {
-            await registration.unregister()
-          } catch (unregError) {
-            // Silent fail on retry
-          }
-        }
-      }
-    } catch (error) {
-      // Silent fail
-    }
-  })
 }
 
-// Handle PWA install prompt
+// Handle PWA install prompt - let vite-plugin-pwa handle this
+// The pwaService will also handle this, but we keep this for compatibility
 let deferredPrompt
 window.addEventListener('beforeinstallprompt', (e) => {
   // Prevent Chrome 67 and earlier from automatically showing the prompt
   e.preventDefault()
   // Stash the event so it can be triggered later
   deferredPrompt = e
-  console.log('PWA install prompt available')
+  console.log('✅ PWA install prompt available - App can be installed!')
+  // Dispatch custom event for components that might want to show install button
+  window.dispatchEvent(new CustomEvent('pwa-install-available', { detail: e }))
 })
 
 // Handle PWA installation
 window.addEventListener('appinstalled', (evt) => {
-  console.log('PWA was installed')
+  console.log('✅ PWA was installed successfully!')
+  deferredPrompt = null
+  // Dispatch custom event
+  window.dispatchEvent(new CustomEvent('pwa-installed'))
 })
 
 // Mount the app directly - let router guards handle authentication when needed

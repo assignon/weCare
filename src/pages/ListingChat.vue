@@ -21,27 +21,27 @@
             <span class="text-xs font-semibold uppercase tracking-wide">{{ $t('listings.offer') }}</span>
           </div>
           <!-- Always show the offer price from inquiry if available -->
-          <div v-if="offerPrice || inquiry?.offer_price" class="text-lg font-bold mb-2">
+          <div v-if="offerPrice || inquiry?.offer_price" class="text-sm font-bold mb-2">
             {{ formattedOfferPrice || (inquiry?.offer_price ? formatPrice(inquiry.offer_price) : '') }}
           </div>
-          <div v-else-if="extractOfferFromMessage(msg.content)" class="text-lg font-bold mb-2">{{ extractOfferFromMessage(msg.content) }}</div>
+          <div v-else-if="extractOfferFromMessage(msg.content)" class="text-sm font-bold mb-2">{{ extractOfferFromMessage(msg.content) }}</div>
           <!-- Show message content with price replaced -->
-          <p v-if="msg.content && msg.content !== getDefaultOfferMessage() && !isOnlyOfferPrice(msg.content)" class="text-sm opacity-90 mb-1">{{ formatMessageContent(msg.content) }}</p>
-          <p v-else-if="msg.content" class="text-sm opacity-90 mb-1">{{ formatMessageContent(msg.content) }}</p>
+          <p v-if="msg.content && msg.content !== getDefaultOfferMessage() && !isOnlyOfferPrice(msg.content)" class="text-xs opacity-90 mb-1">{{ formatMessageContent(msg.content) }}</p>
+          <p v-else-if="msg.content" class="text-xs opacity-90 mb-1">{{ formatMessageContent(msg.content) }}</p>
           <p class="text-xs mt-2 opacity-70">{{ formatTime(msg.created_at) }}</p>
         </div>
         
         <!-- Regular Message Template -->
         <div v-else :class="msg.is_own_message ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white'" class="max-w-[75%] rounded-lg px-4 py-2">
-          <p>{{ formatMessageContent(msg.content) }}</p>
+          <p class="text-xs">{{ formatMessageContent(msg.content) }}</p>
           <p class="text-xs mt-1 opacity-70">{{ formatTime(msg.created_at) }}</p>
         </div>
       </div>
     </div>
 
     <div class="bg-white border-t p-4">
-      <div class="flex gap-2 max-w-4xl mx-auto">
-        <input v-model="newMessage" @keyup.enter="sendMessage" :placeholder="$t('listings.type_message_placeholder')" class="flex-1 px-4 py-2 border rounded-lg max-w-md" />
+      <div class="flex gap-2 max-w-2xl mx-auto">
+        <input v-model="newMessage" @keyup.enter="sendMessage" :placeholder="$t('listings.type_message_placeholder')" class="flex-1 px-4 py-2 border rounded-lg max-w-xs text-sm" />
         <button @click="sendMessage" :disabled="!newMessage.trim()" class="p-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 flex-shrink-0">
           <Send class="w-5 h-5" />
         </button>

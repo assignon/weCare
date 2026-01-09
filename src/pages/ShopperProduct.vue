@@ -756,8 +756,19 @@ async function sendOffer() {
 }
 
 function viewSellerListings() {
+  // Extract seller ID (can be object or ID)
+  const sellerId = typeof listing.value.seller === 'object' 
+    ? listing.value.seller?.id 
+    : listing.value.seller
+  
+  if (!sellerId) {
+    console.error('Cannot get seller ID from listing')
+    return
+  }
+  
   // Store seller ID in sessionStorage to filter on Explore page
-  sessionStorage.setItem('filterBySeller', listing.value.seller)
+  sessionStorage.setItem('filterBySeller', sellerId)
+  sessionStorage.setItem('filterBySellerType', 'shopper_listing') // Mark as shopper listing filter
   router.push({ name: 'Explore' })
 }
 

@@ -85,7 +85,7 @@
                 <div class="flex-1 min-w-0 overflow-hidden max-w-full">
                   <div class="flex items-center space-x-2 mb-1">
                     <h3 class="text-xs font-semibold text-gray-900 truncate flex-1 min-w-0">
-                      {{ notification.title }}
+                      {{ getTranslatedTitle(notification) }}
                     </h3>
                     <div v-if="!notification.is_read" class="flex items-center flex-shrink-0">
                       <div class="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></div>
@@ -94,7 +94,7 @@
                   
                   <!-- Preview message (truncated) -->
                   <p class="text-xs text-gray-600 mb-2 line-clamp-2 break-words">
-                    {{ notification.message }}
+                    {{ getTranslatedMessage(notification) }}
                   </p>
                   
                   <div class="flex items-center justify-between">
@@ -149,7 +149,7 @@
                 <div class="mb-3">
                   <h4 class="text-xs font-semibold text-gray-700 mb-1.5">{{ $t('notifications.full_message') }}</h4>
                   <p class="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere">
-                    {{ notification.message }}
+                    {{ getTranslatedMessage(notification) }}
                   </p>
                 </div>
 
@@ -249,6 +249,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/stores/notification'
+import { translateNotificationTitle, translateNotificationMessage } from '@/utils/notificationTranslator'
 import BackButtonHeader from '@/components/BackButtonHeader.vue'
 import { 
   Bell, Check, CheckCheck, CheckCircle, Clock, AlertCircle, X, Loader2, ArrowRight,
@@ -258,6 +259,16 @@ import {
 const router = useRouter()
 const { t } = useI18n()
 const notificationStore = useNotificationStore()
+
+// Helper function to get translated notification title
+const getTranslatedTitle = (notification) => {
+  return translateNotificationTitle(notification.title, t)
+}
+
+// Helper function to get translated notification message
+const getTranslatedMessage = (notification) => {
+  return translateNotificationMessage(notification.message, t)
+}
 
 // Local state
 const markingAsRead = ref({})

@@ -51,8 +51,8 @@
           <select v-model="filters.price_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
             <option value="">All Types</option>
             <option value="fixed">Fixed Price</option>
-            <option value="offer">Best Offer</option>
-            <option value="free">Free</option>
+            <option value="offer">{{ t('listings.best_offer') }}</option>
+            <option value="free">{{ t('listings.free') }}</option>
           </select>
         </div>
         
@@ -106,13 +106,13 @@
               v-else-if="listing.price_type === 'free'"
               class="absolute top-2 right-2 bg-green-600 text-white px-2 py-1 rounded text-sm font-bold"
             >
-              FREE
+              {{ t('listings.free') }}
             </div>
             <div
               v-else
               class="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold"
             >
-              Best Offer
+              {{ t('listings.best_offer') }}
             </div>
           </div>
           
@@ -139,6 +139,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useListingStore } from '@/stores/listing'
 import { useCurrency } from '@/composables/useCurrency'
 import { Search, SlidersHorizontal, MapPin, Package, Loader2 } from 'lucide-vue-next'
@@ -146,6 +147,7 @@ import BottomNavigation from '@/components/BottomNavigation.vue'
 import apiService from '@/services/api'
 
 const router = useRouter()
+const { t } = useI18n()
 const listingStore = useListingStore()
 const { formatPrice } = useCurrency()
 

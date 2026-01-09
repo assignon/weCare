@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useCRMStore } from '@/stores/crm'
 import BottomNavigation from '@/components/BottomNavigation.vue'
 import GlobalSnackbar from '@/components/GlobalSnackbar.vue'
+import PWAInstallPrompt from '@/components/PWAInstallPrompt.vue'
 
 const route = useRoute()
 const cart = useCartStore()
@@ -46,6 +47,9 @@ onMounted(async () => {
 
     <!-- Global notification snackbar -->
     <GlobalSnackbar />
+
+    <!-- PWA Install Prompt -->
+    <PWAInstallPrompt />
   </div>
 </template>
 

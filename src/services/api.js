@@ -995,20 +995,50 @@ export const apiService = {
   },
 
   updateShopperListing(id, data) {
-    // For updates, we'll use JSON unless images are involved
-    if (data.images && data.images.length > 0) {
+    // Use FormData if any image-related operations are involved
+    const hasImages = data.images && data.images.length > 0
+    const hasImagesToDelete = data.images_to_delete && data.images_to_delete.length > 0
+    const hasImageOrders = data.image_orders && data.image_orders.length > 0
+    
+    console.log('updateShopperListing:', {
+      id,
+      hasImages,
+      hasImagesToDelete,
+      hasImageOrders,
+      images_to_delete: data.images_to_delete,
+      image_orders: data.image_orders
+    })
+    
+    if (hasImages || hasImagesToDelete || hasImageOrders) {
       const formData = new FormData()
       Object.keys(data).forEach(key => {
         if (key === 'images') {
-          data.images.forEach(image => {
-            formData.append('images', image)
-          })
+          // Append new image files
+          if (data.images && data.images.length > 0) {
+            data.images.forEach(image => {
+              formData.append('images', image)
+            })
+          }
+        } else if (key === 'images_to_delete') {
+          // Always append images_to_delete as JSON array (even if empty)
+          formData.append('images_to_delete', JSON.stringify(data.images_to_delete || []))
+          console.log('Appending images_to_delete:', JSON.stringify(data.images_to_delete || []))
+        } else if (key === 'image_orders') {
+          // Always append image_orders as JSON array (even if empty)
+          formData.append('image_orders', JSON.stringify(data.image_orders || []))
+          console.log('Appending image_orders:', JSON.stringify(data.image_orders || []))
         } else if (key === 'contact_methods') {
           formData.append(key, JSON.stringify(data[key]))
         } else if (data[key] !== null && data[key] !== undefined) {
           formData.append(key, data[key])
         }
       })
+      
+      // Log FormData contents for debugging
+      console.log('FormData entries:')
+      for (let pair of formData.entries()) {
+        console.log('  ', pair[0], ':', pair[1])
+      }
       
       return api.patch(`/products/shopper-listings/${id}/`, formData, {
         headers: {

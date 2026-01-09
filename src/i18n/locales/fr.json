@@ -654,7 +654,28 @@
     "hour_ago": "il y a {{count}} heure",
     "hours_ago": "il y a {{count}} heures",
     "day_ago": "il y a {{count}} jour",
-    "days_ago": "il y a {{count}} jours"
+    "days_ago": "il y a {{count}} jours",
+    "translate": {
+      "order_status_update": "Mise à jour du statut de la commande",
+      "new_order_received": "Nouvelle commande reçue",
+      "order_ready_pickup": "Commande prête pour retrait",
+      "order_being_processed": "Commande en cours de traitement",
+      "order_picked_up": "Commande retirée",
+      "order_delivered": "Commande livrée avec succès",
+      "order_cancelled": "Commande annulée",
+      "order_on_hold": "Commande en attente",
+      "payment_received": "Paiement reçu",
+      "order_status_changed": "Le statut de votre commande #{orderId} a été modifié en {status}",
+      "order_ready_pickup_msg": "Votre commande #{orderId} est prête pour retrait",
+      "order_assigned_driver": "Votre commande #{orderId} a été assignée à un chauffeur de livraison",
+      "order_being_processed_msg": "Votre commande #{orderId} est en cours de traitement",
+      "order_picked_up_msg": "Votre commande #{orderId} a été retirée et est en route",
+      "order_delivered_msg": "Votre commande #{orderId} a été livrée",
+      "order_cancelled_msg": "Votre commande #{orderId} a été annulée",
+      "order_returned_msg": "Votre commande #{orderId} a été retournée",
+      "new_order_msg": "Vous avez reçu une nouvelle commande #{orderId}",
+      "payment_received_msg": "Un paiement de {amount} a été reçu pour votre commande #{orderId}"
+    }
   },
   "wishlist": {
     "title": "Liste de souhaits",

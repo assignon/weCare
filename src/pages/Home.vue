@@ -128,7 +128,7 @@
                 <!-- Price and Quantity -->
                 <div class="flex items-center justify-between">
                   <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
-                    {{ formatApiPrice(product) }}
+                    {{ formatPriceWithTranslation(product) }}
                     <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
                       / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
                     </span>
@@ -210,7 +210,7 @@
                 <!-- Price and Quantity -->
                 <div class="flex items-center justify-between">
                   <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
-                    {{ formatApiPrice(product) }}
+                    {{ formatPriceWithTranslation(product) }}
                     <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
                       / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
                     </span>
@@ -274,7 +274,7 @@
                 <!-- Price and Quantity -->
                 <div class="flex items-center justify-between">
                   <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
-                    {{ formatApiPrice(product) }}
+                    {{ formatPriceWithTranslation(product) }}
                     <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
                       / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
                     </span>
@@ -358,7 +358,7 @@
                 <!-- Price and Quantity -->
                 <div class="flex items-center justify-between">
                   <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
-                    {{ formatApiPrice(product) }}
+                    {{ formatPriceWithTranslation(product) }}
                     <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
                       / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
                     </span>
@@ -1526,6 +1526,7 @@
 
 <script setup>
 import { onMounted, computed, ref, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useCartStore } from '@/stores/cart'
 import { useProductStore } from '@/stores/product'
 import { useRouter } from 'vue-router'
@@ -1546,6 +1547,7 @@ import {
   RefreshCw, Loader2, MessageCircle, Eye, Send
 } from 'lucide-vue-next'
 
+const { t } = useI18n()
 const productStore = useProductStore()
 const cart = useCartStore()
 const router = useRouter()
@@ -1553,6 +1555,28 @@ const notification = useNotificationStore()
 const auth = useAuthStore()
 const pharmacyStore = usePharmacyStore()
 const { formatApiPrice } = useCurrency()
+
+// Helper function to format price with translation for "FREE"
+const formatPriceWithTranslation = (product) => {
+  const formattedPrice = formatApiPrice(product)
+  
+  // Check if the formatted price is "FREE" (case-insensitive)
+  if (formattedPrice && formattedPrice.toUpperCase() === 'FREE') {
+    return t('listings.free')
+  }
+  
+  // Also check if product has price_type field for shopper listings
+  if (product.item_type === 'shopper_listing' && product.price_type === 'free') {
+    return t('listings.free')
+  }
+  
+  // Check if formatted_price contains "FREE"
+  if (product.formatted_price && product.formatted_price.toUpperCase().includes('FREE')) {
+    return t('listings.free')
+  }
+  
+  return formattedPrice
+}
 
 const loading = computed(() => productStore.loading)
 const error = computed(() => productStore.error)

@@ -55,6 +55,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { translateNotificationTitle, translateNotificationMessage } from '@/utils/notificationTranslator'
 import { X, CheckCircle, Info, AlertTriangle, AlertCircle } from 'lucide-vue-next'
 import notificationService from '@/services/notificationService'
 
@@ -119,23 +120,15 @@ const actionText = computed(() => {
   return typeMap[currentNotification.value?.reference_type] || t('snackbar.view_details')
 })
 
-// Translation helpers
+// Translation helpers - use main utility for consistency
 const getTranslatedTitle = (title) => {
   if (!title) return ''
-  const translationMap = {
-    'New Notification': t('snackbar.new_notification'),
-    'New Chat Message': t('snackbar.new_chat_message'),
-    'System Announcement': t('snackbar.system_announcement')
-  }
-  return translationMap[title] || title
+  return translateNotificationTitle(title, t)
 }
 
 const getTranslatedMessage = (message) => {
   if (!message) return ''
-  const translationMap = {
-    'You have a new message': t('snackbar.you_have_new_message')
-  }
-  return translationMap[message] || message
+  return translateNotificationMessage(message, t)
 }
 
 // Methods

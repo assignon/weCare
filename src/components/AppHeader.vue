@@ -14,24 +14,28 @@
   <!-- Search bar -->
   <div v-else-if="shouldShowSearch" class="fixed top-0 left-0 right-0 z-50 px-4 py-3">
     <div class="relative group flex items-center gap-2">
-      <div class="relative flex-1">
-        <Search class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
-        <input
-          ref="searchInput"
-          v-model="searchQuery"
-          type="text"
-          placeholder="Search for products..."
-          class="w-full pl-12 pr-12 py-3 bg-white border border-blue-600 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all duration-200 text-sm"
-          @input="handleSearch"
-          @keyup.enter="handleSearch"
-        />
-        <button 
-          v-if="searchQuery" 
-          @click="clearSearch"
-          class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          <X class="w-5 h-5" />
-        </button>
+      <div class="relative flex-1" style="background: linear-gradient(to right, #8c36ea, #3060eb); padding: 2px; border-radius: 0.5rem;">
+        <div class="relative bg-white rounded-lg">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+          </div>
+          <input
+            ref="searchInput"
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search for products..."
+            class="input w-full pl-10 pr-10 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent border-0 bg-transparent"
+            @input="handleSearch"
+            @keyup.enter="handleSearch"
+          />
+          <button 
+            v-if="searchQuery" 
+            @click="clearSearch"
+            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X class="w-4 h-4" />
+          </button>
+        </div>
       </div>
       <button 
         v-if="showFilterButton"

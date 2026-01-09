@@ -9,7 +9,16 @@
           <label class="block text-sm font-semibold text-gray-700">{{ $t('listings.photos_max') }}</label>
           <div class="grid grid-cols-2 gap-3">
             <div v-for="(img, i) in images" :key="i" class="aspect-square bg-gray-200 rounded-lg relative overflow-hidden">
-              <img :src="img.preview" class="w-full h-full object-cover" />
+              <img 
+                v-if="img.preview" 
+                :src="img.preview" 
+                class="w-full h-full object-cover" 
+                alt="Listing image"
+                @error="handleImageError(i)"
+              />
+              <div v-else class="w-full h-full flex items-center justify-center">
+                <Loader2 class="w-8 h-8 animate-spin text-gray-400" />
+              </div>
               <button @click="removeImage(i)" type="button" class="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors">
                 <X class="w-4 h-4" />
               </button>
@@ -294,7 +303,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useListingStore } from '@/stores/listing'
 import { Plus, X, Loader2, FileText, Tag, DollarSign, MapPin, MessageCircle, Phone, Mail, AlertCircle, CheckCircle, Info } from 'lucide-vue-next'
@@ -336,19 +345,59 @@ onMounted(async () => {
   }
 })
 
+onBeforeUnmount(() => {
+  // Clean up all object URLs to prevent memory leaks
+  images.value.forEach(image => {
+    if (image.preview && image.preview.startsWith('blob:')) {
+      URL.revokeObjectURL(image.preview)
+    }
+  })
+})
+
 function addImage(e) {
   const file = e.target.files[0]
-  if (file && images.value.length < 2) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      images.value.push({ file, preview: e.target.result })
-    }
-    reader.readAsDataURL(file)
+  if (!file) return
+  
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    showErrorDialog('Invalid File', 'Please select an image file.')
+    e.target.value = ''
+    return
+  }
+  
+  // Validate file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    showErrorDialog('File Too Large', 'Image size should be less than 5MB.')
+    e.target.value = ''
+    return
+  }
+  
+  if (images.value.length < 2) {
+    // Create preview using URL.createObjectURL (simpler and faster)
+    const preview = URL.createObjectURL(file)
+    images.value.push({ file, preview })
+    
+    // Reset input to allow selecting the same file again
+    e.target.value = ''
+  } else {
+    showErrorDialog('Limit Reached', 'You can only upload up to 2 images.')
+    e.target.value = ''
   }
 }
 
 function removeImage(index) {
+  const image = images.value[index]
+  // Revoke object URL to free memory
+  if (image.preview && image.preview.startsWith('blob:')) {
+    URL.revokeObjectURL(image.preview)
+  }
   images.value.splice(index, 1)
+}
+
+function handleImageError(index) {
+  console.error('Error loading image at index:', index)
+  // Optionally remove the image if it fails to load
+  // images.value.splice(index, 1)
 }
 
 function toggleContactMethod(method) {

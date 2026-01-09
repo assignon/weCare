@@ -9,9 +9,9 @@
     </BackButtonHeader>
     <div v-if="stats" class="px-4 py-3 bg-white border-b text-sm">
       <div class="flex gap-4">
-        <div><span class="font-medium">{{ stats.active_listings }}</span>/{{ stats.max_listings }} Active</div>
-        <div><span class="font-medium">{{ stats.sold_listings }}</span> Sold</div>
-        <div><span class="font-medium">{{ stats.total_inquiries }}</span> Inquiries</div>
+        <div><span class="font-medium">{{ stats.active_listings }}</span>/{{ stats.max_listings }} {{ $t('listings.active') }}</div>
+        <div><span class="font-medium">{{ stats.sold_listings }}</span> {{ $t('listings.sold') }}</div>
+        <div><span class="font-medium">{{ stats.total_inquiries }}</span> {{ $t('listings.inquiries') }}</div>
       </div>
     </div>
 
@@ -40,12 +40,12 @@
               </div>
             </div>
             <div class="p-2">
-              <h3 class="text-sm font-medium capitalize line-clamp-2">{{ listing.title }}</h3>
+              <h3 class="text-xs font-medium capitalize line-clamp-2">{{ listing.title }}</h3>
               <div class="flex items-center justify-between mt-1">
                 <div>
-                  <p v-if="listing.price_type === 'fixed'" class="text-blue-600 font-bold">{{ formatPrice(listing.price) }}</p>
-                  <p v-else-if="listing.price_type === 'free'" class="text-green-600 font-bold">FREE</p>
-                  <p v-else class="text-blue-600 font-bold">Best Offer</p>
+                  <p v-if="listing.price_type === 'fixed'" class="text-blue-600 font-semibold text-xs">{{ formatPrice(listing.price) }}</p>
+                  <p v-else-if="listing.price_type === 'free'" class="text-green-600 font-semibold text-xs">{{ $t('listings.free') }}</p>
+                  <p v-else class="text-blue-600 font-semibold text-xs">{{ $t('listings.best_offer') }}</p>
                 </div>
                 <button 
                   v-if="listing.status !== 'sold'"
