@@ -225,14 +225,19 @@ export const useCartStore = defineStore('cart', () => {
   }
   
   // Update the createNewCart function to handle quantities correctly
-  const createNewCart = async (selectedVariant, quantity, product_id) => {
+  const createNewCart = async (selectedVariant, quantity, product_id, shopper_choices = null) => {
     try {
       // Create a single cart item with the correct quantity
       const cartItem = {
         product_id: product_id,
         variant_id: selectedVariant.id,
-        quantity: quantity // Use the exact quantity passed in
+        quantity: quantity, // Use the exact quantity passed in
       };
+      
+      // Add shopper choices if provided
+      if (shopper_choices && Object.keys(shopper_choices).length > 0) {
+        cartItem.shopper_choices = shopper_choices;
+      }
       
       // Create new cart with the single item
       const response = await apiService.createCart([cartItem]);

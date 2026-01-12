@@ -171,6 +171,102 @@
             </button>
           </div>
         </div>
+
+        <!-- Shopper Choice Attributes - Show all attributes with shopper_choice=true -->
+        <div v-if="shopperChoiceAttributes.length > 0" class="space-y-2 pt-2">
+          <!-- Each attribute group with label on top -->
+          <div v-for="attr in shopperChoiceAttributes" :key="attr.id" class="space-y-1.5" :data-attr-id="attr.id">
+            <!-- Label on top -->
+            <label class="text-xs font-semibold text-gray-700 block">
+              {{ attr.label }}
+              <span class="text-red-500">*</span>
+            </label>
+            
+            <!-- Error message if this attribute is required but not selected -->
+            <div v-if="shopperChoiceErrors[attr.id]" class="text-xs text-red-600 mt-0.5">
+              {{ shopperChoiceErrors[attr.id] }}
+            </div>
+            
+            <!-- Chips for this attribute -->
+            <div class="flex flex-wrap gap-1">
+              <!-- Select field as chips -->
+              <template v-if="attr.field_type === 'select'">
+                <button
+                  v-for="choice in getAttributeChoices(attr)"
+                  :key="`${attr.id}-${choice}`"
+                  @click="shopperChoices[attr.id] = choice; shopperChoiceErrors[attr.id] = null"
+                  :class="[
+                    'px-4 py-2 rounded-md text-xs font-medium transition-all duration-200 border',
+                    shopperChoices[attr.id] === choice
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                      : 'bg-transparent text-blue-600 border-blue-600 hover:bg-blue-50'
+                  ]"
+                >
+                  {{ choice }}
+                </button>
+              </template>
+              
+              <!-- Multiselect field as chips -->
+              <template v-else-if="attr.field_type === 'multiselect'">
+                <button
+                  v-for="choice in getAttributeChoices(attr)"
+                  :key="`${attr.id}-${choice}`"
+                  @click="toggleMultiselectChoice(attr.id, choice); validateShopperChoices()"
+                  :class="[
+                    'px-4 py-2 rounded-md text-xs font-medium transition-all duration-200 border',
+                    isChoiceSelected(attr.id, choice)
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                      : 'bg-transparent text-blue-600 border-blue-600 hover:bg-blue-50'
+                  ]"
+                >
+                  {{ choice }}
+                </button>
+              </template>
+              
+              <!-- Boolean field as chip -->
+              <button
+                v-else-if="attr.field_type === 'boolean'"
+                @click="shopperChoices[attr.id] = !shopperChoices[attr.id]; shopperChoiceErrors[attr.id] = null"
+                :class="[
+                  'px-4 py-2 rounded-md text-xs font-medium transition-all duration-200 border',
+                  shopperChoices[attr.id]
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                    : 'bg-transparent text-blue-600 border-blue-600 hover:bg-blue-50'
+                ]"
+              >
+                {{ shopperChoices[attr.id] ? ($t('common.yes') || 'Yes') : ($t('common.no') || 'No') }}
+              </button>
+              
+              <!-- Text/Number field as chip (shows input when clicked) -->
+              <div v-else class="relative inline-block">
+                <button
+                  @click="activeTextInput = activeTextInput === attr.id ? null : attr.id"
+                  @blur="clearShopperChoiceError(attr.id)"
+                  :class="[
+                    'px-4 py-2 rounded-md text-xs font-medium transition-all duration-200 border',
+                    shopperChoices[attr.id]
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                      : 'bg-transparent text-blue-600 border-blue-600 hover:bg-blue-50'
+                  ]"
+                >
+                  {{ shopperChoices[attr.id] || 'Tap to enter' }}
+                </button>
+                <!-- Inline input that appears when chip is clicked -->
+                <div v-if="activeTextInput === attr.id" class="absolute top-full left-0 mt-1 z-10 bg-white rounded-lg shadow-lg border border-gray-200 p-2 min-w-[200px]">
+                  <input
+                    v-model="shopperChoices[attr.id]"
+                    :type="attr.field_type === 'number' || attr.field_type === 'decimal' ? 'number' : 'text'"
+                    :placeholder="$t('product.enter_value') || 'Enter value'"
+                    @blur="activeTextInput = null; clearShopperChoiceError(attr.id)"
+                    @keyup.enter="activeTextInput = null; clearShopperChoiceError(attr.id)"
+                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    autofocus
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Tab section -->
@@ -740,6 +836,7 @@ const checkingPendingRequest = ref(false)
 // Product attributes variables
 const productAttributes = ref([])
 const loadingAttributes = ref(false)
+const lastProcessedProductId = ref(null) // Track last processed product ID to prevent infinite loops
 
 // Similar products and seller products
 const similarProducts = ref([])
@@ -779,18 +876,90 @@ const decreaseQuantity = () => {
   }
 }
 
+// Clear error for a specific attribute when value is entered
+const clearShopperChoiceError = (attrId) => {
+  if (shopperChoices.value[attrId]) {
+    shopperChoiceErrors.value[attrId] = null
+  }
+}
+
+// Validate shopper choices before adding to cart
+const validateShopperChoices = () => {
+  shopperChoiceErrors.value = {}
+  let isValid = true
+  
+  // Check each shopper choice attribute
+  shopperChoiceAttributes.value.forEach(attr => {
+    const value = shopperChoices.value[attr.id]
+    
+    // For multiselect, check if array has at least one item
+    if (attr.field_type === 'multiselect') {
+      const hasValue = Array.isArray(value) && value.length > 0
+      if (!hasValue) {
+        shopperChoiceErrors.value[attr.id] = `${t('product.select_one')} ${attr.label}`
+        isValid = false
+      }
+    } else {
+      // For other types, check if value exists and is not empty
+      const hasValue = value !== null && 
+                       value !== undefined && 
+                       value !== '' && 
+                       !(Array.isArray(value) && value.length === 0)
+      
+      if (!hasValue) {
+        // This attribute is required but not selected
+        shopperChoiceErrors.value[attr.id] = `${t('product.select_one')} ${attr.label}`
+        isValid = false
+      }
+    }
+  })
+  
+  return isValid
+}
+
 const addToCart = async () => {
   if (product.value && currentStock.value > 0) {
+    // Validate shopper choices first
+    if (!validateShopperChoices()) {
+      // Show error snackbar
+      snackbarText.value = t('product.please_select_all_required_options')
+      snackbarColor.value = 'error'
+      showSnackbar.value = true
+      
+      // Scroll to first error
+      const firstErrorId = Object.keys(shopperChoiceErrors.value)[0]
+      if (firstErrorId) {
+        const errorElement = document.querySelector(`[data-attr-id="${firstErrorId}"]`)
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }
+      return
+    }
+    
     try {
+      // Prepare shopper choices (only include non-empty values)
+      const choicesToSend = {}
+      Object.keys(shopperChoices.value).forEach(attrId => {
+        const value = shopperChoices.value[attrId]
+        if (value !== null && value !== undefined && value !== '' && 
+            !(Array.isArray(value) && value.length === 0)) {
+          choicesToSend[attrId] = value
+        }
+      })
+      
       // Only send the necessary data to create a new cart
       await cart.createNewCart(
         selectedVariant.value,
         quantity.value,
-        product.value.id
+        product.value.id,
+        Object.keys(choicesToSend).length > 0 ? choicesToSend : null
       );
 
       // Reset quantity to 1 after successful addition
       quantity.value = 1;
+      // Reset shopper choices after successful addition
+      shopperChoices.value = {}
 
       // Show success snackbar
       snackbarText.value = 'Product added to cart';
@@ -892,12 +1061,26 @@ const fetchProductAttributes = async () => {
   loadingAttributes.value = true
   
   try {
-    // Use the attribute values that are already included in the product data
+    const attributesFromProduct = []
+    
+    // Step 1: Get attributes that already have values on the product
     if (product.value?.attribute_values && product.value.attribute_values.length > 0) {
-      
-      // Map the attribute values to include label and human display value only
       const attributesWithValues = product.value.attribute_values.map(attrValue => {
         const template = attrValue.attribute_template
+        
+        // Debug logging for each attribute
+        console.log('🔍 Processing attribute:', {
+          label: attrValue.attribute_label,
+          template_id: template?.id,
+          template_shopper_choice: template?.shopper_choice,
+          template_full: template
+        })
+        
+        // Extract shopper_choice - check multiple paths with explicit boolean check
+        const shopperChoice = 
+          template?.shopper_choice === true ||
+          attrValue.attribute_template?.shopper_choice === true ||
+          false
         
         return {
           id: template?.id || attrValue.attribute_template, // fallback to id
@@ -909,35 +1092,130 @@ const fetchProductAttributes = async () => {
           display_value: attrValue.display_value,
           // Optional ordering when available
           display_order: template?.display_order || 0,
+          // Include shopper_choice flag from template - use explicit boolean
+          shopper_choice: shopperChoice,
+          // Also store the full template for reference
+          attribute_template: template,
+          // Mark that this has a value
+          has_value: true
         }
       })
       
-      // Remove duplicates based on attribute label and field type
-      const uniqueAttributes = attributesWithValues.reduce((acc, current) => {
-        const existingIndex = acc.findIndex(attr => 
-          attr.label === current.label && attr.field_type === current.field_type
+      attributesFromProduct.push(...attributesWithValues)
+    }
+    
+    // Step 2: Fetch attribute templates with shopper_choice=true from store category
+    // This ensures we show ALL shopper_choice attributes, even if product doesn't have values yet
+    let storeCategoryId = null
+    
+    // Try multiple sources for store category ID
+    if (product.value?.store?.store_category?.id) {
+      storeCategoryId = product.value.store.store_category.id
+    } else if (product.value?.store?.store_category_id) {
+      storeCategoryId = product.value.store.store_category_id
+    } else if (product.value?.store_category_id) {
+      storeCategoryId = product.value.store_category_id
+    } else {
+      // Fallback to session storage
+      const defaultStore = sessionStorage.getItem('defaultStore')
+      if (defaultStore) {
+        storeCategoryId = defaultStore
+      }
+    }
+    
+    if (storeCategoryId) {
+      try {
+        console.log('📋 Fetching shopper_choice attributes for store category:', storeCategoryId)
+        const response = await apiService.getStoreAttributesByStoreCategory({ 
+          store_category_id: storeCategoryId 
+        })
+        
+        const templates = response.data?.templates || []
+        console.log('📋 Found attribute templates:', templates.length)
+        
+        // Filter for shopper_choice=true and is_active=true
+        const shopperChoiceTemplates = templates.filter(t => 
+          t.shopper_choice === true && t.is_active === true
         )
         
-        if (existingIndex === -1) {
-          acc.push(current)
-        } else {
-          // If duplicate found, keep the one with better data (has display_value or higher display_order)
-          const existing = acc[existingIndex]
-          if (current.display_value || current.display_order > existing.display_order) {
-            acc[existingIndex] = current
-          }
-        }
+        console.log('📋 Shopper choice templates:', shopperChoiceTemplates.map(t => ({
+          id: t.id,
+          name: t.name,
+          label: t.label,
+          field_type: t.field_type
+        })))
         
-        return acc
-      }, [])
-      
-      // Sort by display order; do not filter out anything for shopper view
-      productAttributes.value = uniqueAttributes
-        .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
-      
-    } else {
-      productAttributes.value = []
+        // Convert templates to attribute format and merge with existing attributes
+        shopperChoiceTemplates.forEach(template => {
+          // Check if this template already exists in attributesFromProduct
+          const existingIndex = attributesFromProduct.findIndex(attr => 
+            attr.id === template.id || attr.label === template.label
+          )
+          
+          if (existingIndex === -1) {
+            // Template doesn't exist yet, add it (even without a value)
+            attributesFromProduct.push({
+              id: template.id,
+              label: template.label,
+              field_type: template.field_type,
+              attribute_value: null, // No value yet
+              display_value: null,
+              display_order: template.display_order || 0,
+              shopper_choice: true,
+              attribute_template: template,
+              has_value: false
+            })
+          } else {
+            // Template exists, ensure shopper_choice is set to true
+            attributesFromProduct[existingIndex].shopper_choice = true
+            attributesFromProduct[existingIndex].attribute_template = template
+          }
+        })
+      } catch (error) {
+        console.warn('⚠️ ProductDetails: Failed to fetch store attribute templates:', error)
+        // Continue with just product attributes
+      }
     }
+    
+    // Step 3: Remove duplicates and prioritize attributes with values
+    const uniqueAttributes = attributesFromProduct.reduce((acc, current) => {
+      const existingIndex = acc.findIndex(attr => 
+        attr.id === current.id || (attr.label === current.label && attr.field_type === current.field_type)
+      )
+      
+      if (existingIndex === -1) {
+        acc.push(current)
+      } else {
+        // If duplicate found, prioritize:
+        // 1. Attributes with values (has_value = true)
+        // 2. Attributes with shopper_choice = true
+        // 3. Higher display_order
+        const existing = acc[existingIndex]
+        
+        if (current.has_value && !existing.has_value) {
+          acc[existingIndex] = current
+        } else if (!current.has_value && existing.has_value) {
+          // Keep existing (has value)
+        } else if (current.shopper_choice && !existing.shopper_choice) {
+          acc[existingIndex] = current
+        } else if (current.display_order > existing.display_order) {
+          acc[existingIndex] = current
+        }
+      }
+      
+      return acc
+    }, [])
+    
+    // Sort by display order
+    productAttributes.value = uniqueAttributes
+      .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+    
+    console.log('✅ Final product attributes:', productAttributes.value.map(a => ({
+      id: a.id,
+      label: a.label,
+      shopper_choice: a.shopper_choice,
+      has_value: a.has_value
+    })))
     
   } catch (error) {
     console.error('❌ ProductDetails: Error processing product attributes:', error)
@@ -1400,6 +1678,76 @@ const currentStock = computed(() => {
   return selectedVariant.value ? selectedVariant.value.stock : product.value?.stock
 })
 
+// Shopper choices for attributes
+const shopperChoices = ref({})
+const activeTextInput = ref(null) // Track which text input is active
+const shopperChoiceErrors = ref({}) // Track validation errors for shopper choices
+
+// Computed property to get shopper_choice attributes
+const shopperChoiceAttributes = computed(() => {
+  if (!productAttributes.value.length) {
+    return []
+  }
+  
+  // Filter attributes where shopper_choice is true
+  // Show ALL attributes with shopper_choice=true
+  const filtered = productAttributes.value.filter(attr => {
+    // Simply check if shopper_choice flag is true (set during attribute loading)
+    return attr.shopper_choice === true
+  })
+  
+  console.log('📋 Shopper choice attributes:', filtered.map(a => ({ 
+    label: a.label, 
+    choices: getAttributeChoices(a),
+    field_type: a.field_type
+  })))
+  
+  return filtered
+})
+
+// Helper function to get choices from an attribute (check multiple paths)
+const getAttributeChoices = (attr) => {
+  // Check multiple possible paths for choices
+  const choices = 
+    attr.attribute_template?.choices ||
+    attr.attribute_value?.attribute_template?.choices ||
+    attr.choices ||
+    []
+  
+  // If choices is a string (comma-separated), convert to array
+  if (typeof choices === 'string') {
+    return choices.split(',').map(c => c.trim()).filter(c => c.length > 0)
+  }
+  
+  // If choices is already an array, return it
+  if (Array.isArray(choices)) {
+    return choices
+  }
+  
+  return []
+}
+
+// Helper to toggle multiselect choice
+const toggleMultiselectChoice = (attrId, choice) => {
+  if (!shopperChoices.value[attrId]) {
+    shopperChoices.value[attrId] = []
+  }
+  
+  const choices = shopperChoices.value[attrId]
+  const index = choices.indexOf(choice)
+  
+  if (index > -1) {
+    choices.splice(index, 1)
+  } else {
+    choices.push(choice)
+  }
+}
+
+// Helper to check if a choice is selected in multiselect
+const isChoiceSelected = (attrId, choice) => {
+  return shopperChoices.value[attrId]?.includes(choice) || false
+}
+
 // Update selectVariant to always set quantity to 1
 const selectVariant = (variant) => {
   selectedVariant.value = variant;
@@ -1407,6 +1755,9 @@ const selectVariant = (variant) => {
 
   // Always set quantity to 1 when selecting a variant
   quantity.value = 1;
+  
+  // Reset shopper choices when variant changes
+  shopperChoices.value = {}
 }
 
 const cartItemsCount = computed(() => cart.cartItemCount)
@@ -1423,6 +1774,7 @@ const loadProductData = async (productId) => {
     similarProducts.value = []
     sellerProducts.value = []
     isLiked.value = false
+    lastProcessedProductId.value = null // Reset last processed ID
     
     // Fetch product data
     await productStore.fetchProductById(productId)
@@ -1478,7 +1830,10 @@ watch(() => route.params.id, async (newProductId, oldProductId) => {
 
 // Watch for product changes to recheck CRM flow
 watch(product, async (newProduct) => {
-  if (newProduct?.id) {
+  // Only process if product exists and ID has changed
+  if (newProduct?.id && newProduct.id !== lastProcessedProductId.value) {
+    lastProcessedProductId.value = newProduct.id
+    
     await checkCRMFlow()
     
     // Check for existing viewing requests if using CRM flow

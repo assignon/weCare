@@ -172,6 +172,16 @@
                 <p class="text-xs text-gray-600 mt-0.5">
                   {{ $t('order_detail.variant') }}: {{ item.product_variant?.name || $t('order_detail.standard') }} ML
                 </p>
+                <!-- Shopper Choices - Display under variant -->
+                <div v-if="hasShopperChoices(item)" class="mt-1 flex flex-wrap gap-1">
+                  <span 
+                    v-for="(value, attrId) in item.shopper_choices" 
+                    :key="attrId" 
+                    class="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded border border-blue-300"
+                  >
+                    {{ formatShopperChoice(String(attrId), value) }}
+                  </span>
+                </div>
                 <p class="text-xs text-gray-600">
                   {{ $t('order_detail.quantity') }}: {{ item.quantity }}
                 </p>
@@ -627,6 +637,9 @@ const wrongDeliveryReason = ref('')
 const updatingStatus = ref(false)
 const downloadingInvoice = ref(false)
 
+// Attribute templates mapping (attribute_template_id -> label)
+const attributeTemplatesMap = ref({})
+
 // Computed
 const orderId = computed(() => route.params.id)
 
@@ -667,6 +680,23 @@ const loadOrder = async () => {
   try {
     const response = await apiService.getOrderDetails(orderId.value)
     order.value = response.data
+    
+    // Debug: Log order items to check shopper_choices
+    console.log('📦 Order loaded:', {
+      order_id: order.value?.id,
+      items_count: order.value?.items?.length,
+      items: order.value?.items?.map(item => ({
+        product_name: item.product_name,
+        variant: item.product_variant?.name,
+        shopper_choices: item.shopper_choices,
+        has_choices: item.shopper_choices && Object.keys(item.shopper_choices).length > 0,
+        shopper_choices_type: typeof item.shopper_choices,
+        shopper_choices_keys: item.shopper_choices ? Object.keys(item.shopper_choices) : []
+      }))
+    })
+    
+    // Fetch attribute templates for displaying shopper choices
+    await fetchAttributeTemplates()
   } catch (err) {
     console.error('Error loading order:', err)
     error.value = 'Failed to load order details. Please try again.'
@@ -730,6 +760,72 @@ const goToProduct = (productId) => {
 const truncateText = (text, maxLength) => {
   if (!text) return ''
   return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
+}
+
+// Fetch attribute templates for products in order
+const fetchAttributeTemplates = async () => {
+  try {
+    // Get store category from sessionStorage (default store)
+    const storeCategoryId = sessionStorage.getItem('defaultStore')
+    
+    if (!storeCategoryId) {
+      console.warn('No default store category found, cannot fetch attribute templates')
+      return
+    }
+    
+    // Fetch attribute templates for the store category
+    const response = await apiService.getStoreAttributesByStoreCategory({ 
+      store_category_id: storeCategoryId 
+    })
+    
+    const templates = response.data?.templates || []
+    const templatesMap = {}
+    templates.forEach(template => {
+      // Store both string and number keys for flexible lookup
+      const id = template.id
+      const label = template.label || template.name
+      templatesMap[id] = label
+      templatesMap[String(id)] = label
+      templatesMap[Number(id)] = label
+    })
+    
+    attributeTemplatesMap.value = templatesMap
+  } catch (error) {
+    console.warn('Failed to fetch attribute templates:', error)
+  }
+}
+
+// Helper to check if item has shopper choices
+const hasShopperChoices = (item) => {
+  if (!item) return false
+  if (!item.shopper_choices) return false
+  if (typeof item.shopper_choices !== 'object') return false
+  if (Array.isArray(item.shopper_choices)) return false
+  const keys = Object.keys(item.shopper_choices)
+  return keys.length > 0
+}
+
+const formatShopperChoice = (attrId, value) => {
+  // Convert attrId to string for consistent lookup (handle both number and string IDs)
+  const attrIdStr = String(attrId)
+  
+  // Get the attribute label from the mapping (try both string and number keys)
+  const label = attributeTemplatesMap.value[attrIdStr] || 
+                attributeTemplatesMap.value[Number(attrIdStr)] || 
+                `Attribute ${attrIdStr}`
+  
+  // Format the value
+  let formattedValue = ''
+  if (Array.isArray(value)) {
+    formattedValue = value.join(', ')
+  } else if (typeof value === 'boolean') {
+    formattedValue = value ? 'Yes' : 'No'
+  } else {
+    formattedValue = String(value)
+  }
+  
+  // Return "label: value" format
+  return `${label}: ${formattedValue}`
 }
 
 const formatDate = (dateString) => {

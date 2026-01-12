@@ -26,6 +26,20 @@
                 <div class="flex-1 min-w-0">
                   <h3 class="text-sm font-semibold text-gray-900 capitalize mb-0.5 leading-tight">{{ product.product_name }}</h3>
                   <p class="text-xs text-gray-500 mb-1">{{ product.seller_name || '---' }}</p>
+                  
+                  <!-- Shopper Choices Display -->
+                  <div v-if="product.shopper_choices && Object.keys(product.shopper_choices).length > 0" class="mt-1.5 mb-1">
+                    <div class="flex flex-wrap gap-1">
+                      <span 
+                        v-for="(value, attrId) in product.shopper_choices" 
+                        :key="attrId" 
+                        class="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded border border-blue-300"
+                      >
+                        {{ formatShopperChoice(attrId, value) }}
+                      </span>
+                    </div>
+                  </div>
+                  
                   <div class="flex items-center text-blue-600 text-xs font-medium">
                     <Truck class="w-3 h-3 mr-1" />
                     {{ product.delivery_info?.estimated_delivery_display || $t('cart.standard_delivery') }}
@@ -233,6 +247,7 @@ import { useCRMStore } from '@/stores/crm'
 import { useRouter } from 'vue-router'
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useCurrency } from '@/composables/useCurrency'
+import { apiService } from '@/services/api'
 import BackButtonHeader from '@/components/BackButtonHeader.vue'
 import { 
   ArrowLeft, Trash2, Truck, Minus, Plus, ShoppingCart, AlertTriangle 
@@ -242,6 +257,9 @@ const cart = useCartStore()
 const crmStore = useCRMStore()
 const router = useRouter()
 const { formatPrice } = useCurrency()
+
+// Attribute templates mapping (attribute_template_id -> label)
+const attributeTemplatesMap = ref({})
 
 // Add warning dialog
 const showWarningDialog = ref(false)
@@ -274,6 +292,9 @@ onMounted(async () => {
     // Force refresh cart data to ensure we have the latest
     console.log('🔄 Force refreshing cart data...')
     await cart.fetchCart()
+    
+    // Fetch attribute templates for displaying shopper choices
+    await fetchAttributeTemplates()
     
     console.log('📊 Cart data after refresh:', {
       total_amount: cart.items?.total_amount,
@@ -344,6 +365,7 @@ const groupedCartItems = computed(() => {
         seller_name: item.seller_name,
         main_image: item.main_image,
         delivery_info: item.delivery_info,
+        shopper_choices: item.shopper_choices || {}, // Include shopper_choices from the first item
         variants: []
       };
     }
@@ -356,6 +378,13 @@ const groupedCartItems = computed(() => {
         product_id: item.product_id
       });
     });
+    
+    // If this item has shopper_choices and the grouped item doesn't, use this one
+    // (or merge if needed - for now, use the first non-empty one)
+    if (item.shopper_choices && Object.keys(item.shopper_choices).length > 0 && 
+        (!grouped[item.product_id].shopper_choices || Object.keys(grouped[item.product_id].shopper_choices).length === 0)) {
+      grouped[item.product_id].shopper_choices = item.shopper_choices;
+    }
   });
 
   return Object.values(grouped);
@@ -414,6 +443,54 @@ const totalWithDelivery = computed(() => {
   // Ensure we return a proper number
   return Math.round(total * 100) / 100;
 });
+
+// Fetch attribute templates for products in cart
+const fetchAttributeTemplates = async () => {
+  try {
+    // Get store category from sessionStorage (default store)
+    const storeCategoryId = sessionStorage.getItem('defaultStore')
+    
+    if (!storeCategoryId) {
+      console.warn('No default store category found, cannot fetch attribute templates')
+      return
+    }
+    
+    // Fetch attribute templates for the store category
+    const response = await apiService.getStoreAttributesByStoreCategory({ 
+      store_category_id: storeCategoryId 
+    })
+    
+    const templates = response.data?.templates || []
+    const templatesMap = {}
+    templates.forEach(template => {
+      templatesMap[template.id] = template.label || template.name
+    })
+    
+    attributeTemplatesMap.value = templatesMap
+    console.log('📋 Loaded attribute templates:', templatesMap)
+  } catch (error) {
+    console.warn('Failed to fetch attribute templates:', error)
+  }
+}
+
+// Format shopper choice for display with label
+const formatShopperChoice = (attrId, value) => {
+  // Get the attribute label from the mapping
+  const label = attributeTemplatesMap.value[attrId] || `Attribute ${attrId}`
+  
+  // Format the value
+  let formattedValue = ''
+  if (Array.isArray(value)) {
+    formattedValue = value.join(', ')
+  } else if (typeof value === 'boolean') {
+    formattedValue = value ? 'Yes' : 'No'
+  } else {
+    formattedValue = String(value)
+  }
+  
+  // Return "label: value" format
+  return `${label}: ${formattedValue}`
+}
 </script>
 
 <style scoped>

@@ -2048,7 +2048,8 @@ const placeOrder = async () => {
           product_variant_id: variant.id,
           quantity: variant.quantity,
           price: variant.price,
-          seller_id: cartItem.seller_id
+          seller_id: cartItem.seller_id,
+          shopper_choices: cartItem.shopper_choices || {} // Include shopper_choices from cart item
         }))
       ),
       shipping_address: `${selectedAddress.value.address_line1}, ${selectedAddress.value.city}, ${selectedAddress.value.state} ${selectedAddress.value.postal_code}, ${selectedAddress.value.country}`,

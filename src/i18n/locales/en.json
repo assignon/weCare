@@ -99,6 +99,13 @@
     "active": "Active",
     "sold": "Sold",
     "inquiries": "Inquiries"
+  },
+  "product": {
+    "customize_options": "Customize Your Selection",
+    "select_option": "Select an option",
+    "enter_value": "Enter value",
+    "select_one": "Select one",
+    "please_select_all_required_options": "Please select all required options"
   }
 }
 

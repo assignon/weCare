@@ -1850,10 +1850,11 @@ onMounted(async () => {
       try {
         const resp = await apiService.getStoreCategories({ is_active: true })
         storeCategories.value = resp.data?.results || resp.data || []
-        const defaultStore = sessionStorage.getItem('defaultStore')
-        if (!defaultStore) {
-          showStoreDialog.value = true
-        }
+        // Don't show store dialog when shopper is logged in
+        // const defaultStore = sessionStorage.getItem('defaultStore')
+        // if (!defaultStore) {
+        //   showStoreDialog.value = true
+        // }
       } catch (e) {
         console.warn('Failed to load store categories on Home:', e)
       }

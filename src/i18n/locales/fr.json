@@ -219,6 +219,11 @@
     "keep_me_updated": "Tenez-moi informé",
     "request_pending": "Demande en attente",
     "request_viewing": "Demander une visite",
+    "select_option": "Sélectionner une option",
+    "enter_value": "Entrer une valeur",
+    "customize_options": "Personnalisez votre sélection",
+    "select_one": "Sélectionner un(e)",
+    "please_select_all_required_options": "Veuillez sélectionner toutes les options requises",
     "product_liked": "Produit aimé",
     "product_unliked": "Produit non aimé",
     "failed_to_update_like": "Échec de la mise à jour du statut d'aimé",
@@ -226,7 +231,10 @@
     "similar_products": "Produits similaires",
     "products_from_same_category": "Produits de la même catégorie",
     "product_types": "Types de produits",
-    "loading_details": "Chargement des détails du produit..."
+    "loading_details": "Chargement des détails du produit...",
+    "customize_options": "Personnalisez votre sélection",
+    "select_option": "Sélectionner une option",
+    "enter_value": "Entrer une valeur"
   },
   "profile": {
     "title": "Profil",

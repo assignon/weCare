@@ -361,17 +361,18 @@ const navigateToProfile = () => {
 }
 
 const openStoreDialog = async () => {
-  activeTab.value = 'store'
-  try {
-    if (storeCategories.value.length === 0) {
-      const resp = await apiService.getStoreCategories({ is_active: true })
-      storeCategories.value = resp.data?.results || resp.data || []
-    }
-    showStoreDialog.value = true
-  } catch (e) {
-    console.warn('Failed to load store categories:', e)
-    showStoreDialog.value = true
-  }
+  // Don't show store dialog when shopper is logged in
+  // activeTab.value = 'store'
+  // try {
+  //   if (storeCategories.value.length === 0) {
+  //     const resp = await apiService.getStoreCategories({ is_active: true })
+  //     storeCategories.value = resp.data?.results || resp.data || []
+  //   }
+  //   showStoreDialog.value = true
+  // } catch (e) {
+  //   console.warn('Failed to load store categories:', e)
+  //   showStoreDialog.value = true
+  // }
 }
 
 const closeStoreDialog = () => {
