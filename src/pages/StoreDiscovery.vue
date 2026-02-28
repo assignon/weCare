@@ -1,26 +1,26 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="page-container">
     <!-- Header -->
-    <div class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+    <div class="bg-white shadow-nav border-b border-grey-200 sticky top-0 z-40">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="py-4">
           <div class="flex items-center justify-between mb-4">
-            <h1 class="text-2xl font-bold text-gray-900">Discover Stores</h1>
+            <h1 class="text-2xl font-bold text-navy">Discover Stores</h1>
             
             <!-- View Toggle -->
             <div class="flex items-center space-x-3">
-              <div class="flex border border-gray-300 rounded-lg">
+              <div class="flex border border-grey-200 rounded-2xl">
                 <button
                   @click="viewMode = 'grid'"
-                  :class="viewMode === 'grid' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-50'"
-                  class="p-2 rounded-l-lg transition-colors"
+                  :class="viewMode === 'grid' ? 'bg-navy text-white' : 'text-grey-500 hover:bg-grey-50'"
+                  class="p-2 rounded-l-2xl transition-colors"
                 >
                   <Grid class="h-4 w-4" />
                 </button>
                 <button
                   @click="viewMode = 'list'"
-                  :class="viewMode === 'list' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-50'"
-                  class="p-2 rounded-r-lg transition-colors"
+                  :class="viewMode === 'list' ? 'bg-navy text-white' : 'text-grey-500 hover:bg-grey-50'"
+                  class="p-2 rounded-r-2xl transition-colors"
                 >
                   <List class="h-4 w-4" />
                 </button>
@@ -28,7 +28,7 @@
               
               <button
                 @click="showFilters = !showFilters"
-                class="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                class="flex items-center px-4 py-2 border border-grey-200 rounded-2xl hover:bg-grey-50"
               >
                 <Filter class="w-4 h-4 mr-2" />
                 Filters
@@ -39,14 +39,14 @@
           <!-- Search Bar -->
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search class="h-5 w-5 text-gray-400" />
+              <Search class="h-5 w-5 text-grey-400" />
             </div>
             <input
               v-model="searchQuery"
               @input="handleSearch"
               type="text"
               placeholder="Search stores by name, category, or location..."
-              class="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="input w-full pl-10 pr-4 py-3"
             />
           </div>
 
@@ -55,9 +55,9 @@
             <button
               @click="selectedCategory = null"
               :class="selectedCategory === null 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-white text-gray-700 hover:bg-gray-50'"
-              class="flex-shrink-0 px-4 py-2 rounded-full border border-gray-300 text-sm font-medium transition-colors"
+                ? 'bg-navy text-white' 
+                : 'bg-white text-grey-500 hover:bg-grey-50'"
+              class="flex-shrink-0 px-4 py-2 rounded-full border border-grey-200 text-sm font-medium transition-colors"
             >
               All Categories
             </button>
@@ -66,9 +66,9 @@
               :key="category.id"
               @click="selectedCategory = category.id"
               :class="selectedCategory === category.id 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-white text-gray-700 hover:bg-gray-50'"
-              class="flex-shrink-0 px-4 py-2 rounded-full border border-gray-300 text-sm font-medium transition-colors"
+                ? 'bg-navy text-white' 
+                : 'bg-white text-grey-500 hover:bg-grey-50'"
+              class="flex-shrink-0 px-4 py-2 rounded-full border border-grey-200 text-sm font-medium transition-colors"
             >
               {{ category.name }}
             </button>
@@ -85,23 +85,23 @@
     >
       <div class="absolute inset-0 bg-black bg-opacity-50 lg:hidden"></div>
       <div 
-        class="absolute right-0 top-0 h-full w-80 bg-white shadow-xl transform lg:relative lg:translate-x-0 lg:shadow-none lg:w-64 overflow-y-auto"
+        class="absolute right-0 top-0 h-full w-80 bg-white shadow-float transform lg:relative lg:translate-x-0 lg:shadow-none lg:w-64 overflow-y-auto"
         @click.stop
       >
         <div class="p-6">
           <div class="flex items-center justify-between mb-6">
-            <h3 class="text-lg font-semibold text-gray-900">Filters</h3>
+            <h3 class="text-lg font-semibold text-navy">Filters</h3>
             <button @click="showFilters = false" class="lg:hidden">
-              <X class="h-5 w-5 text-gray-500" />
+              <X class="h-5 w-5 text-grey-400" />
             </button>
           </div>
 
           <!-- Location Filter -->
           <div class="mb-6">
-            <h4 class="text-sm font-medium text-gray-900 mb-3">Location</h4>
+            <h4 class="text-sm font-semibold text-navy mb-3">Location</h4>
             <select
               v-model="filters.location"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              class="select w-full"
             >
               <option value="">All Locations</option>
               <option v-for="location in locations" :key="location" :value="location">
@@ -112,7 +112,7 @@
 
           <!-- Rating Filter -->
           <div class="mb-6">
-            <h4 class="text-sm font-medium text-gray-900 mb-3">Minimum Rating</h4>
+            <h4 class="text-sm font-semibold text-navy mb-3">Minimum Rating</h4>
             <div class="space-y-2">
               <label 
                 v-for="rating in [5, 4, 3, 2]" 
@@ -123,18 +123,18 @@
                   v-model="filters.minRating"
                   :value="rating"
                   type="radio"
-                  class="text-blue-600 focus:ring-blue-500"
+                  class="text-navy focus:ring-navy"
                 />
                 <div class="ml-2 flex items-center">
                   <div class="flex">
                     <Star
                       v-for="i in 5"
                       :key="i"
-                      :class="i <= rating ? 'text-yellow-400' : 'text-gray-300'"
+                      :class="i <= rating ? 'text-yellow-400' : 'text-grey-200'"
                       class="h-4 w-4 fill-current"
                     />
                   </div>
-                  <span class="ml-1 text-sm text-gray-600">& up</span>
+                  <span class="ml-1 text-sm text-grey-500">& up</span>
                 </div>
               </label>
             </div>
@@ -142,41 +142,41 @@
 
           <!-- Store Features -->
           <div class="mb-6">
-            <h4 class="text-sm font-medium text-gray-900 mb-3">Features</h4>
+            <h4 class="text-sm font-semibold text-navy mb-3">Features</h4>
             <div class="space-y-2">
               <label class="flex items-center cursor-pointer">
                 <input
                   v-model="filters.freeShipping"
                   type="checkbox"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  class="rounded border-grey-200 text-navy focus:ring-navy"
                 />
-                <span class="ml-2 text-sm text-gray-700">Free Shipping</span>
+                <span class="ml-2 text-sm text-grey-500">Free Shipping</span>
               </label>
               <label class="flex items-center cursor-pointer">
                 <input
                   v-model="filters.verified"
                   type="checkbox"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  class="rounded border-grey-200 text-navy focus:ring-navy"
                 />
-                <span class="ml-2 text-sm text-gray-700">Verified Stores</span>
+                <span class="ml-2 text-sm text-grey-500">Verified Stores</span>
               </label>
               <label class="flex items-center cursor-pointer">
                 <input
                   v-model="filters.featured"
                   type="checkbox"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  class="rounded border-grey-200 text-navy focus:ring-navy"
                 />
-                <span class="ml-2 text-sm text-gray-700">Featured Stores</span>
+                <span class="ml-2 text-sm text-grey-500">Featured Stores</span>
               </label>
             </div>
           </div>
 
           <!-- Sort Options -->
           <div class="mb-6">
-            <h4 class="text-sm font-medium text-gray-900 mb-3">Sort By</h4>
+            <h4 class="text-sm font-semibold text-navy mb-3">Sort By</h4>
             <select
               v-model="filters.sortBy"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              class="select w-full"
             >
               <option value="featured">Featured</option>
               <option value="rating">Highest Rated</option>
@@ -188,7 +188,7 @@
 
           <button
             @click="applyFilters"
-            class="w-full py-2 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            class="btn-cta"
           >
             Apply Filters
           </button>
@@ -200,16 +200,16 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" :class="{ 'lg:pl-72': showFilters }">
       <!-- Featured Stores Section -->
       <div v-if="!searchQuery && !selectedCategory" class="mb-8">
-        <h2 class="text-xl font-semibold text-gray-900 mb-6">Featured Stores</h2>
+        <h2 class="text-xl font-bold text-navy mb-6">Featured Stores</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <div 
             v-for="store in featuredStores" 
             :key="store.id"
             @click="goToStore(store.id)"
-            class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group"
+            class="card overflow-hidden hover:shadow-float transition-all duration-200 cursor-pointer group"
           >
             <!-- Store Banner -->
-            <div class="relative h-32 bg-gradient-to-r from-blue-500 to-purple-600 overflow-hidden">
+            <div class="relative h-32 bg-navy overflow-hidden">
               <img
                 v-if="store.banner_image"
                 :src="store.banner_image"
@@ -232,7 +232,7 @@
                 class="absolute top-3 right-3 p-2 bg-white bg-opacity-90 rounded-full hover:bg-opacity-100 transition-colors"
               >
                 <Heart 
-                  :class="store.is_following ? 'text-red-500 fill-current' : 'text-gray-600'" 
+                  :class="store.is_following ? 'text-red-500 fill-current' : 'text-grey-500'" 
                   class="w-4 h-4" 
                 />
               </button>
@@ -245,20 +245,20 @@
                   <img
                     :src="store.logo || '/placeholder-store.jpg'"
                     :alt="store.store_name"
-                    class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-md"
+                    class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-card"
                   />
                   <div class="ml-3">
-                    <h3 class="font-semibold text-gray-900">{{ store.store_name }}</h3>
+                    <h3 class="font-semibold text-navy">{{ store.store_name }}</h3>
                     <div class="flex items-center mt-1">
                       <div class="flex">
                         <Star
                           v-for="i in 5"
                           :key="i"
-                          :class="i <= (store.rating || 0) ? 'text-yellow-400' : 'text-gray-300'"
+                          :class="i <= (store.rating || 0) ? 'text-yellow-400' : 'text-grey-200'"
                           class="w-4 h-4 fill-current"
                         />
                       </div>
-                      <span class="ml-1 text-sm text-gray-500">({{ store.review_count || 0 }})</span>
+                      <span class="ml-1 text-sm text-grey-400">({{ store.review_count || 0 }})</span>
                     </div>
                   </div>
                 </div>
@@ -269,21 +269,21 @@
                 </div>
               </div>
 
-              <p class="text-sm text-gray-600 mb-4 line-clamp-2">{{ store.description }}</p>
+              <p class="text-sm text-grey-500 mb-4 line-clamp-2">{{ store.description }}</p>
 
               <!-- Store Stats -->
               <div class="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <div class="text-lg font-bold text-gray-900">{{ store.product_count || 0 }}</div>
-                  <div class="text-xs text-gray-500">Products</div>
+                  <div class="text-lg font-bold text-navy">{{ store.product_count || 0 }}</div>
+                  <div class="text-xs text-grey-400">Products</div>
                 </div>
                 <div>
-                  <div class="text-lg font-bold text-gray-900">{{ store.follower_count || 0 }}</div>
-                  <div class="text-xs text-gray-500">Followers</div>
+                  <div class="text-lg font-bold text-navy">{{ store.follower_count || 0 }}</div>
+                  <div class="text-xs text-grey-400">Followers</div>
                 </div>
                 <div>
-                  <div class="text-lg font-bold text-gray-900">{{ store.order_count || 0 }}</div>
-                  <div class="text-xs text-gray-500">Orders</div>
+                  <div class="text-lg font-bold text-navy">{{ store.order_count || 0 }}</div>
+                  <div class="text-xs text-grey-400">Orders</div>
                 </div>
               </div>
 
@@ -292,7 +292,7 @@
                 <span 
                   v-for="tag in store.tags?.slice(0, 3)" 
                   :key="tag"
-                  class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
+                  class="px-2 py-1 bg-grey-50 text-grey-500 text-xs rounded-full"
                 >
                   {{ tag }}
                 </span>
@@ -305,30 +305,30 @@
       <!-- Store Results -->
       <div>
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-semibold text-gray-900">
+          <h2 class="text-xl font-bold text-navy">
             {{ searchQuery ? `Search results for "${searchQuery}"` : 'All Stores' }}
           </h2>
-          <p class="text-sm text-gray-500">{{ filteredStores.length }} stores found</p>
+          <p class="text-sm text-grey-400">{{ filteredStores.length }} stores found</p>
         </div>
 
         <!-- Loading State -->
         <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <div v-for="i in 9" :key="i" class="animate-pulse">
-            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-              <div class="h-32 bg-gray-300"></div>
+            <div class="card overflow-hidden">
+              <div class="h-32 bg-grey-200"></div>
               <div class="p-6">
                 <div class="flex items-center mb-4">
-                  <div class="w-12 h-12 bg-gray-300 rounded-full"></div>
+                  <div class="w-12 h-12 bg-grey-200 rounded-full"></div>
                   <div class="ml-3 flex-1">
-                    <div class="h-4 bg-gray-300 rounded mb-2"></div>
-                    <div class="h-3 bg-gray-300 rounded w-2/3"></div>
+                    <div class="h-4 bg-grey-200 rounded mb-2"></div>
+                    <div class="h-3 bg-grey-200 rounded w-2/3"></div>
                   </div>
                 </div>
-                <div class="h-3 bg-gray-300 rounded mb-4"></div>
+                <div class="h-3 bg-grey-200 rounded mb-4"></div>
                 <div class="grid grid-cols-3 gap-4">
-                  <div class="h-8 bg-gray-300 rounded"></div>
-                  <div class="h-8 bg-gray-300 rounded"></div>
-                  <div class="h-8 bg-gray-300 rounded"></div>
+                  <div class="h-8 bg-grey-200 rounded"></div>
+                  <div class="h-8 bg-grey-200 rounded"></div>
+                  <div class="h-8 bg-grey-200 rounded"></div>
                 </div>
               </div>
             </div>
@@ -362,12 +362,12 @@
 
         <!-- No Results -->
         <div v-if="!loading && filteredStores.length === 0" class="text-center py-16">
-          <Store class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 class="text-lg font-medium text-gray-900 mb-2">No stores found</h3>
-          <p class="text-gray-500 mb-4">Try adjusting your search or filters</p>
+          <Store class="w-16 h-16 text-grey-200 mx-auto mb-4" />
+          <h3 class="text-lg font-bold text-navy mb-2">No stores found</h3>
+          <p class="text-grey-400 mb-4">Try adjusting your search or filters</p>
           <button
             @click="clearFilters"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            class="btn btn-primary px-4 py-2"
           >
             Clear Filters
           </button>
@@ -377,7 +377,7 @@
         <div v-if="hasMore && !loading" class="text-center mt-8">
           <button
             @click="loadMore"
-            class="px-6 py-3 bg-white border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            class="btn btn-outlined px-6 py-3"
           >
             Load More Stores
           </button>

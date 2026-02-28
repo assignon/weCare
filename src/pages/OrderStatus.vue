@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen bg-white pb-32">
+  <div class="page-container pb-32">
     <BackButtonHeader :title="`#${orderId}`" />
     <div class="p-3 pt-4">
       <!-- Header Info -->
       <div class="mb-3 flex items-center justify-between">
-        <p v-if="order" class="text-xs text-gray-600 flex items-center">
+        <p v-if="order" class="text-xs text-grey-400 flex items-center">
           <Calendar class="w-3 h-3 mr-1" />
           {{ $t('order_detail.placed_on') }} {{ formatDate(order.created_at) }}
         </p>
@@ -12,7 +12,7 @@
         <!-- Status Badge -->
         <div v-if="order" 
              :class="[
-               'px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1',
+               'px-2.5 py-1.5 rounded-full text-xs font-semibold flex items-center space-x-1',
                getStatusClasses(order.status)
              ]"
         >
@@ -24,14 +24,14 @@
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-12">
         <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Loader2 class="w-6 h-6 text-blue-600 animate-spin" />
+          <Loader2 class="w-6 h-6 text-navy animate-spin" />
         </div>
-        <h3 class="text-sm font-semibold text-gray-800 mb-1">{{ $t('order_detail.loading') }}</h3>
-        <p class="text-xs text-gray-600">{{ $t('order_detail.loading_subtitle') }}</p>
+        <h3 class="text-sm font-semibold text-navy mb-1">{{ $t('order_detail.loading') }}</h3>
+        <p class="text-xs text-grey-400">{{ $t('order_detail.loading_subtitle') }}</p>
       </div>
 
       <!-- Error State -->
-      <div v-if="error" class="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+      <div v-if="error" class="mb-3 p-3 bg-red-50 border border-red-200 rounded-2xl">
         <div class="flex items-center">
           <div class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
             <AlertCircle class="w-3.5 h-3.5 text-red-600" />
@@ -40,7 +40,7 @@
             <h4 class="text-xs font-semibold text-red-800 mb-0.5">{{ $t('order_detail.error_loading') }}</h4>
             <p class="text-xs text-red-700">{{ error }}</p>
           </div>
-          <button @click="error = null" class="w-6 h-6 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors flex-shrink-0">
+          <button @click="error = null" class="w-6 h-6 bg-red-100 hover:bg-red-200 rounded-2xl flex items-center justify-center transition-colors flex-shrink-0">
             <X class="w-3.5 h-3.5 text-red-600" />
           </button>
         </div>
@@ -49,16 +49,16 @@
       <!-- Order Content -->
       <div v-if="!loading && order" class="space-y-2">
             <!-- Order Notes -->
-        <div v-if="order.notes || order.status === 'on_hold'" class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+        <div v-if="order.notes || order.status === 'on_hold'" class="card p-3">
           <div class="flex items-center space-x-1.5 mb-2">
             <div class="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <FileText class="w-3 h-3 text-blue-600" />
+              <FileText class="w-3 h-3 text-navy" />
             </div>
-            <h3 class="text-sm font-semibold text-gray-900">{{ $t('order_detail.order_notes') }}</h3>
+            <h3 class="text-sm font-semibold text-navy">{{ $t('order_detail.order_notes') }}</h3>
           </div>
           
           <!-- On Hold Status Special Notes -->
-          <div v-if="order.status === 'on_hold'" class="p-3 bg-amber-50 border border-amber-200 rounded-lg mb-2">
+          <div v-if="order.status === 'on_hold'" class="p-3 bg-amber-50 border border-amber-200 rounded-2xl mb-2">
             <div class="flex items-start space-x-2">
               <AlertTriangle class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
               <div>
@@ -68,7 +68,7 @@
                 </p>
                 
                 <!-- Show new expected delivery date if available -->
-                <div v-if="order.expected_delivery_date" class="bg-amber-100 p-2 rounded-lg border border-amber-300">
+                <div v-if="order.expected_delivery_date" class="bg-amber-100 p-2 rounded-2xl border border-amber-300">
                   <div class="flex items-center space-x-1.5 mb-1">
                     <Calendar class="w-3 h-3 text-amber-700" />
                     <span class="text-xs font-medium text-amber-800">{{ $t('order_detail.new_expected_delivery_date') }}</span>
@@ -82,7 +82,7 @@
                 </div>
                 
                 <!-- Show delivery time if available -->
-                <div v-if="order.expected_delivery_time" class="bg-amber-100 p-2 rounded-lg border border-amber-300 mt-1.5">
+                <div v-if="order.expected_delivery_time" class="bg-amber-100 p-2 rounded-2xl border border-amber-300 mt-1.5">
                   <div class="flex items-center space-x-1.5 mb-1">
                     <Clock class="w-3 h-3 text-amber-700" />
                     <span class="text-xs font-medium text-amber-800">{{ $t('order_detail.expected_delivery_time') }}</span>
@@ -96,10 +96,10 @@
           </div>
           
           <!-- Regular order notes -->
-          <div v-if="order.notes && order.status !== 'wrong_delivery'" class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p class="text-xs text-gray-700">{{ order.notes }}</p>
+          <div v-if="order.notes && order.status !== 'wrong_delivery'" class="p-3 bg-grey-50 rounded-2xl">
+            <p class="text-xs text-grey-500">{{ order.notes }}</p>
           </div>
-          <div v-if="order.status === 'wrong_delivery'" class="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <div v-if="order.status === 'wrong_delivery'" class="p-3 bg-amber-50 border border-amber-200 rounded-2xl">
             <div class="flex items-start space-x-2">
               <AlertTriangle class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
               <div>
@@ -119,7 +119,7 @@
             v-if="order.status === 'delivered_no_confirmation'"
             @click="showDeliveryConfirmDialog = true"
             :disabled="updatingStatus"
-            class="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+            class="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
           >
             <Loader2 v-if="updatingStatus" class="w-3 h-3 animate-spin" />
             <CheckCircle v-else class="w-3 h-3" />
@@ -131,7 +131,7 @@
             v-if="order.status === 'delivered' && canReportWrongDelivery"
             @click="showWrongDeliveryDialog = true"
             :disabled="updatingStatus"
-            class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+            class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
           >
             <AlertTriangle class="w-3 h-3" />
             <span>{{ $t('order_detail.report_wrong_delivery') }}</span>
@@ -139,19 +139,19 @@
         </div>
 
         <!-- Order Items -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+        <div class="card p-3">
           <div class="flex items-center space-x-1.5 mb-2">
             <div class="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
               <Package class="w-3 h-3 text-purple-600" />
             </div>
-            <h3 class="text-sm font-semibold text-gray-900">{{ $t('order_detail.order_items') }}</h3>
+            <h3 class="text-sm font-semibold text-navy">{{ $t('order_detail.order_items') }}</h3>
           </div>
           
           <div class="space-y-2">
             <div 
               v-for="(item, index) in order.items" 
               :key="index"
-              class="flex items-start space-x-2 p-2 bg-gray-50 rounded-lg border border-gray-100"
+              class="flex items-start space-x-2 p-2 bg-grey-50 rounded-2xl border border-grey-100"
             >
               <div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
                 <img 
@@ -160,16 +160,16 @@
                   :alt="item.product?.name"
                   class="w-full h-full object-cover"
                 />
-                <div v-else class="w-full h-full bg-gray-200 flex items-center justify-center">
-                  <Package class="w-4 h-4 text-gray-400" />
+                <div v-else class="w-full h-full bg-grey-200 flex items-center justify-center">
+                  <Package class="w-4 h-4 text-grey-300" />
                 </div>
             </div>
 
               <div class="flex-1 min-w-0">
-                <h4 class="text-xs font-semibold text-gray-900 truncate">
+                <h4 class="text-xs font-semibold text-navy truncate">
                   {{ item.product?.name || $t('order_detail.product') }}
                 </h4>
-                <p class="text-xs text-gray-600 mt-0.5">
+                <p class="text-xs text-grey-400 mt-0.5">
                   {{ $t('order_detail.variant') }}: {{ item.product_variant?.name || $t('order_detail.standard') }} ML
                 </p>
                 <!-- Shopper Choices - Display under variant -->
@@ -182,11 +182,11 @@
                     {{ formatShopperChoice(String(attrId), value) }}
                   </span>
                 </div>
-                <p class="text-xs text-gray-600">
+                <p class="text-xs text-grey-400">
                   {{ $t('order_detail.quantity') }}: {{ item.quantity }}
                 </p>
                 <!-- Delivery info for each product -->
-                <div v-if="item.delivery_date || item.delivery_timeslot || order.expected_delivery_date" class="mt-1.5 p-1.5 bg-amber-50 rounded-lg border border-amber-200">
+                <div v-if="item.delivery_date || item.delivery_timeslot || order.expected_delivery_date" class="mt-1.5 p-1.5 bg-amber-50 rounded-2xl border border-amber-200">
                   <div class="flex items-center space-x-1 mb-0.5">
                     <Truck class="w-2.5 h-2.5 text-amber-600" />
                     <span class="text-xs font-medium text-amber-700">{{ $t('order_detail.delivery_info') }}</span>
@@ -201,7 +201,7 @@
               </div>
 
               <div class="text-right flex-shrink-0">
-                <p class="text-xs font-semibold text-gray-900">
+                <p class="text-xs font-semibold text-navy">
                   {{ formatApiPrice({ price: item.price * item.quantity, currency_info: item.currency_info }) }}
                 </p>
               </div>
@@ -210,44 +210,44 @@
             </div>
 
         <!-- Delivery Information -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+        <div class="card p-3">
           <div class="flex items-center space-x-1.5 mb-2">
             <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
               <Truck class="w-3 h-3 text-green-600" />
             </div>
-            <h3 class="text-sm font-semibold text-gray-900">{{ $t('order_detail.delivery_information') }}</h3>
+            <h3 class="text-sm font-semibold text-navy">{{ $t('order_detail.delivery_information') }}</h3>
             </div>
 
           <div class="space-y-1.5">
             <div class="flex items-center space-x-1.5 text-xs">
-              <MapPin class="w-3 h-3 text-gray-500 flex-shrink-0" />
-              <span class="text-gray-700">{{ order.shipping_address }}</span>
+              <MapPin class="w-3 h-3 text-grey-400 flex-shrink-0" />
+              <span class="text-grey-500">{{ order.shipping_address }}</span>
             </div>
             <div v-if="order.expected_delivery_time" class="flex items-center space-x-1.5 text-xs">
-              <Clock class="w-3 h-3 text-gray-500 flex-shrink-0" />
-              <span class="text-gray-700">{{ $t('order_detail.expected') }}: {{ formatDeliveryTime(order.expected_delivery_time) }}</span>
+              <Clock class="w-3 h-3 text-grey-400 flex-shrink-0" />
+              <span class="text-grey-500">{{ $t('order_detail.expected') }}: {{ formatDeliveryTime(order.expected_delivery_time) }}</span>
             </div>
           </div>
         </div>
 
         <!-- Order Summary -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+        <div class="card p-3">
           <div class="flex items-center space-x-1.5 mb-2">
             <div class="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <Receipt class="w-3 h-3 text-blue-600" />
+              <Receipt class="w-3 h-3 text-navy" />
             </div>
-            <h3 class="text-sm font-semibold text-gray-900">{{ $t('order_detail.order_summary') }}</h3>
+            <h3 class="text-sm font-semibold text-navy">{{ $t('order_detail.order_summary') }}</h3>
           </div>
           
           <div class="space-y-2">
             <!-- Product Breakdown -->
             <div v-if="order.items && order.items.length > 0" class="space-y-1.5">
-              <h4 class="text-xs font-semibold text-gray-700 mb-1.5">{{ $t('order_detail.product_details') }}:</h4>
+              <h4 class="text-xs font-semibold text-grey-500 mb-1.5">{{ $t('order_detail.product_details') }}:</h4>
               <div class="space-y-1.5 max-h-32 overflow-y-auto">
                 <div 
                   v-for="(item, index) in order.items" 
                   :key="index"
-                  class="p-2 bg-gray-50 rounded-lg border border-gray-100"
+                  class="p-2 bg-grey-50 rounded-2xl border border-grey-100"
                 >
                   <div class="flex items-start space-x-1.5">
                     <div class="w-6 h-6 rounded-lg overflow-hidden flex-shrink-0">
@@ -257,43 +257,43 @@
                         :alt="item.product?.name"
                         class="w-full h-full object-cover"
                       />
-                      <div v-else class="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <Package class="w-3 h-3 text-gray-400" />
+                      <div v-else class="w-full h-full bg-grey-200 flex items-center justify-center">
+                        <Package class="w-3 h-3 text-grey-300" />
                       </div>
                     </div>
                     <div class="flex-1 min-w-0">
-                      <h5 class="text-xs font-semibold text-gray-900 truncate">
+                      <h5 class="text-xs font-semibold text-navy truncate">
                         {{ item.product?.name || 'Product' }}
                       </h5>
                       <div class="space-y-0.5 mt-0.5">
                         <div class="flex justify-between items-center text-xs">
-                          <span class="text-gray-600">{{ $t('order_detail.variant') }}:</span>
-                          <span class="font-medium text-gray-900">{{ item.product_variant?.name || $t('order_detail.standard') }} ML</span>
+                          <span class="text-grey-400">{{ $t('order_detail.variant') }}:</span>
+                          <span class="font-medium text-navy">{{ item.product_variant?.name || $t('order_detail.standard') }} ML</span>
                         </div>
                         <div class="flex justify-between items-center text-xs">
-                          <span class="text-gray-600">{{ $t('order_detail.quantity') }}:</span>
-                          <span class="font-medium text-gray-900">{{ item.quantity }}</span>
+                          <span class="text-grey-400">{{ $t('order_detail.quantity') }}:</span>
+                          <span class="font-medium text-navy">{{ item.quantity }}</span>
                         </div>
                         <div class="flex justify-between items-center text-xs">
-                          <span class="text-gray-600">{{ $t('order_detail.price') }}:</span>
-                          <span class="font-medium text-gray-900">
+                          <span class="text-grey-400">{{ $t('order_detail.price') }}:</span>
+                          <span class="font-medium text-navy">
                             {{ formatApiPrice({ price: item.price, currency_info: order.currency_info }) }} {{ $t('order_detail.each') }}
                           </span>
                         </div>
-                        <div class="flex justify-between items-center text-xs font-semibold text-gray-900 pt-0.5 border-t border-gray-200">
+                        <div class="flex justify-between items-center text-xs font-semibold text-navy pt-0.5 border-t border-grey-200">
                           <span>{{ $t('order_detail.subtotal') }}:</span>
                           <span>{{ formatApiPrice({ price: item.price * item.quantity, currency_info: order.currency_info }) }}</span>
                         </div>
                         <!-- Delivery info for each product in summary -->
-                        <div v-if="item.delivery_date || item.delivery_timeslot || order.expected_delivery_date" class="mt-1.5 pt-1.5 border-t border-gray-200">
+                        <div v-if="item.delivery_date || item.delivery_timeslot || order.expected_delivery_date" class="mt-1.5 pt-1.5 border-t border-grey-200">
                           <div class="flex items-center space-x-1 mb-0.5">
                             <Truck class="w-2.5 h-2.5 text-green-600" />
                             <span class="text-xs font-medium text-green-700">{{ $t('order_detail.delivery') }}</span>
                           </div>
-                          <div v-if="item.delivery_date || order.expected_delivery_date" class="text-xs text-gray-600">
+                          <div v-if="item.delivery_date || order.expected_delivery_date" class="text-xs text-grey-400">
                             <strong>{{ $t('order_detail.date') }}:</strong> {{ formatDate(item.delivery_date || order.expected_delivery_date) }}
                           </div>
-                          <div v-if="item.delivery_timeslot || order.expected_delivery_time" class="text-xs text-gray-600">
+                          <div v-if="item.delivery_timeslot || order.expected_delivery_time" class="text-xs text-grey-400">
                             <strong>{{ $t('order_detail.time') }}:</strong> {{ formatTimeSlot(item.delivery_timeslot || order.expected_delivery_time) }}
                           </div>
                         </div>
@@ -305,22 +305,22 @@
             </div>
             
             <!-- Price Summary -->
-            <div class="space-y-1.5 pt-2 border-t border-gray-200">
+            <div class="space-y-1.5 pt-2 border-t border-grey-200">
               <div class="flex justify-between items-center text-xs">
-                <span class="text-gray-600">{{ $t('order_detail.subtotal') }}</span>
-                <span class="font-semibold text-gray-900">
+                <span class="text-grey-400">{{ $t('order_detail.subtotal') }}</span>
+                <span class="font-semibold text-navy">
                   {{ formatApiPrice({ price: parseFloat(order.total_amount) || 0, currency_info: order.currency_info }) }}
                 </span>
                   </div>
               <div v-if="order.delivery_fee && parseFloat(order.delivery_fee) > 0" class="flex justify-between items-center text-xs">
-                <span class="text-gray-600">{{ $t('order_detail.delivery_fee') }}</span>
-                <span class="font-semibold text-gray-900">
+                <span class="text-grey-400">{{ $t('order_detail.delivery_fee') }}</span>
+                <span class="font-semibold text-navy">
                   {{ formatApiPrice({ price: parseFloat(order.delivery_fee) || 0, currency_info: order.currency_info }) }}
                 </span>
                   </div>
-              <div class="flex justify-between items-center pt-1.5 border-t border-gray-200">
-                <span class="text-sm font-bold text-gray-900">{{ $t('order_detail.total') }}</span>
-                <span class="text-base font-bold text-blue-600">
+              <div class="flex justify-between items-center pt-1.5 border-t border-grey-200">
+                <span class="text-sm font-bold text-navy">{{ $t('order_detail.total') }}</span>
+                <span class="text-base font-bold text-navy">
                       {{ formatApiPrice({ price: (parseFloat(order.total_amount) || 0) + (parseFloat(order.delivery_fee) || 0), currency_info: order.currency_info }) }}
                     </span>
                   </div>
@@ -329,45 +329,45 @@
         </div>
 
             <!-- Payment Information -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+        <div class="card p-3">
           <div class="flex items-center space-x-1.5 mb-2">
             <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
               <CreditCard class="w-3 h-3 text-green-600" />
             </div>
-            <h3 class="text-sm font-semibold text-gray-900">{{ $t('order_detail.payment_information') }}</h3>
+            <h3 class="text-sm font-semibold text-navy">{{ $t('order_detail.payment_information') }}</h3>
           </div>
           
           <div class="space-y-1.5">
             <div v-if="order.payment" class="flex justify-between items-center text-xs">
-              <span class="text-gray-600">{{ $t('order_detail.payment_method') }}:</span>
-              <span class="font-medium text-gray-900 capitalize">
+              <span class="text-grey-400">{{ $t('order_detail.payment_method') }}:</span>
+              <span class="font-medium text-navy capitalize">
                 {{ formatPaymentMethod(order.payment.payment_method) || $t('order_detail.not_specified') }}
               </span>
             </div>
             
             <div v-if="order.payment" class="flex justify-between items-center text-xs">
-              <span class="text-gray-600">{{ $t('order_detail.payment_status') }}:</span>
-              <span class="font-medium text-gray-900 capitalize">
+              <span class="text-grey-400">{{ $t('order_detail.payment_status') }}:</span>
+              <span class="font-medium text-navy capitalize">
                 {{ formatPaymentStatus(order.payment.payment_status) || $t('order_detail.not_specified') }}
               </span>
             </div>
             
             <div v-if="!order.payment" class="text-center py-3">
-              <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-1.5">
-                <CreditCard class="w-4 h-4 text-gray-400" />
+              <div class="w-8 h-8 bg-grey-100 rounded-full flex items-center justify-center mx-auto mb-1.5">
+                <CreditCard class="w-4 h-4 text-grey-300" />
               </div>
-              <p class="text-gray-500 text-xs">{{ $t('order_detail.no_payment_info') }}</p>
+              <p class="text-grey-400 text-xs">{{ $t('order_detail.no_payment_info') }}</p>
             </div>
           </div>
                 </div>
 
         <!-- Order Timeline -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+        <div class="card p-3">
           <div class="flex items-center space-x-1.5 mb-2">
             <div class="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
               <Clock class="w-3 h-3 text-purple-600" />
             </div>
-            <h3 class="text-sm font-semibold text-gray-900">{{ $t('order_detail.order_timeline') }}</h3>
+            <h3 class="text-sm font-semibold text-navy">{{ $t('order_detail.order_timeline') }}</h3>
                 </div>
           
           <OrderStatusTimeline :order="order" />
@@ -378,13 +378,13 @@
     </div>
 
     <!-- Fixed Action Buttons Footer -->
-    <div v-if="order" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 shadow-lg z-50">
+    <div v-if="order" class="action-bar z-50">
       <div class="max-w-md mx-auto flex gap-2">
         <!-- Proceed Order Button (for on_hold status) -->
         <button 
           v-if="order.status === 'on_hold'"
           @click="showProceedConfirmDialog = true"
-          class="flex-1 px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold rounded-lg transition-all duration-200 flex items-center justify-center space-x-1.5"
+          class="flex-1 px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold rounded-2xl transition-all duration-200 flex items-center justify-center space-x-1.5"
         >
           <CheckCircle class="w-3.5 h-3.5" />
             <span>{{ $t('order_detail.proceed_with_order') }}</span>
@@ -394,7 +394,7 @@
         <button 
           v-if="canCancel(order.status)"
           @click="showCancelConfirmDialog = true"
-          class="flex-1 px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-lg transition-all duration-200 flex items-center justify-center space-x-1.5"
+          class="flex-1 px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-2xl transition-all duration-200 flex items-center justify-center space-x-1.5"
         >
           <X class="w-3.5 h-3.5" />
           <span>{{ $t('order_detail.cancel_order') }}</span>
@@ -404,7 +404,7 @@
         <button 
           v-if="canReorder(order.status)"
           @click="reorderItems"
-          class="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-all duration-200 flex items-center justify-center space-x-1.5"
+          class="flex-1 px-3 py-2 bg-navy hover:bg-navy/80 text-white text-xs font-semibold rounded-2xl transition-all duration-200 flex items-center justify-center space-x-1.5"
         >
           <RefreshCw class="w-3.5 h-3.5" />
           <span>{{ $t('order_detail.reorder_items') }}</span>
@@ -419,7 +419,7 @@
       @click="showCancelConfirmDialog = false"
     >
       <div 
-        class="bg-white rounded-lg p-5 max-w-md w-full shadow-xl"
+        class="bg-white rounded-2xl p-5 max-w-md w-full shadow-float"
         @click.stop
       >
         <div class="flex items-center mb-4">
@@ -427,22 +427,22 @@
             <AlertTriangle class="w-5 h-5 text-red-600" />
           </div>
           <div>
-            <h3 class="text-base font-bold text-gray-900">Cancel Order</h3>
-            <p class="text-gray-600 text-xs">Order #{{ orderId }}</p>
+            <h3 class="text-base font-bold text-navy">Cancel Order</h3>
+            <p class="text-grey-400 text-xs">Order #{{ orderId }}</p>
           </div>
         </div>
-        <p class="text-sm text-gray-700 mb-4">Are you sure you want to cancel this order? This action cannot be undone.</p>
+        <p class="text-sm text-grey-500 mb-4">Are you sure you want to cancel this order? This action cannot be undone.</p>
         <div class="flex space-x-2">
           <button 
             @click="showCancelConfirmDialog = false"
-            class="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+            class="flex-1 py-2.5 border border-grey-200 text-grey-500 text-sm font-semibold rounded-2xl hover:border-grey-300 hover:bg-grey-50 transition-all duration-200"
           >
             Keep Order
           </button>
           <button 
             @click="executeCancelOrder"
             :disabled="updatingStatus"
-            class="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
+            class="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
           >
             <Loader2 v-if="updatingStatus" class="w-3.5 h-3.5 animate-spin" />
             <X v-else class="w-3.5 h-3.5" />
@@ -459,7 +459,7 @@
       @click="showProceedConfirmDialog = false"
     >
       <div 
-        class="bg-white rounded-lg p-5 max-w-md w-full shadow-xl"
+        class="bg-white rounded-2xl p-5 max-w-md w-full shadow-float"
         @click.stop
       >
         <div class="flex items-center mb-4">
@@ -467,15 +467,15 @@
             <Play class="w-5 h-5 text-green-600" />
           </div>
           <div>
-            <h3 class="text-base font-bold text-gray-900">Proceed with Order</h3>
-            <p class="text-gray-600 text-xs">Order #{{ orderId }}</p>
+            <h3 class="text-base font-bold text-navy">Proceed with Order</h3>
+            <p class="text-grey-400 text-xs">Order #{{ orderId }}</p>
           </div>
         </div>
         <div class="mb-4">
-          <p class="text-sm text-gray-700 mb-3">Are you sure you want to proceed with this order? It will be moved to pending status.</p>
+          <p class="text-sm text-grey-500 mb-3">Are you sure you want to proceed with this order? It will be moved to pending status.</p>
           
           <!-- Express Delivery Refund Notice -->
-          <div v-if="hasExpressDelivery && expressDeliveryCost > 0" class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+          <div v-if="hasExpressDelivery && expressDeliveryCost > 0" class="bg-amber-50 border border-amber-200 rounded-2xl p-3">
             <div class="flex items-start space-x-2">
               <div class="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <Zap class="w-3.5 h-3.5 text-amber-600" />
@@ -485,7 +485,7 @@
                 <p class="text-amber-700 text-xs mb-2">
                   Since your order cannot be delivered the same day as originally planned, you will receive a refund for the express delivery cost.
                 </p>
-                <div class="bg-amber-100 p-2 rounded-lg border border-amber-300">
+                <div class="bg-amber-100 p-2 rounded-2xl border border-amber-300">
                   <div class="flex items-center justify-between">
                     <span class="text-amber-800 font-medium text-xs">Express Delivery Refund:</span>
                     <span class="text-amber-900 font-bold text-xs">{{ formatApiPrice(expressDeliveryCost) }} CFA</span>
@@ -499,14 +499,14 @@
         <div class="flex space-x-2">
           <button 
             @click="showProceedConfirmDialog = false"
-            class="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+            class="flex-1 py-2.5 border border-grey-200 text-grey-500 text-sm font-semibold rounded-2xl hover:border-grey-300 hover:bg-grey-50 transition-all duration-200"
           >
             Keep on Hold
           </button>
           <button 
             @click="executeProceedOrder"
             :disabled="updatingStatus"
-            class="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
+            class="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
           >
             <Loader2 v-if="updatingStatus" class="w-3.5 h-3.5 animate-spin" />
             <Play v-else class="w-3.5 h-3.5" />
@@ -523,30 +523,30 @@
       @click="showDeliveryConfirmDialog = false"
     >
       <div 
-        class="bg-white rounded-lg p-5 max-w-md w-full shadow-xl"
+        class="bg-white rounded-2xl p-5 max-w-md w-full shadow-float"
         @click.stop
       >
         <div class="flex items-center mb-4">
           <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-            <CheckCircle class="w-5 h-5 text-blue-600" />
+            <CheckCircle class="w-5 h-5 text-navy" />
           </div>
           <div>
-            <h3 class="text-base font-bold text-gray-900">{{ $t('order_detail.confirm_delivery') }}</h3>
-            <p class="text-gray-600 text-xs">Order #{{ orderId }}</p>
+            <h3 class="text-base font-bold text-navy">{{ $t('order_detail.confirm_delivery') }}</h3>
+            <p class="text-grey-400 text-xs">Order #{{ orderId }}</p>
           </div>
         </div>
-        <p class="text-sm text-gray-700 mb-4">Please confirm that you have received your order. This will mark the order as delivered.</p>
+        <p class="text-sm text-grey-500 mb-4">Please confirm that you have received your order. This will mark the order as delivered.</p>
         <div class="flex space-x-2">
           <button 
             @click="showDeliveryConfirmDialog = false"
-            class="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+            class="flex-1 py-2.5 border border-grey-200 text-grey-500 text-sm font-semibold rounded-2xl hover:border-grey-300 hover:bg-grey-50 transition-all duration-200"
           >
             Not Yet
           </button>
           <button 
             @click="executeDeliveryConfirmation"
             :disabled="updatingStatus"
-            class="flex-1 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
+            class="flex-1 py-2.5 bg-navy hover:bg-navy/80 text-white text-sm font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
           >
             <Loader2 v-if="updatingStatus" class="w-3.5 h-3.5 animate-spin" />
             <CheckCircle v-else class="w-3.5 h-3.5" />
@@ -563,7 +563,7 @@
       @click="showWrongDeliveryDialog = false"
     >
       <div 
-        class="bg-white rounded-lg p-5 max-w-md w-full shadow-xl"
+        class="bg-white rounded-2xl p-5 max-w-md w-full shadow-float"
         @click.stop
       >
         <div class="flex items-center mb-4">
@@ -571,28 +571,28 @@
             <AlertTriangle class="w-5 h-5 text-amber-600" />
           </div>
           <div>
-            <h3 class="text-base font-bold text-gray-900">Report Wrong Delivery</h3>
-            <p class="text-gray-600 text-xs">Order #{{ orderId }}</p>
+            <h3 class="text-base font-bold text-navy">Report Wrong Delivery</h3>
+            <p class="text-grey-400 text-xs">Order #{{ orderId }}</p>
           </div>
         </div>
-        <p class="text-sm text-gray-700 mb-3">Please describe what was wrong with your delivery:</p>
+        <p class="text-sm text-grey-500 mb-3">Please describe what was wrong with your delivery:</p>
         <textarea 
           v-model="wrongDeliveryReason"
           placeholder="Describe the issue with your delivery..."
-          class="w-full p-3 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors resize-none"
+          class="w-full p-3 text-xs border border-grey-200 rounded-2xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors resize-none"
           rows="4"
         ></textarea>
         <div class="flex space-x-2 mt-4">
           <button 
             @click="showWrongDeliveryDialog = false"
-            class="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+            class="flex-1 py-2.5 border border-grey-200 text-grey-500 text-sm font-semibold rounded-2xl hover:border-grey-300 hover:bg-grey-50 transition-all duration-200"
           >
               Cancel
           </button>
           <button 
             @click="executeWrongDeliveryReport"
             :disabled="updatingStatus"
-            class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
+            class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
           >
             <Loader2 v-if="updatingStatus" class="w-3.5 h-3.5 animate-spin" />
             <AlertTriangle v-else class="w-3.5 h-3.5" />

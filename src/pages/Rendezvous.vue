@@ -1,14 +1,13 @@
 <template>
-  <div class="min-h-screen bg-white pb-24">
+  <div class="page-container pb-24">
     <!-- Header -->
-    <div class="sticky top-0 bg-white px-4 py-3 z-40 border-b border-gray-100">
+    <div class="sticky top-0 bg-white/90 backdrop-blur-md px-4 py-3 z-40">
       <div class="flex items-center justify-between">
-        <h1 class="text-xl font-semibold text-gray-900">{{ $t('rendezvous.title') }}</h1>
+        <h1 class="text-xl font-bold text-navy">{{ $t('rendezvous.title') }}</h1>
         <button 
           @click="refreshRequests"
           :disabled="loading"
-          class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm disabled:opacity-50"
-          style="background: linear-gradient(to right, #2563eb, #9333ea);"
+          class="w-10 h-10 bg-navy rounded-2xl flex items-center justify-center hover:opacity-90 transition-all duration-200 shadow-sm disabled:opacity-50"
         >
           <RefreshCw :class="['w-5 h-5 text-white', { 'animate-spin': loading }]" />
         </button>
@@ -18,26 +17,26 @@
     <!-- Stats Cards -->
     <div class="px-4 pt-4 pb-4">
       <div class="grid grid-cols-2 gap-3">
-        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+        <div class="card p-4">
           <div class="flex items-center">
-            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Calendar class="w-5 h-5 text-blue-600" />
+            <div class="w-10 h-10 bg-navy/10 rounded-xl flex items-center justify-center">
+              <Calendar class="w-5 h-5 text-navy" />
             </div>
             <div class="ml-3">
-              <p class="text-xs text-gray-500 font-medium">{{ $t('rendezvous.total_requests') }}</p>
-              <p class="text-lg font-bold text-gray-900">{{ stats.total_requests || 0 }}</p>
+              <p class="text-xs text-grey-500 font-medium">{{ $t('rendezvous.total_requests') }}</p>
+              <p class="text-lg font-bold text-navy">{{ stats.total_requests || 0 }}</p>
             </div>
           </div>
         </div>
         
-        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+        <div class="card p-4">
           <div class="flex items-center">
-            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+            <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
               <Clock class="w-5 h-5 text-orange-600" />
             </div>
             <div class="ml-3">
-              <p class="text-xs text-gray-500 font-medium">{{ $t('rendezvous.pending') }}</p>
-              <p class="text-lg font-bold text-gray-900">{{ stats.pending_requests || 0 }}</p>
+              <p class="text-xs text-grey-500 font-medium">{{ $t('rendezvous.pending') }}</p>
+              <p class="text-lg font-bold text-navy">{{ stats.pending_requests || 0 }}</p>
             </div>
           </div>
         </div>
@@ -47,13 +46,13 @@
     <!-- Loading State -->
     <div v-if="loading && !viewingRequests.length" class="px-4">
       <div class="space-y-3">
-        <div v-for="i in 3" :key="i" class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm animate-pulse">
+        <div v-for="i in 3" :key="i" class="card p-4 animate-pulse">
           <div class="flex items-center space-x-4">
-            <div class="w-16 h-16 bg-gray-200 rounded-lg"></div>
+            <div class="w-16 h-16 bg-grey-200 rounded-2xl"></div>
             <div class="flex-1 space-y-2">
-              <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div class="h-3 bg-gray-200 rounded w-1/2"></div>
-              <div class="h-3 bg-gray-200 rounded w-1/4"></div>
+              <div class="h-4 bg-grey-200 rounded w-3/4"></div>
+              <div class="h-3 bg-grey-200 rounded w-1/2"></div>
+              <div class="h-3 bg-grey-200 rounded w-1/4"></div>
             </div>
           </div>
         </div>
@@ -62,7 +61,7 @@
 
     <!-- Error State -->
     <div v-if="error" class="px-4">
-      <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+      <div class="bg-red-50 rounded-2xl shadow-card p-4">
         <div class="flex items-center">
           <AlertCircle class="w-5 h-5 text-red-500 mr-3" />
           <span class="text-red-700 font-medium">{{ error }}</span>
@@ -72,17 +71,17 @@
 
     <!-- Empty State -->
     <div v-if="!loading && groupedProducts.length === 0" class="px-4">
-      <div class="bg-white rounded-xl p-8 text-center border border-gray-200 shadow-sm">
-        <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-          <Calendar class="w-8 h-8 text-gray-400" />
+      <div class="card p-8 text-center">
+        <div class="w-16 h-16 bg-grey-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Calendar class="w-8 h-8 text-grey-400" />
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $t('rendezvous.no_requests') }}</h3>
-        <p class="text-gray-600 mb-6">
+        <h3 class="text-lg font-bold text-navy mb-2">{{ $t('rendezvous.no_requests') }}</h3>
+        <p class="text-grey-500 mb-6">
           {{ $t('rendezvous.no_requests_message') }}
         </p>
         <button 
           @click="$router.push({ name: 'Explore' })"
-          class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+          class="btn btn-primary px-6 py-3 font-semibold"
         >
           {{ $t('rendezvous.explore_products') }}
         </button>
@@ -94,29 +93,29 @@
       <div
         v-for="productGroup in groupedProducts"
         :key="productGroup.product_id"
-        class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+        class="card overflow-hidden"
       >
         <!-- Product Header (Clickable to expand/collapse) -->
         <div 
           @click="toggleProduct(productGroup.product_id)"
-          class="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+          class="p-4 cursor-pointer hover:bg-grey-50 transition-colors"
         >
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3 flex-1">
               <img 
                 :src="productGroup.product_main_image || '/placeholder.jpg'" 
                 :alt="productGroup.product_name"
-                class="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                class="w-16 h-16 rounded-2xl object-cover flex-shrink-0"
               />
               <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-gray-900 text-base mb-1 truncate">{{ productGroup.product_name }}</h3>
-                <p class="text-sm text-gray-500 mb-1">{{ productGroup.store_name }}</p>
-                <p class="text-xs text-gray-400">{{ productGroup.requests.length }} {{ productGroup.requests.length !== 1 ? $t('rendezvous.requests') : $t('rendezvous.request') }}</p>
+                <h3 class="font-semibold text-navy text-base mb-1 truncate">{{ productGroup.product_name }}</h3>
+                <p class="text-sm text-grey-500 mb-1">{{ productGroup.store_name }}</p>
+                <p class="text-xs text-grey-400">{{ productGroup.requests.length }} {{ productGroup.requests.length !== 1 ? $t('rendezvous.requests') : $t('rendezvous.request') }}</p>
               </div>
             </div>
             <ChevronDown 
               :class="[
-                'w-5 h-5 text-gray-400 flex-shrink-0 ml-2 transition-transform duration-200',
+                'w-5 h-5 text-grey-400 flex-shrink-0 ml-2 transition-transform duration-200',
                 expandedProducts.includes(productGroup.product_id) ? 'rotate-180' : ''
               ]"
             />
@@ -134,14 +133,14 @@
         >
           <div 
             v-if="expandedProducts.includes(productGroup.product_id)"
-            class="border-t border-gray-100"
+            class="border-t border-grey-100"
           >
             <div class="space-y-2 p-2">
               <div
                 v-for="request in productGroup.requests"
                 :key="request.id"
                 @click.stop="navigateToDetail(request.id)"
-                class="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-all duration-200 active:scale-[0.98]"
+                class="p-3 card-flat cursor-pointer hover:bg-grey-100 transition-all duration-200 active:scale-[0.98]"
               >
                 <div class="flex items-center justify-between">
                   <div class="flex-1 min-w-0">
@@ -154,16 +153,16 @@
                       >
                         {{ request.status_display }}
                       </div>
-                      <span class="text-xs text-gray-500">{{ formatDate(request.created_at) }}</span>
+                      <span class="text-xs text-grey-500">{{ formatDate(request.created_at) }}</span>
                     </div>
-                    <div class="text-xs text-gray-600">
+                    <div class="text-xs text-grey-500">
                       <span class="font-medium">{{ $t('rendezvous.preferred') }}:</span> {{ formatDate(request.preferred_date) }} {{ $t('rendezvous.at') }} {{ formatTime(request.preferred_time) }}
                     </div>
                     <div v-if="request.status === 'SCHEDULED' && request.scheduled_date" class="text-xs text-green-600 mt-1">
                       <span class="font-medium">{{ $t('rendezvous.scheduled') }}:</span> {{ formatDate(request.scheduled_date) }} {{ $t('rendezvous.at') }} {{ formatTime(request.scheduled_time) }}
                     </div>
                   </div>
-                  <ChevronDown class="w-4 h-4 text-gray-400 flex-shrink-0 ml-2 rotate-[-90deg]" />
+                  <ChevronDown class="w-4 h-4 text-grey-400 flex-shrink-0 ml-2 rotate-[-90deg]" />
                 </div>
               </div>
             </div>
@@ -179,17 +178,17 @@
       @click="handleHistoryModalOverlayClick"
     >
       <div 
-        class="bg-white rounded-3xl max-w-md w-full max-h-[80vh] overflow-y-auto"
+        class="bg-white rounded-3xl max-w-md w-full max-h-[80vh] overflow-y-auto shadow-float"
         @click.stop
       >
-        <div class="sticky top-0 bg-white rounded-t-3xl border-b border-gray-100 px-6 py-4">
+        <div class="sticky top-0 bg-white rounded-t-3xl border-b border-grey-100 px-6 py-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-bold text-gray-900">{{ $t('rendezvous.request_history') }}</h3>
+            <h3 class="text-lg font-bold text-navy">{{ $t('rendezvous.request_history') }}</h3>
             <button 
               @click="showHistoryModal = false"
-              class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              class="w-8 h-8 rounded-full bg-grey-100 flex items-center justify-center hover:bg-grey-200 transition-colors"
             >
-              <X class="w-5 h-5 text-gray-500" />
+              <X class="w-5 h-5 text-grey-500" />
             </button>
           </div>
         </div>
@@ -197,30 +196,30 @@
         <div class="p-6">
           <div v-if="loadingHistory" class="space-y-4">
             <div v-for="i in 3" :key="i" class="animate-pulse">
-              <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-              <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+              <div class="h-4 bg-grey-200 rounded w-3/4 mb-2"></div>
+              <div class="h-3 bg-grey-200 rounded w-1/2"></div>
             </div>
           </div>
           
           <div v-else-if="requestHistory.length === 0" class="text-center py-8">
-            <p class="text-gray-500">{{ $t('rendezvous.no_history_available') }}</p>
+            <p class="text-grey-500">{{ $t('rendezvous.no_history_available') }}</p>
           </div>
           
           <div v-else class="space-y-4">
             <div
               v-for="history in requestHistory"
               :key="history.id"
-              class="border-l-4 border-blue-200 pl-4 py-2"
+              class="border-l-4 border-navy/20 pl-4 py-2"
             >
               <div class="flex items-center justify-between">
-                <span class="font-medium text-gray-900">
+                <span class="font-medium text-navy">
                   {{ history.old_status_display ? `${history.old_status_display} → ` : '' }}
                   {{ history.new_status_display }}
                 </span>
-                <span class="text-xs text-gray-500">{{ formatDateTime(history.changed_at) }}</span>
+                <span class="text-xs text-grey-500">{{ formatDateTime(history.changed_at) }}</span>
               </div>
-              <p class="text-sm text-gray-600">{{ $t('rendezvous.by') }} {{ history.changed_by_name }}</p>
-              <p v-if="history.notes" class="text-sm text-gray-700 mt-1">{{ history.notes }}</p>
+              <p class="text-sm text-grey-500">{{ $t('rendezvous.by') }} {{ history.changed_by_name }}</p>
+              <p v-if="history.notes" class="text-sm text-grey-400 mt-1">{{ history.notes }}</p>
             </div>
           </div>
         </div>
@@ -242,25 +241,25 @@
         @click="closeChat"
       >
         <div 
-          class="bg-white rounded-t-3xl w-full h-[80vh] flex flex-col shadow-2xl"
+          class="bg-white rounded-t-3xl w-full h-[80vh] flex flex-col shadow-float"
           @click.stop
           style="margin-bottom: 0;"
         >
           <!-- Chat Header -->
-          <div class="sticky top-0 bg-white border-b border-gray-100 px-6 py-5 rounded-t-3xl shadow-sm">
+          <div class="sticky top-0 bg-white border-b border-grey-100 px-6 py-5 rounded-t-3xl shadow-nav">
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-4">
                 <div class="relative">
                   <img 
                     :src="selectedChatRequest?.product_main_image || '/placeholder.jpg'" 
                     :alt="selectedChatRequest?.product_name"
-                    class="w-12 h-12 rounded-xl object-cover shadow-md ring-2 ring-white"
+                    class="w-12 h-12 rounded-2xl object-cover shadow-card ring-2 ring-white"
                   />
                   <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                 </div>
                 <div>
-                  <h3 class="font-semibold text-gray-900 text-lg">{{ selectedChatRequest?.product_name }}</h3>
-                  <p class="text-sm text-gray-500 flex items-center">
+                  <h3 class="font-semibold text-navy text-lg">{{ selectedChatRequest?.product_name }}</h3>
+                  <p class="text-sm text-grey-500 flex items-center">
                     <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                     {{ selectedChatRequest?.store_name }}
                   </p>
@@ -268,28 +267,28 @@
               </div>
               <button 
                 @click="closeChat"
-                class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all duration-200 hover:scale-105"
+                class="w-10 h-10 rounded-full bg-grey-100 hover:bg-grey-200 flex items-center justify-center transition-all duration-200 hover:scale-105"
               >
-                <X class="w-5 h-5 text-gray-600" />
+                <X class="w-5 h-5 text-grey-500" />
               </button>
             </div>
           </div>
           
           <!-- Chat Messages -->
-          <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-gray-50/50 to-white min-h-0">
+          <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-grey-50 min-h-0">
             <div v-if="loadingChat" class="flex justify-center py-12">
               <div class="flex flex-col items-center space-y-3">
-                <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-200 border-t-blue-600"></div>
-                <p class="text-sm text-gray-500">{{ $t('rendezvous.loading_messages') }}</p>
+                <div class="animate-spin rounded-full h-10 w-10 border-4 border-navy/20 border-t-navy"></div>
+                <p class="text-sm text-grey-500">{{ $t('rendezvous.loading_messages') }}</p>
               </div>
             </div>
             
             <div v-else-if="chatMessages.length === 0" class="text-center py-16">
-              <div class="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MessageCircle class="w-10 h-10 text-blue-600" />
+              <div class="w-20 h-20 bg-navy/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MessageCircle class="w-10 h-10 text-navy" />
               </div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $t('rendezvous.start_conversation') }}</h3>
-              <p class="text-gray-500">{{ $t('rendezvous.start_conversation_message') }}</p>
+              <h3 class="text-lg font-bold text-navy mb-2">{{ $t('rendezvous.start_conversation') }}</h3>
+              <p class="text-grey-500">{{ $t('rendezvous.start_conversation_message') }}</p>
             </div>
             
             <div v-else class="space-y-4">
@@ -303,17 +302,17 @@
               >
                 <div
                   :class="[
-                    'max-w-xs lg:max-w-md px-5 py-3 rounded-xl shadow-sm',
+                    'max-w-xs lg:max-w-md px-5 py-3 rounded-2xl shadow-card',
                     message.sender_type === 'SELLER'
-                      ? 'bg-purple-600 text-white ml-12' 
-                      : 'bg-blue-600 text-white mr-12'
+                      ? 'bg-grey-100 text-navy ml-12' 
+                      : 'bg-navy text-white mr-12'
                   ]"
                 >
                   <p class="text-sm leading-relaxed">{{ message.content }}</p>
                   <p 
                     :class="[
                       'text-xs mt-2 opacity-70',
-                      message.sender_type === 'SELLER' ? 'text-purple-100' : 'text-blue-100'
+                      message.sender_type === 'SELLER' ? 'text-grey-500' : 'text-white/70'
                     ]"
                   >
                     {{ formatDateTime(message.created_at) }}
@@ -324,7 +323,7 @@
           </div>
           
           <!-- Chat Input -->
-          <div class="bg-white border-t border-gray-100 p-3 shadow-lg flex-shrink-0">
+          <div class="bg-white border-t border-grey-100 p-3 shadow-nav flex-shrink-0">
             <div class="flex items-end space-x-2">
               <div class="flex-1 relative">
                 <input
@@ -332,18 +331,17 @@
                   @keyup.enter="sendMessage"
                   type="text"
                   :placeholder="$t('rendezvous.type_your_message')"
-                  class="w-full px-3 py-2 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200 placeholder-gray-400 text-sm"
+                  class="input w-full px-3 py-2 pr-10 text-sm"
                   :disabled="sendingMessage"
                 />
                 <div class="absolute right-2 top-1/2 transform -translate-y-1/2">
-                  <div v-if="sendingMessage" class="animate-spin rounded-full h-4 w-4 border-2 border-blue-200 border-t-blue-600"></div>
+                  <div v-if="sendingMessage" class="animate-spin rounded-full h-4 w-4 border-2 border-navy/20 border-t-navy"></div>
                 </div>
               </div>
               <button
                 @click="sendMessage"
                 :disabled="!newMessage.trim() || sendingMessage"
-                style="background: linear-gradient(to right, #2563eb, #9333ea);"
-                class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                class="w-10 h-10 bg-navy rounded-2xl flex items-center justify-center hover:opacity-90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-card"
               >
                 <Send v-if="!sendingMessage" class="w-4 h-4 text-white" />
               </button>

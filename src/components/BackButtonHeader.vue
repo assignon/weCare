@@ -1,15 +1,13 @@
 <template>
-  <div class="sticky top-0 z-10 bg-white border-b px-4 py-3 w-full">
+  <div class="sticky top-0 z-10 bg-white/90 backdrop-blur-md px-5 py-3 w-full">
     <div class="flex items-center gap-3 w-full">
       <button 
         @click="goBack" 
-        class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-colors"
+        class="w-10 h-10 flex items-center justify-center rounded-2xl bg-grey-50 hover:bg-grey-100 transition-colors"
       >
-        <div class="gradient-arrow-wrapper">
-          <ArrowLeft class="w-6 h-6" />
-        </div>
+        <ArrowLeft class="w-5 h-5 text-navy" />
       </button>
-      <h1 class="text-md font-semibold">{{ title }}</h1>
+      <h1 class="text-base font-bold text-navy">{{ title }}</h1>
       <div v-if="$slots.right" class="ml-auto">
         <slot name="right"></slot>
       </div>
@@ -46,25 +44,3 @@ const goBack = () => {
   }
 }
 </script>
-
-<style scoped>
-.gradient-arrow-wrapper {
-  position: relative;
-  width: 24px;
-  height: 24px;
-  background: linear-gradient(to right, #8c36ea, #3060eb);
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 19-7-7 7-7'/%3E%3Cpath d='M19 12H5'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 19-7-7 7-7'/%3E%3Cpath d='M19 12H5'/%3E%3C/svg%3E");
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-}
-
-.gradient-arrow-wrapper :deep(svg) {
-  display: none;
-}
-</style>
-

@@ -126,8 +126,7 @@ export const useProductStore = defineStore('product', () => {
   const fetchProductById = async (productId) => {
     loading.value = true
     error.value = null
-    currentProduct.value = null
-    
+    // Don't set currentProduct to null - avoids triggering watchers twice (null then data) and possible refresh loops
     try {
       const response = await apiService.getProductDetails(productId)
       currentProduct.value = response.data
@@ -135,6 +134,7 @@ export const useProductStore = defineStore('product', () => {
     } catch (err) {
       console.error(`Failed to fetch product ${productId}:`, err)
       error.value = 'Failed to load product details. Please try again later.'
+      currentProduct.value = null
       throw err
     } finally {
       loading.value = false

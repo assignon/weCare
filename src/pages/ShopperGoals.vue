@@ -336,7 +336,7 @@ onMounted(async () => {
 <style scoped>
 .goals-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #1a1a2e;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -375,14 +375,14 @@ onMounted(async () => {
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #7C3AED, #A855F7);
+    background: #1a1a2e;
     border-radius: 4px;
     transition: width 0.3s ease;
 }
 
 .progress-text {
     font-size: 14px;
-    color: #666;
+    color: #6b7280;
     font-weight: 500;
 }
 
@@ -445,13 +445,14 @@ onMounted(async () => {
 .step-title {
     font-size: 28px;
     font-weight: 700;
-    color: #1a2233;
+    color: #1a1a2e;
     margin-bottom: 8px;
+    font-family: 'Poppins', sans-serif;
 }
 
 .step-subtitle {
     font-size: 16px;
-    color: #666;
+    color: #6b7280;
     line-height: 1.5;
 }
 
@@ -489,28 +490,26 @@ onMounted(async () => {
 }
 
 .option-card {
-    background: #f8f9fa;
-    border: 2px solid #e9ecef;
+    background: #f9fafb;
     border-radius: 16px;
     padding: 24px;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
     text-align: center;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 .option-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    border-color: #7C3AED;
 }
 
 .option-card.active {
-    background: linear-gradient(135deg, #7C3AED, #A855F7);
-    border-color: #7C3AED;
+    background: #1a1a2e;
     color: white;
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
+    box-shadow: 0 8px 24px rgba(26, 26, 46, 0.3);
 }
 
 .option-icon {
@@ -555,7 +554,7 @@ onMounted(async () => {
 .complete-btn {
     min-width: 140px;
     height: 48px;
-    border-radius: 24px;
+    border-radius: 9999px;
     font-weight: 600;
     text-transform: none;
     letter-spacing: 0.5px;
@@ -563,7 +562,7 @@ onMounted(async () => {
 
 .back-btn {
     height: 48px;
-    border-radius: 24px;
+    border-radius: 9999px;
     font-weight: 600;
     text-transform: none;
 }
@@ -584,19 +583,20 @@ onMounted(async () => {
 .completion-title {
     font-size: 32px;
     font-weight: 700;
-    color: #1a2233;
+    color: #1a1a2e;
     margin-bottom: 16px;
+    font-family: 'Poppins', sans-serif;
 }
 
 .completion-subtitle {
     font-size: 18px;
-    color: #666;
+    color: #6b7280;
     line-height: 1.6;
     margin-bottom: 32px;
 }
 
 .profile-summary {
-    background: #f8f9fa;
+    background: #f9fafb;
     border-radius: 16px;
     padding: 24px;
     margin-bottom: 32px;
@@ -606,9 +606,10 @@ onMounted(async () => {
 .profile-summary h3 {
     font-size: 20px;
     font-weight: 600;
-    color: #1a2233;
+    color: #1a1a2e;
     margin-bottom: 16px;
     text-align: center;
+    font-family: 'Poppins', sans-serif;
 }
 
 .summary-item {
@@ -617,7 +618,7 @@ onMounted(async () => {
     gap: 12px;
     padding: 8px 0;
     font-size: 16px;
-    color: #333;
+    color: #4b5563;
 }
 
 .completion-actions {

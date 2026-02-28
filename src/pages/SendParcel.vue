@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white">
+  <div class="min-h-screen bg-white page-container">
     <!-- Map Container -->
     <div class="relative h-screen">
       <!-- Map -->
@@ -24,8 +24,8 @@
       <!-- Active Drivers Count (Middle) -->
       <div class="absolute top-20 left-1/2 transform -translate-x-1/2 z-30">
         <div class="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg flex items-center space-x-2">
-          <Truck class="w-4 h-4 text-blue-600" />
-          <span class="text-sm font-semibold text-gray-900">{{ activeDriversCount }} {{ $t('send_parcel.active_drivers') }}</span>
+          <Truck class="w-4 h-4 text-navy" />
+          <span class="text-sm font-semibold text-navy">{{ activeDriversCount }} {{ $t('send_parcel.active_drivers') }}</span>
         </div>
       </div>
 
@@ -37,19 +37,19 @@
         <div class="p-6 overflow-y-auto" style="max-height: 65vh;">
           <!-- Drag Handle -->
           <div class="flex justify-center mb-4">
-            <div class="w-12 h-1 bg-gray-300 rounded-full"></div>
+            <div class="w-12 h-1 bg-grey-300 rounded-full"></div>
           </div>
 
           <!-- Step 1: Location Selection -->
           <div v-if="currentStep === 1" class="space-y-4">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">{{ $t('send_parcel.select_locations') }}</h2>
+            <h2 class="text-xl font-bold text-navy mb-4">{{ $t('send_parcel.select_locations') }}</h2>
             
             <!-- Pickup Location Search -->
             <div class="relative">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('send_parcel.pickup_location') }}</label>
+              <label class="block text-sm font-semibold text-grey-700 mb-2">{{ $t('send_parcel.pickup_location') }}</label>
               <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MapPin class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                  <MapPin class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
                 </div>
                 <input 
                   v-model="pickupSearchQuery"
@@ -58,24 +58,24 @@
                   @blur="hidePickupSuggestions"
                   type="text"
                   :placeholder="$t('send_parcel.pickup_placeholder')"
-                  class="input pl-10 pr-10 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input pl-10 pr-10 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-navy focus:border-navy"
                 />
-                <Search class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <Search class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-grey-400 pointer-events-none" />
               </div>
               
               <!-- Pickup Suggestions Dropdown -->
               <div 
                 v-if="showPickupSuggestions && pickupSuggestions.length > 0"
-                class="absolute z-50 w-full mt-1 bg-white border-2 border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+                class="absolute z-50 w-full mt-1 bg-white border-2 border-grey-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
                 style="top: 100%; left: 0;"
               >
                 <div
                   v-for="(suggestion, index) in pickupSuggestions"
                   :key="index"
                   @mousedown.prevent="selectLocation('pickup', suggestion)"
-                  class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                  class="p-3 hover:bg-grey-100 cursor-pointer border-b border-grey-100 last:border-b-0"
                 >
-                  <p class="text-sm font-semibold text-gray-900">{{ suggestion.display_name }}</p>
+                  <p class="text-sm font-semibold text-navy">{{ suggestion.display_name }}</p>
                 </div>
               </div>
               
@@ -93,10 +93,10 @@
 
             <!-- Dropoff Location Search -->
             <div class="relative">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('send_parcel.dropoff_location') }}</label>
+              <label class="block text-sm font-semibold text-grey-700 mb-2">{{ $t('send_parcel.dropoff_location') }}</label>
               <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MapPin class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                  <MapPin class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
                 </div>
                 <input 
                   v-model="dropoffSearchQuery"
@@ -105,24 +105,24 @@
                   @blur="hideDropoffSuggestions"
                   type="text"
                   :placeholder="$t('send_parcel.dropoff_placeholder')"
-                  class="input pl-10 pr-10 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input pl-10 pr-10 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-navy focus:border-navy"
                 />
-                <Search class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <Search class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-grey-400 pointer-events-none" />
               </div>
               
               <!-- Dropoff Suggestions Dropdown -->
               <div 
                 v-if="showDropoffSuggestions && dropoffSuggestions.length > 0"
-                class="absolute z-50 w-full mt-1 bg-white border-2 border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+                class="absolute z-50 w-full mt-1 bg-white border-2 border-grey-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
                 style="top: 100%; left: 0;"
               >
                 <div
                   v-for="(suggestion, index) in dropoffSuggestions"
                   :key="index"
                   @mousedown.prevent="selectLocation('dropoff', suggestion)"
-                  class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                  class="p-3 hover:bg-grey-100 cursor-pointer border-b border-grey-100 last:border-b-0"
                 >
-                  <p class="text-sm font-semibold text-gray-900">{{ suggestion.display_name }}</p>
+                  <p class="text-sm font-semibold text-navy">{{ suggestion.display_name }}</p>
                 </div>
               </div>
               
@@ -142,8 +142,7 @@
             <button
               @click="goToStep(2)"
               :disabled="!pickupLocation || !dropoffLocation"
-              class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-              style="background: linear-gradient(to right, #2563eb, #9333ea);"
+              class="w-full py-4 bg-navy text-white font-bold rounded-2xl hover:bg-navy/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
             >
               {{ $t('common.next') }}
             </button>
@@ -151,30 +150,30 @@
 
           <!-- Step 2: Package Details -->
           <div v-if="currentStep === 2" class="space-y-4">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Package Details</h2>
+            <h2 class="text-xl font-bold text-navy mb-4">Package Details</h2>
             <!-- Delivery Type -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Delivery Type</label>
+              <label class="block text-sm font-semibold text-grey-700 mb-2">Delivery Type</label>
               <div class="grid grid-cols-2 gap-3">
                 <button
                   @click="form.delivery_type = 'same_day'"
                   :class="[
-                    'p-3 rounded-xl border-2 transition-all',
-                    form.delivery_type === 'same_day' ? 'border-blue-600 bg-blue-50' : 'border-gray-300'
+                    'p-3 rounded-2xl border-2 transition-all',
+                    form.delivery_type === 'same_day' ? 'border-navy bg-navy/5' : 'border-grey-300'
                   ]"
                 >
-                  <Clock class="w-5 h-5 mx-auto mb-1" :class="form.delivery_type === 'same_day' ? 'text-blue-600' : 'text-gray-500'" />
-                  <p :class="['text-sm font-semibold', form.delivery_type === 'same_day' ? 'text-blue-600' : 'text-gray-700']">Same Day</p>
+                  <Clock class="w-5 h-5 mx-auto mb-1" :class="form.delivery_type === 'same_day' ? 'text-navy' : 'text-grey-500'" />
+                  <p :class="['text-sm font-semibold', form.delivery_type === 'same_day' ? 'text-navy' : 'text-grey-700']">Same Day</p>
                 </button>
                 <button
                   @click="form.delivery_type = 'scheduled'"
                   :class="[
-                    'p-3 rounded-xl border-2 transition-all',
-                    form.delivery_type === 'scheduled' ? 'border-blue-600 bg-blue-50' : 'border-gray-300'
+                    'p-3 rounded-2xl border-2 transition-all',
+                    form.delivery_type === 'scheduled' ? 'border-navy bg-navy/5' : 'border-grey-300'
                   ]"
                 >
-                  <Calendar class="w-5 h-5 mx-auto mb-1" :class="form.delivery_type === 'scheduled' ? 'text-blue-600' : 'text-gray-500'" />
-                  <p :class="['text-sm font-semibold', form.delivery_type === 'scheduled' ? 'text-blue-600' : 'text-gray-700']">Scheduled</p>
+                  <Calendar class="w-5 h-5 mx-auto mb-1" :class="form.delivery_type === 'scheduled' ? 'text-navy' : 'text-grey-500'" />
+                  <p :class="['text-sm font-semibold', form.delivery_type === 'scheduled' ? 'text-navy' : 'text-grey-700']">Scheduled</p>
                 </button>
               </div>
             </div>
@@ -182,29 +181,29 @@
             <!-- Scheduled Date/Time (if scheduled delivery) -->
             <div v-if="form.delivery_type === 'scheduled'" class="space-y-3">
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Delivery Date</label>
+                <label class="block text-sm font-semibold text-grey-700 mb-2">Delivery Date</label>
                 <div class="relative group">
                   <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Calendar class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                    <Calendar class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
                   </div>
                   <input 
                     v-model="form.scheduled_date" 
                     type="date"
                     :min="today"
-                    class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-navy focus:border-navy"
                   />
                 </div>
               </div>
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Preferred Time</label>
+                <label class="block text-sm font-semibold text-grey-700 mb-2">Preferred Time</label>
                 <div class="relative group">
                   <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Clock class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                    <Clock class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
                   </div>
                   <input 
                     v-model="form.scheduled_time" 
                     type="time"
-                    class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-navy focus:border-navy"
                   />
                 </div>
               </div>
@@ -212,51 +211,51 @@
 
             <!-- Package Size -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Package Size</label>
+              <label class="block text-sm font-semibold text-grey-700 mb-2">Package Size</label>
               <div class="grid grid-cols-3 gap-2">
                 <button
                   v-for="size in packageSizes"
                   :key="size.value"
                   @click="form.package_size = size.value"
                   :class="[
-                    'p-3 rounded-xl border-2 transition-all',
-                    form.package_size === size.value ? 'border-blue-600 bg-blue-50' : 'border-gray-300'
+                    'p-3 rounded-2xl border-2 transition-all',
+                    form.package_size === size.value ? 'border-navy bg-navy/5' : 'border-grey-300'
                   ]"
                 >
-                  <Package class="w-5 h-5 mx-auto mb-1" :class="form.package_size === size.value ? 'text-blue-600' : 'text-gray-500'" />
-                  <p :class="['text-xs font-semibold', form.package_size === size.value ? 'text-blue-600' : 'text-gray-700']">{{ size.label }}</p>
+                  <Package class="w-5 h-5 mx-auto mb-1" :class="form.package_size === size.value ? 'text-navy' : 'text-grey-500'" />
+                  <p :class="['text-xs font-semibold', form.package_size === size.value ? 'text-navy' : 'text-grey-700']">{{ size.label }}</p>
                 </button>
               </div>
             </div>
 
             <!-- Pickup Landmark -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Pickup Landmark/Address</label>
+              <label class="block text-sm font-semibold text-grey-700 mb-2">Pickup Landmark/Address</label>
               <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MapPin class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                  <MapPin class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
                 </div>
                 <input 
                   v-model="form.pickup_landmark" 
                   type="text"
                   :placeholder="$t('send_parcel.pickup_landmark_placeholder')"
-                  class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-navy focus:border-navy"
                 />
               </div>
             </div>
 
             <!-- Dropoff Landmark -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Dropoff Landmark/Address</label>
+              <label class="block text-sm font-semibold text-grey-700 mb-2">Dropoff Landmark/Address</label>
               <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MapPin class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                  <MapPin class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
                 </div>
                 <input 
                   v-model="form.dropoff_landmark" 
                   type="text"
                   :placeholder="$t('send_parcel.dropoff_landmark_placeholder')"
-                  class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-navy focus:border-navy"
                 />
               </div>
             </div>
@@ -265,15 +264,14 @@
             <div class="flex space-x-3">
               <button
                 @click="goToStep(1)"
-                class="flex-1 py-3 bg-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-300 transition-all"
+                class="flex-1 py-3 bg-grey-200 text-grey-700 font-semibold rounded-2xl hover:bg-grey-300 transition-all"
               >
                 {{ $t('common.back') }}
               </button>
               <button
                 @click="goToStep(3)"
                 :disabled="costLoading"
-                class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg disabled:opacity-50"
-                style="background: linear-gradient(to right, #2563eb, #9333ea);"
+                class="flex-1 py-3 bg-navy text-white font-bold rounded-2xl hover:bg-navy/90 transition-all shadow-lg disabled:opacity-50"
               >
                 {{ $t('common.next') }}
               </button>
@@ -282,19 +280,19 @@
 
           <!-- Step 3: Recipient Details -->
           <div v-if="currentStep === 3" class="space-y-4">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">{{ $t('send_parcel.recipient_info') }}</h2>
+            <h2 class="text-xl font-bold text-navy mb-4">{{ $t('send_parcel.recipient_info') }}</h2>
 
             <!-- Recipient Name -->
             <div class="space-y-1">
               <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                  <User class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
                 </div>
                 <input 
                   v-model="form.recipient_name" 
                   type="text"
                   :placeholder="$t('send_parcel.recipient_name_placeholder')"
-                  class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-navy focus:border-navy"
                 />
               </div>
             </div>
@@ -303,13 +301,13 @@
             <div class="space-y-1">
               <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Phone class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                  <Phone class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
                 </div>
                 <input 
                   v-model="form.recipient_phone" 
                   type="tel"
                   :placeholder="$t('send_parcel.recipient_phone_placeholder')"
-                  class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-navy focus:border-navy"
                 />
               </div>
             </div>
@@ -318,13 +316,13 @@
             <div class="space-y-1">
               <div class="relative group">
                 <div class="absolute top-0 left-0 pl-3 pt-3 flex items-start pointer-events-none">
-                  <Package class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                  <Package class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
                 </div>
                 <textarea 
                   v-model="form.package_description" 
                   rows="3"
                   :placeholder="$t('send_parcel.package_description_placeholder')"
-                  class="input pl-10 pr-3 pt-3 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  class="input pl-10 pr-3 pt-3 text-sm transition-all duration-200 focus:ring-2 focus:ring-navy focus:border-navy resize-none"
                 ></textarea>
               </div>
             </div>
@@ -333,15 +331,14 @@
             <div class="flex space-x-3">
               <button
                 @click="goToStep(2)"
-                class="flex-1 py-3 bg-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-300 transition-all"
+                class="flex-1 py-3 bg-grey-200 text-grey-700 font-semibold rounded-2xl hover:bg-grey-300 transition-all"
               >
                 Back
               </button>
               <button
                 @click="goToStep(4)"
                 :disabled="!isFormValid"
-                class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg disabled:opacity-50"
-                style="background: linear-gradient(to right, #2563eb, #9333ea);"
+                class="flex-1 py-3 bg-navy text-white font-bold rounded-2xl hover:bg-navy/90 transition-all shadow-lg disabled:opacity-50"
               >
                 Review
               </button>
@@ -350,20 +347,20 @@
 
           <!-- Step 4: Review & Confirm -->
           <div v-if="currentStep === 4" class="space-y-4">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Review Delivery</h2>
+            <h2 class="text-xl font-bold text-navy mb-4">Review Delivery</h2>
 
             <!-- Locations Summary -->
-            <div class="bg-white rounded-xl p-4 border-2 border-gray-200">
-              <h3 class="text-sm font-semibold text-gray-700 mb-3">Locations</h3>
+            <div class="bg-white rounded-2xl p-4 shadow-card">
+              <h3 class="text-sm font-semibold text-grey-700 mb-3">Locations</h3>
               <div class="space-y-3">
                 <div class="flex items-start space-x-3">
                   <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
                     <MapPin class="w-4 h-4 text-green-600" />
                   </div>
                   <div class="flex-1">
-                    <p class="text-xs text-gray-500 mb-1">Pickup</p>
-                    <p class="text-sm font-semibold text-gray-900">{{ pickupLocation?.display_name }}</p>
-                    <p v-if="form.pickup_landmark" class="text-xs text-gray-600 mt-1">{{ form.pickup_landmark }}</p>
+                    <p class="text-xs text-grey-500 mb-1">Pickup</p>
+                    <p class="text-sm font-semibold text-navy">{{ pickupLocation?.display_name }}</p>
+                    <p v-if="form.pickup_landmark" class="text-xs text-grey-600 mt-1">{{ form.pickup_landmark }}</p>
                   </div>
                 </div>
                 <div class="flex items-start space-x-3">
@@ -371,88 +368,88 @@
                     <MapPin class="w-4 h-4 text-red-600" />
                   </div>
                   <div class="flex-1">
-                    <p class="text-xs text-gray-500 mb-1">Dropoff</p>
-                    <p class="text-sm font-semibold text-gray-900">{{ dropoffLocation?.display_name }}</p>
-                    <p v-if="form.dropoff_landmark" class="text-xs text-gray-600 mt-1">{{ form.dropoff_landmark }}</p>
+                    <p class="text-xs text-grey-500 mb-1">Dropoff</p>
+                    <p class="text-sm font-semibold text-navy">{{ dropoffLocation?.display_name }}</p>
+                    <p v-if="form.dropoff_landmark" class="text-xs text-grey-600 mt-1">{{ form.dropoff_landmark }}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- Package Details Summary -->
-            <div class="bg-white rounded-xl p-4 border-2 border-gray-200">
-              <h3 class="text-sm font-semibold text-gray-700 mb-3">Package Details</h3>
+            <div class="bg-white rounded-2xl p-4 shadow-card">
+              <h3 class="text-sm font-semibold text-grey-700 mb-3">Package Details</h3>
               <div class="space-y-2">
                 <div class="flex justify-between">
-                  <span class="text-xs text-gray-600">Package Size:</span>
-                  <span class="text-sm font-semibold text-gray-900">{{ getPackageSizeLabel(form.package_size) }}</span>
+                  <span class="text-xs text-grey-600">Package Size:</span>
+                  <span class="text-sm font-semibold text-navy">{{ getPackageSizeLabel(form.package_size) }}</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-xs text-gray-600">Delivery Type:</span>
-                  <span class="text-sm font-semibold text-gray-900">{{ form.delivery_type === 'same_day' ? 'Same Day' : 'Scheduled' }}</span>
+                  <span class="text-xs text-grey-600">Delivery Type:</span>
+                  <span class="text-sm font-semibold text-navy">{{ form.delivery_type === 'same_day' ? 'Same Day' : 'Scheduled' }}</span>
                 </div>
                 <div v-if="form.delivery_type === 'scheduled' && form.scheduled_date" class="flex justify-between">
-                  <span class="text-xs text-gray-600">Scheduled:</span>
-                  <span class="text-sm font-semibold text-gray-900">
+                  <span class="text-xs text-grey-600">Scheduled:</span>
+                  <span class="text-sm font-semibold text-navy">
                     {{ formatDate(form.scheduled_date) }} 
                     <span v-if="form.scheduled_time">at {{ form.scheduled_time }}</span>
                   </span>
                 </div>
-                <div v-if="form.package_description" class="pt-2 border-t border-gray-100">
-                  <p class="text-xs text-gray-600 mb-1">Description:</p>
-                  <p class="text-sm text-gray-700">{{ form.package_description }}</p>
+                <div v-if="form.package_description" class="pt-2 border-t border-grey-100">
+                  <p class="text-xs text-grey-600 mb-1">Description:</p>
+                  <p class="text-sm text-grey-700">{{ form.package_description }}</p>
                 </div>
               </div>
             </div>
 
             <!-- Recipient Summary -->
-            <div class="bg-white rounded-xl p-4 border-2 border-gray-200">
-              <h3 class="text-sm font-semibold text-gray-700 mb-3">Recipient</h3>
+            <div class="bg-white rounded-2xl p-4 shadow-card">
+              <h3 class="text-sm font-semibold text-grey-700 mb-3">Recipient</h3>
               <div class="space-y-2">
                 <div class="flex justify-between">
-                  <span class="text-xs text-gray-600">Name:</span>
-                  <span class="text-sm font-semibold text-gray-900">{{ form.recipient_name }}</span>
+                  <span class="text-xs text-grey-600">Name:</span>
+                  <span class="text-sm font-semibold text-navy">{{ form.recipient_name }}</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-xs text-gray-600">Phone:</span>
-                  <span class="text-sm font-semibold text-gray-900">{{ form.recipient_phone }}</span>
+                  <span class="text-xs text-grey-600">Phone:</span>
+                  <span class="text-sm font-semibold text-navy">{{ form.recipient_phone }}</span>
                 </div>
               </div>
             </div>
 
             <!-- Pricing Breakdown -->
-            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border-2 border-blue-200">
-              <h3 class="text-sm font-semibold text-gray-700 mb-3">Pricing Breakdown</h3>
+            <div class="bg-navy/5 rounded-2xl p-4 shadow-card">
+              <h3 class="text-sm font-semibold text-grey-700 mb-3">Pricing Breakdown</h3>
               <div class="space-y-2">
                 <div class="flex justify-between">
-                  <span class="text-xs text-gray-600">Distance:</span>
-                  <span class="text-sm font-semibold text-gray-900">{{ distance ? distance.toFixed(1) : '0' }} km</span>
+                  <span class="text-xs text-grey-600">Distance:</span>
+                  <span class="text-sm font-semibold text-navy">{{ distance ? distance.toFixed(1) : '0' }} km</span>
                 </div>
-                <div v-if="costData" class="space-y-1 pt-2 border-t border-blue-200">
+                <div v-if="costData" class="space-y-1 pt-2 border-t border-navy/20">
                   <div class="flex justify-between">
-                    <span class="text-xs text-gray-600">Base Fee:</span>
-                    <span class="text-sm font-semibold text-gray-900">{{ costData.base_fee }} CFA</span>
+                    <span class="text-xs text-grey-600">Base Fee:</span>
+                    <span class="text-sm font-semibold text-navy">{{ costData.base_fee }} CFA</span>
                   </div>
                   <div class="flex justify-between">
-                    <span class="text-xs text-gray-600">Distance Fee:</span>
-                    <span class="text-sm font-semibold text-gray-900">{{ costData.distance_fee }} CFA</span>
+                    <span class="text-xs text-grey-600">Distance Fee:</span>
+                    <span class="text-sm font-semibold text-navy">{{ costData.distance_fee }} CFA</span>
                   </div>
                   <div v-if="costData.package_size_multiplier > 1" class="flex justify-between">
-                    <span class="text-xs text-gray-600">Package Size ({{ getPackageSizeLabel(form.package_size) }}):</span>
-                    <span class="text-sm font-semibold text-gray-900">+{{ ((costData.subtotal * (costData.package_size_multiplier - 1))).toFixed(0) }} CFA</span>
+                    <span class="text-xs text-grey-600">Package Size ({{ getPackageSizeLabel(form.package_size) }}):</span>
+                    <span class="text-sm font-semibold text-navy">+{{ ((costData.subtotal * (costData.package_size_multiplier - 1))).toFixed(0) }} CFA</span>
                   </div>
                   <div v-if="costData.delivery_type_multiplier < 1" class="flex justify-between">
-                    <span class="text-xs text-gray-600">Scheduled Discount:</span>
+                    <span class="text-xs text-grey-600">Scheduled Discount:</span>
                     <span class="text-sm font-semibold text-green-600">-{{ ((costData.subtotal * costData.package_size_multiplier * (1 - costData.delivery_type_multiplier))).toFixed(0) }} CFA</span>
                   </div>
                   <div v-if="costData.express_fee && costData.express_fee > 0" class="flex justify-between">
-                    <span class="text-xs text-gray-600">Express Fee (Same Day):</span>
-                    <span class="text-sm font-semibold text-gray-900">+{{ costData.express_fee }} CFA</span>
+                    <span class="text-xs text-grey-600">Express Fee (Same Day):</span>
+                    <span class="text-sm font-semibold text-navy">+{{ costData.express_fee }} CFA</span>
                   </div>
                 </div>
-                <div class="flex justify-between pt-2 border-t-2 border-blue-300">
-                  <span class="text-base font-bold text-gray-900">Total:</span>
-                  <span class="text-2xl font-bold text-blue-600">
+                <div class="flex justify-between pt-2 border-t-2 border-navy/30">
+                  <span class="text-base font-bold text-navy">Total:</span>
+                  <span class="text-2xl font-bold text-navy">
                     {{ costData?.total || 0 }} CFA
                   </span>
                 </div>
@@ -463,15 +460,14 @@
             <div class="flex space-x-3">
               <button
                 @click="goToStep(3)"
-                class="flex-1 py-3 bg-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-300 transition-all"
+                class="flex-1 py-3 bg-grey-200 text-grey-700 font-semibold rounded-2xl hover:bg-grey-300 transition-all"
               >
                 Back
               </button>
               <button
                 @click="requestDriver"
                 :disabled="loading || sending || !isFormValid || !costData"
-                class="flex-1 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                style="background: linear-gradient(to right, #2563eb, #9333ea);"
+                class="flex-1 py-4 bg-navy text-white font-bold rounded-2xl hover:bg-navy/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
                 <span v-if="loading" class="flex items-center justify-center">
                   <Loader2 class="w-5 h-5 animate-spin mr-2" />
@@ -490,9 +486,9 @@
             <div class="text-center py-8">
               <!-- Searching Driver -->
               <div v-if="searchingDriver && !driverFound" class="space-y-4">
-                <Loader2 class="w-16 h-16 text-blue-600 animate-spin mx-auto" />
-                <h2 class="text-xl font-bold text-gray-900">Searching for Driver</h2>
-                <p class="text-gray-600">Looking for an available driver nearby...</p>
+                <Loader2 class="w-16 h-16 text-navy animate-spin mx-auto" />
+                <h2 class="text-xl font-bold text-navy">Searching for Driver</h2>
+                <p class="text-grey-600">Looking for an available driver nearby...</p>
               </div>
 
               <!-- Driver Found, Waiting for Acceptance -->
@@ -500,17 +496,17 @@
                 <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
                   <User class="w-8 h-8 text-green-600" />
                 </div>
-                <h2 class="text-xl font-bold text-gray-900">Driver Found!</h2>
-                <div v-if="driverInfo" class="bg-white rounded-xl p-4 border-2 border-gray-200 space-y-2">
-                  <p class="text-lg font-semibold text-gray-900">{{ driverInfo.name }}</p>
-                  <p class="text-sm text-gray-600">{{ driverInfo.vehicle_type }}</p>
-                  <p v-if="driverInfo.phone" class="text-sm text-gray-600">{{ driverInfo.phone }}</p>
+                <h2 class="text-xl font-bold text-navy">Driver Found!</h2>
+                <div v-if="driverInfo" class="bg-white rounded-2xl p-4 shadow-card space-y-2">
+                  <p class="text-lg font-semibold text-navy">{{ driverInfo.name }}</p>
+                  <p class="text-sm text-grey-600">{{ driverInfo.vehicle_type }}</p>
+                  <p v-if="driverInfo.phone" class="text-sm text-grey-600">{{ driverInfo.phone }}</p>
                 </div>
                 <div class="flex items-center justify-center space-x-2 mt-4">
-                  <Loader2 class="w-5 h-5 text-blue-600 animate-spin" />
-                  <p class="text-gray-600">Waiting for driver to accept your request...</p>
+                  <Loader2 class="w-5 h-5 text-navy animate-spin" />
+                  <p class="text-grey-600">Waiting for driver to accept your request...</p>
                 </div>
-                <p class="text-xs text-gray-500 mt-2">The driver has been notified and will respond shortly</p>
+                <p class="text-xs text-grey-500 mt-2">The driver has been notified and will respond shortly</p>
               </div>
 
               <!-- Driver Accepted -->
@@ -520,20 +516,20 @@
                 </div>
                 <h2 class="text-2xl font-bold text-green-600">Driver Accepted!</h2>
                 <div class="bg-green-50 rounded-xl p-6 border-2 border-green-200">
-                  <p class="text-lg font-semibold text-gray-900 mb-2">{{ driverInfo.name }}</p>
-                  <p class="text-sm text-gray-600">{{ driverInfo.vehicle_type }}</p>
-                  <p v-if="driverInfo.phone" class="text-sm text-gray-600 mt-1">{{ driverInfo.phone }}</p>
+                  <p class="text-lg font-semibold text-navy mb-2">{{ driverInfo.name }}</p>
+                  <p class="text-sm text-grey-600">{{ driverInfo.vehicle_type }}</p>
+                  <p v-if="driverInfo.phone" class="text-sm text-grey-600 mt-1">{{ driverInfo.phone }}</p>
                 </div>
                 <button
                   v-if="parcelId"
                   @click="router.push({ name: 'ParcelTracking', params: { id: parcelId } })"
-                  class="mt-6 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                  class="mt-6 w-full bg-navy hover:bg-navy/90 text-white font-semibold py-3 px-6 rounded-2xl transition-colors"
                 >
                   View Parcel Details
                 </button>
                 <button
                   @click="resetForm"
-                  class="mt-3 w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition-colors"
+                  class="mt-3 w-full bg-grey-200 hover:bg-grey-300 text-grey-700 font-semibold py-3 px-6 rounded-2xl transition-colors"
                 >
                   Send Another Parcel
                 </button>
@@ -545,27 +541,27 @@
                   <Info class="w-12 h-12 text-orange-600" />
                 </div>
                 <h2 class="text-2xl font-bold text-orange-600">No Drivers Available</h2>
-                <div class="bg-orange-50 rounded-xl p-6 border-2 border-orange-200">
-                  <p class="text-gray-700 mb-2">
+                <div class="bg-orange-50 rounded-2xl p-6 border-2 border-orange-200">
+                  <p class="text-grey-700 mb-2">
                     We couldn't find an available driver at the moment.
                   </p>
-                  <p class="text-gray-700">
+                  <p class="text-grey-700">
                     An admin will manually assign a driver to your delivery shortly.
                   </p>
-                  <p class="text-sm text-gray-600 mt-3">
+                  <p class="text-sm text-grey-600 mt-3">
                     You will be notified once a driver is assigned.
                   </p>
                 </div>
                 <button
                   v-if="parcelId"
                   @click="router.push({ name: 'ParcelTracking', params: { id: parcelId } })"
-                  class="mt-6 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                  class="mt-6 w-full bg-navy hover:bg-navy/90 text-white font-semibold py-3 px-6 rounded-2xl transition-colors"
                 >
                   View Parcel Details
                 </button>
                 <button
                   @click="resetForm"
-                  class="mt-3 w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition-colors"
+                  class="mt-3 w-full bg-grey-200 hover:bg-grey-300 text-grey-700 font-semibold py-3 px-6 rounded-2xl transition-colors"
                 >
                   Send Another Parcel
                 </button>

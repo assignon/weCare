@@ -1,25 +1,25 @@
 <template>
-  <div class="min-h-screen bg-gray-50 pb-24">
+  <div class="page-container pb-24">
     <BackButtonHeader :title="`Parcel #${parcelId}`">
       <template #right>
         <button 
           @click="refreshParcel"
           :disabled="loading"
-          class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-colors disabled:opacity-50"
+          class="w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-grey-100 transition-colors disabled:opacity-50"
         >
-          <RefreshCw :class="['w-5 h-5 text-gray-700', { 'animate-spin': loading }]" />
+          <RefreshCw :class="['w-5 h-5 text-navy', { 'animate-spin': loading }]" />
         </button>
       </template>
     </BackButtonHeader>
 
     <!-- Loading State -->
     <div v-if="loading && !parcel" class="flex justify-center items-center py-20">
-      <Loader2 class="w-10 h-10 animate-spin text-blue-600" />
+      <Loader2 class="w-10 h-10 animate-spin text-navy" />
     </div>
 
     <!-- Error State -->
     <div v-else-if="error" class="p-4">
-      <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+      <div class="bg-red-50 rounded-2xl shadow-card p-4">
         <div class="flex items-center">
           <AlertCircle class="w-5 h-5 text-red-500 mr-3" />
           <span class="text-red-700">{{ error }}</span>
@@ -30,32 +30,26 @@
     <!-- Parcel Details -->
     <div v-else-if="parcel" class="p-4 space-y-4">
       <!-- Status Banner -->
-      <div 
-        :class="[
-          'p-6 rounded-2xl shadow-lg',
-          statusColors[parcel.status]
-        ]"
-        :style="{ background: statusColors[parcel.status] }"
-      >
+      <div class="p-6 rounded-2xl shadow-card bg-navy">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center space-x-3">
             <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-              <component :is="statusIcons[parcel.status]" class="w-6 h-6 text-gray-900" />
+              <component :is="statusIcons[parcel.status]" class="w-6 h-6 text-navy" />
             </div>
             <div>
-              <p class="text-white text-sm opacity-90">{{ $t('parcels.status') }}</p>
+              <p class="text-white/80 text-sm">{{ $t('parcels.status') }}</p>
               <p class="text-white text-xl font-bold">{{ parcel.status_display }}</p>
             </div>
           </div>
         </div>
-        <p v-if="parcel.estimated_delivery_time" class="text-white text-sm opacity-90">
+        <p v-if="parcel.estimated_delivery_time" class="text-white/80 text-sm">
           {{ $t('parcels.est_delivery') }}: {{ parcel.estimated_delivery_time }} {{ $t('parcels.minutes') }}
         </p>
       </div>
 
       <!-- Status Timeline -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 class="text-lg font-bold text-gray-900 mb-4">{{ $t('parcels.delivery_timeline') }}</h2>
+      <div class="card p-6">
+        <h2 class="text-lg font-bold text-navy mb-4">{{ $t('parcels.delivery_timeline') }}</h2>
         <div class="space-y-4">
           <div 
             v-for="(step, index) in timelineSteps" 
@@ -66,27 +60,27 @@
               <div 
                 :class="[
                   'w-10 h-10 rounded-full flex items-center justify-center border-2',
-                  step.completed ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-300'
+                  step.completed ? 'bg-navy border-navy' : 'bg-white border-grey-200'
                 ]"
               >
                 <component 
                   :is="step.icon" 
-                  :class="['w-5 h-5', step.completed ? 'text-white' : 'text-gray-400']" 
+                  :class="['w-5 h-5', step.completed ? 'text-white' : 'text-grey-400']" 
                 />
               </div>
               <div 
                 v-if="index < timelineSteps.length - 1"
                 :class="[
                   'w-0.5 h-12 mt-2',
-                  step.completed ? 'bg-blue-600' : 'bg-gray-300'
+                  step.completed ? 'bg-navy' : 'bg-grey-200'
                 ]"
               ></div>
             </div>
             <div class="flex-1 pt-2">
-              <p :class="['font-semibold', step.completed ? 'text-gray-900' : 'text-gray-500']">
+              <p :class="['font-semibold', step.completed ? 'text-navy' : 'text-grey-400']">
                 {{ step.label }}
               </p>
-              <p v-if="step.time" class="text-xs text-gray-500 mt-1">
+              <p v-if="step.time" class="text-xs text-grey-400 mt-1">
                 {{ formatDateTime(step.time) }}
               </p>
             </div>
@@ -95,22 +89,22 @@
       </div>
 
       <!-- Driver Info (if assigned) -->
-      <div v-if="parcel.driver" class="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 class="text-lg font-bold text-gray-900 mb-4">{{ $t('parcels.driver_information') }}</h2>
+      <div v-if="parcel.driver" class="card p-6">
+        <h2 class="text-lg font-bold text-navy mb-4">{{ $t('parcels.driver_information') }}</h2>
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
-            <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center">
-              <User class="w-7 h-7 text-blue-600" />
+            <div class="w-14 h-14 bg-grey-50 rounded-full flex items-center justify-center">
+              <User class="w-7 h-7 text-navy" />
             </div>
             <div>
-              <p class="font-semibold text-gray-900">{{ parcel.driver.full_name || $t('parcels.driver') }}</p>
-              <p class="text-sm text-gray-600">{{ parcel.driver.phone_number || $t('parcels.no_phone') }}</p>
+              <p class="font-semibold text-navy">{{ parcel.driver.full_name || $t('parcels.driver') }}</p>
+              <p class="text-sm text-grey-500">{{ parcel.driver.phone_number || $t('parcels.no_phone') }}</p>
             </div>
           </div>
           <button
             v-if="parcel.driver.phone_number"
             @click="callDriver"
-            class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 flex items-center space-x-2"
+            class="px-4 py-2 bg-navy text-white rounded-2xl hover:bg-navy/90 flex items-center space-x-2"
           >
             <Phone class="w-4 h-4" />
             <span>{{ $t('parcels.call') }}</span>
@@ -119,8 +113,8 @@
       </div>
 
       <!-- Location Details -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 class="text-lg font-bold text-gray-900 mb-4">{{ $t('parcels.delivery_details') }}</h2>
+      <div class="card p-6">
+        <h2 class="text-lg font-bold text-navy mb-4">{{ $t('parcels.delivery_details') }}</h2>
         <div class="space-y-4">
           <!-- Pickup -->
           <div class="flex items-start space-x-3">
@@ -128,11 +122,11 @@
               <MapPin class="w-5 h-5 text-green-600" />
             </div>
             <div class="flex-1">
-              <p class="text-sm font-semibold text-gray-900">{{ $t('parcels.pickup_location') }}</p>
-              <p class="text-sm text-gray-600">
+              <p class="text-sm font-semibold text-navy">{{ $t('parcels.pickup_location') }}</p>
+              <p class="text-sm text-grey-500">
                 {{ parcel.pickup_location.landmark || parcel.pickup_location.address || $t('parcels.no_landmark') }}
               </p>
-              <p class="text-xs text-gray-400 mt-1">
+              <p class="text-xs text-grey-400 mt-1">
                 {{ parcel.pickup_location.latitude }}, {{ parcel.pickup_location.longitude }}
               </p>
             </div>
@@ -140,7 +134,7 @@
 
           <!-- Arrow -->
           <div class="flex justify-center">
-            <ArrowDown class="w-5 h-5 text-gray-400" />
+            <ArrowDown class="w-5 h-5 text-grey-400" />
           </div>
 
           <!-- Dropoff -->
@@ -149,11 +143,11 @@
               <MapPin class="w-5 h-5 text-red-600" />
             </div>
             <div class="flex-1">
-              <p class="text-sm font-semibold text-gray-900">{{ $t('parcels.dropoff_location') }}</p>
-              <p class="text-sm text-gray-600">
+              <p class="text-sm font-semibold text-navy">{{ $t('parcels.dropoff_location') }}</p>
+              <p class="text-sm text-grey-500">
                 {{ parcel.dropoff_location.landmark || parcel.dropoff_location.address || 'No landmark' }}
               </p>
-              <p class="text-xs text-gray-400 mt-1">
+              <p class="text-xs text-grey-400 mt-1">
                 {{ parcel.dropoff_location.latitude }}, {{ parcel.dropoff_location.longitude }}
               </p>
             </div>
@@ -162,58 +156,58 @@
       </div>
 
       <!-- Recipient Details -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 class="text-lg font-bold text-gray-900 mb-4">{{ $t('parcels.recipient') }}</h2>
+      <div class="card p-6">
+        <h2 class="text-lg font-bold text-navy mb-4">{{ $t('parcels.recipient') }}</h2>
         <div class="space-y-4">
           <div class="relative group">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <User class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+              <User class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
             </div>
             <div class="pl-10">
-              <p class="text-xs text-gray-500 mb-1">Name</p>
-              <p class="text-sm font-semibold text-gray-900">{{ parcel.recipient_name }}</p>
+              <p class="text-xs text-grey-400 mb-1">Name</p>
+              <p class="text-sm font-semibold text-navy">{{ parcel.recipient_name }}</p>
             </div>
           </div>
           <div class="relative group">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Phone class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+              <Phone class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
             </div>
             <div class="pl-10">
-              <p class="text-xs text-gray-500 mb-1">Phone</p>
-              <p class="text-sm font-semibold text-gray-900">{{ parcel.recipient_phone }}</p>
+              <p class="text-xs text-grey-400 mb-1">Phone</p>
+              <p class="text-sm font-semibold text-navy">{{ parcel.recipient_phone }}</p>
             </div>
           </div>
           <div v-if="parcel.package_description" class="relative group">
             <div class="absolute top-0 left-0 pl-3 pt-3 flex items-start pointer-events-none">
-              <Package class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+              <Package class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
             </div>
             <div class="pl-10">
-              <p class="text-xs text-gray-500 mb-1">{{ $t('parcels.package_description') }}</p>
-              <p class="text-sm text-gray-700">{{ parcel.package_description }}</p>
+              <p class="text-xs text-grey-400 mb-1">{{ $t('parcels.package_description') }}</p>
+              <p class="text-sm text-grey-500">{{ parcel.package_description }}</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Pricing Details -->
-      <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 shadow-sm">
-        <h2 class="text-lg font-bold text-gray-900 mb-4">Pricing</h2>
+      <div class="card-flat p-6">
+        <h2 class="text-lg font-bold text-navy mb-4">Pricing</h2>
         <div class="space-y-2">
           <div class="flex justify-between">
-            <span class="text-gray-700">Distance</span>
-            <span class="font-semibold">{{ parcel.distance_km }} km</span>
+            <span class="text-grey-500">Distance</span>
+            <span class="font-semibold text-navy">{{ parcel.distance_km }} km</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-700">Base Fee</span>
-            <span class="font-semibold">{{ parcel.base_fee }} CFA</span>
+            <span class="text-grey-500">Base Fee</span>
+            <span class="font-semibold text-navy">{{ parcel.base_fee }} CFA</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-700">Distance Fee</span>
-            <span class="font-semibold">{{ parcel.distance_fee }} CFA</span>
+            <span class="text-grey-500">Distance Fee</span>
+            <span class="font-semibold text-navy">{{ parcel.distance_fee }} CFA</span>
           </div>
-          <div class="flex justify-between pt-2 border-t-2 border-gray-300">
-            <span class="text-lg font-bold text-gray-900">Total</span>
-            <span class="text-xl font-bold text-blue-600">{{ parcel.delivery_fee }} CFA</span>
+          <div class="flex justify-between pt-2 border-t-2 border-grey-200">
+            <span class="text-lg font-bold text-navy">Total</span>
+            <span class="text-xl font-bold text-navy">{{ parcel.delivery_fee }} CFA</span>
           </div>
         </div>
       </div>
@@ -222,7 +216,7 @@
       <button
         v-if="parcel.can_be_cancelled"
         @click="showCancelDialog = true"
-        class="w-full py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-all"
+        class="w-full py-3 bg-red-600 text-white font-semibold rounded-2xl hover:bg-red-700 transition-all"
       >
         Cancel Delivery
       </button>
@@ -234,26 +228,26 @@
       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       @click.self="showCancelDialog = false"
     >
-      <div class="bg-white rounded-2xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold text-gray-900 mb-4">Cancel Delivery?</h3>
-        <p class="text-gray-600 mb-4">Are you sure you want to cancel this parcel delivery?</p>
+      <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-float">
+        <h3 class="text-xl font-bold text-navy mb-4">Cancel Delivery?</h3>
+        <p class="text-grey-500 mb-4">Are you sure you want to cancel this parcel delivery?</p>
         <textarea 
           v-model="cancelReason"
           rows="3"
           placeholder="Reason for cancellation (optional)"
-          class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-600 focus:outline-none resize-none mb-4"
+          class="textarea mb-4"
         ></textarea>
         <div class="flex space-x-3">
           <button
             @click="showCancelDialog = false"
-            class="flex-1 py-3 bg-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-300"
+            class="btn btn-outlined flex-1"
           >
             Keep Delivery
           </button>
           <button
             @click="confirmCancel"
             :disabled="cancelling"
-            class="flex-1 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 disabled:opacity-50"
+            class="flex-1 py-3 bg-red-600 text-white font-semibold rounded-2xl hover:bg-red-700 disabled:opacity-50"
           >
             {{ cancelling ? 'Cancelling...' : 'Confirm Cancel' }}
           </button>
@@ -410,4 +404,3 @@ onMounted(() => {
   return () => clearInterval(interval)
 })
 </script>
-

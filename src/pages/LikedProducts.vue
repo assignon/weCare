@@ -1,18 +1,18 @@
 <template>
-  <div class="min-h-screen bg-white pb-24">
+  <div class="page-container pb-24">
     <BackButtonHeader :title="$t('liked_products.title')" />
     
     <div v-if="loading" class="flex justify-center items-center py-20">
-      <Loader2 class="w-8 h-8 animate-spin text-blue-600" />
+      <Loader2 class="w-8 h-8 animate-spin text-navy" />
     </div>
     
     <div v-else-if="error" class="px-4 py-8">
-      <div class="bg-white rounded-xl p-6 text-center">
+      <div class="card-flat p-6 text-center">
         <AlertCircle class="w-12 h-12 text-red-500 mx-auto mb-4" />
-        <p class="text-gray-600">{{ error }}</p>
+        <p class="text-grey-500">{{ error }}</p>
         <button 
           @click="fetchLikedProducts"
-          class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          class="mt-4 px-4 py-2 bg-navy text-white rounded-2xl hover:bg-navy/90 transition-colors"
         >
           {{ $t('liked_products.try_again') }}
         </button>
@@ -20,10 +20,12 @@
     </div>
     
     <div v-else-if="products.length === 0" class="px-4 py-8">
-      <div class="bg-white rounded-xl p-6 text-center">
-        <Heart class="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ $t('liked_products.no_liked') }}</h3>
-        <p class="text-gray-600">{{ $t('liked_products.no_liked_message') }}</p>
+      <div class="card-flat p-6 text-center">
+        <div class="w-16 h-16 bg-grey-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Heart class="w-8 h-8 text-grey-400" />
+        </div>
+        <h3 class="text-lg font-bold text-navy mb-2">{{ $t('liked_products.no_liked') }}</h3>
+        <p class="text-grey-500">{{ $t('liked_products.no_liked_message') }}</p>
       </div>
     </div>
     
@@ -34,44 +36,41 @@
           :key="product.id" 
           class="flex flex-col"
         >
-          <!-- Product Card - Only contains image -->
-          <div class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square relative">
+          <!-- Product Card -->
+          <div class="group bg-grey-50 rounded-2xl shadow-card transition-all duration-200 overflow-hidden mb-2 aspect-square relative">
             <img 
               @click="navigateToProduct(product.id, product.item_type)"
               :src="product.main_image || packagingImage" 
               :alt="product.name || product.title"
-              class="w-full h-full object-cover rounded-lg cursor-pointer"
+              class="w-full h-full object-cover rounded-2xl cursor-pointer"
             />
-            <!-- Verified Badge (for all approved store products) -->
+            <!-- Verified Badge -->
             <button
               v-if="product.item_type === 'store_product' && product.seller_account_status === 'APPROVED'"
               @click.stop="showVerificationDialog(product)"
-              class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all z-10"
+              class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-float hover:bg-white transition-all z-10"
             >
-              <BadgeCheck class="w-4 h-4 text-blue-600" />
+              <BadgeCheck class="w-4 h-4 text-navy" />
             </button>
           </div>
           
-          <!-- Product Info - Outside the card -->
+          <!-- Product Info -->
           <div class="space-y-1">
-            <!-- Store Name Caption (only for store products, not shopper listings) -->
-            <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
+            <p v-if="product.item_type === 'store_product'" class="text-xs text-grey-400 mb-0.5">
               {{ product.seller_name || product.store_name || 'AfriQExpress Seller' }}
             </p>
             
-            <!-- Product Name -->
             <h3 
               @click="navigateToProduct(product.id, product.item_type)"
-              class="font-bold text-xs text-gray-900 mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors capitalize"
+              class="font-bold text-xs text-navy mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-navy/70 transition-colors capitalize"
             >
               {{ product.name || product.title }}
             </h3>
             
-            <!-- Price and Quantity -->
             <div class="flex items-center justify-between">
-              <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
+              <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-navy'">
                 {{ formatApiPrice(product) }}
-                <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
+                <span v-if="product.quantity || product.weight" class="text-xs font-normal text-grey-500">
                   / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
                 </span>
               </span>
@@ -89,23 +88,23 @@
         @click="showVerificationDialogState = false"
       >
         <div
-          class="bg-white rounded-2xl p-6 max-w-sm w-full"
+          class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-float"
           @click.stop
         >
           <div class="flex items-center justify-center mb-4">
-            <div class="bg-blue-100 rounded-full p-3">
-              <BadgeCheck class="w-8 h-8 text-blue-600" />
+            <div class="bg-grey-50 rounded-full p-3">
+              <BadgeCheck class="w-8 h-8 text-navy" />
             </div>
           </div>
-          <h3 class="text-lg font-semibold text-gray-800 text-center mb-2">
+          <h3 class="text-lg font-bold text-navy text-center mb-2">
             Verified Product
           </h3>
-          <p class="text-sm text-gray-600 text-center">
+          <p class="text-sm text-grey-500 text-center">
             This product and seller are verified by AfriQExpress
           </p>
           <button
             @click="showVerificationDialogState = false"
-            class="mt-6 w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            class="btn-cta mt-6"
           >
             Got it
           </button>
@@ -179,4 +178,3 @@ onMounted(() => {
   opacity: 0;
 }
 </style>
-

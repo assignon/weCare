@@ -1,28 +1,27 @@
 <template>
   <Transition name="slide-up">
     <div v-if="showPrompt" class="fixed bottom-20 left-4 right-4 z-50 max-w-md mx-auto">
-      <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 flex items-center gap-3">
+      <div class="bg-white rounded-2xl shadow-2xl border border-grey-200 p-4 flex items-center gap-3">
         <div class="flex-shrink-0">
-          <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
+          <div class="w-12 h-12 bg-navy rounded-xl flex items-center justify-center">
             <Download class="w-6 h-6 text-white" />
           </div>
         </div>
         <div class="flex-1 min-w-0">
-          <h3 class="text-sm font-semibold text-gray-900 mb-0.5">Install AfriQExpress</h3>
-          <p class="text-xs text-gray-600">Get the full app experience</p>
+          <h3 class="text-sm font-semibold text-grey-900 mb-0.5">Install AfriQExpress</h3>
+          <p class="text-xs text-grey-600">Get the full app experience</p>
         </div>
         <div class="flex gap-2 flex-shrink-0">
           <button
             @click="dismissPrompt"
-            class="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-800 transition-colors"
+            class="px-3 py-1.5 text-xs font-medium text-grey-600 hover:text-grey-800 transition-colors"
           >
             Not now
           </button>
           <button
             @click="handleInstall"
             :disabled="installing"
-            class="px-4 py-1.5 text-xs font-semibold text-white rounded-lg transition-all"
-            style="background: linear-gradient(to right, #8c36ea, #3060eb);"
+            class="px-4 py-1.5 text-xs font-semibold text-white bg-navy rounded-2xl transition-all"
           >
             {{ installing ? 'Installing...' : 'Install' }}
           </button>

@@ -1,61 +1,60 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="page-container">
     <BackButtonHeader :title="$t('listings.my_listings')">
       <template #right>
-        <button @click="handleAddListing" class="p-2 text-white rounded-lg" style="background: linear-gradient(to right, #8c36ea, #3060eb);">
+        <button @click="handleAddListing" class="p-2 text-white rounded-2xl bg-navy">
           <Plus class="w-5 h-5" />
         </button>
       </template>
     </BackButtonHeader>
-    <div v-if="stats" class="px-4 py-3 bg-white border-b text-sm">
+    <div v-if="stats" class="px-4 py-3 bg-grey-50 text-sm shadow-nav">
       <div class="flex gap-4">
-        <div><span class="font-medium">{{ stats.active_listings }}</span>/{{ stats.max_listings }} {{ $t('listings.active') }}</div>
-        <div><span class="font-medium">{{ stats.sold_listings }}</span> {{ $t('listings.sold') }}</div>
-        <div><span class="font-medium">{{ stats.total_inquiries }}</span> {{ $t('listings.inquiries') }}</div>
+        <div><span class="font-semibold text-navy">{{ stats.active_listings }}</span>/{{ stats.max_listings }} {{ $t('listings.active') }}</div>
+        <div><span class="font-semibold text-navy">{{ stats.sold_listings }}</span> {{ $t('listings.sold') }}</div>
+        <div><span class="font-semibold text-navy">{{ stats.total_inquiries }}</span> {{ $t('listings.inquiries') }}</div>
       </div>
     </div>
 
     <div class="p-4">
       <div v-if="loading" class="flex justify-center py-8">
-        <Loader2 class="w-8 h-8 animate-spin text-blue-600" />
+        <Loader2 class="w-8 h-8 animate-spin text-navy" />
       </div>
       <div v-else-if="listings.length === 0" class="text-center py-12">
-        <Package class="w-16 h-16 text-gray-300 mx-auto mb-3" />
-        <p class="text-gray-500 mb-4">{{ $t('listings.no_listings') }}</p>
+        <Package class="w-16 h-16 text-grey-300 mx-auto mb-3" />
+        <p class="text-grey-400 mb-4">{{ $t('listings.no_listings') }}</p>
         <button 
           @click="handleAddListing"
-          class="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-          style="background: linear-gradient(to right, #2563eb, #9333ea);"
+          class="px-8 py-4 bg-navy text-white font-semibold rounded-2xl transition-all duration-200 shadow-card hover:shadow-float hover:scale-[1.02]"
         >
           {{ $t('listings.create_first') }}
         </button>
       </div>
       <div v-else class="grid grid-cols-2 gap-4">
-        <div v-for="listing in listings" :key="listing.id" class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+        <div v-for="listing in listings" :key="listing.id" class="card overflow-hidden hover:shadow-float transition-shadow">
           <div @click="$router.push(`/listing/${listing.id}`)" class="cursor-pointer">
-            <div class="aspect-square bg-gray-200 relative">
+            <div class="aspect-square bg-grey-200 relative">
               <img v-if="listing.main_image" :src="listing.main_image" :alt="listing.title" class="w-full h-full object-cover" />
-              <div class="absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium" :class="statusClass(listing.status)">
+              <div class="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-semibold" :class="statusClass(listing.status)">
                 {{ listing.status }}
               </div>
             </div>
-            <div class="p-2">
-              <h3 class="text-xs font-medium capitalize line-clamp-2">{{ listing.title }}</h3>
+            <div class="p-3">
+              <h3 class="text-xs font-semibold text-navy capitalize line-clamp-2">{{ listing.title }}</h3>
               <div class="flex items-center justify-between mt-1">
                 <div>
-                  <p v-if="listing.price_type === 'fixed'" class="text-blue-600 font-semibold text-xs">{{ formatPrice(listing.price) }}</p>
+                  <p v-if="listing.price_type === 'fixed'" class="text-navy font-semibold text-xs">{{ formatPrice(listing.price) }}</p>
                   <p v-else-if="listing.price_type === 'free'" class="text-green-600 font-semibold text-xs">{{ $t('listings.free') }}</p>
-                  <p v-else class="text-blue-600 font-semibold text-xs">{{ $t('listings.best_offer') }}</p>
+                  <p v-else class="text-navy font-semibold text-xs">{{ $t('listings.best_offer') }}</p>
                 </div>
                 <button 
                   v-if="listing.status !== 'sold'"
                   @click.stop="editListing(listing.id)" 
-                  class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                  class="p-1.5 text-navy hover:bg-grey-50 rounded-full transition-colors"
                 >
                   <Edit class="w-4 h-4" />
                 </button>
               </div>
-              <div class="flex items-center gap-2 mt-1 text-xs text-gray-500">
+              <div class="flex items-center gap-2 mt-1 text-xs text-grey-400">
                 <Eye class="w-3 h-3" /> {{ listing.views_count }}
                 <MessageCircle class="w-3 h-3" /> {{ listing.inquiry_count }}
               </div>
@@ -69,7 +68,7 @@
     <Transition name="dialog" appear>
       <div v-if="showDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeDialog"></div>
-        <div class="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 w-full max-w-md transform transition-all duration-300">
+        <div class="relative bg-white backdrop-blur-xl rounded-3xl shadow-float w-full max-w-md transform transition-all duration-300">
           <!-- Header -->
           <div class="p-6 pb-4">
             <div class="flex items-center justify-center mb-4">
@@ -77,14 +76,14 @@
                 <AlertCircle class="w-8 h-8 text-red-600" />
               </div>
             </div>
-            <h3 class="text-xl font-bold text-center text-slate-900 mb-2">{{ $t('listings.listing_limit_reached') }}</h3>
-            <p class="text-center text-slate-600 text-sm leading-relaxed">{{ dialogMessage }}</p>
+            <h3 class="text-xl font-bold text-center text-navy mb-2">{{ $t('listings.listing_limit_reached') }}</h3>
+            <p class="text-center text-grey-500 text-sm leading-relaxed">{{ dialogMessage }}</p>
             <div v-if="sellerPortalUrl" class="mt-4 text-center">
               <a 
                 :href="sellerPortalUrl" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                class="text-blue-600 hover:text-blue-700 underline font-medium"
+                class="text-navy hover:text-navy/80 underline font-medium"
               >
                 {{ $t('listings.visit_seller_platform') }}
               </a>
@@ -95,7 +94,7 @@
           <div class="p-6 pt-4">
             <button
               @click="closeDialog"
-              class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+              class="btn-cta"
             >
               {{ $t('listings.got_it') }}
             </button>
@@ -220,4 +219,3 @@ function closeDialog() {
   transform: scale(0.9) translateY(20px);
 }
 </style>
-

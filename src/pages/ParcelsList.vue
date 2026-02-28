@@ -1,15 +1,15 @@
 <template>
-  <div class="min-h-screen bg-gray-50 pb-24">
+  <div class="page-container pb-24">
     <BackButtonHeader :title="$t('parcels.title')" />
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center items-center py-20">
-      <Loader2 class="w-10 h-10 animate-spin text-blue-600" />
+      <Loader2 class="w-10 h-10 animate-spin text-navy" />
     </div>
 
     <!-- Error State -->
     <div v-else-if="error" class="p-4">
-      <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+      <div class="bg-red-50 rounded-2xl shadow-card p-4">
         <div class="flex items-center">
           <AlertCircle class="w-5 h-5 text-red-500 mr-3" />
           <span class="text-red-700">{{ error }}</span>
@@ -19,23 +19,25 @@
 
     <!-- Empty State -->
     <div v-else-if="parcels.length === 0" class="flex flex-col items-center justify-center py-20 px-4">
-      <Package class="w-16 h-16 text-gray-300 mb-4" />
-      <p class="text-gray-600 text-center mb-2">{{ $t('parcels.no_parcels') }}</p>
+      <div class="w-16 h-16 bg-grey-50 rounded-full flex items-center justify-center mb-4">
+        <Package class="w-8 h-8 text-grey-300" />
+      </div>
+      <p class="text-grey-500 text-center mb-2">{{ $t('parcels.no_parcels') }}</p>
       <router-link 
         :to="{ name: 'SendParcel' }"
-        class="mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all"
+        class="mt-4 btn-cta max-w-xs"
       >
         {{ $t('parcels.send_first') }}
       </router-link>
     </div>
 
     <!-- Parcels List -->
-    <div v-else class="p-4 space-y-4">
+    <div v-else class="p-4 space-y-3">
       <div
         v-for="parcel in parcels"
         :key="parcel.id"
         @click="viewParcel(parcel.id)"
-        class="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all cursor-pointer"
+        class="card p-4 hover:shadow-float transition-all cursor-pointer"
       >
         <div class="flex items-start justify-between mb-3">
           <div class="flex-1">
@@ -48,20 +50,20 @@
               >
                 {{ parcel.status_display }}
               </span>
-              <span class="text-xs text-gray-500">#{{ parcel.id }}</span>
+              <span class="text-xs text-grey-400">#{{ parcel.id }}</span>
             </div>
-            <p class="text-sm font-semibold text-gray-900 mb-1">
+            <p class="text-sm font-semibold text-navy mb-1">
               {{ $t('parcels.to') }}: {{ parcel.recipient_name }}
             </p>
-            <p class="text-xs text-gray-600 mb-2">
+            <p class="text-xs text-grey-500 mb-2">
               {{ parcel.pickup_landmark || parcel.pickup_address || $t('parcels.pickup_location') }} → 
               {{ parcel.dropoff_landmark || parcel.dropoff_address || $t('parcels.dropoff_location') }}
             </p>
           </div>
-          <ChevronRight class="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" />
+          <ChevronRight class="w-5 h-5 text-grey-400 flex-shrink-0 ml-2" />
         </div>
         
-        <div class="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
+        <div class="flex items-center justify-between text-xs text-grey-400 pt-3 border-t border-grey-100">
           <div class="flex items-center space-x-4">
             <span>{{ parcel.distance_km }} km</span>
             <span>{{ parcel.delivery_fee }} CFA</span>
@@ -132,4 +134,3 @@ onMounted(() => {
   fetchParcels()
 })
 </script>
-

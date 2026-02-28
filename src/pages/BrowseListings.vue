@@ -1,32 +1,32 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="page-container">
     <!-- Header with search -->
-    <div class="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3">
+    <div class="sticky top-0 z-10 bg-white/90 backdrop-blur-md px-4 py-3 shadow-nav">
       <div class="flex items-center gap-3">
         <div class="flex-1 relative">
-          <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-grey-400" />
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Search listings..."
-            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="input w-full pl-10 pr-4 py-2"
             @input="debouncedSearch"
           />
         </div>
         <button
           @click="showFilters = !showFilters"
-          class="p-2 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+          class="p-2 rounded-2xl bg-navy text-white"
         >
           <SlidersHorizontal class="w-5 h-5" />
         </button>
       </div>
       
       <!-- Filters panel -->
-      <div v-if="showFilters" class="mt-3 space-y-3 pb-3 border-t border-gray-200 pt-3">
+      <div v-if="showFilters" class="mt-3 space-y-3 pb-3 border-t border-grey-200 pt-3">
         <!-- Category filter -->
         <div>
-          <label class="text-sm font-medium text-gray-700 block mb-1">Category</label>
-          <select v-model="filters.category" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          <label class="text-sm font-semibold text-navy block mb-1">Category</label>
+          <select v-model="filters.category" class="select w-full">
             <option value="">All Categories</option>
             <option v-for="cat in categories" :key="cat.id" :value="cat.id">
               {{ cat.name }}
@@ -36,19 +36,19 @@
         
         <!-- City filter -->
         <div>
-          <label class="text-sm font-medium text-gray-700 block mb-1">City</label>
+          <label class="text-sm font-semibold text-navy block mb-1">City</label>
           <input
             v-model="filters.city"
             type="text"
             placeholder="Enter city..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            class="input w-full"
           />
         </div>
         
         <!-- Price type filter -->
         <div>
-          <label class="text-sm font-medium text-gray-700 block mb-1">Price Type</label>
-          <select v-model="filters.price_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          <label class="text-sm font-semibold text-navy block mb-1">Price Type</label>
+          <select v-model="filters.price_type" class="select w-full">
             <option value="">All Types</option>
             <option value="fixed">Fixed Price</option>
             <option value="offer">{{ t('listings.best_offer') }}</option>
@@ -58,7 +58,7 @@
         
         <button
           @click="applyFilters"
-          class="w-full py-2 bg-blue-600 text-white rounded-lg font-medium"
+          class="btn-cta"
         >
           Apply Filters
         </button>
@@ -68,12 +68,12 @@
     <!-- Listings grid -->
     <div class="p-4">
       <div v-if="loading" class="flex justify-center py-8">
-        <Loader2 class="w-8 h-8 animate-spin text-blue-600" />
+        <Loader2 class="w-8 h-8 animate-spin text-navy" />
       </div>
       
       <div v-else-if="listings.length === 0" class="text-center py-12">
-        <Package class="w-16 h-16 text-gray-300 mx-auto mb-3" />
-        <p class="text-gray-500">No listings found</p>
+        <Package class="w-16 h-16 text-grey-300 mx-auto mb-3" />
+        <p class="text-grey-400">No listings found</p>
       </div>
       
       <div v-else class="grid grid-cols-2 gap-4">
@@ -81,10 +81,10 @@
           v-for="listing in listings"
           :key="listing.id"
           @click="goToDetails(listing.id)"
-          class="bg-gray-100 rounded-lg overflow-hidden cursor-pointer"
+          class="card overflow-hidden cursor-pointer"
         >
           <!-- Image -->
-          <div class="aspect-square bg-gray-200 relative">
+          <div class="aspect-square bg-grey-200 relative">
             <img
               v-if="listing.main_image"
               :src="listing.main_image"
@@ -92,37 +92,37 @@
               class="w-full h-full object-cover"
             />
             <div v-else class="w-full h-full flex items-center justify-center">
-              <Package class="w-12 h-12 text-gray-400" />
+              <Package class="w-12 h-12 text-grey-400" />
             </div>
             
             <!-- Price badge -->
             <div
               v-if="listing.price_type === 'fixed'"
-              class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-sm font-bold"
+              class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-sm font-bold"
             >
               {{ formatPrice(listing.price) }}
             </div>
             <div
               v-else-if="listing.price_type === 'free'"
-              class="absolute top-2 right-2 bg-green-600 text-white px-2 py-1 rounded text-sm font-bold"
+              class="absolute top-2 right-2 bg-success-600 text-white px-2 py-1 rounded-full text-sm font-bold"
             >
               {{ t('listings.free') }}
             </div>
             <div
               v-else
-              class="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold"
+              class="absolute top-2 right-2 bg-navy text-white px-2 py-1 rounded-full text-sm font-bold"
             >
               {{ t('listings.best_offer') }}
             </div>
           </div>
           
           <!-- Details -->
-          <div class="p-2">
-            <p class="text-xs text-gray-500">{{ listing.category_name || 'Uncategorized' }}</p>
-            <h3 class="text-sm font-medium text-gray-900 capitalize line-clamp-2">
+          <div class="p-3">
+            <p class="text-xs text-grey-400">{{ listing.category_name || 'Uncategorized' }}</p>
+            <h3 class="text-sm font-semibold text-navy capitalize line-clamp-2">
               {{ listing.title }}
             </h3>
-            <div class="flex items-center gap-1 mt-1 text-xs text-gray-500">
+            <div class="flex items-center gap-1 mt-1 text-xs text-grey-400">
               <MapPin class="w-3 h-3" />
               <span>{{ listing.city }}</span>
             </div>
@@ -226,4 +226,3 @@ function goToDetails(id) {
   line-clamp: 2;
 }
 </style>
-

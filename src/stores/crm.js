@@ -9,6 +9,7 @@ export const useCRMStore = defineStore('crm', () => {
   const currentCategoryName = ref('')
   const crmFlowInfo = ref(null)
   const pendingViewingRequests = ref(0)
+  const activeViewingRequests = ref(0)
   const checkingCRMFlow = ref(false)
   
   // Getters
@@ -76,16 +77,31 @@ export const useCRMStore = defineStore('crm', () => {
   const fetchPendingViewingRequests = async () => {
     try {
       const response = await apiService.getViewingRequestStats()
-      pendingViewingRequests.value = response.data.pending_requests || 0
+      const data = response.data || {}
+      pendingViewingRequests.value = data.pending_requests ?? 0
+      activeViewingRequests.value = data.active_requests ?? (data.pending_requests ?? 0) + (data.scheduled_viewings ?? 0)
     } catch (error) {
       console.error('Failed to fetch viewing request stats:', error)
       pendingViewingRequests.value = 0
+      activeViewingRequests.value = 0
     }
   }
   
   const refreshPendingRequests = () => {
     if (currentCategoryUsesCRM.value) {
       fetchPendingViewingRequests()
+    }
+  }
+
+  const fetchViewingRequestStatsForBadge = async () => {
+    try {
+      const response = await apiService.getViewingRequestStats()
+      const data = response.data || {}
+      pendingViewingRequests.value = data.pending_requests ?? 0
+      activeViewingRequests.value = data.active_requests ?? (data.pending_requests ?? 0) + (data.scheduled_viewings ?? 0)
+    } catch (error) {
+      pendingViewingRequests.value = 0
+      activeViewingRequests.value = 0
     }
   }
   
@@ -121,6 +137,7 @@ export const useCRMStore = defineStore('crm', () => {
     currentCategoryName,
     crmFlowInfo,
     pendingViewingRequests,
+    activeViewingRequests,
     checkingCRMFlow,
     
     // Getters
@@ -131,6 +148,7 @@ export const useCRMStore = defineStore('crm', () => {
     checkCategoryFlow,
     fetchPendingViewingRequests,
     refreshPendingRequests,
+    fetchViewingRequestStatsForBadge,
     resetCRMState,
     initializeFromSession
   }

@@ -8,23 +8,23 @@
       <!-- Initial Question Step -->
       <div v-if="currentStep === 'question'" class="p-6">
         <div class="text-center mb-6">
-          <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4" style="background: linear-gradient(to right, #2563eb, #9333ea);">
+          <div class="w-16 h-16 bg-navy rounded-full flex items-center justify-center mx-auto mb-4">
             <MapPin class="w-8 h-8 text-white" />
           </div>
-          <h3 class="text-xl font-bold text-gray-900">{{ $t('location_confirmation.title') }}</h3>
+          <h3 class="text-xl font-bold text-grey-900">{{ $t('location_confirmation.title') }}</h3>
         </div>
         
         <div class="text-center mb-6">
-          <p class="text-gray-700 mb-4">
+          <p class="text-grey-700 mb-4">
             {{ $t('location_confirmation.question') }}
           </p>
-          <div class="p-4 bg-gray-50 rounded-2xl border-l-4 border-blue-500">
-            <div class="flex items-center text-gray-700">
-              <MapPin class="w-4 h-4 mr-2 text-blue-600" />
+          <div class="p-4 bg-grey-50 rounded-2xl border-l-4 border-navy">
+            <div class="flex items-center text-grey-700">
+              <MapPin class="w-4 h-4 mr-2 text-navy" />
               <span class="text-sm">{{ addressSummary }}</span>
             </div>
           </div>
-          <p class="text-xs text-gray-500 mt-3">
+          <p class="text-xs text-grey-500 mt-3">
             {{ $t('location_confirmation.help_text') }}
           </p>
         </div>
@@ -33,15 +33,14 @@
           <button 
               @click="handleNo"
               :disabled="loading"
-            class="w-full py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-gray-400 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            class="w-full py-4 border-2 border-grey-300 text-grey-700 font-semibold rounded-2xl hover:border-grey-400 hover:bg-grey-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               {{ $t('location_confirmation.no') }}
           </button>
           <button 
               @click="handleYes"
               :disabled="loading"
-            class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
-            style="background: linear-gradient(to right, #2563eb, #9333ea);"
+            class="w-full py-4 bg-navy text-white font-semibold rounded-2xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
             >
               {{ $t('location_confirmation.yes') }}
           </button>
@@ -54,28 +53,28 @@
           <div class="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <Crosshair class="w-8 h-8 text-white" />
           </div>
-          <h3 class="text-xl font-bold text-gray-900">{{ $t('location_confirmation.location_access') }}</h3>
+          <h3 class="text-xl font-bold text-grey-900">{{ $t('location_confirmation.location_access') }}</h3>
         </div>
         
         <div class="text-center mb-6">
-          <p class="text-gray-700 mb-4">
+          <p class="text-grey-700 mb-4">
             {{ $t('location_confirmation.permission_message') }}
           </p>
           <div class="text-left mb-4 max-w-xs mx-auto">
             <div class="flex items-center mb-2">
               <CheckCircle class="w-4 h-4 text-green-600 mr-2" />
-              <span class="text-sm text-gray-700">{{ $t('location_confirmation.benefit_faster') }}</span>
+              <span class="text-sm text-grey-700">{{ $t('location_confirmation.benefit_faster') }}</span>
             </div>
             <div class="flex items-center mb-2">
               <CheckCircle class="w-4 h-4 text-green-600 mr-2" />
-              <span class="text-sm text-gray-700">{{ $t('location_confirmation.benefit_accurate') }}</span>
+              <span class="text-sm text-grey-700">{{ $t('location_confirmation.benefit_accurate') }}</span>
             </div>
             <div class="flex items-center">
               <CheckCircle class="w-4 h-4 text-green-600 mr-2" />
-              <span class="text-sm text-gray-700">{{ $t('location_confirmation.benefit_navigation') }}</span>
+              <span class="text-sm text-grey-700">{{ $t('location_confirmation.benefit_navigation') }}</span>
             </div>
           </div>
-          <p class="text-xs text-gray-500">
+          <p class="text-xs text-grey-500">
             {{ $t('location_confirmation.privacy_note') }}
           </p>
         </div>
@@ -84,21 +83,20 @@
           <button 
               @click="handleSkipLocation"
               :disabled="loading"
-            class="w-full py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-gray-400 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            class="w-full py-4 border-2 border-grey-300 text-grey-700 font-semibold rounded-2xl hover:border-grey-400 hover:bg-grey-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               {{ $t('location_confirmation.skip') }}
           </button>
           <button 
               @click="requestLocation"
             :disabled="loading"
-            class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
-            style="background: linear-gradient(to right, #2563eb, #9333ea);"
+            class="w-full py-4 bg-navy text-white font-semibold rounded-2xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
             >
             <Crosshair class="w-4 h-4 mr-2" />
             <span v-if="loading">{{ $t('location_confirmation.getting_location') }}...</span>
             <span v-else>{{ $t('location_confirmation.grant_access') }}</span>
           </button>
-          <p class="text-xs text-gray-500 text-center">
+          <p class="text-xs text-grey-500 text-center">
               👆 {{ $t('location_confirmation.permission_hint') }}
             </p>
           </div>
@@ -107,18 +105,18 @@
       <!-- Loading Step -->
       <div v-else-if="currentStep === 'loading'" class="p-6">
         <div class="text-center mb-6">
-          <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin" style="background: linear-gradient(to right, #2563eb, #9333ea);">
+          <div class="w-16 h-16 bg-navy rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
             <Crosshair class="w-8 h-8 text-white" />
           </div>
-          <h3 class="text-xl font-bold text-gray-900">{{ $t('location_confirmation.getting_location_title') }}</h3>
+          <h3 class="text-xl font-bold text-grey-900">{{ $t('location_confirmation.getting_location_title') }}</h3>
         </div>
         
         <div class="text-center">
-          <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p class="text-gray-700 mb-2">
+          <div class="w-16 h-16 border-4 border-grey-200 border-t-navy rounded-full animate-spin mx-auto mb-4"></div>
+          <p class="text-grey-700 mb-2">
             {{ $t('location_confirmation.getting_location_message') }}
           </p>
-          <p class="text-xs text-gray-500">
+          <p class="text-xs text-grey-500">
             {{ $t('location_confirmation.enable_services') }}
           </p>
         </div>
@@ -130,22 +128,22 @@
           <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle class="w-8 h-8 text-white" />
           </div>
-          <h3 class="text-xl font-bold text-gray-900">{{ $t('location_confirmation.location_saved') }}</h3>
+          <h3 class="text-xl font-bold text-grey-900">{{ $t('location_confirmation.location_saved') }}</h3>
         </div>
         
         <div class="text-center mb-6">
-          <p class="text-gray-700 mb-4">
+          <p class="text-grey-700 mb-4">
             {{ $t('location_confirmation.success_message') }}
           </p>
           <div class="p-4 bg-green-50 rounded-2xl border-l-4 border-green-500">
-            <div class="text-sm text-gray-700 mb-1">
+            <div class="text-sm text-grey-700 mb-1">
               <strong>{{ $t('location_confirmation.latitude') }}:</strong> {{ coordinates.latitude?.toFixed(6) }}
             </div>
-            <div class="text-sm text-gray-700">
+            <div class="text-sm text-grey-700">
               <strong>{{ $t('location_confirmation.longitude') }}:</strong> {{ coordinates.longitude?.toFixed(6) }}
             </div>
           </div>
-          <p class="text-xs text-gray-500 mt-3">
+          <p class="text-xs text-grey-500 mt-3">
             {{ $t('location_confirmation.success_help') }}
           </p>
         </div>
@@ -164,11 +162,11 @@
           <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <AlertCircle class="w-8 h-8 text-white" />
           </div>
-          <h3 class="text-xl font-bold text-gray-900">{{ $t('location_confirmation.location_error') }}</h3>
+          <h3 class="text-xl font-bold text-grey-900">{{ $t('location_confirmation.location_error') }}</h3>
         </div>
         
         <div class="text-center mb-6">
-          <p class="text-sm text-gray-700 mb-4 text-left whitespace-pre-line">
+          <p class="text-sm text-grey-700 mb-4 text-left whitespace-pre-line">
             {{ errorMessage }}
           </p>
         </div>
@@ -176,15 +174,14 @@
         <div class="space-y-3">
           <button 
             @click="handleSkipLocation"
-            class="w-full py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+            class="w-full py-4 border-2 border-grey-300 text-grey-700 font-semibold rounded-2xl hover:border-grey-400 hover:bg-grey-50 transition-all duration-200"
           >
             {{ $t('location_confirmation.skip') }}
           </button>
           <button 
             @click="requestLocation"
             :disabled="loading"
-            class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
-            style="background: linear-gradient(to right, #2563eb, #9333ea);"
+            class="w-full py-4 bg-navy text-white font-semibold rounded-2xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             <span v-if="loading">{{ $t('location_confirmation.getting_location') }}...</span>
             <span v-else>{{ $t('location_confirmation.try_again') }}</span>

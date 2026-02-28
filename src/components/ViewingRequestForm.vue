@@ -9,23 +9,23 @@
       @click.stop
     >
       <!-- Header -->
-      <div class="sticky top-0 bg-white rounded-t-3xl border-b border-gray-100 px-6 py-4">
+      <div class="sticky top-0 bg-white rounded-t-3xl border-b border-grey-100 px-6 py-4">
         <div class="flex items-center justify-between">
-          <h2 class="text-xl font-bold text-gray-900">Request Viewing</h2>
+          <h2 class="text-xl font-bold text-grey-900">{{ $t('viewing_request_form.title') }}</h2>
           <button 
             @click="closeForm"
-            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+            class="w-8 h-8 rounded-full bg-grey-100 flex items-center justify-center hover:bg-grey-200 transition-colors"
           >
-            <X class="w-5 h-5 text-gray-500" />
+            <X class="w-5 h-5 text-grey-500" />
           </button>
         </div>
-        <p class="text-sm text-gray-600 mt-1">Schedule a viewing for this {{ productType || 'item' }}</p>
+        <p class="text-sm text-grey-600 mt-1">{{ $t('viewing_request_form.schedule_for', { type: productType || $t('viewing_request_form.item') }) }}</p>
       </div>
 
       <!-- Form -->
       <form @submit.prevent="submitRequest" class="p-6 space-y-6">
         <!-- Product Info -->
-        <div class="bg-gray-50 rounded-2xl p-4">
+        <div class="bg-grey-50 rounded-2xl p-4">
           <div class="flex items-center space-x-3">
             <img 
               :src="product.main_image || '/placeholder.jpg'" 
@@ -33,95 +33,97 @@
               class="w-16 h-16 rounded-xl object-cover"
             />
             <div>
-              <h3 class="font-semibold text-gray-900">{{ product.name }}</h3>
-              <p class="text-sm text-gray-500">{{ product.store_name }}</p>
+              <h3 class="font-semibold text-grey-900">{{ product.name }}</h3>
+              <p class="text-sm text-grey-500">{{ product.store_name }}</p>
             </div>
           </div>
         </div>
 
         <!-- Personal Information -->
         <div class="space-y-4">
-          <h3 class="font-semibold text-gray-900">Your Information</h3>
+          <h3 class="font-semibold text-grey-900">{{ $t('viewing_request_form.your_information') }}</h3>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+            <label class="block text-sm font-medium text-grey-700 mb-2">{{ $t('viewing_request_form.full_name') }}</label>
             <input
               v-model="form.customer_name"
               type="text"
               required
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-              placeholder="Enter your full name"
+              class="w-full px-4 py-3 rounded-xl border border-grey-200 focus:border-navy focus:ring-2 focus:ring-navy/20 transition-all"
+              :placeholder="$t('viewing_request_form.full_name_placeholder')"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+            <label class="block text-sm font-medium text-grey-700 mb-2">{{ $t('viewing_request_form.phone_number') }}</label>
             <input
               v-model="form.customer_phone"
               type="tel"
               required
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-              placeholder="+229 XX XX XX XX"
+              class="w-full px-4 py-3 rounded-xl border border-grey-200 focus:border-navy focus:ring-2 focus:ring-navy/20 transition-all"
+              :placeholder="$t('viewing_request_form.phone_placeholder')"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+            <label class="block text-sm font-medium text-grey-700 mb-2">{{ $t('viewing_request_form.email_address') }}</label>
             <input
               v-model="form.customer_email"
               type="email"
               required
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-              placeholder="your.email@example.com"
+              class="w-full px-4 py-3 rounded-xl border border-grey-200 focus:border-navy focus:ring-2 focus:ring-navy/20 transition-all"
+              :placeholder="$t('viewing_request_form.email_placeholder')"
             />
           </div>
         </div>
 
         <!-- Viewing Preferences -->
         <div class="space-y-4">
-          <h3 class="font-semibold text-gray-900">Viewing Preferences</h3>
+          <h3 class="font-semibold text-grey-900">{{ $t('viewing_request_form.viewing_preferences') }}</h3>
           
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Date *</label>
+              <label class="block text-sm font-medium text-grey-700 mb-2">{{ $t('viewing_request_form.preferred_date') }}</label>
               <input
+                ref="dateInputRef"
                 v-model="form.preferred_date"
                 type="date"
                 :min="minDate"
                 required
-                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                class="w-full px-4 py-3 rounded-xl border border-grey-200 focus:border-navy focus:ring-2 focus:ring-navy/20 transition-all"
+                @click="openDatePicker"
               />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Time *</label>
+              <label class="block text-sm font-medium text-grey-700 mb-2">{{ $t('viewing_request_form.preferred_time') }}</label>
               <select
                 v-model="form.preferred_time"
                 required
-                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                class="w-full px-4 py-3 rounded-xl border border-grey-200 focus:border-navy focus:ring-2 focus:ring-navy/20 transition-all"
               >
-                <option value="">Select time</option>
-                <option value="09:00">9:00 AM</option>
-                <option value="10:00">10:00 AM</option>
-                <option value="11:00">11:00 AM</option>
-                <option value="12:00">12:00 PM</option>
-                <option value="13:00">1:00 PM</option>
-                <option value="14:00">2:00 PM</option>
-                <option value="15:00">3:00 PM</option>
-                <option value="16:00">4:00 PM</option>
-                <option value="17:00">5:00 PM</option>
-                <option value="18:00">6:00 PM</option>
+                <option value="">{{ $t('viewing_request_form.select_time') }}</option>
+                <option value="09:00">{{ $t('viewing_request_form.time_09') }}</option>
+                <option value="10:00">{{ $t('viewing_request_form.time_10') }}</option>
+                <option value="11:00">{{ $t('viewing_request_form.time_11') }}</option>
+                <option value="12:00">{{ $t('viewing_request_form.time_12') }}</option>
+                <option value="13:00">{{ $t('viewing_request_form.time_13') }}</option>
+                <option value="14:00">{{ $t('viewing_request_form.time_14') }}</option>
+                <option value="15:00">{{ $t('viewing_request_form.time_15') }}</option>
+                <option value="16:00">{{ $t('viewing_request_form.time_16') }}</option>
+                <option value="17:00">{{ $t('viewing_request_form.time_17') }}</option>
+                <option value="18:00">{{ $t('viewing_request_form.time_18') }}</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Additional Message</label>
+            <label class="block text-sm font-medium text-grey-700 mb-2">{{ $t('viewing_request_form.additional_message') }}</label>
             <textarea
               v-model="form.message"
               rows="3"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none"
-              placeholder="Any specific requirements or questions about the viewing..."
+              class="w-full px-4 py-3 rounded-xl border border-grey-200 focus:border-navy focus:ring-2 focus:ring-navy/20 transition-all resize-none"
+              :placeholder="$t('viewing_request_form.message_placeholder')"
             ></textarea>
           </div>
         </div>
@@ -138,12 +140,11 @@
         <button
           type="submit"
           :disabled="submitting"
-          class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-            style="background: linear-gradient(to right, #2563eb, #9333ea);"
+          class="w-full py-4 bg-navy text-white font-semibold rounded-2xl hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
         >
           <Calendar v-if="!submitting" class="w-5 h-5 mr-2" />
           <div v-else class="w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          {{ submitting ? 'Submitting Request...' : 'Request Viewing' }}
+          {{ submitting ? $t('viewing_request_form.submitting') : $t('viewing_request_form.submit_button') }}
         </button>
       </form>
     </div>
@@ -151,10 +152,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { X, AlertCircle, Calendar } from 'lucide-vue-next'
 import { apiService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
+
+const { t } = useI18n()
 
 const props = defineProps({
   showForm: {
@@ -186,6 +190,7 @@ const form = ref({
 
 const submitting = ref(false)
 const error = ref('')
+const dateInputRef = ref(null)
 
 // Computed minimum date (tomorrow)
 const minDate = computed(() => {
@@ -202,6 +207,15 @@ onMounted(() => {
     form.value.customer_phone = authStore.user.phone || ''
   }
 })
+
+const openDatePicker = () => {
+  nextTick(() => {
+    const el = dateInputRef.value
+    if (el && typeof el.showPicker === 'function') {
+      el.showPicker()
+    }
+  })
+}
 
 const closeForm = () => {
   emit('close')
@@ -240,7 +254,7 @@ const submitRequest = async () => {
     await apiService.createViewingRequest(requestData)
 
     emit('success', {
-      message: 'Your viewing request has been sent to the seller. They will contact you to confirm the details.',
+      message: t('viewing_request_form.success_message'),
       productName: props.product.name
     })
 
@@ -266,7 +280,7 @@ const submitRequest = async () => {
         error.value = errorData
       }
     } else {
-      error.value = 'Failed to submit viewing request. Please try again.'
+      error.value = t('viewing_request_form.error_submit')
     }
 
     emit('error', error.value)

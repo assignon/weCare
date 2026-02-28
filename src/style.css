@@ -1,14 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
 :root {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  --primary-color: #7C3AED;
+  --primary-color: #1a1a2e;
   --secondary-color: #1a2233;
-  --text-color: #333;
-  --placeholder-color: #888;
-  --background-color: #f5f7fb;
+  --text-color: #1a1a2e;
+  --text-muted: #6b7280;
+  --placeholder-color: #9ca3af;
+  --background-color: #ffffff;
   --card-color: #fff;
+  --border-color: #f3f4f6;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -34,7 +38,7 @@ body {
   padding: 0;
   background-color: var(--background-color);
   color: var(--text-color);
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
   overflow-x: hidden;
 }
 
@@ -64,37 +68,25 @@ body {
   width: 100% !important;
 }
 
-/* Override for Vuetify elements */
 .v-application {
-  font-family: 'Poppins', sans-serif !important;
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif !important;
 }
 
-/* Override for inputs, buttons and other components */
 .v-btn,
 .v-card,
 .v-toolbar,
 .v-text-field {
-  font-family: 'Poppins', sans-serif !important;
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif !important;
 }
 
-/* Headings */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-.text-h1,
-.text-h2,
-.text-h3,
-.text-h4,
-.text-h5,
-.text-h6 {
-  font-family: 'Poppins', sans-serif !important;
-  font-weight: 600;
+h1, h2, h3, h4, h5, h6,
+.text-h1, .text-h2, .text-h3,
+.text-h4, .text-h5, .text-h6 {
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif !important;
+  font-weight: 700;
+  color: #1a1a2e;
 }
 
-/* Add some responsive adjustments for small devices */
 @media screen and (max-width: 600px) {
   .container {
     padding: 12px;
@@ -109,55 +101,21 @@ h6,
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #1a1a2e;
   text-decoration: inherit;
 }
 
 a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  color: #4d4d80;
 }
 
 button {
-  border-radius: 8px;
+  border-radius: 16px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-
-button:hover {
-  border-color: #646cff;
-}
-
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-.card {
-  padding: 2em;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-
-  a:hover {
-    color: #747bff;
-  }
-
-  button {
-    background-color: #f9f9f9;
-  }
+  transition: all 0.2s ease;
 }

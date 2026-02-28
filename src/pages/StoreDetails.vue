@@ -1,31 +1,31 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+  <div class="page-container">
     <div class="pb-24">
-      <!-- Enhanced Header with Back Button -->
-      <div class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-white/20">
+      <!-- Sticky Header with Back Button -->
+      <div class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-nav">
         <div class="flex items-center justify-between p-4">
           <button 
             @click="goBack"
-            class="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+            class="p-2 hover:bg-grey-100 rounded-xl transition-colors"
           >
-            <ArrowLeft class="w-6 h-6 text-gray-600" />
+            <ArrowLeft class="w-6 h-6 text-grey-500" />
           </button>
-          <h1 class="text-lg font-semibold text-gray-900 truncate mx-4">
+          <h1 class="text-lg font-bold text-navy truncate mx-4">
             {{ store?.business_name || 'Store Details' }}
           </h1>
           <div class="flex items-center space-x-2">
             <button 
               @click="shareStore"
-              class="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+              class="p-2 hover:bg-grey-100 rounded-xl transition-colors"
             >
-              <Share2 class="w-5 h-5 text-gray-600" />
+              <Share2 class="w-5 h-5 text-grey-500" />
             </button>
             <button 
               @click="toggleFavorite"
-              class="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+              class="p-2 hover:bg-grey-100 rounded-xl transition-colors"
             >
               <Heart 
-                :class="isFavorited ? 'text-red-500 fill-current' : 'text-gray-600'"
+                :class="isFavorited ? 'text-red-500 fill-current' : 'text-grey-500'"
                 class="w-5 h-5 transition-colors" 
               />
             </button>
@@ -36,14 +36,14 @@
       <!-- Loading State -->
       <div v-if="loading" class="flex justify-center items-center min-h-[50vh]">
         <div class="relative">
-          <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-200"></div>
-          <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent absolute top-0 left-0"></div>
+          <div class="animate-spin rounded-full h-12 w-12 border-4 border-grey-200"></div>
+          <div class="animate-spin rounded-full h-12 w-12 border-4 border-navy border-t-transparent absolute top-0 left-0"></div>
         </div>
       </div>
 
       <!-- Error State -->
       <div v-else-if="error" class="p-4">
-        <div class="bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-3xl p-6">
+        <div class="bg-red-50 border border-red-200 rounded-2xl p-6">
           <div class="flex items-center">
             <AlertCircle class="w-6 h-6 text-red-500 mr-3" />
             <span class="text-red-700 font-medium">{{ error }}</span>
@@ -61,7 +61,7 @@
               class="w-full h-full object-cover" 
               alt="Store Banner"
             />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+            <div class="absolute inset-0 hero-overlay"></div>
           </div>
           
           <!-- Store Info Overlay -->
@@ -69,7 +69,7 @@
             <div class="flex items-end space-x-4">
               <img 
                 :src="store.profile_picture || defaultStoreImage" 
-                class="w-20 h-20 rounded-2xl object-cover border-4 border-white shadow-lg" 
+                class="w-20 h-20 rounded-2xl object-cover border-4 border-white shadow-float" 
                 alt="Store Logo"
               />
               <div class="flex-1">
@@ -103,27 +103,27 @@
         <!-- Store Info Cards -->
         <div class="p-4">
           <div class="grid grid-cols-3 gap-4 mb-6">
-            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20">
-              <Package class="w-6 h-6 text-blue-600 mx-auto mb-2" />
-              <div class="text-lg font-bold text-gray-900">{{ store.product_count || 0 }}</div>
-              <div class="text-xs text-gray-600">Products</div>
+            <div class="card-flat p-4 text-center">
+              <Package class="w-6 h-6 text-navy mx-auto mb-2" />
+              <div class="text-lg font-bold text-navy">{{ store.product_count || 0 }}</div>
+              <div class="text-xs text-grey-500">Products</div>
             </div>
-            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20">
+            <div class="card-flat p-4 text-center">
               <Users class="w-6 h-6 text-green-600 mx-auto mb-2" />
-              <div class="text-lg font-bold text-gray-900">{{ store.follower_count || 0 }}</div>
-              <div class="text-xs text-gray-600">Followers</div>
+              <div class="text-lg font-bold text-navy">{{ store.follower_count || 0 }}</div>
+              <div class="text-xs text-grey-500">Followers</div>
             </div>
-            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20">
-              <Clock class="w-6 h-6 text-purple-600 mx-auto mb-2" />
-              <div class="text-lg font-bold text-gray-900">{{ getStoreAge() }}</div>
-              <div class="text-xs text-gray-600">Active</div>
+            <div class="card-flat p-4 text-center">
+              <Clock class="w-6 h-6 text-navy mx-auto mb-2" />
+              <div class="text-lg font-bold text-navy">{{ getStoreAge() }}</div>
+              <div class="text-xs text-grey-500">Active</div>
             </div>
           </div>
 
           <!-- Store Description -->
-          <div v-if="store.description" class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-white/20">
-            <h3 class="text-lg font-semibold text-gray-900 mb-3">About This Store</h3>
-            <p class="text-gray-600 leading-relaxed">{{ store.description }}</p>
+          <div v-if="store.description" class="card p-6 mb-6">
+            <h3 class="text-lg font-semibold text-navy mb-3">About This Store</h3>
+            <p class="text-grey-500 leading-relaxed">{{ store.description }}</p>
           </div>
 
           <!-- Action Buttons -->
@@ -131,14 +131,14 @@
             <button 
               @click="followStore"
               :disabled="followLoading"
-              class="flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
+              class="flex items-center justify-center px-6 py-3 bg-navy text-white rounded-2xl hover:bg-navy/90 transition-all duration-200 shadow-card hover:shadow-float disabled:opacity-50"
             >
               <UserPlus class="w-5 h-5 mr-2" />
               {{ isFollowing ? 'Following' : 'Follow Store' }}
             </button>
             <button 
               @click="contactStore"
-              class="flex items-center justify-center px-6 py-3 bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-700 rounded-2xl hover:bg-white hover:border-gray-300 transition-all duration-200"
+              class="flex items-center justify-center px-6 py-3 bg-white border border-grey-200 text-grey-500 rounded-2xl hover:bg-grey-50 hover:border-grey-300 transition-all duration-200"
             >
               <MessageCircle class="w-5 h-5 mr-2" />
               Contact
@@ -148,16 +148,16 @@
 
         <!-- Product Categories in Store -->
         <div class="px-4 mb-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Product Categories</h3>
+          <h3 class="text-lg font-semibold text-navy mb-4">Product Categories</h3>
           <div class="overflow-x-auto">
             <div class="flex space-x-3 pb-2">
               <button 
                 @click="filterProducts(null)"
                 :class="[
-                  'px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 whitespace-nowrap',
+                  'px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap',
                   selectedProductCategory === null 
-                    ? 'bg-blue-600 text-white shadow-lg' 
-                    : 'bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white'
+                    ? 'bg-navy text-white shadow-card' 
+                    : 'bg-grey-50 text-grey-500 hover:bg-grey-100'
                 ]"
               >
                 All Products
@@ -167,10 +167,10 @@
                 :key="category.id"
                 @click="filterProducts(category.id)"
                 :class="[
-                  'px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 whitespace-nowrap',
+                  'px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap',
                   selectedProductCategory === category.id 
-                    ? 'bg-blue-600 text-white shadow-lg' 
-                    : 'bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white'
+                    ? 'bg-navy text-white shadow-card' 
+                    : 'bg-grey-50 text-grey-500 hover:bg-grey-100'
                 ]"
               >
                 {{ category.name }}
@@ -182,17 +182,17 @@
         <!-- Products Grid -->
         <div class="px-4">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">
+            <h3 class="text-lg font-semibold text-navy">
               {{ getProductsSectionTitle() }}
             </h3>
-            <span class="text-sm text-gray-600">{{ filteredProducts.length }} products</span>
+            <span class="text-sm text-grey-500">{{ filteredProducts.length }} products</span>
           </div>
 
           <!-- Products Loading -->
           <div v-if="productsLoading" class="flex justify-center my-8">
             <div class="relative">
-              <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-200"></div>
-              <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent absolute top-0 left-0"></div>
+              <div class="animate-spin rounded-full h-8 w-8 border-4 border-grey-200"></div>
+              <div class="animate-spin rounded-full h-8 w-8 border-4 border-navy border-t-transparent absolute top-0 left-0"></div>
             </div>
           </div>
 
@@ -203,41 +203,40 @@
               :key="product.id"
               class="flex flex-col"
             >
-              <!-- Product Card - Only contains image -->
+              <!-- Product Card -->
               <div 
                 @click="navigateToProduct(product.id)"
-                class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square cursor-pointer"
+                class="group bg-grey-50 rounded-2xl transition-all duration-200 overflow-hidden mb-2 aspect-square cursor-pointer"
               >
                 <img 
                   :src="product.main_image || defaultProductImage" 
                   :alt="product.name"
-                  class="w-full h-full object-cover rounded-lg"
+                  class="w-full h-full object-cover rounded-2xl"
                 />
               </div>
               
-              <!-- Product Info - Outside the card -->
+              <!-- Product Info -->
               <div class="space-y-1">
-                <!-- Product Name -->
                 <h4 
                   @click="navigateToProduct(product.id)"
-                  class="font-bold text-sm text-gray-900 mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors"
+                  class="font-bold text-sm text-navy mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-navy/70 transition-colors capitalize"
                 >
                   {{ product.name }}
                 </h4>
                 
                 <!-- Local Names/Description with Flag -->
                 <div v-if="product.local_name || product.description" class="flex items-start gap-1.5 mb-1">
-                  <Flag class="w-3.5 h-3.5 text-gray-600 mt-0.5 flex-shrink-0" />
-                  <p class="text-xs italic text-gray-600 line-clamp-1">
+                  <Flag class="w-3.5 h-3.5 text-grey-500 mt-0.5 flex-shrink-0" />
+                  <p class="text-xs italic text-grey-500 line-clamp-1">
                     {{ product.local_name || (product.description ? product.description.substring(0, 50) + '...' : '') }}
                   </p>
                 </div>
                 
                 <!-- Price and Quantity -->
                 <div class="flex items-center justify-between">
-                  <span class="font-bold text-sm text-blue-600">
+                  <span class="font-bold text-sm text-navy">
                     {{ formatPrice(product.price) }}
-                    <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
+                    <span v-if="product.quantity || product.weight" class="text-xs font-normal text-grey-500">
                       / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
                     </span>
                   </span>
@@ -248,9 +247,9 @@
 
           <!-- No Products -->
           <div v-else-if="!productsLoading" class="text-center py-12">
-            <Package class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 class="text-lg font-medium text-gray-900 mb-2">No Products Found</h3>
-            <p class="text-gray-600">This store doesn't have any products in this category yet.</p>
+            <Package class="w-16 h-16 text-grey-300 mx-auto mb-4" />
+            <h3 class="text-lg font-medium text-navy mb-2">No Products Found</h3>
+            <p class="text-grey-500">This store doesn't have any products in this category yet.</p>
           </div>
 
           <!-- Load More Products -->
@@ -258,7 +257,7 @@
             <button 
               @click="loadMoreProducts"
               :disabled="loadingMoreProducts"
-              class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
+              class="px-6 py-3 bg-navy text-white rounded-2xl hover:bg-navy/90 transition-all duration-200 shadow-card hover:shadow-float disabled:opacity-50"
             >
               {{ loadingMoreProducts ? 'Loading...' : 'Load More Products' }}
             </button>
@@ -518,7 +517,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Line clamp utilities */
 .line-clamp-1 {
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -533,26 +531,5 @@ onMounted(() => {
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-/* Enhanced hover effects */
-.hover\:-translate-y-1:hover {
-  transform: translateY(-0.25rem);
-}
-
-/* Smooth transitions */
-.transition-all {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Glass morphism effect */
-.backdrop-blur-sm {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-.backdrop-blur-md {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
 }
 </style>

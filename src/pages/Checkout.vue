@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white pb-24">
+  <div class="min-h-screen bg-white pb-24 page-container">
     <BackButtonHeader :title="$t('checkout.title')" />
     <div class="p-3 pt-4">
 
@@ -13,8 +13,8 @@
                 :class="[
                   'w-6 h-6 rounded-full flex items-center justify-center font-semibold text-xs mb-0.5',
                   currentStep >= 1 
-                    ? 'bg-blue-600 text-white' 
-                    : 'border-2 border-gray-300 text-gray-500'
+                    ? 'bg-navy text-white' 
+                    : 'border-2 border-grey-300 text-grey-500'
                 ]"
               >
                 1
@@ -22,7 +22,7 @@
               <span 
                 :class="[
                   'text-xs font-medium',
-                  currentStep >= 1 ? 'text-gray-900' : 'text-gray-500'
+                  currentStep >= 1 ? 'text-navy' : 'text-grey-500'
                 ]"
               >
                 {{ $t('checkout.address') }}
@@ -31,7 +31,7 @@
             <div 
               :class="[
                 'w-6 h-0.5 rounded-full',
-                currentStep >= 2 ? 'bg-blue-600' : 'bg-gray-300'
+                currentStep >= 2 ? 'bg-navy' : 'bg-grey-300'
               ]"
             ></div>
             <div class="flex flex-col items-center">
@@ -39,8 +39,8 @@
                 :class="[
                   'w-6 h-6 rounded-full flex items-center justify-center font-semibold text-xs mb-0.5',
                   currentStep >= 2 
-                    ? 'bg-blue-600 text-white' 
-                    : 'border-2 border-gray-300 text-gray-500'
+                    ? 'bg-navy text-white' 
+                    : 'border-2 border-grey-300 text-grey-500'
                 ]"
               >
                 2
@@ -48,7 +48,7 @@
               <span 
                 :class="[
                   'text-xs font-medium',
-                  currentStep >= 2 ? 'text-gray-900' : 'text-gray-500'
+                  currentStep >= 2 ? 'text-navy' : 'text-grey-500'
                 ]"
               >
                 {{ $t('checkout.delivery') }}
@@ -57,7 +57,7 @@
             <div 
               :class="[
                 'w-6 h-0.5 rounded-full',
-                currentStep >= 3 ? 'bg-blue-600' : 'bg-gray-300'
+                currentStep >= 3 ? 'bg-navy' : 'bg-grey-300'
               ]"
             ></div>
             <div class="flex flex-col items-center">
@@ -65,8 +65,8 @@
                 :class="[
                   'w-6 h-6 rounded-full flex items-center justify-center font-semibold text-xs mb-0.5',
                   currentStep >= 3 
-                    ? 'bg-blue-600 text-white' 
-                    : 'border-2 border-gray-300 text-gray-500'
+                    ? 'bg-navy text-white' 
+                    : 'border-2 border-grey-300 text-grey-500'
                 ]"
               >
                 3
@@ -74,7 +74,7 @@
               <span 
                 :class="[
                   'text-xs font-medium',
-                  currentStep >= 3 ? 'text-gray-900' : 'text-gray-500'
+                  currentStep >= 3 ? 'text-navy' : 'text-grey-500'
                 ]"
               >
                 {{ $t('checkout.payment') }}
@@ -87,8 +87,8 @@
         <div class="space-y-3">
           <!-- Step 1: Address Selection -->
           <div v-if="currentStep === 1" class="space-y-3">
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h2 class="text-base font-bold text-gray-900 mb-4">{{ $t('checkout.delivery_address') }}</h2>
+            <div class="bg-white rounded-2xl shadow-card p-4">
+              <h2 class="text-base font-bold text-navy mb-4">{{ $t('checkout.delivery_address') }}</h2>
 
               <!-- Address list -->
               <div v-if="!loading" class="space-y-2">
@@ -97,28 +97,28 @@
                     v-for="(address, index) in addresses" 
                     :key="index"
                     :class="[
-                      'p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 mb-2',
+                      'p-3 rounded-2xl border-2 cursor-pointer transition-all duration-200 mb-2',
                       selectedAddressIndex === index 
-                        ? 'border-blue-500 bg-blue-50' 
-                        : 'border-gray-200 bg-white hover:border-gray-300'
+                        ? 'border-navy bg-navy/5' 
+                        : 'border-grey-200 bg-white hover:border-grey-300'
                     ]"
                     @click="selectAddress(index)"
                   >
                     <div class="flex items-start justify-between">
                       <div class="flex items-start space-x-2 flex-1">
-                        <div class="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <div class="w-6 h-6 bg-navy rounded-full flex items-center justify-center flex-shrink-0">
                           <Home v-if="address.type === 'home'" class="w-3 h-3 text-white" />
                           <Building v-else class="w-3 h-3 text-white" />
                         </div>
                         <div class="flex-1 min-w-0">
                           <div class="flex items-center space-x-2 mb-1">
-                            <span class="text-sm font-semibold text-gray-900">{{ address.address_label }}</span>
+                            <span class="text-sm font-semibold text-navy">{{ address.address_label }}</span>
                             <div v-if="address.latitude && address.longitude" class="flex items-center px-1.5 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                               <MapPin class="w-2.5 h-2.5 mr-0.5" />
                               GPS
                             </div>
                           </div>
-                          <div class="text-xs text-gray-600 space-y-0.5">
+                          <div class="text-xs text-grey-600 space-y-0.5">
                             <p>{{ address.phone }}</p>
                             <p>{{ address.address_line1 }}</p>
                             <p>{{ address.city }}, {{ address.state }} {{ address.postal_code }}</p>
@@ -128,15 +128,15 @@
 
                       <button 
                         @click.stop="editAddress(index)"
-                        class="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors flex-shrink-0"
+                        class="w-7 h-7 bg-grey-100 hover:bg-grey-200 rounded-2xl flex items-center justify-center transition-colors flex-shrink-0"
                       >
-                        <Edit class="w-3.5 h-3.5 text-gray-600" />
+                        <Edit class="w-3.5 h-3.5 text-grey-600" />
                       </button>
                       </div>
 
                       <!-- Selected indicator -->
                     <div v-if="selectedAddressIndex === index" class="flex items-center justify-end mt-2">
-                      <div class="flex items-center text-blue-600 text-xs font-medium">
+                      <div class="flex items-center text-navy text-xs font-medium">
                         <CheckCircle class="w-3 h-3 mr-1" />
                         {{ $t('checkout.selected') }}
                       </div>
@@ -146,16 +146,16 @@
 
                 <!-- No addresses state -->
                 <div v-else class="text-center py-8">
-                  <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <MapPinOff class="w-6 h-6 text-gray-400" />
+                  <div class="w-12 h-12 bg-grey-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <MapPinOff class="w-6 h-6 text-grey-400" />
                   </div>
-                  <p class="text-sm text-gray-600">{{ $t('checkout.no_addresses_found') }}</p>
+                  <p class="text-sm text-grey-600">{{ $t('checkout.no_addresses_found') }}</p>
                 </div>
 
                 <!-- Add new address button -->
                 <button 
                   @click="showAddressDialog = true"
-                  class="w-full py-2.5 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-gray-400 hover:text-gray-700 transition-all duration-200 flex items-center justify-center"
+                  class="w-full py-2.5 border-2 border-dashed border-grey-300 rounded-2xl text-sm text-grey-600 hover:border-grey-400 hover:text-grey-700 transition-all duration-200 flex items-center justify-center"
                 >
                   <Plus class="w-4 h-4 mr-1.5" />
                   {{ $t('checkout.add_new_address') }}
@@ -165,7 +165,7 @@
               <!-- Loading skeleton -->
               <div v-else class="space-y-2">
                 <div v-for="i in 2" :key="i" class="animate-pulse">
-                  <div class="h-20 bg-gray-200 rounded-lg"></div>
+                  <div class="h-20 bg-grey-200 rounded-2xl"></div>
                 </div>
               </div>
 
@@ -173,7 +173,7 @@
               <button 
                 :disabled="selectedAddressIndex === null"
                 @click="nextStep"
-                class="w-full mt-4 py-3 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
+                class="w-full mt-4 py-3 bg-navy text-white text-sm font-semibold rounded-2xl hover:bg-navy/90 disabled:bg-grey-400 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 {{ $t('checkout.continue_to_delivery') }}
               </button>
@@ -183,9 +183,9 @@
           <!-- Step 2: Delivery Information -->
           <div v-if="currentStep === 2" class="space-y-3">
             <!-- Delivery Address -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 class="text-sm font-semibold text-gray-900 mb-2">{{ $t('checkout.delivery_address') }}</h3>
-              <div v-if="selectedAddressIndex !== null" class="text-xs text-gray-600 space-y-0.5">
+            <div class="bg-white rounded-2xl shadow-card p-4">
+              <h3 class="text-sm font-semibold text-navy mb-2">{{ $t('checkout.delivery_address') }}</h3>
+              <div v-if="selectedAddressIndex !== null" class="text-xs text-grey-600 space-y-0.5">
                 <p>{{ selectedAddress.name }}</p>
                 <p>{{ selectedAddress.address_line1 }}</p>
                 <p>{{ selectedAddress.city }}, {{ selectedAddress.state }} {{ selectedAddress.postal_code }}</p>
@@ -195,34 +195,34 @@
             </div>
 
             <!-- Seller Delivery Groups -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 class="text-sm font-semibold text-gray-900 mb-4">{{ $t('checkout.delivery_options_by_seller') }}</h3>
+            <div class="bg-white rounded-2xl shadow-card p-4">
+              <h3 class="text-sm font-semibold text-navy mb-4">{{ $t('checkout.delivery_options_by_seller') }}</h3>
               
               <!-- Seller delivery groups -->
               <div class="space-y-3">
                 <div 
                   v-for="group in sellerDeliveryGroups" 
                   :key="`${group.seller_id}_${group.delivery_type}`"
-                  class="p-3 rounded-lg border bg-white"
-                  :class="group.delivery_type === 'express' ? 'border-green-200 bg-green-50' : 'border-gray-200'"
+                  class="p-3 rounded-2xl border bg-white"
+                  :class="group.delivery_type === 'express' ? 'border-green-200 bg-green-50' : 'border-grey-200'"
                 >
                   <!-- Group header -->
                   <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center space-x-2">
                       <div 
                         class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
-                        :class="group.delivery_type === 'express' ? 'bg-green-600' : 'bg-blue-600'"
+                        :class="group.delivery_type === 'express' ? 'bg-green-600' : 'bg-navy'"
                       >
                         <Truck v-if="group.delivery_type !== 'express'" class="w-3.5 h-3.5 text-white" />
                         <Zap v-else class="w-3.5 h-3.5 text-white" />
                       </div>
                       <div>
-                        <h4 class="text-sm font-semibold text-gray-900">{{ group.seller_name }}</h4>
-                        <p class="text-xs text-gray-600 capitalize">
+                        <h4 class="text-sm font-semibold text-navy">{{ group.seller_name }}</h4>
+                        <p class="text-xs text-grey-600 capitalize">
                           {{ $t(`checkout.${group.delivery_type}_delivery`) }}
                           <span v-if="group.is_express_group" class="text-green-600">({{ $t('checkout.express_item') }})</span>
                         </p>
-                        <p class="text-xs text-blue-600 mt-0.5">
+                        <p class="text-xs text-navy mt-0.5">
                           {{ $t('checkout.expected') }}: {{ formatGroupDeliveryDate(group) }}
                         </p>
                       </div>
@@ -234,9 +234,9 @@
                       <button
                         v-if="group.delivery_type === 'standard' || group.delivery_type === 'custom'"
                         @click="() => { console.log('🔧 Custom button clicked for group:', group); openCustomDeliveryModalForGroup(group); }"
-                        class="flex items-center px-2 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border bg-gray-50 border-gray-200 text-gray-600 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600"
+                        class="flex items-center px-2 py-1.5 rounded-2xl text-xs font-medium transition-all duration-200 border bg-grey-50 border-grey-200 text-grey-600 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600"
                       >
-                        <span class="w-3 h-3 mr-1 flex items-center justify-center rounded text-xs bg-gray-200 text-gray-600">
+                        <span class="w-3 h-3 mr-1 flex items-center justify-center rounded text-xs bg-grey-200 text-grey-600">
                           📅
                         </span>
                         {{ $t('checkout.custom') }}
@@ -249,10 +249,10 @@
                     <div 
                       v-for="item in group.items" 
                       :key="item.product_id"
-                      class="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg"
+                      class="flex items-center space-x-2 p-2 bg-grey-50 rounded-2xl"
                     >
                       <!-- Product image -->
-                      <div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                      <div class="w-10 h-10 rounded-2xl overflow-hidden flex-shrink-0">
                         <img 
                           :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
                           :alt="item.product_name"
@@ -262,9 +262,9 @@
                       
                       <!-- Product info -->
                       <div class="flex-1 min-w-0">
-                        <h5 class="font-medium text-gray-900 text-xs">{{ item.product_name }}</h5>
-                        <p class="text-xs text-gray-600">{{ getTotalQuantityForItem(item) }} {{ $t('checkout.items') }}</p>
-                        <div class="flex items-center text-blue-600 text-xs mt-0.5">
+                        <h5 class="font-medium text-navy text-xs">{{ item.product_name }}</h5>
+                        <p class="text-xs text-grey-600">{{ getTotalQuantityForItem(item) }} {{ $t('checkout.items') }}</p>
+                        <div class="flex items-center text-navy text-xs mt-0.5">
                           <Truck class="w-2.5 h-2.5 mr-0.5" />
                           {{ getAdaptiveDeliveryDateForItem(item) }}
                         </div>
@@ -276,13 +276,13 @@
                           v-if="isExpressEligibleItem(item)"
                           @click="toggleExpressForItem(item)"
                           :class="[
-                            'flex items-center px-2 py-1 rounded-lg text-xs font-medium transition-all duration-200 border',
+                            'flex items-center px-2 py-1 rounded-2xl text-xs font-medium transition-all duration-200 border',
                             expressProductIds.has(item.product_id)
                               ? 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100'
-                              : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-green-50 hover:border-green-200 hover:text-green-600'
+                              : 'bg-grey-50 border-grey-200 text-grey-600 hover:bg-green-50 hover:border-green-200 hover:text-green-600'
                           ]"
                         >
-                          <span class="w-2.5 h-2.5 mr-1 flex items-center justify-center rounded text-xs" :class="expressProductIds.has(item.product_id) ? 'bg-green-200 text-green-800' : 'bg-gray-200 text-gray-600'">
+                          <span class="w-2.5 h-2.5 mr-1 flex items-center justify-center rounded text-xs" :class="expressProductIds.has(item.product_id) ? 'bg-green-200 text-green-800' : 'bg-grey-200 text-grey-600'">
                             <span v-if="expressProductIds.has(item.product_id)">✓</span>
                             <span v-else>⚡</span>
                           </span>
@@ -305,17 +305,17 @@
             />
 
               <!-- Order summary -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 class="text-sm font-semibold text-gray-900 mb-4">{{ $t('checkout.order_summary') }}</h3>
+            <div class="bg-white rounded-2xl shadow-card p-4">
+              <h3 class="text-sm font-semibold text-navy mb-4">{{ $t('checkout.order_summary') }}</h3>
 
                   <!-- Cart items list (up to 3) -->
               <div v-if="groupedCartItems.length > 0" class="space-y-2 mb-4">
                 <div 
                   v-for="(item, index) in displayedCartItems" 
                   :key="item.product_id"
-                  class="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg"
+                  class="flex items-center space-x-2 p-2 bg-grey-50 rounded-2xl"
                 >
-                  <div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                  <div class="w-10 h-10 rounded-2xl overflow-hidden flex-shrink-0">
                     <img 
                       :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
                       :alt="item.product_name"
@@ -323,17 +323,17 @@
                     />
                       </div>
                   <div class="flex-1 min-w-0">
-                    <p class="text-xs font-medium text-gray-900 truncate">{{ item.product_name }}</p>
-                    <p class="text-xs text-gray-600">
+                    <p class="text-xs font-medium text-navy truncate">{{ item.product_name }}</p>
+                    <p class="text-xs text-grey-600">
                       {{ item.variants.length }} {{ item.variants.length === 1 ? $t('checkout.variant_one') : $t('checkout.variant_other') }} · {{ getTotalQuantity(item) }} {{ $t('checkout.items') }}
                     </p>
-                    <div class="flex items-center text-blue-600 text-xs mt-0.5">
+                    <div class="flex items-center text-navy text-xs mt-0.5">
                       <Truck class="w-2.5 h-2.5 mr-0.5" />
                       {{ getAdaptiveDeliveryDate(item) }}
                     </div>
                       </div>
                       <div class="text-right">
-                    <p class="text-xs font-semibold text-gray-900">
+                    <p class="text-xs font-semibold text-navy">
                       {{ formatApiPrice({
                           price: getItemTotal(item),
                         currency_info: cart.items.currency_info 
@@ -346,7 +346,7 @@
                 <button 
                   v-if="groupedCartItems.length > 3"
                   @click="showCartItemsDialog = true"
-                  class="w-full py-2 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                  class="w-full py-2 text-xs text-navy hover:text-navy/80 font-medium transition-colors"
                 >
                       {{ $t('checkout.view_all_items', { count: groupedCartItems.length }) }}
                 </button>
@@ -355,8 +355,8 @@
               <!-- Price breakdown -->
               <div class="space-y-2">
                 <div class="flex justify-between items-center">
-                  <span class="text-xs text-gray-600">{{ $t('checkout.subtotal') }}</span>
-                  <span class="text-xs font-semibold text-gray-900">
+                  <span class="text-xs text-grey-600">{{ $t('checkout.subtotal') }}</span>
+                  <span class="text-xs font-semibold text-navy">
                     {{ formatApiPrice({
                       price: cart.items?.total_amount || 0, 
                       currency_info: cart.items.currency_info 
@@ -367,14 +367,14 @@
                 <!-- Delivery Cost (using new calculation) -->
                 <div class="space-y-1">
                   <div class="flex justify-between items-center">
-                    <span class="text-xs text-gray-600 flex items-center">
+                    <span class="text-xs text-grey-600 flex items-center">
                       <Truck class="w-3 h-3 mr-1" />
                       {{ $t('checkout.delivery') }}
-                      <span v-if="deliveryCost.loading || isCalculatingDelivery" class="ml-1.5 text-xs text-blue-600">
+                      <span v-if="deliveryCost.loading || isCalculatingDelivery" class="ml-1.5 text-xs text-navy">
                         ({{ $t('checkout.calculating') }})
                       </span>
                     </span>
-                    <span class="text-xs font-semibold text-gray-900">
+                    <span class="text-xs font-semibold text-navy">
                       {{ formatApiPrice({
                         price: getDeliveryFeeForDisplay(), 
                         currency_info: cart.items.currency_info 
@@ -383,10 +383,10 @@
                   </div>
                 </div>
 
-                <div class="border-t border-gray-200 pt-2">
+                <div class="border-t border-grey-200 pt-2">
                   <div class="flex justify-between items-center">
-                    <span class="text-sm font-bold text-gray-900">{{ $t('checkout.total') }}</span>
-                    <span class="text-lg font-bold text-blue-600">
+                    <span class="text-sm font-bold text-navy">{{ $t('checkout.total') }}</span>
+                    <span class="text-lg font-bold text-navy">
                       {{ formatApiPrice({
                       price: totalAmount,
                         currency_info: cart.items.currency_info 
@@ -401,13 +401,13 @@
             <div class="flex space-x-2">
               <button 
                 @click="prevStep"
-                class="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+                class="flex-1 py-2.5 border border-grey-300 text-grey-700 text-sm font-semibold rounded-2xl hover:border-grey-400 hover:bg-grey-50 transition-all duration-200"
               >
                 {{ $t('checkout.back') }}
               </button>
               <button 
                 @click="nextStep"
-                class="flex-1 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                class="flex-1 py-2.5 bg-navy text-white text-sm font-semibold rounded-2xl hover:bg-navy/90 transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 {{ $t('checkout.next') }}
               </button>
@@ -417,17 +417,17 @@
           <!-- Step 3: Payment -->
           <div v-if="currentStep === 3" class="space-y-3">
               <!-- Summary for this step -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 class="text-sm font-semibold text-gray-900 mb-3">{{ $t('checkout.order_summary') }}</h3>
+            <div class="bg-white rounded-2xl shadow-card p-4">
+              <h3 class="text-sm font-semibold text-navy mb-3">{{ $t('checkout.order_summary') }}</h3>
               
                             <div class="space-y-2">
                 <div class="flex items-center space-x-2">
-                  <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <MapPin class="w-3 h-3 text-blue-600" />
+                  <div class="w-6 h-6 bg-navy/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin class="w-3 h-3 text-navy" />
                   </div>
                     <div>
-                    <p class="text-xs font-medium text-gray-900">{{ $t('checkout.delivery_address') }}</p>
-                    <p class="text-xs text-gray-600">
+                    <p class="text-xs font-medium text-navy">{{ $t('checkout.delivery_address') }}</p>
+                    <p class="text-xs text-grey-600">
                         {{ selectedAddress?.address_line1 }}, {{ selectedAddress?.city }}
                       </p>
                     </div>
@@ -438,20 +438,20 @@
                     <Truck class="w-3 h-3 text-green-600" />
                   </div>
                     <div>
-                    <p class="text-xs font-medium text-gray-900">{{ $t('checkout.delivery_option') }}</p>
-                    <p class="text-xs text-gray-600">{{ getDeliveryOptionDisplay() }}</p>
+                    <p class="text-xs font-medium text-navy">{{ $t('checkout.delivery_option') }}</p>
+                    <p class="text-xs text-grey-600">{{ getDeliveryOptionDisplay() }}</p>
                     </div>
                 </div>
 
                 <!-- Cart Items Summary -->
-                <div class="mt-3 pt-3 border-t border-gray-200">
+                <div class="mt-3 pt-3 border-t border-grey-200">
                   <div class="flex items-center space-x-2 mb-2">
                     <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
                       <ShoppingBag class="w-3 h-3 text-purple-600" />
                       </div>
                     <div>
-                      <p class="text-xs font-medium text-gray-900">{{ $t('checkout.order_items') }}</p>
-                      <p class="text-xs text-gray-600">{{ groupedCartItems.length }} {{ groupedCartItems.length === 1 ? $t('checkout.product_one') : $t('checkout.product_other') }}</p>
+                      <p class="text-xs font-medium text-navy">{{ $t('checkout.order_items') }}</p>
+                      <p class="text-xs text-grey-600">{{ groupedCartItems.length }} {{ groupedCartItems.length === 1 ? $t('checkout.product_one') : $t('checkout.product_other') }}</p>
                     </div>
                   </div>
                   
@@ -460,9 +460,9 @@
                     <div 
                       v-for="item in groupedCartItems" 
                       :key="item.product_id"
-                      class="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg border border-gray-100"
+                      class="flex items-center space-x-2 p-2 bg-grey-50 rounded-2xl"
                     >
-                      <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                      <div class="w-8 h-8 rounded-2xl overflow-hidden flex-shrink-0">
                         <img 
                           :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
                           :alt="item.product_name"
@@ -470,17 +470,17 @@
                         />
                       </div>
                       <div class="flex-1 min-w-0">
-                        <p class="text-xs font-medium text-gray-900 truncate">{{ item.product_name }}</p>
-                        <p class="text-xs text-gray-600">
+                        <p class="text-xs font-medium text-navy truncate">{{ item.product_name }}</p>
+                        <p class="text-xs text-grey-600">
                           {{ item.variants.length }} {{ item.variants.length === 1 ? $t('checkout.variant_one') : $t('checkout.variant_other') }} · {{ getTotalQuantity(item) }} {{ $t('checkout.items') }}
                         </p>
-                        <div class="flex items-center text-blue-600 text-xs mt-0.5">
+                        <div class="flex items-center text-navy text-xs mt-0.5">
                           <Truck class="w-2.5 h-2.5 mr-0.5" />
                           {{ getAdaptiveDeliveryDate(item) }}
                         </div>
                       </div>
                       <div class="text-right">
-                        <p class="text-xs font-semibold text-gray-900">
+                        <p class="text-xs font-semibold text-navy">
                           {{ formatApiPrice({
                             price: getItemTotal(item),
                             currency_info: cart.items.currency_info 
@@ -494,32 +494,32 @@
             </div>
 
             <!-- Payment methods -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 class="text-sm font-semibold text-gray-900 mb-4">{{ $t('checkout.payment_method') }}</h3>
+            <div class="bg-white rounded-2xl shadow-card p-4">
+              <h3 class="text-sm font-semibold text-navy mb-4">{{ $t('checkout.payment_method') }}</h3>
 
               <div class="space-y-2">
                 <!-- Mobile Money -->
                 <div 
                   :class="[
-                    'p-3 rounded-lg border-2 cursor-pointer transition-all duration-200',
+                    'p-3 rounded-2xl border-2 cursor-pointer transition-all duration-200',
                     paymentMethod === 'mobile_money' 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 bg-white hover:border-gray-300'
+                      ? 'border-navy bg-navy/5' 
+                      : 'border-grey-200 bg-white hover:border-grey-300'
                   ]"
                   @click="paymentMethod = 'mobile_money'"
                 >
                   <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div class="w-8 h-8 bg-navy rounded-full flex items-center justify-center flex-shrink-0">
                       <Smartphone class="w-4 h-4 text-white" />
                       </div>
                     <div class="flex-1">
                       <div class="flex items-center justify-between">
-                        <span class="text-sm font-semibold text-gray-900">{{ $t('checkout.mobile_money') }}</span>
-                        <div class="w-4 h-4 rounded-full border-2 border-gray-300 flex items-center justify-center">
-                          <div v-if="paymentMethod === 'mobile_money'" class="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>
+                        <span class="text-sm font-semibold text-navy">{{ $t('checkout.mobile_money') }}</span>
+                        <div class="w-4 h-4 rounded-full border-2 border-grey-300 flex items-center justify-center">
+                          <div v-if="paymentMethod === 'mobile_money'" class="w-2.5 h-2.5 bg-navy rounded-full"></div>
                         </div>
                       </div>
-                      <p class="text-xs text-gray-600 mt-0.5">{{ $t('checkout.pay_with_mobile_money') }}</p>
+                      <p class="text-xs text-grey-600 mt-0.5">{{ $t('checkout.pay_with_mobile_money') }}</p>
                     </div>
                   </div>
                 </div>
@@ -535,9 +535,9 @@
 
             <!-- Payment button -->
             <div class="space-y-2">
-              <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span class="text-sm font-bold text-gray-900">{{ $t('checkout.total') }}</span>
-                <span class="text-lg font-bold text-blue-600">
+              <div class="flex justify-between items-center p-3 bg-grey-50 rounded-2xl">
+                <span class="text-sm font-bold text-navy">{{ $t('checkout.total') }}</span>
+                <span class="text-lg font-bold text-navy">
                   {{ formatApiPrice({
                     price: totalAmount, 
                     currency_info: cart.items.currency_info 
@@ -548,14 +548,14 @@
               <div class="flex space-x-2">
                 <button 
                   @click="prevStep"
-                  class="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+                  class="flex-1 py-2.5 border border-grey-300 text-grey-700 text-sm font-semibold rounded-2xl hover:border-grey-400 hover:bg-grey-50 transition-all duration-200"
                 >
                   {{ $t('checkout.back') }}
                 </button>
                 <button 
                   :disabled="processing"
                   @click="placeOrder"
-                  class="flex-1 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
+                  class="flex-1 py-2.5 bg-navy text-white text-sm font-semibold rounded-2xl hover:bg-navy/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
                 >
                   <span v-if="processing" class="flex items-center justify-center">
                     <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1.5"></div>
@@ -580,85 +580,85 @@
           @click.stop
         >
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-900">
+            <h3 class="text-lg font-bold text-navy">
             {{ editAddressIndex !== null ? $t('checkout.edit_address') : $t('checkout.add_new_address') }}
             </h3>
             <button 
               @click="showAddressDialog = false"
-              class="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors"
+              class="w-7 h-7 bg-grey-100 hover:bg-grey-200 rounded-2xl flex items-center justify-center transition-colors"
             >
-              <X class="w-3.5 h-3.5 text-gray-600" />
+              <X class="w-3.5 h-3.5 text-grey-600" />
             </button>
           </div>
 
           <form @submit.prevent="saveAddress" class="space-y-3">
             <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1.5">{{ $t('checkout.address_label') }}*</label>
+              <label class="block text-xs font-medium text-grey-700 mb-1.5">{{ $t('checkout.address_label') }}*</label>
               <input 
                 v-model="addressForm.address_label"
                 type="text"
                 required
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                class="w-full px-3 py-2 text-sm border border-grey-300 rounded-2xl focus:ring-2 focus:ring-navy focus:border-navy transition-colors"
                 :placeholder="$t('checkout.address_label')"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1.5">{{ $t('checkout.address_line1') }}*</label>
+              <label class="block text-xs font-medium text-grey-700 mb-1.5">{{ $t('checkout.address_line1') }}*</label>
               <input 
                 v-model="addressForm.address_line1"
                 type="text"
                 required
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                class="w-full px-3 py-2 text-sm border border-grey-300 rounded-2xl focus:ring-2 focus:ring-navy focus:border-navy transition-colors"
                 :placeholder="$t('checkout.address_line1')"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1.5">{{ $t('checkout.address_line2') }}</label>
+              <label class="block text-xs font-medium text-grey-700 mb-1.5">{{ $t('checkout.address_line2') }}</label>
               <input 
                 v-model="addressForm.address_line2"
                 type="text"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                class="w-full px-3 py-2 text-sm border border-grey-300 rounded-2xl focus:ring-2 focus:ring-navy focus:border-navy transition-colors"
                 :placeholder="$t('checkout.address_line2')"
               />
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1.5">{{ $t('checkout.city') }}*</label>
+                <label class="block text-xs font-medium text-grey-700 mb-1.5">{{ $t('checkout.city') }}*</label>
                 <input 
                   v-model="addressForm.city"
                   type="text"
                   required
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  class="w-full px-3 py-2 text-sm border border-grey-300 rounded-2xl focus:ring-2 focus:ring-navy focus:border-navy transition-colors"
                 />
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1.5">{{ $t('checkout.state') }}</label>
+                <label class="block text-xs font-medium text-grey-700 mb-1.5">{{ $t('checkout.state') }}</label>
                 <input 
                   v-model="addressForm.state"
                   type="text"
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  class="w-full px-3 py-2 text-sm border border-grey-300 rounded-2xl focus:ring-2 focus:ring-navy focus:border-navy transition-colors"
                 />
               </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1.5">{{ $t('checkout.postal_code') }}</label>
+                <label class="block text-xs font-medium text-grey-700 mb-1.5">{{ $t('checkout.postal_code') }}</label>
                 <input 
                   v-model="addressForm.postal_code"
                   type="text"
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  class="w-full px-3 py-2 text-sm border border-grey-300 rounded-2xl focus:ring-2 focus:ring-navy focus:border-navy transition-colors"
                 />
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1.5">{{ $t('checkout.country') }}*</label>
+                <label class="block text-xs font-medium text-grey-700 mb-1.5">{{ $t('checkout.country') }}*</label>
                 <select 
                   v-model="addressForm.country"
                   required
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  class="w-full px-3 py-2 text-sm border border-grey-300 rounded-2xl focus:ring-2 focus:ring-navy focus:border-navy transition-colors"
                 >
                   <option value="">{{ $t('checkout.select_country') }}</option>
                   <option v-for="country in countries" :key="country.name" :value="country.name">
@@ -673,23 +673,23 @@
                 v-model="addressForm.default"
                 type="checkbox"
                 id="default-address"
-                class="w-3.5 h-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                class="w-3.5 h-3.5 text-navy border-grey-300 rounded focus:ring-navy"
               />
-              <label for="default-address" class="text-xs text-gray-700">{{ $t('checkout.set_as_default') }}</label>
+              <label for="default-address" class="text-xs text-grey-700">{{ $t('checkout.set_as_default') }}</label>
             </div>
 
             <div class="flex space-x-2 pt-3">
               <button 
                 type="button"
                 @click="showAddressDialog = false"
-                class="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+                class="flex-1 py-2.5 border border-grey-300 text-grey-700 text-sm font-semibold rounded-2xl hover:border-grey-400 hover:bg-grey-50 transition-all duration-200"
               >
               {{ $t('checkout.cancel') }}
               </button>
               <button 
                 type="submit"
                 :disabled="!formValid || addressLoading"
-                class="flex-1 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200"
+                class="flex-1 py-2.5 bg-navy text-white text-sm font-semibold rounded-2xl hover:bg-navy/90 disabled:bg-grey-400 disabled:cursor-not-allowed transition-all duration-200"
               >
                 <span v-if="addressLoading" class="flex items-center justify-center">
                   <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1.5"></div>
@@ -713,12 +713,12 @@
           @click.stop
         >
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-900">{{ $t('checkout.cart_items') }}</h3>
+            <h3 class="text-lg font-bold text-navy">{{ $t('checkout.cart_items') }}</h3>
             <button 
               @click="showCartItemsDialog = false"
-              class="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors"
+              class="w-7 h-7 bg-grey-100 hover:bg-grey-200 rounded-2xl flex items-center justify-center transition-colors"
             >
-              <X class="w-3.5 h-3.5 text-gray-600" />
+              <X class="w-3.5 h-3.5 text-grey-600" />
             </button>
           </div>
 
@@ -726,7 +726,7 @@
             <div 
               v-for="item in groupedCartItems" 
               :key="item.product_id"
-              class="p-4 bg-gray-50/50 rounded-2xl border border-gray-200"
+              class="p-4 bg-grey-50/50 rounded-2xl shadow-card"
             >
               <div class="flex items-start space-x-3">
                 <div class="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0">
@@ -738,9 +738,9 @@
                 </div>
 
                 <div class="flex-1 min-w-0">
-                  <p class="font-semibold text-gray-900 mb-1">{{ item.product_name }}</p>
-                  <p class="text-sm text-gray-600 mb-2">{{ item.seller_name || 'Unknown Seller' }}</p>
-                  <div class="flex items-center text-blue-600 text-sm mb-3">
+                  <p class="font-semibold text-navy mb-1">{{ item.product_name }}</p>
+                  <p class="text-sm text-grey-600 mb-2">{{ item.seller_name || 'Unknown Seller' }}</p>
+                  <div class="flex items-center text-navy text-sm mb-3">
                     <Truck class="w-3 h-3 mr-1" />
                     {{ getAdaptiveDeliveryDate(item) }}
               </div>
@@ -750,14 +750,14 @@
                     <div 
                       v-for="variant in item.variants" 
                       :key="variant.id"
-                      class="flex justify-between items-center py-2 px-3 bg-white rounded-xl border border-gray-100"
+                      class="flex justify-between items-center py-2 px-3 bg-white rounded-xl border border-grey-100"
                     >
                   <div>
-                        <span class="text-sm font-medium text-blue-600">{{ variant.name }} ML</span>
-                        <span class="text-sm text-gray-500 mx-2">×</span>
+                        <span class="text-sm font-medium text-navy">{{ variant.name }} ML</span>
+                        <span class="text-sm text-grey-500 mx-2">×</span>
                         <span class="text-sm font-medium">{{ variant.quantity }}</span>
                   </div>
-                      <span class="text-sm font-semibold text-gray-900">
+                      <span class="text-sm font-semibold text-navy">
                         {{ formatApiPrice({
                           price: variant.price * variant.quantity, 
                           currency_info: cart.items.currency_info 
@@ -768,7 +768,7 @@
               </div>
 
                 <div class="text-right">
-                  <p class="font-semibold text-gray-900">
+                  <p class="font-semibold text-navy">
                     {{ formatApiPrice({
                   price: getItemTotal(item),
                       currency_info: cart.items.currency_info 
@@ -781,9 +781,9 @@
                     <button
                       v-if="!expressProductIds.has(item.product_id)"
                       @click="openCustomDeliveryModal(item)"
-                      class="flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border-2 bg-gray-50 border-gray-200 text-gray-600 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600"
+                      class="flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border-2 bg-grey-50 border-grey-200 text-grey-600 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600"
                     >
-                      <span class="w-3 h-3 mr-1 flex items-center justify-center rounded-full text-xs bg-gray-200 text-gray-600">
+                      <span class="w-3 h-3 mr-1 flex items-center justify-center rounded-full text-xs bg-grey-200 text-grey-600">
                         📅
                       </span>
                       Custom
@@ -797,7 +797,7 @@
           <div class="flex justify-end pt-3">
             <button 
               @click="showCartItemsDialog = false"
-              class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200"
+              class="px-4 py-2 bg-navy text-white text-sm font-semibold rounded-2xl hover:bg-navy/90 transition-all duration-200"
             >
               {{ $t('checkout.close') }}
             </button>
@@ -810,9 +810,9 @@
       <div v-if="showExpressDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click="showExpressDialog = false">
         <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto" @click.stop>
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-900">{{ $t('checkout.select_express_items') }}</h3>
-            <button @click="showExpressDialog = false" class="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors">
-              <X class="w-3.5 h-3.5 text-gray-600" />
+            <h3 class="text-lg font-bold text-navy">{{ $t('checkout.select_express_items') }}</h3>
+            <button @click="showExpressDialog = false" class="w-7 h-7 bg-grey-100 hover:bg-grey-200 rounded-2xl flex items-center justify-center transition-colors">
+              <X class="w-3.5 h-3.5 text-grey-600" />
             </button>
           </div>
           <div class="space-y-3">
@@ -820,15 +820,15 @@
               <div class="flex items-center space-x-3">
                 <img :src="'http://localhost:8000' + item.main_image" class="w-10 h-10 rounded-lg object-cover" />
                 <div>
-                  <p class="text-sm font-medium text-gray-900">{{ item.product_name }}</p>
-                  <p class="text-xs text-gray-500">{{ getTotalQuantity(item) }} items</p>
+                  <p class="text-sm font-medium text-navy">{{ item.product_name }}</p>
+                  <p class="text-xs text-grey-500">{{ getTotalQuantity(item) }} items</p>
                 </div>
               </div>
               <input type="checkbox" :checked="expressProductIds.has(item.product_id)" @change="toggleExpress(item.product_id)" />
             </div>
           </div>
           <div class="flex justify-end pt-3">
-            <button @click="confirmExpressSelection" class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200">
+            <button @click="confirmExpressSelection" class="px-4 py-2 bg-navy text-white text-sm font-semibold rounded-2xl hover:bg-navy/90 transition-all duration-200">
               {{ $t('checkout.done') }}
             </button>
           </div>
@@ -839,9 +839,9 @@
       <div v-if="showCustomDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click="showCustomDialog = false">
         <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto" @click.stop>
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-900">{{ $t('checkout.select_custom_dates') }}</h3>
-            <button @click="showCustomDialog = false" class="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors">
-              <X class="w-3.5 h-3.5 text-gray-600" />
+            <h3 class="text-lg font-bold text-navy">{{ $t('checkout.select_custom_dates') }}</h3>
+            <button @click="showCustomDialog = false" class="w-7 h-7 bg-grey-100 hover:bg-grey-200 rounded-2xl flex items-center justify-center transition-colors">
+              <X class="w-3.5 h-3.5 text-grey-600" />
             </button>
           </div>
           <div class="space-y-4">
@@ -849,20 +849,20 @@
               <div class="flex items-center space-x-3">
                 <img :src="'http://localhost:8000' + item.main_image" class="w-10 h-10 rounded-lg object-cover" />
                 <div class="flex-1">
-                  <p class="text-sm font-medium text-gray-900">{{ item.product_name }}</p>
-                  <p class="text-xs text-gray-500">Min: {{ minDateForItem(item) }}</p>
+                  <p class="text-sm font-medium text-navy">{{ item.product_name }}</p>
+                  <p class="text-xs text-grey-500">Min: {{ minDateForItem(item) }}</p>
                 </div>
               </div>
                <div class="relative">
                  <input type="date" :min="minDateForItem(item)" :max="getMaxDeliveryDate()" v-model="customDates[item.product_id]" class="w-full px-3 py-2 pr-10 border rounded-xl" />
-                 <button type="button" @click="openItemDatePicker(item)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                 <button type="button" @click="openItemDatePicker(item)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-grey-400 hover:text-grey-600">
                    <Calendar class="w-4 h-4" />
                  </button>
                </div>
             </div>
           </div>
           <div class="flex justify-end pt-3">
-            <button @click="confirmCustomSelection" class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200">
+            <button @click="confirmCustomSelection" class="px-4 py-2 bg-navy text-white text-sm font-semibold rounded-2xl hover:bg-navy/90 transition-all duration-200">
               {{ $t('checkout.done') }}
             </button>
           </div>
@@ -878,25 +878,25 @@
           @click.stop
         >
           <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-bold text-gray-900">Select Delivery Date</h3>
+            <h3 class="text-xl font-bold text-navy">Select Delivery Date</h3>
             <button 
               @click="showDatePicker = false"
-              class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
+              class="w-8 h-8 bg-grey-100 hover:bg-grey-200 rounded-full flex items-center justify-center transition-colors"
             >
-              <X class="w-4 h-4 text-gray-600" />
+              <X class="w-4 h-4 text-grey-600" />
             </button>
           </div>
 
           <div class="space-y-4">
             <div class="grid grid-cols-7 gap-2 text-center">
               <!-- Day headers -->
-              <div class="text-sm font-semibold text-gray-600 py-2">Sun</div>
-              <div class="text-sm font-semibold text-gray-600 py-2">Mon</div>
-              <div class="text-sm font-semibold text-gray-600 py-2">Tue</div>
-              <div class="text-sm font-semibold text-gray-600 py-2">Wed</div>
-              <div class="text-sm font-semibold text-gray-600 py-2">Thu</div>
-              <div class="text-sm font-semibold text-gray-600 py-2">Fri</div>
-              <div class="text-sm font-semibold text-gray-600 py-2">Sat</div>
+              <div class="text-sm font-semibold text-grey-600 py-2">Sun</div>
+              <div class="text-sm font-semibold text-grey-600 py-2">Mon</div>
+              <div class="text-sm font-semibold text-grey-600 py-2">Tue</div>
+              <div class="text-sm font-semibold text-grey-600 py-2">Wed</div>
+              <div class="text-sm font-semibold text-grey-600 py-2">Thu</div>
+              <div class="text-sm font-semibold text-grey-600 py-2">Fri</div>
+              <div class="text-sm font-semibold text-grey-600 py-2">Sat</div>
               
               <!-- Calendar days -->
               <div 
@@ -906,11 +906,11 @@
                   'p-2 rounded-lg cursor-pointer transition-colors text-sm',
                   day.isCurrentMonth 
                     ? day.isDisabled 
-                      ? 'text-gray-300 cursor-not-allowed' 
+                      ? 'text-grey-300 cursor-not-allowed' 
                       : day.isSelected 
-                        ? 'bg-blue-600 text-white' 
-                        : 'text-gray-700 hover:bg-gray-100'
-                    : 'text-gray-300'
+                        ? 'bg-navy text-white' 
+                        : 'text-grey-700 hover:bg-grey-100'
+                    : 'text-grey-300'
                 ]"
                 @click="day.isCurrentMonth && !day.isDisabled ? selectDate(day.date) : null"
               >
@@ -921,30 +921,29 @@
             <div class="flex justify-between items-center pt-4">
               <button 
                 @click="previousMonth"
-                class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                class="p-2 hover:bg-grey-100 rounded-2xl transition-colors"
               >
-                <ChevronLeft class="w-5 h-5 text-gray-600" />
+                <ChevronLeft class="w-5 h-5 text-grey-600" />
               </button>
-              <span class="text-lg font-semibold text-gray-900">{{ getCurrentMonthYear() }}</span>
+              <span class="text-lg font-semibold text-navy">{{ getCurrentMonthYear() }}</span>
               <button 
                 @click="nextMonth"
-                class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                class="p-2 hover:bg-grey-100 rounded-2xl transition-colors"
               >
-                <ChevronRight class="w-5 h-5 text-gray-600" />
+                <ChevronRight class="w-5 h-5 text-grey-600" />
               </button>
             </div>
 
             <div class="flex space-x-3 pt-4">
               <button 
                 @click="showDatePicker = false"
-                class="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+                class="flex-1 py-3 border-2 border-grey-300 text-grey-700 font-semibold rounded-2xl hover:border-grey-400 hover:bg-grey-50 transition-all duration-200"
               >
                 Cancel
               </button>
               <button 
                 @click="confirmDateSelection"
-                class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
-                style="background: linear-gradient(to right, #2563eb, #9333ea);"
+                class="flex-1 py-3 bg-navy text-white font-semibold rounded-2xl hover:bg-navy/90 transition-all duration-200"
               >
                 Confirm
               </button>
@@ -957,16 +956,16 @@
       <div v-if="showProductDeliveryModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click="showProductDeliveryModal = false">
         <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl" @click.stop>
           <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-bold text-gray-900">Custom Delivery</h3>
-            <button @click="showProductDeliveryModal = false" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors">
-              <X class="w-4 h-4 text-gray-600" />
+            <h3 class="text-xl font-bold text-navy">Custom Delivery</h3>
+            <button @click="showProductDeliveryModal = false" class="w-8 h-8 bg-grey-100 hover:bg-grey-200 rounded-full flex items-center justify-center transition-colors">
+              <X class="w-4 h-4 text-grey-600" />
             </button>
           </div>
           
           <div v-if="selectedProductForDelivery" class="space-y-6">
             <!-- Product info -->
-            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl">
-              <div class="w-12 h-12 rounded-lg overflow-hidden">
+            <div class="flex items-center space-x-3 p-3 bg-grey-50 rounded-xl">
+              <div class="w-12 h-12 rounded-2xl overflow-hidden">
                 <img 
                   :src="'http://localhost:8000' + selectedProductForDelivery.main_image || 'https://via.placeholder.com/150'"
                   :alt="selectedProductForDelivery.product_name"
@@ -974,14 +973,14 @@
                 />
               </div>
               <div>
-                <h4 class="font-medium text-gray-900">{{ selectedProductForDelivery.product_name }}</h4>
-                <p class="text-sm text-gray-600">{{ $t('checkout.standard') }}: {{ getAdaptiveDeliveryDate(selectedProductForDelivery) }}</p>
+                <h4 class="font-medium text-navy">{{ selectedProductForDelivery.product_name }}</h4>
+                <p class="text-sm text-grey-600">{{ $t('checkout.standard') }}: {{ getAdaptiveDeliveryDate(selectedProductForDelivery) }}</p>
               </div>
             </div>
             
             <!-- Date selection -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Custom Delivery Date</label>
+              <label class="block text-sm font-medium text-grey-700 mb-2">Custom Delivery Date</label>
               <div class="relative">
                 <input 
                   v-model="productCustomDate"
@@ -989,21 +988,21 @@
                   readonly
                   @click="openDatePickerForProduct"
                   :placeholder="productCustomDate ? formatDate(productCustomDate) : 'Select delivery date'"
-                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors cursor-pointer bg-white"
+                  class="w-full px-4 py-3 pr-12 border border-grey-300 rounded-xl focus:ring-2 focus:ring-navy focus:border-navy transition-colors cursor-pointer bg-white"
                 />
                 <button type="button" @click="openDatePickerForProduct" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-auto">
-                  <Calendar class="h-5 w-5 text-gray-400" />
+                  <Calendar class="h-5 w-5 text-grey-400" />
                 </button>
               </div>
-              <p class="text-xs text-gray-500 mt-1">Must be after {{ getAdaptiveDeliveryDate(selectedProductForDelivery) }}</p>
+              <p class="text-xs text-grey-500 mt-1">Must be after {{ getAdaptiveDeliveryDate(selectedProductForDelivery) }}</p>
             </div>
             
             <!-- Time slot selection -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Time Slot</label>
+              <label class="block text-sm font-medium text-grey-700 mb-2">Time Slot</label>
               <select 
                 v-model="productCustomTime"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                class="w-full px-4 py-3 border border-grey-300 rounded-xl focus:ring-2 focus:ring-navy focus:border-navy transition-colors"
               >
                 <option value="">Select time slot</option>
                 <option value="morning">Morning (8:00 AM - 12:00 PM)</option>
@@ -1017,15 +1016,14 @@
           <div class="flex space-x-3 mt-6">
             <button 
               @click="showProductDeliveryModal = false"
-              class="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+              class="flex-1 py-3 border-2 border-grey-300 text-grey-700 font-semibold rounded-2xl hover:border-grey-400 hover:bg-grey-50 transition-all duration-200"
             >
               Cancel
             </button>
             <button 
               @click="confirmProductCustomDelivery"
               :disabled="!productCustomDate || !productCustomTime"
-              class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-              style="background: linear-gradient(to right, #2563eb, #9333ea);"
+              class="flex-1 py-3 bg-navy text-white font-semibold rounded-2xl hover:bg-navy/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               Confirm
             </button>
@@ -1037,17 +1035,17 @@
       <div v-if="showCustomDeliveryModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click="showCustomDeliveryModal = false">
         <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl" @click.stop>
           <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-bold text-gray-900">{{ $t('checkout.custom_delivery_for_group') }}</h3>
-            <button @click="showCustomDeliveryModal = false" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors">
-              <X class="w-4 h-4 text-gray-600" />
+            <h3 class="text-xl font-bold text-navy">{{ $t('checkout.custom_delivery_for_group') }}</h3>
+            <button @click="showCustomDeliveryModal = false" class="w-8 h-8 bg-grey-100 hover:bg-grey-200 rounded-full flex items-center justify-center transition-colors">
+              <X class="w-4 h-4 text-grey-600" />
             </button>
           </div>
           
           <div v-if="currentCustomGroup" class="space-y-6">
             <!-- Group info -->
-            <div class="p-4 bg-gray-50 rounded-xl">
-              <h4 class="font-semibold text-gray-900 mb-2">{{ currentCustomGroup.seller_name }}</h4>
-              <p class="text-sm text-gray-600 mb-3">{{ currentCustomGroup.items.length }} {{ currentCustomGroup.items.length === 1 ? $t('checkout.items') : $t('checkout.items') }}</p>
+            <div class="p-4 bg-grey-50 rounded-xl">
+              <h4 class="font-semibold text-navy mb-2">{{ currentCustomGroup.seller_name }}</h4>
+              <p class="text-sm text-grey-600 mb-3">{{ currentCustomGroup.items.length }} {{ currentCustomGroup.items.length === 1 ? $t('checkout.items') : $t('checkout.items') }}</p>
               
               <!-- Group items -->
               <div class="space-y-2">
@@ -1063,14 +1061,14 @@
                       class="w-full h-full object-cover"
                     />
                   </div>
-                  <span class="text-gray-700">{{ item.product_name }}</span>
+                  <span class="text-grey-700">{{ item.product_name }}</span>
                 </div>
               </div>
             </div>
             
             <!-- Date selection -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('checkout.custom_delivery_date') }}</label>
+              <label class="block text-sm font-medium text-grey-700 mb-2">{{ $t('checkout.custom_delivery_date') }}</label>
               <div class="relative">
                 <input 
                   v-model="customDeliveryDate"
@@ -1078,21 +1076,21 @@
                   readonly
                   @click="openDatePicker"
                   :placeholder="customDeliveryDate ? formatDate(customDeliveryDate) : $t('checkout.select_delivery_date')"
-                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors cursor-pointer bg-white"
+                  class="w-full px-4 py-3 pr-12 border border-grey-300 rounded-xl focus:ring-2 focus:ring-navy focus:border-navy transition-colors cursor-pointer bg-white"
                 />
                 <button type="button" @click="openDatePicker" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-auto">
-                  <Calendar class="h-5 w-5 text-gray-400" />
+                  <Calendar class="h-5 w-5 text-grey-400" />
                 </button>
               </div>
-              <p class="text-xs text-gray-500 mt-1">{{ $t('checkout.this_date_will_be_applied') }}</p>
+              <p class="text-xs text-grey-500 mt-1">{{ $t('checkout.this_date_will_be_applied') }}</p>
             </div>
             
             <!-- Time slot selection -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('checkout.time_slot') }}</label>
+              <label class="block text-sm font-medium text-grey-700 mb-2">{{ $t('checkout.time_slot') }}</label>
               <select 
                 v-model="customDeliveryTime"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                class="w-full px-4 py-3 border border-grey-300 rounded-xl focus:ring-2 focus:ring-navy focus:border-navy transition-colors"
               >
                 <option value="">{{ $t('checkout.select_time_slot') }}</option>
                 <option value="morning">{{ $t('checkout.morning') }}</option>
@@ -1106,15 +1104,14 @@
           <div class="flex space-x-3 mt-6">
             <button 
               @click="showCustomDeliveryModal = false"
-              class="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+              class="flex-1 py-3 border-2 border-grey-300 text-grey-700 font-semibold rounded-2xl hover:border-grey-400 hover:bg-grey-50 transition-all duration-200"
             >
               {{ $t('checkout.cancel') }}
             </button>
             <button 
               @click="confirmGroupCustomDelivery"
               :disabled="!customDeliveryDate || !customDeliveryTime"
-              class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-              style="background: linear-gradient(to right, #2563eb, #9333ea);"
+              class="flex-1 py-3 bg-navy text-white font-semibold rounded-2xl hover:bg-navy/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               {{ $t('checkout.confirm') }}
             </button>

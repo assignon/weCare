@@ -1,13 +1,13 @@
 <template>
-  <div class="h-screen flex flex-col bg-gray-50">
+  <div class="h-screen flex flex-col bg-grey-50">
     <BackButtonHeader :title="inquiry?.listing_title || $t('listings.chat')">
       <template #right>
         <button 
           @click="refreshMessages" 
           :disabled="refreshing"
-          class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-colors disabled:opacity-50"
+          class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-grey-100 transition-colors disabled:opacity-50"
         >
-          <RefreshCw :class="{ 'animate-spin': refreshing }" class="w-5 h-5 text-gray-700" />
+          <RefreshCw :class="{ 'animate-spin': refreshing }" class="w-5 h-5 text-grey-500" />
         </button>
       </template>
     </BackButtonHeader>
@@ -15,34 +15,46 @@
     <div ref="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-3">
       <div v-for="msg in messages" :key="msg.id" :class="msg.is_own_message ? 'flex justify-end' : 'flex justify-start'">
         <!-- Offer Message Template -->
-        <div v-if="isOfferMessage(msg)" :class="msg.is_own_message ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white'" class="max-w-[75%] rounded-lg px-4 py-3 shadow-md">
+        <div
+          v-if="isOfferMessage(msg)"
+          :class="msg.is_own_message ? 'bg-navy text-white' : 'bg-white text-navy shadow-card'"
+          class="max-w-[75%] rounded-2xl px-4 py-3"
+        >
           <div class="flex items-center gap-2 mb-2">
             <Gavel class="w-4 h-4" />
             <span class="text-xs font-semibold uppercase tracking-wide">{{ $t('listings.offer') }}</span>
           </div>
-          <!-- Always show the offer price from inquiry if available -->
           <div v-if="offerPrice || inquiry?.offer_price" class="text-sm font-bold mb-2">
             {{ formattedOfferPrice || (inquiry?.offer_price ? formatPrice(inquiry.offer_price) : '') }}
           </div>
           <div v-else-if="extractOfferFromMessage(msg.content)" class="text-sm font-bold mb-2">{{ extractOfferFromMessage(msg.content) }}</div>
-          <!-- Show message content with price replaced -->
-          <p v-if="msg.content && msg.content !== getDefaultOfferMessage() && !isOnlyOfferPrice(msg.content)" class="text-xs opacity-90 mb-1">{{ formatMessageContent(msg.content) }}</p>
-          <p v-else-if="msg.content" class="text-xs opacity-90 mb-1">{{ formatMessageContent(msg.content) }}</p>
-          <p class="text-xs mt-2 opacity-70">{{ formatTime(msg.created_at) }}</p>
+          <p
+            v-if="msg.content && msg.content !== getDefaultOfferMessage() && !isOnlyOfferPrice(msg.content)"
+            :class="msg.is_own_message ? 'text-xs opacity-90 mb-1' : 'text-xs text-grey-500 mb-1'"
+          >{{ formatMessageContent(msg.content) }}</p>
+          <p
+            v-else-if="msg.content"
+            :class="msg.is_own_message ? 'text-xs opacity-90 mb-1' : 'text-xs text-grey-500 mb-1'"
+          >{{ formatMessageContent(msg.content) }}</p>
+          <p :class="msg.is_own_message ? 'text-xs mt-2 opacity-70' : 'text-xs mt-2 text-grey-400'">{{ formatTime(msg.created_at) }}</p>
         </div>
         
         <!-- Regular Message Template -->
-        <div v-else :class="msg.is_own_message ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white'" class="max-w-[75%] rounded-lg px-4 py-2">
+        <div
+          v-else
+          :class="msg.is_own_message ? 'bg-navy text-white' : 'bg-white text-navy shadow-card'"
+          class="max-w-[75%] rounded-2xl px-4 py-2"
+        >
           <p class="text-xs">{{ formatMessageContent(msg.content) }}</p>
-          <p class="text-xs mt-1 opacity-70">{{ formatTime(msg.created_at) }}</p>
+          <p :class="msg.is_own_message ? 'text-xs mt-1 opacity-70' : 'text-xs mt-1 text-grey-400'">{{ formatTime(msg.created_at) }}</p>
         </div>
       </div>
     </div>
 
-    <div class="bg-white border-t p-4">
+    <div class="bg-white border-t border-grey-200 p-4">
       <div class="flex gap-2 max-w-2xl mx-auto">
-        <input v-model="newMessage" @keyup.enter="sendMessage" :placeholder="$t('listings.type_message_placeholder')" class="flex-1 px-4 py-2 border rounded-lg max-w-xs text-sm" />
-        <button @click="sendMessage" :disabled="!newMessage.trim()" class="p-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 flex-shrink-0">
+        <input v-model="newMessage" @keyup.enter="sendMessage" :placeholder="$t('listings.type_message_placeholder')" class="flex-1 px-4 py-2 border border-grey-200 rounded-2xl max-w-xs text-sm focus:outline-none focus:border-navy transition-colors" />
+        <button @click="sendMessage" :disabled="!newMessage.trim()" class="p-2 bg-navy text-white rounded-2xl disabled:opacity-50 flex-shrink-0">
           <Send class="w-5 h-5" />
         </button>
       </div>
@@ -323,4 +335,3 @@ function formatTime(date) {
   return new Date(date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 }
 </script>
-

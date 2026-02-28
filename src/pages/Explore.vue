@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white0">
+  <div class="page-container">
     <div class="p-4 pt-16">
       <!-- Enhanced Header -->
       <AppHeader />
@@ -21,17 +21,17 @@
           @click.stop
         >
           <!-- Header -->
-          <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-5 rounded-t-3xl shadow-sm">
+          <div class="sticky top-0 bg-white border-b border-grey-200 px-6 py-5 rounded-t-3xl shadow-nav">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-lg font-semibold text-gray-900">Filter Products</h3>
-                <span class="text-xs text-gray-500">Personalized for your selected store</span>
+                <h3 class="text-lg font-bold text-navy">Filter Products</h3>
+                <span class="text-xs text-grey-400">Personalized for your selected store</span>
               </div>
               <button 
                 @click="showFilterOptions = false"
-                class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all duration-200 hover:scale-105"
+                class="w-10 h-10 rounded-full bg-grey-100 hover:bg-grey-200 flex items-center justify-center transition-all duration-200 hover:scale-105"
               >
-                <X class="w-5 h-5 text-gray-600" />
+                <X class="w-5 h-5 text-grey-400" />
               </button>
             </div>
           </div>
@@ -42,8 +42,8 @@
               <!-- Dynamic attribute filters (from CategoryAttributeTemplate by store category) -->
               <div v-if="storeAttributeTemplates.length > 0" class="space-y-6">
                 <div class="grid grid-cols-1 gap-6">
-                  <div v-for="tpl in storeAttributeTemplates" :key="tpl.id" class="bg-gray-50/50 rounded-2xl p-4 border border-gray-200/50">
-                    <label class="block text-sm font-semibold text-gray-800 mb-3">{{ tpl.label }}</label>
+                  <div v-for="tpl in storeAttributeTemplates" :key="tpl.id" class="bg-grey-50/50 rounded-2xl p-4 border border-grey-200/50">
+                    <label class="block text-sm font-semibold text-navy mb-3">{{ tpl.label }}</label>
                     <!-- Select / Multiselect as chips -->
                     <div v-if="tpl.field_type === 'select' || tpl.field_type === 'multiselect'">
                       <div class="flex flex-wrap gap-2">
@@ -56,9 +56,9 @@
                             'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
                             isSelected(tpl, opt)
                               ? 'text-white border-transparent shadow-sm'
-                              : 'text-gray-700 border-gray-200 hover:border-blue-400'
+                              : 'text-grey-500 border-grey-200 hover:border-navy'
                           ]"
-                          :style="isSelected(tpl, opt) ? 'background: linear-gradient(to right, #2563eb, #9333ea);' : ''"
+                          :style="isSelected(tpl, opt) ? 'background: #1a1a2e;' : ''"
                         >
                           {{ opt }}
                         </button>
@@ -66,10 +66,10 @@
                     </div>
                     <!-- Boolean toggle -->
                     <div v-else-if="tpl.field_type === 'boolean'" class="flex items-center justify-between">
-                      <span class="text-sm text-gray-700">Enable</span>
+                      <span class="text-sm text-grey-500">Enable</span>
                       <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" class="sr-only peer" :checked="getBoolean(tpl)" @change="toggleBoolean(tpl)" />
-                        <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 transition-colors"></div>
+                        <div class="w-11 h-6 bg-grey-200 rounded-full peer peer-checked:bg-navy transition-colors"></div>
                         <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
                       </label>
                     </div>
@@ -77,7 +77,7 @@
                     <div v-else>
                       <input
                         :type="tpl.field_type === 'number' || tpl.field_type === 'decimal' ? 'number' : 'text'"
-                        class="w-full p-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50"
+                        class="w-full p-3 bg-white border border-grey-200 rounded-2xl focus:ring-2 focus:ring-navy/20 focus:border-navy/50"
                         :placeholder="tpl.help_text || 'Type to filter'"
                         v-model="dynamicFilters[tpl.id]"
                       />
@@ -88,7 +88,7 @@
 
               <!-- Fallback default filters when no templates available -->
               <div v-else class="space-y-6">
-                <div class="text-center py-8 text-gray-500">
+                <div class="text-center py-8 text-grey-400">
                   No filters available for this store.
                 </div>
               </div>
@@ -96,18 +96,18 @@
           </div>
           
           <!-- Footer Actions -->
-          <div class="sticky bottom-0 bg-white border-t border-gray-200 p-6 shadow-lg" style="position: sticky; bottom: 55px;">
+          <div class="sticky bottom-0 bg-white border-t border-grey-200 p-6 shadow-lg" style="position: sticky; bottom: 55px;">
             <div class="flex gap-3">
               <button 
                 @click="clearDynamicFilters"
-                class="flex-1 px-4 py-3 text-blue-600 hover:text-blue-700 font-semibold text-sm bg-blue-50/50 hover:bg-blue-100/50 rounded-2xl transition-all duration-200"
+                class="flex-1 px-4 py-3 text-navy hover:text-navy/80 font-semibold text-sm bg-grey-50 hover:bg-grey-100 rounded-2xl transition-all duration-200"
               >
                 Clear All
               </button>
               <button 
                 @click="applyDynamicFilters"
                 class="flex-1 px-4 py-3 text-white font-semibold text-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200"
-                style="background: linear-gradient(to right, #2563eb, #9333ea);"
+                style="background: #1a1a2e;"
               >
                 Apply Filters
               </button>
@@ -121,8 +121,8 @@
         <!-- Loading state for initial load -->
         <div v-if="loading && productStore.products.length === 0" class="flex justify-center my-12">
           <div class="relative">
-            <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-200" style="border-color: #dbeafe;"></div>
-            <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent absolute top-0 left-0" style="border-color: #2563eb;"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-grey-200"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-navy border-t-transparent absolute top-0 left-0"></div>
           </div>
         </div>
 
@@ -144,12 +144,12 @@
             <!-- Product Card - Only contains image -->
             <div 
               @click="navigateToDetails(product.id, product.item_type)"
-              class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square cursor-pointer relative"
+              class="group bg-grey-50 rounded-2xl transition-all duration-200 overflow-hidden mb-2 aspect-square cursor-pointer relative"
             >
               <img 
                 :src="product.main_image || packagingImage" 
                 :alt="product.name"
-                class="w-full h-full object-cover rounded-lg"
+                class="w-full h-full object-cover rounded-2xl"
               />
               <!-- Verified Badge (for all approved store products) -->
               <button
@@ -157,38 +157,38 @@
                 @click.stop="showVerificationDialog = true; selectedProduct = product"
                 class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all z-10"
               >
-                <BadgeCheck class="w-4 h-4 text-blue-600" />
+                <BadgeCheck class="w-4 h-4 text-navy" />
               </button>
             </div>
             
             <!-- Product Info - Outside the card -->
             <div class="space-y-1">
               <!-- Store Name Caption (only for store products, not shopper listings) -->
-              <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
+              <p v-if="product.item_type === 'store_product'" class="text-xs text-grey-400 mb-0.5">
                 {{ product.seller_name || product.store_name || 'AfriQExpress Seller' }}
               </p>
               
               <!-- Product Name -->
               <h3 
                 @click="navigateToDetails(product.id, product.item_type)"
-                class="font-bold text-sm text-gray-900 mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors"
+                class="text-sm text-navy mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-navy/80 transition-colors capitalize"
               >
                 {{ product.name }}
               </h3>
               
               <!-- Local Names/Description with Flag -->
               <div v-if="product.local_name || product.description" class="flex items-start gap-1.5 mb-1">
-                <Flag class="w-3.5 h-3.5 text-gray-600 mt-0.5 flex-shrink-0" />
-                <p class="text-xs italic text-gray-600 line-clamp-1">
+                <Flag class="w-3.5 h-3.5 text-grey-400 mt-0.5 flex-shrink-0" />
+                <p class="text-xs italic text-grey-400 line-clamp-1">
                   {{ product.local_name || (product.description ? product.description.substring(0, 50) + '...' : '') }}
                 </p>
               </div>
               
               <!-- Price and Quantity -->
               <div class="flex items-center justify-between">
-                <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
+                <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-navy'">
                   {{ formatApiPrice(product) }}
-                  <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
+                  <span v-if="product.quantity || product.weight" class="text-xs font-normal text-grey-400">
                     / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
                   </span>
                 </span>
@@ -200,33 +200,33 @@
         <!-- Infinite Scroll Loading -->
         <div v-if="hasMoreProducts && productStore.products.length > 0" ref="loadMoreTrigger" class="text-center py-8">
           <div v-if="loadingMore" class="relative inline-block">
-            <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-200" style="border-color: #dbeafe;"></div>
-            <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent absolute top-0 left-0" style="border-color: #2563eb;"></div>
+            <div class="animate-spin rounded-full h-8 w-8 border-4 border-grey-200"></div>
+            <div class="animate-spin rounded-full h-8 w-8 border-4 border-navy border-t-transparent absolute top-0 left-0"></div>
           </div>
-          <p v-if="loadingMore" class="text-sm text-gray-600 mt-3 font-medium">
+          <p v-if="loadingMore" class="text-sm text-grey-400 mt-3 font-medium">
             Loading more products...
           </p>
         </div>
 
         <!-- End of Results -->
         <div v-if="!hasMoreProducts && productStore.products.length > 0 && !loading" class="text-center py-12 mb-20">
-          <div class="w-16 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto mb-6" style="background: linear-gradient(to right, #2563eb, #9333ea);"></div>
-          <CheckCircle class="w-8 h-8 text-gray-400 mx-auto mb-3" />
-          <p class="text-sm text-gray-600 font-medium">
+          <div class="w-16 h-1 bg-navy rounded-full mx-auto mb-6"></div>
+          <CheckCircle class="w-8 h-8 text-grey-300 mx-auto mb-3" />
+          <p class="text-sm text-grey-400 font-medium">
             That's all for now!
           </p>
-          <p class="text-xs text-gray-500 mt-1">
+          <p class="text-xs text-grey-400 mt-1">
             You've seen all {{ filteredProducts.length }} products
           </p>
         </div>
 
         <!-- No products state -->
         <div v-else-if="!loading && filteredProducts.length === 0" class="text-center my-12">
-          <div class="w-32 h-32 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6" style="background: linear-gradient(to right, #dbeafe, #e9d5ff);">
+          <div class="w-32 h-32 bg-grey-50 rounded-full flex items-center justify-center mx-auto mb-6">
             <img :src="emptyBoxImage" alt="No products" class="w-20 h-20 opacity-60" />
           </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-2">No Products Available</h3>
-          <p class="text-sm text-gray-600">Check back soon for new products.</p>
+          <h3 class="text-xl font-bold text-navy mb-2">No Products Available</h3>
+          <p class="text-sm text-grey-400">Check back soon for new products.</p>
         </div>
       </div>
 
@@ -242,12 +242,12 @@
           <!-- Header -->
           <div class="p-6 pb-4">
             <div class="flex items-center justify-center mb-4">
-              <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                <BadgeCheck class="w-8 h-8 text-blue-600" />
+              <div class="w-16 h-16 bg-grey-50 rounded-full flex items-center justify-center">
+                <BadgeCheck class="w-8 h-8 text-navy" />
               </div>
             </div>
-            <h3 class="text-xl font-bold text-center text-slate-900 mb-2">Verified by AfriQExpress</h3>
-            <p class="text-center text-slate-600 text-sm leading-relaxed">
+            <h3 class="text-xl font-bold text-center text-navy mb-2">Verified by AfriQExpress</h3>
+            <p class="text-center text-grey-400 text-sm leading-relaxed">
               This product and seller have been verified by AfriQExpress. You can shop with confidence knowing that this seller has been authenticated and approved.
             </p>
           </div>
@@ -256,7 +256,7 @@
           <div class="p-6 pt-4">
             <button
               @click="showVerificationDialog = false"
-              class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+              class="w-full py-3 bg-navy hover:bg-navy/80 text-white font-semibold rounded-2xl transition-all duration-200 transform hover:scale-[1.02] shadow-card hover:shadow-float"
             >
               Got it
             </button>
@@ -871,11 +871,11 @@ onUnmounted(() => {
 }
 
 .overflow-x-auto::-webkit-scrollbar-thumb {
-  background: linear-gradient(to right, #2563eb, #9333ea);
+  background: #1a1a2e;
   border-radius: 2px;
 }
 
 .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to right, #1d4ed8, #7c3aed);
+  background: #2d2d4e;
 }
 </style>

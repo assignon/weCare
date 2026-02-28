@@ -1,21 +1,21 @@
 <template>
-  <div class="min-h-screen bg-white pb-24">
+  <div class="page-container pb-24">
     <BackButtonHeader :title="$t('cart.title')" />
-    <div class="p-3 pt-4">
+    <div class="p-4 pt-4">
 
       <!-- Cart content -->
       <div v-if="cart.items.items && cart.items.items.length > 0" class="space-y-3">
         <!-- Cart items -->
-        <div class="space-y-2">
+        <div class="space-y-3">
           <div 
             v-for="product in groupedCartItems" 
             :key="product.product_id"
-            class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+            class="card overflow-hidden"
           >
-              <!-- Product header -->
-            <div class="p-3 border-b border-gray-100">
+            <!-- Product header -->
+            <div class="p-3 border-b border-grey-100">
               <div class="flex items-start space-x-3">
-                <div class="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                <div class="w-14 h-14 rounded-2xl overflow-hidden flex-shrink-0">
                   <img 
                     :src="'http://localhost:8000' + product.main_image || 'https://via.placeholder.com/150'"
                     :alt="product.product_name"
@@ -24,8 +24,8 @@
                 </div>
 
                 <div class="flex-1 min-w-0">
-                  <h3 class="text-sm font-semibold text-gray-900 capitalize mb-0.5 leading-tight">{{ product.product_name }}</h3>
-                  <p class="text-xs text-gray-500 mb-1">{{ product.seller_name || '---' }}</p>
+                  <h3 class="text-sm font-semibold text-navy capitalize mb-0.5 leading-tight">{{ product.product_name }}</h3>
+                  <p class="text-xs text-grey-500 mb-1">{{ product.seller_name || '---' }}</p>
                   
                   <!-- Shopper Choices Display -->
                   <div v-if="product.shopper_choices && Object.keys(product.shopper_choices).length > 0" class="mt-1.5 mb-1">
@@ -33,32 +33,32 @@
                       <span 
                         v-for="(value, attrId) in product.shopper_choices" 
                         :key="attrId" 
-                        class="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded border border-blue-300"
+                        class="chip chip-navy"
                       >
                         {{ formatShopperChoice(attrId, value) }}
                       </span>
                     </div>
                   </div>
                   
-                  <div class="flex items-center text-blue-600 text-xs font-medium">
+                  <div class="flex items-center text-navy text-xs font-medium">
                     <Truck class="w-3 h-3 mr-1" />
                     {{ product.delivery_info?.estimated_delivery_display || $t('cart.standard_delivery') }}
                   </div>
                 </div>
-                </div>
               </div>
+            </div>
 
-              <!-- Product variants -->
+            <!-- Product variants -->
             <div class="p-3 space-y-2">
               <div 
                 v-for="variant in product.variants" 
                 :key="variant.id"
-                class="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100"
+                class="flex items-center justify-between p-2.5 bg-grey-50 rounded-2xl"
               >
                 <div class="flex items-center space-x-3">
                   <div>
-                    <span class="text-xs font-semibold text-blue-600">{{ variant.name }} ML</span>
-                    <div class="text-sm font-semibold text-gray-900 mt-0.5">
+                    <span class="text-xs font-semibold text-navy">{{ variant.name }} ML</span>
+                    <div class="text-sm font-semibold text-navy mt-0.5">
                       {{ formatPrice(variant.price * variant.quantity) }}
                     </div>
                   </div>
@@ -66,19 +66,19 @@
 
                 <div class="flex items-center space-x-2">
                   <!-- Quantity controls -->
-                  <div class="flex items-center bg-white rounded-lg shadow-sm border border-gray-200">
+                  <div class="flex items-center bg-white rounded-full shadow-card">
                     <button 
                       @click="updateVariantQuantity(variant.cart_item_id, variant.id, variant.quantity - 1, variant.stock)"
-                        :disabled="variant.quantity <= 1"
-                      class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-900 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
+                      :disabled="variant.quantity <= 1"
+                      class="w-8 h-8 flex items-center justify-center text-grey-500 hover:text-navy disabled:text-grey-200 disabled:cursor-not-allowed transition-colors rounded-full"
                     >
                       <Minus class="w-3.5 h-3.5" />
                     </button>
-                    <div class="w-10 text-center text-xs font-semibold text-gray-900">{{ variant.quantity }}</div>
+                    <div class="w-10 text-center text-xs font-bold text-navy">{{ variant.quantity }}</div>
                     <button 
                       @click="updateVariantQuantity(variant.cart_item_id, variant.id, variant.quantity + 1, variant.stock)"
-                        :disabled="variant.quantity >= (variant.stock || 0)"
-                      class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-900 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
+                      :disabled="variant.quantity >= (variant.stock || 0)"
+                      class="w-8 h-8 flex items-center justify-center text-grey-500 hover:text-navy disabled:text-grey-200 disabled:cursor-not-allowed transition-colors rounded-full"
                     >
                       <Plus class="w-3.5 h-3.5" />
                     </button>
@@ -87,7 +87,7 @@
                   <!-- Remove button -->
                   <button 
                     @click="removeVariant(variant.cart_item_id)"
-                    class="w-8 h-8 bg-red-50 hover:bg-red-100 rounded-lg flex items-center justify-center transition-colors"
+                    class="w-8 h-8 bg-red-50 hover:bg-red-100 rounded-full flex items-center justify-center transition-colors"
                   >
                     <Trash2 class="w-3.5 h-3.5 text-red-500" />
                   </button>
@@ -97,40 +97,40 @@
           </div>
         </div>
 
-          <!-- Continue shopping button -->
+        <!-- Continue shopping button -->
         <div class="flex justify-center pt-2">
           <button 
             @click="$router.push({ name: 'Home' })"
-            class="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-blue-600 hover:bg-gray-50 hover:shadow-sm transition-all duration-200 text-sm"
+            class="btn btn-outlined text-sm flex items-center px-4 py-2"
           >
             <ArrowLeft class="w-3.5 h-3.5 mr-1.5" />
-              {{ $t('cart.continue_shopping') }}
+            {{ $t('cart.continue_shopping') }}
           </button>
-          </div>
+        </div>
 
         <!-- Order summary -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <h2 class="text-base font-bold text-gray-900 mb-4">{{ $t('cart.order_summary') }}</h2>
+        <div class="card p-4">
+          <h2 class="text-base font-bold text-navy mb-4">{{ $t('cart.order_summary') }}</h2>
 
           <div class="space-y-3">
             <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-600">{{ $t('cart.items') }}</span>
-              <span class="text-sm font-semibold text-gray-900">
+              <span class="text-sm text-grey-500">{{ $t('cart.items') }}</span>
+              <span class="text-sm font-semibold text-navy">
                 {{ formatPrice(cart.items.total_amount || 0) }}
               </span>
             </div>
 
             <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-600">{{ $t('cart.delivery_fee') }}</span>
-              <span class="text-sm font-semibold text-gray-900">
+              <span class="text-sm text-grey-500">{{ $t('cart.delivery_fee') }}</span>
+              <span class="text-sm font-semibold text-navy">
                 {{ formatPrice(estimatedDeliveryFee) }}
               </span>
             </div>
 
-            <div class="border-t border-gray-200 pt-3">
+            <div class="border-t border-grey-100 pt-3">
               <div class="flex justify-between items-center">
-                <span class="text-base font-bold text-gray-900">{{ $t('cart.total') }}</span>
-                <span class="text-lg font-bold text-blue-600">
+                <span class="text-base font-bold text-navy">{{ $t('cart.total') }}</span>
+                <span class="text-lg font-bold text-navy">
                   {{ formatPrice(totalWithDelivery) }}
                 </span>
               </div>
@@ -141,34 +141,33 @@
 
       <!-- Empty cart -->
       <div v-else class="text-center py-16">
-        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <ShoppingCart class="w-12 h-12 text-gray-400" />
+        <div class="w-24 h-24 bg-grey-50 rounded-full flex items-center justify-center mx-auto mb-4">
+          <ShoppingCart class="w-12 h-12 text-grey-400" />
         </div>
-        <h3 class="text-lg font-bold text-gray-900 mb-2">{{ $t('cart.empty') }}</h3>
-        <p class="text-sm text-gray-600 mb-6 max-w-md mx-auto">
+        <h3 class="text-lg font-bold text-navy mb-2">{{ $t('cart.empty') }}</h3>
+        <p class="text-sm text-grey-500 mb-6 max-w-md mx-auto">
           {{ $t('cart.empty_subtitle') }}
         </p>
         <button 
           @click="$router.push({ name: 'Home' })"
-          class="px-6 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md"
+          class="btn btn-primary px-6 py-2.5 text-sm"
         >
           {{ $t('cart.start_shopping') }}
         </button>
       </div>
 
       <!-- Fixed checkout button for mobile -->
-      <div v-if="cart.items.items && cart.items.items.length > 0" class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200">
+      <div v-if="cart.items.items && cart.items.items.length > 0" class="action-bar">
         <div class="p-3">
           <button 
             @click="$router.push({ name: 'Checkout' })"
-            class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
-            style="background: linear-gradient(to right, #2563eb, #9333ea);"
+            class="btn-cta flex items-center justify-center"
           >
             <span>{{ $t('cart.checkout') }}</span>
             <span class="ml-2 text-xs opacity-90">({{ formatPrice(totalWithDelivery) }})</span>
           </button>
         </div>
-                </div>
+      </div>
 
       <!-- Warning dialog -->
       <div 
@@ -177,26 +176,26 @@
         @click="showWarningDialog = false"
       >
         <div 
-          class="bg-white rounded-lg p-5 max-w-sm w-full shadow-xl"
+          class="bg-white rounded-2xl p-5 max-w-sm w-full shadow-float"
           @click.stop
         >
           <div class="flex items-center mb-3">
             <AlertTriangle class="w-5 h-5 text-yellow-500 mr-2" />
-            <h3 class="text-base font-bold text-gray-900">Unsaved Changes</h3>
+            <h3 class="text-base font-bold text-navy">Unsaved Changes</h3>
           </div>
-          <p class="text-sm text-gray-600 mb-5">
+          <p class="text-sm text-grey-500 mb-5">
             You have unsaved changes in your cart. Are you sure you want to leave this page?
           </p>
           <div class="flex space-x-2">
             <button 
               @click="showWarningDialog = false"
-              class="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+              class="flex-1 py-2.5 px-4 bg-grey-50 text-navy text-sm font-semibold rounded-2xl hover:bg-grey-100 transition-colors"
             >
               Stay
             </button>
             <button 
               @click="handleLeave"
-              class="flex-1 py-2.5 px-4 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-colors"
+              class="flex-1 py-2.5 px-4 bg-red-500 text-white text-sm font-semibold rounded-2xl hover:bg-red-600 transition-colors"
             >
               Leave
             </button>
@@ -211,26 +210,26 @@
         @click="showClearCartDialog = false"
       >
         <div 
-          class="bg-white rounded-lg p-5 max-w-sm w-full shadow-xl"
+          class="bg-white rounded-2xl p-5 max-w-sm w-full shadow-float"
           @click.stop
         >
           <div class="flex items-center mb-3">
             <Trash2 class="w-5 h-5 text-red-500 mr-2" />
-            <h3 class="text-base font-bold text-gray-900">Clear Cart</h3>
+            <h3 class="text-base font-bold text-navy">Clear Cart</h3>
           </div>
-          <p class="text-sm text-gray-600 mb-5">
+          <p class="text-sm text-grey-500 mb-5">
             Are you sure you want to remove all items from your cart?
           </p>
           <div class="flex space-x-2">
             <button 
               @click="showClearCartDialog = false"
-              class="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+              class="flex-1 py-2.5 px-4 bg-grey-50 text-navy text-sm font-semibold rounded-2xl hover:bg-grey-100 transition-colors"
             >
               Cancel
             </button>
             <button 
               @click="clearCart"
-              class="flex-1 py-2.5 px-4 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-colors"
+              class="flex-1 py-2.5 px-4 bg-red-500 text-white text-sm font-semibold rounded-2xl hover:bg-red-600 transition-colors"
             >
               Clear Cart
             </button>

@@ -1,28 +1,28 @@
 <template>
-  <div class="min-h-screen bg-white pb-24">
+  <div class="page-container pb-24">
     <BackButtonHeader :title="$t('orders.title')" />
-    <div class="p-3 pt-4">
+    <div class="p-4 pt-4">
       <!-- Header Info -->
       <div class="mb-3">
-        <p class="text-xs text-gray-600 flex items-center">
+        <p class="text-xs text-grey-500 flex items-center font-medium">
           <ShoppingBag class="w-3 h-3 mr-1" />
           {{ totalOrders }} {{ $t('orders.orders_total') }}
         </p>
       </div>
 
       <!-- Search and Filters -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-3">
+      <div class="card p-3 mb-3">
         <!-- Search Bar -->
         <div class="mb-3">
           <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
-              <Search class="h-3.5 w-3.5 text-gray-400" />
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search class="h-3.5 w-3.5 text-grey-400" />
             </div>
             <input
               v-model="searchTerm"
               type="text"
               :placeholder="$t('orders.search_placeholder')"
-              class="w-full pl-9 pr-3 py-2 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
+              class="input pl-9 pr-3 py-2 text-xs"
               @input="debouncedSearch"
             />
           </div>
@@ -35,18 +35,18 @@
             :key="status.value"
             @click="onQuickStatusChange(status.value)"
             :class="[
-              'px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center space-x-1',
+              'pill-filter flex items-center space-x-1',
               quickStatusFilter === status.value
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                ? 'pill-filter-active'
+                : ''
             ]"
           >
             <component :is="getFilterIcon(status.value)" class="w-3 h-3" />
             <span>{{ status.text }}</span>
             <span v-if="statusCounts[status.value]" 
                   :class="[
-                    'px-1 py-0.5 rounded text-xs font-bold',
-                    quickStatusFilter === status.value ? 'bg-white/20' : 'bg-blue-100 text-blue-700'
+                    'px-1 py-0.5 rounded-full text-xs font-bold',
+                    quickStatusFilter === status.value ? 'bg-white/20' : 'bg-grey-100 text-navy'
                   ]">
               {{ statusCounts[status.value] }}
             </span>
@@ -56,15 +56,15 @@
 
       <!-- Loading State -->
       <div v-if="loading && orders.length === 0" class="text-center py-12">
-        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Loader2 class="w-6 h-6 text-blue-600 animate-spin" />
+        <div class="w-12 h-12 bg-grey-50 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Loader2 class="w-6 h-6 text-navy animate-spin" />
         </div>
-        <h3 class="text-sm font-semibold text-gray-800 mb-1">{{ $t('orders.loading') }}</h3>
-        <p class="text-xs text-gray-600">{{ $t('orders.loading_subtitle') }}</p>
+        <h3 class="text-sm font-semibold text-navy mb-1">{{ $t('orders.loading') }}</h3>
+        <p class="text-xs text-grey-500">{{ $t('orders.loading_subtitle') }}</p>
       </div>
 
       <!-- Error State -->
-      <div v-if="error" class="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+      <div v-if="error" class="mb-3 p-3 bg-red-50 rounded-2xl">
         <div class="flex items-center">
           <div class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
             <AlertCircle class="w-3.5 h-3.5 text-red-600" />
@@ -73,30 +73,30 @@
             <h4 class="text-xs font-semibold text-red-800 mb-0.5">{{ $t('orders.error_loading') }}</h4>
             <p class="text-xs text-red-700">{{ error }}</p>
           </div>
-          <button @click="error = null" class="w-6 h-6 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors flex-shrink-0">
+          <button @click="error = null" class="w-6 h-6 bg-red-100 hover:bg-red-200 rounded-full flex items-center justify-center transition-colors flex-shrink-0">
             <X class="w-3.5 h-3.5 text-red-600" />
           </button>
         </div>
       </div>
 
       <!-- Orders List -->
-      <div v-if="!loading && orders.length > 0" class="space-y-2">
+      <div v-if="!loading && orders.length > 0" class="space-y-3">
         <div 
           v-for="order in orders" 
           :key="order.id"
           @click="goToOrderDetails(order.id)"
-          class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 cursor-pointer hover:shadow-md transition-all duration-200"
+          class="card p-3 cursor-pointer hover:shadow-float transition-all duration-200"
         >
           <!-- Order Header -->
           <div class="flex items-start justify-between mb-2">
             <div class="flex-1">
               <div class="flex items-center space-x-1.5 mb-1.5">
-                <div class="w-5 h-5 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <ShoppingBag class="w-3 h-3 text-blue-600" />
+                <div class="w-5 h-5 bg-grey-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <ShoppingBag class="w-3 h-3 text-navy" />
                 </div>
                 <div>
-                  <h3 class="text-sm font-bold text-gray-900">{{ $t('orders.order') }} #{{ order.id }}</h3>
-                  <p class="text-xs text-gray-600 flex items-center mt-0.5">
+                  <h3 class="text-sm font-bold text-navy">{{ $t('orders.order') }} #{{ order.id }}</h3>
+                  <p class="text-xs text-grey-400 flex items-center mt-0.5">
                     <Calendar class="w-2.5 h-2.5 mr-0.5" />
                     {{ formatDate(order.created_at) }}
                   </p>
@@ -107,21 +107,21 @@
               <div class="flex items-center space-x-1.5 mb-2">
                 <div 
                   :class="[
-                    'px-2 py-1 rounded-lg text-xs font-semibold flex items-center space-x-1',
+                    'chip text-xs flex items-center space-x-1',
                     getStatusClasses(order.status)
                   ]"
                 >
                   <component :is="getStatusIcon(order.status)" class="w-2.5 h-2.5" />
                   <span>{{ formatStatus(order.status) }}</span>
                 </div>
-                <span class="text-xs text-gray-500">
+                <span class="text-xs text-grey-400">
                   {{ order.items?.length || 0 }} {{ order.items?.length !== 1 ? $t('orders.items') : $t('orders.item') }}
                 </span>
               </div>
             </div>
             
             <div class="text-right flex-shrink-0">
-              <h4 class="text-sm font-bold text-blue-600">
+              <h4 class="text-sm font-bold text-navy">
                 {{ formatApiPrice({
                   price: (parseFloat(order.total_amount) || 0) + (parseFloat(order.delivery_fee) || 0), 
                   currency_info: order.currency_info
@@ -137,44 +137,44 @@
                 v-for="(item, index) in order.items?.slice(0, 2)" 
                 :key="index"
               >
-                <div class="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
-                  <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                <div class="flex items-center space-x-2 p-2 bg-grey-50 rounded-2xl">
+                  <div class="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0">
                     <img 
                       v-if="item.product?.main_image"
                       :src="item.product.main_image" 
                       :alt="item.product?.name"
                       class="w-full h-full object-cover"
                     />
-                    <div v-else class="w-full h-full bg-gray-200 flex items-center justify-center">
-                      <Package class="w-3 h-3 text-gray-400" />
+                    <div v-else class="w-full h-full bg-grey-100 flex items-center justify-center">
+                      <Package class="w-3 h-3 text-grey-400" />
                     </div>
                   </div>
                   <div class="flex-1 min-w-0">
-                    <p class="text-xs font-medium text-gray-900 truncate">
+                    <p class="text-xs font-medium text-navy truncate">
                       {{ item.product?.name || 'Product' }}
                     </p>
-                    <p class="text-xs text-gray-600 flex items-center mt-0.5">
+                    <p class="text-xs text-grey-400 flex items-center mt-0.5">
                       <Hash class="w-2 h-2 mr-0.5" />
                       {{ $t('orders.qty') }}: {{ item.quantity }}
                     </p>
                   </div>
                 </div>
               </div>
-              <p v-if="order.items?.length > 2" class="text-xs text-gray-500 text-center py-1.5 bg-gray-50 rounded-lg">
+              <p v-if="order.items?.length > 2" class="text-xs text-grey-400 text-center py-1.5 bg-grey-50 rounded-2xl">
                 {{ (order.items.length - 2) === 1 ? $t('orders.more_items', { count: order.items.length - 2 }) : $t('orders.more_items_plural', { count: order.items.length - 2 }) }}
               </p>
             </div>
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+          <div class="flex items-center justify-between pt-2 border-t border-grey-100">
             <div class="flex space-x-1.5">
               <!-- On Hold Status Action Buttons -->
               <div v-if="order.status === 'on_hold'" class="flex space-x-1.5">
                 <button 
                   @click.stop="cancelOrder(order.id)"
                   :disabled="updatingOrderId === order.id"
-                  class="px-2 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                  class="px-2 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-full text-xs font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
                 >
                   <X v-if="updatingOrderId !== order.id" class="w-3 h-3" />
                   <Loader2 v-else class="w-3 h-3 animate-spin" />
@@ -183,7 +183,7 @@
                 <button 
                   @click.stop="proceedOrder(order.id)"
                   :disabled="updatingOrderId === order.id"
-                  class="px-2 py-1.5 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg text-xs font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                  class="px-2 py-1.5 bg-green-50 hover:bg-green-100 text-green-600 rounded-full text-xs font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
                 >
                   <Play v-if="updatingOrderId !== order.id" class="w-3 h-3" />
                   <Loader2 v-else class="w-3 h-3 animate-spin" />
@@ -196,7 +196,7 @@
                 <button 
                   @click.stop="confirmDelivery(order.id)"
                   :disabled="updatingOrderId === order.id"
-                  class="px-2 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-xs font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                  class="px-2 py-1.5 bg-grey-50 hover:bg-grey-100 text-navy rounded-full text-xs font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
                 >
                   <CheckCircle v-if="updatingOrderId !== order.id" class="w-3 h-3" />
                   <Loader2 v-else class="w-3 h-3 animate-spin" />
@@ -207,7 +207,7 @@
 
             <button 
               @click.stop="goToOrderDetails(order.id)"
-              class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center space-x-1"
+              class="px-3 py-1.5 bg-grey-50 hover:bg-grey-100 text-navy rounded-full text-xs font-semibold transition-all duration-200 flex items-center space-x-1"
             >
               <ArrowRight class="w-3 h-3" />
               <span>{{ $t('order_detail.view_details') }}</span>
@@ -218,10 +218,10 @@
         <!-- Infinite Scroll Loading -->
         <div v-if="hasMoreOrders" ref="loadMoreTrigger" class="text-center py-4">
           <div v-if="loadingMore" class="flex items-center justify-center space-x-2">
-            <div class="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center">
-              <Loader2 class="w-3.5 h-3.5 text-blue-600 animate-spin" />
+            <div class="w-5 h-5 bg-grey-50 rounded-full flex items-center justify-center">
+              <Loader2 class="w-3.5 h-3.5 text-navy animate-spin" />
             </div>
-            <span class="text-xs text-gray-600 font-medium">{{ $t('orders.loading_more') }}</span>
+            <span class="text-xs text-grey-500 font-medium">{{ $t('orders.loading_more') }}</span>
           </div>
         </div>
 
@@ -230,7 +230,7 @@
           <button 
             @click="loadMoreOrders"
             :disabled="loadingMore"
-            class="px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 mx-auto"
+            class="btn btn-primary px-4 py-2 text-xs flex items-center space-x-2 mx-auto"
           >
             <span v-if="loadingMore" class="flex items-center space-x-1.5">
               <Loader2 class="w-3.5 h-3.5 animate-spin" />
@@ -248,25 +248,25 @@
           <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
             <CheckCircle class="w-5 h-5 text-green-600" />
           </div>
-          <h3 class="text-sm font-semibold text-gray-800 mb-1">{{ $t('orders.all_loaded') }}</h3>
-          <p class="text-xs text-gray-600">{{ $t('orders.end_of_history') }}</p>
+          <h3 class="text-sm font-semibold text-navy mb-1">{{ $t('orders.all_loaded') }}</h3>
+          <p class="text-xs text-grey-500">{{ $t('orders.end_of_history') }}</p>
         </div>
       </div>
 
       <!-- Empty State -->
       <div v-else-if="!loading && orders.length === 0" class="text-center py-12">
-        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <ShoppingBag class="w-8 h-8 text-gray-400" />
+        <div class="w-16 h-16 bg-grey-50 rounded-full flex items-center justify-center mx-auto mb-4">
+          <ShoppingBag class="w-8 h-8 text-grey-400" />
         </div>
-        <h3 class="text-lg font-bold text-gray-900 mb-2">{{ $t('orders.no_orders_found') }}</h3>
-        <p class="text-sm text-gray-600 mb-6 max-w-md mx-auto">
+        <h3 class="text-lg font-bold text-navy mb-2">{{ $t('orders.no_orders_found') }}</h3>
+        <p class="text-sm text-grey-500 mb-6 max-w-md mx-auto">
           {{ searchTerm || selectedStatus ? $t('orders.no_match_filters') : $t('orders.no_orders_yet') }}
         </p>
         <div class="space-x-2">
           <button 
             v-if="!searchTerm && !selectedStatus"
             @click="$router.push({ name: 'Home' })"
-            class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center space-x-1.5 mx-auto"
+            class="btn btn-primary px-4 py-2 text-sm flex items-center space-x-1.5 mx-auto"
           >
             <ShoppingCart class="w-4 h-4" />
             <span>{{ $t('orders.start_shopping') }}</span>
@@ -274,7 +274,7 @@
           <button 
             v-else
             @click="clearFilters"
-            class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 flex items-center space-x-1.5 mx-auto"
+            class="btn btn-outlined px-4 py-2 text-sm flex items-center space-x-1.5 mx-auto"
           >
             <RefreshCw class="w-4 h-4" />
             <span>{{ $t('orders.clear_filters') }}</span>
@@ -293,7 +293,7 @@
       @click="showCancelDialog = false"
     >
       <div 
-        class="bg-white rounded-lg p-5 max-w-md w-full shadow-xl"
+        class="bg-white rounded-2xl p-5 max-w-md w-full shadow-float"
         @click.stop
       >
         <div class="flex items-center mb-4">
@@ -301,22 +301,22 @@
             <AlertTriangle class="w-5 h-5 text-red-600" />
           </div>
           <div>
-            <h3 class="text-base font-bold text-gray-900">{{ $t('orders.cancel_order_title') }}</h3>
-            <p class="text-gray-600 text-xs">{{ $t('orders.order') }} #{{ orderToUpdate }}</p>
+            <h3 class="text-base font-bold text-navy">{{ $t('orders.cancel_order_title') }}</h3>
+            <p class="text-grey-500 text-xs">{{ $t('orders.order') }} #{{ orderToUpdate }}</p>
           </div>
         </div>
-        <p class="text-sm text-gray-700 mb-4">{{ $t('orders.cancel_order_message') }}</p>
+        <p class="text-sm text-grey-500 mb-4">{{ $t('orders.cancel_order_message') }}</p>
         <div class="flex space-x-2">
           <button 
             @click="showCancelDialog = false"
-            class="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+            class="flex-1 py-2.5 bg-grey-50 text-navy text-sm font-semibold rounded-2xl hover:bg-grey-100 transition-all duration-200"
           >
             {{ $t('orders.keep_order') }}
           </button>
           <button 
             @click="executeCancelOrder"
             :disabled="updatingOrderId === orderToUpdate"
-            class="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
+            class="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
           >
             <Loader2 v-if="updatingOrderId === orderToUpdate" class="w-3.5 h-3.5 animate-spin" />
             <X v-else class="w-3.5 h-3.5" />
@@ -333,7 +333,7 @@
       @click="showProceedDialog = false"
     >
       <div 
-        class="bg-white rounded-lg p-5 max-w-md w-full shadow-xl"
+        class="bg-white rounded-2xl p-5 max-w-md w-full shadow-float"
         @click.stop
       >
         <div class="flex items-center mb-4">
@@ -341,22 +341,22 @@
             <Play class="w-5 h-5 text-green-600" />
           </div>
           <div>
-            <h3 class="text-base font-bold text-gray-900">{{ $t('orders.proceed_order_title') }}</h3>
-            <p class="text-gray-600 text-xs">{{ $t('orders.order') }} #{{ orderToUpdate }}</p>
+            <h3 class="text-base font-bold text-navy">{{ $t('orders.proceed_order_title') }}</h3>
+            <p class="text-grey-500 text-xs">{{ $t('orders.order') }} #{{ orderToUpdate }}</p>
           </div>
         </div>
-        <p class="text-sm text-gray-700 mb-4">{{ $t('orders.proceed_order_message') }}</p>
+        <p class="text-sm text-grey-500 mb-4">{{ $t('orders.proceed_order_message') }}</p>
         <div class="flex space-x-2">
           <button 
             @click="showProceedDialog = false"
-            class="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+            class="flex-1 py-2.5 bg-grey-50 text-navy text-sm font-semibold rounded-2xl hover:bg-grey-100 transition-all duration-200"
           >
             {{ $t('orders.keep_on_hold') }}
           </button>
           <button 
             @click="executeProceedOrder"
             :disabled="updatingOrderId === orderToUpdate"
-            class="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
+            class="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
           >
             <Loader2 v-if="updatingOrderId === orderToUpdate" class="w-3.5 h-3.5 animate-spin" />
             <Play v-else class="w-3.5 h-3.5" />
@@ -373,30 +373,30 @@
       @click="showDeliveryConfirmDialog = false"
     >
       <div 
-        class="bg-white rounded-lg p-5 max-w-md w-full shadow-xl"
+        class="bg-white rounded-2xl p-5 max-w-md w-full shadow-float"
         @click.stop
       >
         <div class="flex items-center mb-4">
-          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-            <CheckCircle class="w-5 h-5 text-blue-600" />
+          <div class="w-10 h-10 bg-grey-50 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+            <CheckCircle class="w-5 h-5 text-navy" />
           </div>
           <div>
-            <h3 class="text-base font-bold text-gray-900">{{ $t('orders.confirm_delivery_title') }}</h3>
-            <p class="text-gray-600 text-xs">{{ $t('orders.order') }} #{{ orderToUpdate }}</p>
+            <h3 class="text-base font-bold text-navy">{{ $t('orders.confirm_delivery_title') }}</h3>
+            <p class="text-grey-500 text-xs">{{ $t('orders.order') }} #{{ orderToUpdate }}</p>
           </div>
         </div>
-        <p class="text-sm text-gray-700 mb-4">{{ $t('orders.confirm_delivery_message') }}</p>
+        <p class="text-sm text-grey-500 mb-4">{{ $t('orders.confirm_delivery_message') }}</p>
         <div class="flex space-x-2">
           <button 
             @click="showDeliveryConfirmDialog = false"
-            class="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+            class="flex-1 py-2.5 bg-grey-50 text-navy text-sm font-semibold rounded-2xl hover:bg-grey-100 transition-all duration-200"
           >
             {{ $t('orders.not_yet') }}
           </button>
           <button 
             @click="executeDeliveryConfirmation"
             :disabled="updatingOrderId === orderToUpdate"
-            class="flex-1 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
+            class="flex-1 py-2.5 bg-navy hover:bg-navy/90 text-white text-sm font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
           >
             <Loader2 v-if="updatingOrderId === orderToUpdate" class="w-3.5 h-3.5 animate-spin" />
             <CheckCircle v-else class="w-3.5 h-3.5" />

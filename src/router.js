@@ -4,6 +4,7 @@ import { useCRMStore } from '@/stores/crm'
 import apiService from '@/services/api'
 
 // Helper function to handle dynamic imports with error recovery
+const RELOAD_ATTEMPTED_KEY = 'router_chunk_reload_attempted'
 const loadComponent = (importFn, componentName) => {
   return async () => {
     try {
@@ -11,16 +12,19 @@ const loadComponent = (importFn, componentName) => {
     } catch (error) {
       console.error(`Error loading component ${componentName}:`, error)
       
-      // If it's a module loading error (404, network error, etc.), try to reload the page
-      if (error.message && (
+      // If it's a module loading error (404, network error, etc.), try to reload the page ONCE
+      const isChunkError = error.message && (
         error.message.includes('Failed to fetch') ||
         error.message.includes('Loading') ||
         error.message.includes('dynamically imported module') ||
         error.code === 'ERR_MODULE_NOT_FOUND'
-      )) {
-        console.warn('Module loading error detected, clearing cache and reloading...')
+      )
+      const alreadyReloaded = sessionStorage.getItem(RELOAD_ATTEMPTED_KEY)
+      
+      if (isChunkError && !alreadyReloaded) {
+        sessionStorage.setItem(RELOAD_ATTEMPTED_KEY, '1')
+        console.warn('Module loading error detected, clearing cache and reloading once...')
         
-        // Clear service worker and caches
         if ('serviceWorker' in navigator) {
           try {
             const registrations = await navigator.serviceWorker.getRegistrations()
@@ -47,16 +51,18 @@ const loadComponent = (importFn, componentName) => {
           }
         }
         
-        // Reload the page after a short delay
         setTimeout(() => {
           window.location.reload()
         }, 1000)
         
-        // Return a loading component while reloading
         return { default: { template: '<div>Loading...</div>' } }
       }
       
-      // For other errors, throw to let Vue Router handle it
+      // Clear the flag on successful navigation so future chunk errors can retry
+      if (!isChunkError) {
+        sessionStorage.removeItem(RELOAD_ATTEMPTED_KEY)
+      }
+      
       throw error
     }
   }
@@ -79,6 +85,7 @@ const routes = [
   { path: '/forgot-password', name: 'ForgotPassword', component: loadComponent(() => import('@/pages/ForgotPassword.vue'), 'ForgotPassword') },
   { path: '/reset-password/:code', name: 'ResetPassword', component: loadComponent(() => import('@/pages/ResetPassword.vue'), 'ResetPassword') },
   { path: '/product/:id', name: 'ProductDetails', component: loadComponent(() => import('@/pages/ProductDetails.vue'), 'ProductDetails'), meta: { requiresAuth: true } },
+  { path: '/product/:id/book', name: 'PropertyBook', component: loadComponent(() => import('@/pages/PropertyBook.vue'), 'PropertyBook'), meta: { requiresAuth: true } },
   // { path: '/stores', name: 'StoreDirectory', component: loadComponent(() => import('@/pages/StoreDirectory.vue'), 'StoreDirectory'), meta: { requiresAuth: true } },
   // { path: '/store/:id', name: 'StoreDetails', component: loadComponent(() => import('@/pages/StoreDetails.vue'), 'StoreDetails'), meta: { requiresAuth: true } },
   { path: '/order-status/:id', name: 'OrderStatus', component: loadComponent(() => import('@/pages/OrderStatus.vue'), 'OrderStatus'), meta: { requiresAuth: true } },
@@ -109,6 +116,10 @@ const routes = [
   { path: '/liked-products', name: 'LikedProducts', component: loadComponent(() => import('@/pages/LikedProducts.vue'), 'LikedProducts'), meta: { requiresAuth: true } },
   { path: '/listing-chat/:inquiryId', name: 'ListingChat', component: loadComponent(() => import('@/pages/ListingChat.vue'), 'ListingChat'), meta: { requiresAuth: true } },
   
+  // Property Booking routes
+  { path: '/my-bookings', name: 'MyBookings', component: loadComponent(() => import('@/pages/MyBookings.vue'), 'MyBookings'), meta: { requiresAuth: true } },
+  { path: '/booking/:id', name: 'BookingConfirmation', component: loadComponent(() => import('@/pages/BookingConfirmation.vue'), 'BookingConfirmation'), meta: { requiresAuth: true } },
+
   // Parcel delivery routes
   { path: '/send-parcel', name: 'SendParcel', component: loadComponent(() => import('@/pages/SendParcel.vue'), 'SendParcel'), meta: { requiresAuth: true } },
   { path: '/parcels', name: 'ParcelsList', component: loadComponent(() => import('@/pages/ParcelsList.vue'), 'ParcelsList'), meta: { requiresAuth: true } },

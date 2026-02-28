@@ -809,6 +809,10 @@ export const apiService = {
     return api.post('/products/crm/viewing-requests/', requestData)
   },
 
+  sendViewingInquiry(productId, message) {
+    return api.post('/products/crm/viewing-inquiry/', { product_id: productId, message: message || '' })
+  },
+
   getViewingRequests(params = {}) {
     return api.get('/products/crm/viewing-requests/', { params })
   },
@@ -1142,6 +1146,38 @@ export const apiService = {
         is_available: true
       }
     })
+  },
+
+  // ─── Property Booking APIs ────────────────────────────────────────────────────
+
+  // Check property availability for given dates
+  getBookingAvailability(params) {
+    return api.get('/products/bookings/availability/', { params })
+  },
+
+  // Calculate booking price
+  calculateBookingPrice(data) {
+    return api.post('/products/bookings/calculate-price/', data)
+  },
+
+  // Create a booking
+  createBooking(data) {
+    return api.post('/products/bookings/create/', data)
+  },
+
+  // Get shopper's bookings
+  getMyBookings(params = {}) {
+    return api.get('/products/bookings/my-bookings/', { params })
+  },
+
+  // Get booking detail
+  getBookingDetail(id) {
+    return api.get(`/products/bookings/${id}/`)
+  },
+
+  // Cancel a booking
+  cancelBooking(id, data = {}) {
+    return api.post(`/products/bookings/${id}/cancel/`, data)
   },
 }
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+  <div class="page-container">
     <div class="p-4 pb-24">
       <!-- Enhanced Header -->
       <AppHeader />
@@ -7,18 +7,18 @@
       <!-- Search bar -->
       <div class="mb-6">
         <div class="relative group">
-          <Search class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+          <Search class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-grey-400 group-focus-within:text-navy transition-colors" />
           <input
             v-model="search"
             type="text"
             placeholder="Search stores by name or category..."
-            class="w-full pl-12 pr-12 py-4 bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200 shadow-sm hover:shadow-md"
+            class="input w-full pl-12 pr-12 py-4"
             @input="handleSearch"
           />
           <button 
             v-if="search" 
             @click="clearSearch"
-            class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            class="absolute right-4 top-1/2 transform -translate-y-1/2 text-grey-400 hover:text-grey-500 transition-colors"
           >
             <X class="w-5 h-5" />
           </button>
@@ -28,10 +28,10 @@
       <!-- Store Category Filters -->
       <div class="mb-6">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-bold text-slate-900">Browse by Category</h2>
+          <h2 class="text-lg font-bold text-navy">Browse by Category</h2>
           <button 
             @click="showAllStores"
-            class="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            class="text-sm text-navy font-medium"
           >
             View All
           </button>
@@ -42,10 +42,10 @@
             <button 
               @click="filterByStoreCategory(null)"
               :class="[
-                'px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-200 whitespace-nowrap shadow-sm hover:shadow-md',
+                'px-4 py-3 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap',
                 selectedStoreCategory === null 
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
-                  : 'bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white hover:border-blue-500/50'
+                  ? 'bg-navy text-white shadow-card' 
+                  : 'bg-grey-50 text-grey-500 hover:bg-white hover:text-navy'
               ]"
             >
               All Categories
@@ -55,10 +55,10 @@
               :key="category.id"
               @click="filterByStoreCategory(category.id)"
               :class="[
-                'px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-200 whitespace-nowrap shadow-sm hover:shadow-md',
+                'px-4 py-3 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap',
                 selectedStoreCategory === category.id 
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
-                  : 'bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white hover:border-blue-500/50'
+                  ? 'bg-navy text-white shadow-card' 
+                  : 'bg-grey-50 text-grey-500 hover:bg-white hover:text-navy'
               ]"
             >
               {{ category.name }}
@@ -71,10 +71,10 @@
       <div v-if="featuredStores.length > 0" class="mb-8">
         <div class="flex justify-between items-center mb-4">
           <div>
-            <h2 class="text-xl font-bold text-slate-900 mb-1">Featured Stores</h2>
-            <p class="text-sm text-slate-600">Top-rated stores just for you</p>
+            <h2 class="text-xl font-bold text-navy mb-1">Featured Stores</h2>
+            <p class="text-sm text-grey-400">Top-rated stores just for you</p>
           </div>
-          <div class="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
+          <div class="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
             <span class="text-white text-xs font-bold">⭐</span>
           </div>
         </div>
@@ -84,7 +84,7 @@
             <div 
               v-for="store in featuredStores" 
               :key="store.id"
-              class="flex-shrink-0 w-80 bg-white/90 backdrop-blur-sm rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-white/30"
+              class="flex-shrink-0 w-80 card rounded-3xl overflow-hidden hover:shadow-float transition-all duration-300 cursor-pointer hover:-translate-y-2"
               @click="navigateToStore(store.id)"
             >
               <div class="relative h-32">
@@ -93,8 +93,8 @@
                   class="w-full h-full object-cover" 
                   alt="Store Banner"
                 />
-                <div class="absolute top-2 right-2 w-6 h-6 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center">
-                  <span class="text-xs font-bold text-slate-700">⭐</span>
+                <div class="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center">
+                  <span class="text-xs font-bold text-navy">⭐</span>
                 </div>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
               </div>
@@ -106,7 +106,7 @@
                     alt="Store Logo"
                   />
                   <div class="flex-1">
-                    <h3 class="text-sm font-semibold text-slate-900 truncate">{{ store.business_name }}</h3>
+                    <h3 class="text-sm font-semibold text-navy truncate">{{ store.business_name }}</h3>
                     <div class="flex items-center">
                       <span 
                         :class="`px-2 py-1 text-xs rounded-full ${getStoreCategoryColorClass(store.store_category)}`"
@@ -119,9 +119,9 @@
                 <div class="flex items-center justify-between">
                   <div class="flex items-center">
                     <Star class="w-4 h-4 text-yellow-400 fill-current" />
-                    <span class="text-sm text-slate-600 ml-1">{{ store.rating || '4.5' }}</span>
+                    <span class="text-sm text-grey-500 ml-1">{{ store.rating || '4.5' }}</span>
                   </div>
-                  <div class="text-xs text-slate-500">
+                  <div class="text-xs text-grey-400">
                     {{ store.product_count || 0 }} products
                   </div>
                 </div>
@@ -135,20 +135,20 @@
       <div class="mb-6">
         <div class="flex justify-between items-center mb-4">
           <div>
-            <h2 class="text-xl font-bold text-slate-900 mb-1">{{ getSectionTitle() }}</h2>
-            <p class="text-sm text-slate-600">{{ filteredStores.length }} stores available</p>
+            <h2 class="text-xl font-bold text-navy mb-1">{{ getSectionTitle() }}</h2>
+            <p class="text-sm text-grey-400">{{ filteredStores.length }} stores available</p>
           </div>
           <div class="flex items-center space-x-2">
             <button 
               @click="toggleViewMode"
-              class="p-2 bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl hover:bg-white transition-all duration-200"
+              class="p-2 bg-grey-50 rounded-2xl hover:bg-white transition-all duration-200"
             >
-              <component :is="viewMode === 'grid' ? List : Grid3X3" class="w-4 h-4 text-gray-600" />
+              <component :is="viewMode === 'grid' ? List : Grid3X3" class="w-4 h-4 text-grey-500" />
             </button>
             <select 
               v-model="sortBy"
               @change="handleSort"
-              class="px-3 py-2 bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20"
+              class="select px-3 py-2 text-sm"
             >
               <option value="name">Name A-Z</option>
               <option value="rating">Highest Rated</option>
@@ -161,13 +161,13 @@
         <!-- Loading state -->
         <div v-if="loading" class="flex justify-center my-12">
           <div class="relative">
-            <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-200"></div>
-            <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent absolute top-0 left-0"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-grey-200"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-navy border-t-transparent absolute top-0 left-0"></div>
           </div>
         </div>
 
         <!-- Error state -->
-        <div v-else-if="error" class="mb-6 p-6 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-3xl">
+        <div v-else-if="error" class="mb-6 p-6 bg-red-50 border border-red-200 rounded-2xl">
           <div class="flex items-center">
             <AlertCircle class="w-6 h-6 text-red-500 mr-3" />
             <span class="text-red-700 font-medium">{{ error }}</span>
@@ -181,7 +181,7 @@
             <div 
               v-for="store in filteredStores" 
               :key="store.id"
-              class="group bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border border-white/20 hover:border-blue-500/20 transform hover:-translate-y-1"
+              class="group card rounded-3xl overflow-hidden hover:shadow-float transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
               @click="navigateToStore(store.id)"
             >
               <div class="relative h-40">
@@ -216,9 +216,9 @@
                 </div>
               </div>
               <div class="p-4">
-                <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ store.description || 'Welcome to our store!' }}</p>
+                <p class="text-grey-500 text-sm mb-3 line-clamp-2">{{ store.description || 'Welcome to our store!' }}</p>
                 <div class="flex items-center justify-between">
-                  <div class="text-xs text-gray-500">
+                  <div class="text-xs text-grey-400">
                     {{ store.product_count || 0 }} products
                   </div>
                   <div class="flex items-center">
@@ -226,7 +226,7 @@
                       :class="getStoreStatusClass(store.verification_status)"
                       class="w-2 h-2 rounded-full mr-2"
                     ></div>
-                    <span class="text-xs text-gray-500">{{ getStoreStatusText(store.verification_status) }}</span>
+                    <span class="text-xs text-grey-400">{{ getStoreStatusText(store.verification_status) }}</span>
                   </div>
                 </div>
               </div>
@@ -238,7 +238,7 @@
             <div 
               v-for="store in filteredStores" 
               :key="store.id"
-              class="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-white/20 hover:border-blue-500/20"
+              class="group card hover:shadow-float transition-all duration-300 cursor-pointer"
               @click="navigateToStore(store.id)"
             >
               <div class="flex items-center p-4">
@@ -249,10 +249,10 @@
                 />
                 <div class="flex-1">
                   <div class="flex items-center justify-between mb-1">
-                    <h3 class="font-semibold text-slate-900 truncate">{{ store.business_name }}</h3>
+                    <h3 class="font-semibold text-navy truncate">{{ store.business_name }}</h3>
                     <div class="flex items-center">
                       <Star class="w-4 h-4 text-yellow-400 fill-current" />
-                      <span class="text-sm text-slate-600 ml-1">{{ store.rating || '4.5' }}</span>
+                      <span class="text-sm text-grey-500 ml-1">{{ store.rating || '4.5' }}</span>
                     </div>
                   </div>
                   <div class="flex items-center mb-2">
@@ -265,12 +265,12 @@
                       :class="getStoreStatusClass(store.verification_status)"
                       class="w-2 h-2 rounded-full mr-2"
                     ></div>
-                    <span class="text-xs text-gray-500">{{ getStoreStatusText(store.verification_status) }}</span>
+                    <span class="text-xs text-grey-400">{{ getStoreStatusText(store.verification_status) }}</span>
                   </div>
-                  <p class="text-gray-600 text-sm line-clamp-1">{{ store.description || 'Welcome to our store!' }}</p>
+                  <p class="text-grey-500 text-sm line-clamp-1">{{ store.description || 'Welcome to our store!' }}</p>
                   <div class="flex items-center justify-between mt-2">
-                    <span class="text-xs text-gray-500">{{ store.product_count || 0 }} products</span>
-                    <ArrowRight class="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                    <span class="text-xs text-grey-400">{{ store.product_count || 0 }} products</span>
+                    <ArrowRight class="w-4 h-4 text-grey-400 group-hover:text-navy transition-colors" />
                   </div>
                 </div>
               </div>
@@ -282,7 +282,7 @@
             <button 
               @click="loadMoreStores"
               :disabled="loadingMore"
-              class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
+              class="btn btn-primary px-6 py-3 disabled:opacity-50"
             >
               <span v-if="loadingMore">Loading...</span>
               <span v-else>Load More Stores</span>
@@ -292,17 +292,17 @@
 
         <!-- No stores state -->
         <div v-else-if="!loading" class="text-center my-12">
-          <div class="w-32 h-32 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Store class="w-16 h-16 text-gray-400" />
+          <div class="w-32 h-32 bg-grey-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Store class="w-16 h-16 text-grey-400" />
           </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-2">No Stores Found</h3>
-          <p class="text-sm text-gray-600 mb-4">
+          <h3 class="text-xl font-bold text-navy mb-2">No Stores Found</h3>
+          <p class="text-sm text-grey-500 mb-4">
             {{ search ? 'Try adjusting your search terms' : 'Check back soon for new stores' }}
           </p>
           <button 
             v-if="search || selectedStoreCategory"
             @click="clearAllFilters"
-            class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
+            class="btn btn-primary px-4 py-2"
           >
             Clear Filters
           </button>
@@ -540,7 +540,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* Hide scrollbar for webkit browsers */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -550,7 +549,6 @@ onMounted(async () => {
   display: none;
 }
 
-/* Line clamp utilities */
 .line-clamp-1 {
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -565,7 +563,6 @@ onMounted(async () => {
   overflow: hidden;
 }
 
-/* Enhanced hover effects */
 .hover\:-translate-y-1:hover {
   transform: translateY(-0.25rem);
 }
@@ -574,18 +571,6 @@ onMounted(async () => {
   transform: translateY(-0.5rem);
 }
 
-/* Smooth transitions */
-.transition-all {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Glass morphism effect */
-.backdrop-blur-sm {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-/* Custom scrollbar for category chips */
 .overflow-x-auto::-webkit-scrollbar {
   height: 4px;
 }
@@ -595,7 +580,7 @@ onMounted(async () => {
 }
 
 .overflow-x-auto::-webkit-scrollbar-thumb {
-  background: linear-gradient(to right, #2563eb, #9333ea);
+  background: #1a1a2e;
   border-radius: 2px;
 }
 </style>

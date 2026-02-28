@@ -1,125 +1,115 @@
 <template>
-  <div class="min-h-screen bg-white">
-    <div class="p-3 pb-24 pt-6">
-      <!-- Header -->
-      <AppHeader />
+  <div class="page-container">
+    <AppHeader />
+    <div class="px-5 pb-28 pt-20">
 
-      <!-- Loading state -->
-      <div v-if="loading" class="flex justify-center items-center py-12">
-        <div class="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center">
-          <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      <!-- Loading -->
+      <div v-if="loading" class="flex justify-center items-center py-20">
+        <div class="w-10 h-10 border-2 border-navy border-t-transparent rounded-full animate-spin"></div>
+      </div>
+
+      <!-- Error -->
+      <div v-else-if="error" class="alert alert-error mb-4">
+        <div class="flex items-center gap-2">
+          <AlertCircle class="w-4 h-4 flex-shrink-0" />
+          <span class="text-sm">{{ error }}</span>
         </div>
       </div>
 
-      <!-- Error state -->
-      <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded-lg mb-3 flex items-center space-x-2">
-        <AlertCircle class="w-4 h-4 text-red-600 flex-shrink-0" />
-        <span class="text-xs">{{ error }}</span>
-      </div>
-
       <!-- Search Results -->
-      <div v-if="hasSearchQuery && !loadingProducts" class="mt-3">
-        <div v-if="searchProducts.length > 0" class="grid grid-cols-2 gap-2">
+      <div v-if="hasSearchQuery && !loadingProducts">
+        <p class="text-sm text-grey-400 mb-4">{{ $t('store_category.search_results') || 'Search results' }}</p>
+        <div v-if="searchProducts.length > 0" class="grid grid-cols-2 gap-4">
           <div 
             v-for="product in searchProducts" 
-            :key="product.id" 
-            class="flex flex-col"
+            :key="product.id"
+            class="rounded-3xl bg-grey-50 p-2"
           >
-            <!-- Product Card - Only contains image -->
             <div 
               @click="navigateToDetails(product.id, product.item_type)"
-              class="group bg-gray-100 rounded-lg border border-gray-200 transition-all duration-200 overflow-hidden mb-1.5 aspect-square cursor-pointer"
+              class="relative rounded-2xl overflow-hidden aspect-square cursor-pointer group"
             >
               <img 
                 :src="product.main_image || packagingImage" 
                 :alt="product.name"
-                class="w-full h-full object-cover rounded-lg"
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
+              <div class="hero-overlay"></div>
+              <div class="absolute bottom-0 left-0 right-0 p-3">
+                <p class="text-white text-xs leading-tight line-clamp-2 capitalize">{{ product.name }}</p>
+              </div>
             </div>
-            
-            <!-- Product Info - Outside the card -->
-            <div class="space-y-0.5">
-              <!-- Store Name Caption (only for store products, not shopper listings) -->
-              <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-400 mb-0.5">
+            <div class="mt-2 px-1">
+              <p v-if="product.item_type === 'store_product'" class="text-[11px] text-grey-400 mb-0.5 truncate">
                 {{ product.seller_name || product.store_name || 'AfriQExpress Seller' }}
               </p>
-              
-              <!-- Product Name -->
-              <h3 
-                @click="navigateToDetails(product.id, product.item_type)"
-                class="font-semibold text-xs text-gray-900 mb-0.5 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors capitalize"
-              >
-                {{ product.name }}
-              </h3>
-              
-              <!-- Price and Quantity -->
-              <div class="flex items-center justify-between">
-                <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-xs text-orange-600' : 'font-bold text-xs text-blue-600'">
-                  {{ formatApiPrice(product) }}
-                  <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-500">
-                    / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
-                  </span>
-                </span>
-              </div>
+              <span class="font-bold text-sm text-navy">
+                {{ formatApiPrice(product) }}
+              </span>
+              <span v-if="product.quantity || product.weight" class="text-xs text-grey-400 ml-1">
+                / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
+              </span>
             </div>
           </div>
         </div>
         
-        <!-- Empty search results -->
-        <div v-else class="text-center py-12">
-          <Package class="w-12 h-12 text-gray-300 mx-auto mb-2" />
-          <p class="text-xs text-gray-500">No products found</p>
+        <div v-else class="text-center py-20">
+          <div class="w-16 h-16 rounded-3xl bg-grey-50 flex items-center justify-center mx-auto mb-4">
+            <Package class="w-7 h-7 text-grey-300" />
+          </div>
+          <p class="text-sm text-grey-400">{{ $t('store_category.no_products') || 'No products found' }}</p>
         </div>
       </div>
 
       <!-- Store Categories Grid -->
-      <div v-else-if="storeCategories.length > 0 && !hasSearchQuery" class="grid grid-cols-2 gap-2 mt-16">
-        <button
-          v-for="category in storeCategories"
-          :key="category.id"
-          @click="selectCategory(category.id)"
-          class="group rounded-lg transition-all duration-200 p-[1px] flex flex-col items-center justify-center relative overflow-hidden"
-          style="background: linear-gradient(to right, #2563eb, #9333ea);"
-        >
-          <!-- Inner content area -->
-          <div class="w-full h-full rounded-lg p-3 flex flex-col items-center justify-center space-y-2"
-               :class="isDefault(category.id) 
-                 ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white' 
-                 : 'bg-white'">
-            <!-- Category Icon -->
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200"
-                 :class="isDefault(category.id) ? 'bg-white/20' : 'bg-blue-50'">
+      <div v-else-if="storeCategories.length > 0 && !hasSearchQuery">
+        <h2 class="text-xl font-bold text-navy mb-1 mt-10">{{ $t('store_category.title') || 'Categories' }}</h2>
+        <p class="text-sm text-grey-400 mb-5">{{ $t('store_category.subtitle') || 'Choose a category to explore' }}</p>
+        
+        <div class="grid grid-cols-2 gap-3">
+          <button
+            v-for="category in storeCategories"
+            :key="category.id"
+            @click="selectCategory(category.id)"
+            class="group rounded-3xl p-5 text-left transition-all duration-200 relative overflow-hidden"
+            :class="isDefault(category.id) 
+              ? 'bg-navy text-white shadow-card' 
+              : 'bg-grey-50 hover:bg-grey-100'"
+          >
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-all"
+                 :class="isDefault(category.id) ? 'bg-white/20' : 'bg-white shadow-sm'">
               <component :is="getCategoryIcon(category.name)" 
-                         class="w-5 h-5 transition-colors duration-200" :class="isDefault(category.id) ? 'text-white' : 'text-blue-600'" />
+                         class="w-6 h-6 transition-colors" 
+                         :class="isDefault(category.id) ? 'text-white' : 'text-navy'" />
             </div>
             
-            <!-- Category Name -->
-            <h3 class="font-semibold text-xs text-center line-clamp-2" :class="isDefault(category.id) ? 'text-white' : 'text-gray-900'">
+            <h3 class="font-bold text-sm mb-1" :class="isDefault(category.id) ? 'text-white' : 'text-navy'">
               {{ category.name }}
             </h3>
             
-            <!-- Category Description -->
             <p v-if="category.description" 
-               class="text-xs text-center line-clamp-2" :class="isDefault(category.id) ? 'text-white/90' : 'text-gray-500'">
+               class="text-xs line-clamp-2 leading-relaxed" 
+               :class="isDefault(category.id) ? 'text-white/70' : 'text-grey-400'">
               {{ category.description }}
             </p>
             
-            <!-- Default Badge -->
-            <span v-if="isDefault(category.id)" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/20 text-white">
-              Selected
+            <span v-if="isDefault(category.id)" 
+                  class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-white/20 text-white mt-3">
+              {{ $t('store_category.selected') || 'Selected' }}
             </span>
-          </div>
-        </button>
+          </button>
+        </div>
       </div>
 
       <!-- Empty state -->
-      <div v-else class="text-center py-12">
-        <Package class="w-12 h-12 text-gray-300 mx-auto mb-2" />
-        <p class="text-xs text-gray-500">No store categories available</p>
+      <div v-else class="text-center py-20">
+        <div class="w-16 h-16 rounded-3xl bg-grey-50 flex items-center justify-center mx-auto mb-4">
+          <Package class="w-7 h-7 text-grey-300" />
+        </div>
+        <p class="text-sm text-grey-400">{{ $t('store_category.empty') || 'No store categories available' }}</p>
       </div>
     </div>
 
-    <!-- Bottom Navigation -->
     <BottomNavigation />
   </div>
 </template>
@@ -243,14 +233,3 @@ onMounted(async () => {
   }
 })
 </script>
-
-<style scoped>
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-</style>
-

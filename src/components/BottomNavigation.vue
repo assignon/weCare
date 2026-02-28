@@ -1,100 +1,62 @@
 <template>
-  <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg">
-    <div class="flex items-center justify-around h-16">
+  <nav class="fixed bottom-4 left-4 right-4 z-50 bg-navy rounded-3xl shadow-float">
+    <div class="flex items-center justify-around h-16 px-2">
       <router-link 
         :to="{ name: 'Home' }"
-        class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
-        :class="activeTab === 'home' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+        class="nav-tab text-white"
+        :class="activeTab === 'home' ? 'nav-tab-active opacity-100' : 'opacity-70 hover:opacity-100'"
       >
-        <div class="relative">
-          <Home v-if="activeTab === 'home'" class="w-6 h-6" />
-          <Home v-else class="w-5 h-5 group-hover:scale-110 transition-transform" />
-          <div 
-            v-if="activeTab === 'home'" 
-            class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
-            style="background: linear-gradient(to right, #2563eb, #9333ea);"
-          ></div>
-        </div>
+        <Home class="w-5 h-5" />
+        <span class="text-[10px] font-medium mt-0.5">{{ $t('navigation.home') }}</span>
       </router-link>
       
       <router-link 
         :to="{ name: 'StoreCategory' }"
-        class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
-        :class="activeTab === 'storecategory' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+        class="nav-tab text-white"
+        :class="activeTab === 'storecategory' ? 'nav-tab-active opacity-100' : 'opacity-70 hover:opacity-100'"
       >
-        <div class="relative">
-          <Search v-if="activeTab === 'storecategory'" class="w-6 h-6" />
-          <Search v-else class="w-5 h-5 group-hover:scale-110 transition-transform" />
-          <div 
-            v-if="activeTab === 'storecategory'" 
-            class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
-            style="background: linear-gradient(to right, #2563eb, #9333ea);"
-          ></div>
-        </div>
+        <Search class="w-5 h-5" />
+        <span class="text-[10px] font-medium mt-0.5">{{ $t('navigation.search') }}</span>
       </router-link>
       
-      <!-- Cart Tab -->
       <router-link 
-        :to="{ name: 'Cart' }"
-        class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
-        :class="activeTab === 'cart' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+        :to="{ name: 'MyListings' }"
+        class="nav-tab text-white"
+        :class="activeTab === 'mylistings' ? 'nav-tab-active opacity-100' : 'opacity-70 hover:opacity-100'"
       >
-        <div class="relative">
-          <ShoppingCart v-if="activeTab === 'cart'" class="w-6 h-6" />
-          <ShoppingCart v-else class="w-5 h-5 group-hover:scale-110 transition-transform" />
-          
-          <!-- Cart item count badge -->
-          <span 
-            v-if="cart.cartItemCount > 0"
-            class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-sm"
-          >
-            {{ cart.cartItemCount > 99 ? '99+' : cart.cartItemCount }}
-          </span>
-          
-          <div 
-            v-if="activeTab === 'cart'" 
-            class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
-            style="background: linear-gradient(to right, #2563eb, #9333ea);"
-          ></div>
-        </div>
+        <Megaphone class="w-5 h-5" />
+        <span class="text-[10px] font-medium mt-0.5">{{ $t('navigation.ads') }}</span>
       </router-link>
 
-      <!-- More menu button -->
       <button 
         @click="openMoreMenu"
-        class="flex flex-col items-center justify-center flex-1 h-full text-xs transition-all duration-200 relative group"
-        :class="showMoreMenu ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+        class="nav-tab text-white"
+        :class="showMoreMenu ? 'nav-tab-active opacity-100' : 'opacity-70 hover:opacity-100'"
         type="button"
       >
-        <div class="relative">
-          <MoreVertical v-if="showMoreMenu" class="w-6 h-6" />
-          <MoreVertical v-else class="w-5 h-5 group-hover:scale-110 transition-transform" />
-          <div 
-            v-if="showMoreMenu" 
-            class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
-            style="background: linear-gradient(to right, #2563eb, #9333ea);"
-          ></div>
-        </div>
+        <MoreVertical class="w-5 h-5" />
+        <span class="text-[10px] font-medium mt-0.5">{{ $t('navigation.more') }}</span>
       </button>
     </div>
   </nav>
 
-  <!-- More Menu Drawer (Right Side) -->
+  <!-- More Menu Drawer -->
   <Transition name="slide-left">
     <div v-if="showMoreMenu" class="fixed inset-0 z-[60]">
-      <div class="absolute inset-0 bg-black/40" @click="closeMoreMenu"></div>
-      <div class="absolute right-0 top-0 bottom-0 w-72 bg-gray-100 flex flex-col">
+      <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" @click="closeMoreMenu"></div>
+      <div class="absolute right-0 top-0 bottom-0 w-[280px] bg-white flex flex-col shadow-2xl">
         <!-- Header -->
-        <div class="px-6 py-5 border-b border-gray-300">
-          <div class="flex items-center justify-end">
+        <div class="px-6 pt-14 pb-5">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-navy">Menu</h3>
             <button 
               @click="navigateToNotification"
-              class="relative w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded transition-colors"
+              class="relative w-10 h-10 flex items-center justify-center rounded-2xl bg-grey-50 hover:bg-grey-100 transition-colors"
             >
-              <Bell class="w-5 h-5 text-[#333333]" />
+              <Bell class="w-5 h-5 text-navy" />
               <span 
                 v-if="notification.hasUnreadNotifications"
-                class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold"
+                class="badge-count"
               >
                 {{ notification.unreadCount > 99 ? '99+' : notification.unreadCount }}
               </span>
@@ -103,114 +65,117 @@
         </div>
 
         <!-- Main Navigation -->
-        <div class="flex-1 px-6 py-4 border-b border-gray-300">
+        <div class="flex-1 px-4 py-2 overflow-y-auto">
           <div class="space-y-1">
-            <!-- Orders -->
             <router-link 
               :to="{ name: 'Orders' }"
               @click="closeMoreMenu"
-              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
-              :class="activeTab === 'orders' ? 'bg-gray-200' : ''"
+              class="drawer-item"
+              :class="activeTab === 'orders' ? 'drawer-item-active' : ''"
             >
-              <Package class="w-5 h-5 text-[#333333]" />
-              <span class="text-base font-semibold text-[#333333]">{{ $t('navigation.orders') }}</span>
+              <div class="drawer-icon"><Package class="w-5 h-5" /></div>
+              <span>{{ $t('navigation.orders') }}</span>
             </router-link>
             
-            <!-- Rendezvous -->
             <router-link 
               :to="{ name: 'Rendezvous' }"
               @click="closeMoreMenu"
-              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group relative"
-              :class="activeTab === 'rendezvous' ? 'bg-gray-200' : ''"
+              class="drawer-item"
+              :class="activeTab === 'rendezvous' ? 'drawer-item-active' : ''"
             >
-              <div class="relative">
-                <Calendar class="w-5 h-5 text-[#333333]" />
+              <div class="drawer-icon relative">
+                <Calendar class="w-5 h-5" />
                 <span 
-                  v-if="pendingViewingRequests > 0"
-                  class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold"
+                  v-if="activeViewingRequests > 0"
+                  class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center font-bold"
                 >
-                  {{ pendingViewingRequests > 99 ? '99+' : pendingViewingRequests }}
+                  {{ activeViewingRequests > 99 ? '99+' : activeViewingRequests }}
                 </span>
               </div>
-              <span class="text-base font-semibold text-[#333333]">{{ $t('navigation.viewing_requests') }}</span>
+              <span>{{ $t('navigation.viewing_requests') }}</span>
             </router-link>
             
-            <!-- My Ads -->
+            <router-link 
+              :to="{ name: 'MyBookings' }"
+              @click="closeMoreMenu"
+              class="drawer-item"
+            >
+              <div class="drawer-icon"><CalendarDays class="w-5 h-5" /></div>
+              <span>{{ $t('navigation.my_bookings') }}</span>
+            </router-link>
+            
             <router-link 
               :to="{ name: 'MyListings' }"
               @click="closeMoreMenu"
-              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
+              class="drawer-item"
             >
-              <Megaphone class="w-5 h-5 text-[#333333]" />
-              <span class="text-base font-semibold text-[#333333]">{{ $t('navigation.my_ads') }}</span>
+              <div class="drawer-icon"><Megaphone class="w-5 h-5" /></div>
+              <span>{{ $t('navigation.my_ads') }}</span>
             </router-link>
             
-            <!-- Inquiries -->
             <router-link 
               :to="{ name: 'ListingInquiries' }"
               @click="closeMoreMenu"
-              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group relative"
+              class="drawer-item"
             >
-              <div class="relative">
-                <MessageSquareQuote class="w-5 h-5 text-[#333333]" />
+              <div class="drawer-icon relative">
+                <MessageSquareQuote class="w-5 h-5" />
                 <span 
                   v-if="listingStore.unreadInquiriesCount > 0"
-                  class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold"
+                  class="absolute -top-1 -right-1 bg-error-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold"
                 >
                   {{ listingStore.unreadInquiriesCount > 99 ? '99+' : listingStore.unreadInquiriesCount }}
                 </span>
               </div>
-              <span class="text-base font-semibold text-[#333333]">{{ $t('navigation.inquiries') }}</span>
+              <span>{{ $t('navigation.inquiries') }}</span>
             </router-link>
             
-            <!-- Messages -->
             <router-link 
               :to="{ name: 'Messages' }"
               @click="closeMoreMenu"
-              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
+              class="drawer-item"
             >
-              <MessageCircle class="w-5 h-5 text-[#333333]" />
-              <span class="text-base font-semibold text-[#333333]">{{ $t('navigation.messages') }}</span>
+              <div class="drawer-icon"><MessageCircle class="w-5 h-5" /></div>
+              <span>{{ $t('navigation.messages') }}</span>
             </router-link>
             
-            <!-- Likes -->
             <router-link 
               :to="{ name: 'LikedProducts' }"
               @click="closeMoreMenu"
-              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
+              class="drawer-item"
             >
-              <Heart class="w-5 h-5 text-[#333333]" />
-              <span class="text-base font-semibold text-[#333333]">{{ $t('navigation.likes') }}</span>
+              <div class="drawer-icon"><Heart class="w-5 h-5" /></div>
+              <span>{{ $t('navigation.likes') }}</span>
             </router-link>
           </div>
         </div>
 
-        <!-- Bottom Section -->
-        <div class="px-6 pb-6 pt-4">
-          <div class="space-y-1">
-            <!-- User Info -->
-            <button 
-              @click="navigateToProfile"
-              class="w-full flex items-center space-x-4 py-3 px-2 hover:bg-gray-200 transition-colors group"
-            >
-              <div class="w-8 h-8 rounded-xl bg-[#E0B95B] flex items-center justify-center overflow-hidden">
-                <img 
-                  v-if="auth.user?.profile_picture" 
-                  :src="auth.user.profile_picture" 
-                  alt="User" 
-                  class="w-full h-full object-cover"
-                />
-                <span v-else class="text-[#333333] font-semibold text-sm">
-                  {{ auth.user?.first_name?.charAt(0)?.toUpperCase() || auth.user?.email?.charAt(0)?.toUpperCase() || 'U' }}
-                </span>
-              </div>
-              <span class="text-base font-semibold text-[#333333]">
+        <!-- User Section -->
+        <div class="px-4 pb-8 pt-4 border-t border-grey-100">
+          <button 
+            @click="navigateToProfile"
+            class="w-full flex items-center gap-3 py-3 px-3 rounded-2xl hover:bg-grey-50 transition-colors"
+          >
+            <div class="w-10 h-10 rounded-2xl bg-warm-200 flex items-center justify-center overflow-hidden">
+              <img 
+                v-if="auth.user?.profile_picture" 
+                :src="auth.user.profile_picture" 
+                alt="User" 
+                class="w-full h-full object-cover"
+              />
+              <span v-else class="text-navy font-bold text-sm">
+                {{ auth.user?.first_name?.charAt(0)?.toUpperCase() || auth.user?.email?.charAt(0)?.toUpperCase() || 'U' }}
+              </span>
+            </div>
+            <div class="text-left">
+              <p class="text-sm font-semibold text-navy">
                 {{ auth.user?.first_name && auth.user?.last_name 
                   ? `${auth.user.first_name} ${auth.user.last_name}` 
                   : auth.user?.email?.split('@')[0] || 'User' }}
-              </span>
-            </button>
-          </div>
+              </p>
+              <p class="text-xs text-grey-400">{{ $t('navigation.view_profile') }}</p>
+            </div>
+          </button>
         </div>
       </div>
     </div>
@@ -226,7 +191,7 @@ import { useCRMStore } from '@/stores/crm'
 import { usePharmacyStore } from '@/stores/pharmacy'
 import { useAuthStore } from '@/stores/auth'
 import { useListingStore } from '@/stores/listing'
-import { Home, Search, Receipt, ShoppingCart, Store, Sparkles, Shirt, Pill, Sofa, Monitor, Car, Calendar, MoreVertical, Bell, User, X, ChevronRight, Package, MessageCircle, MessageSquareQuote, Megaphone } from 'lucide-vue-next'
+import { Home, Search, Receipt, ShoppingCart, Store, Sparkles, Shirt, Pill, Sofa, Monitor, Car, Calendar, CalendarDays, MoreVertical, Bell, User, X, ChevronRight, Package, MessageCircle, MessageSquareQuote, Megaphone } from 'lucide-vue-next'
 import apiService from '@/services/api'
 
 const route = useRoute()
@@ -245,6 +210,7 @@ const currentRouteName = computed(() => route.name)
 // Use CRM store for state
 const shouldShowRendezvous = computed(() => crmStore.shouldShowRendezvous)
 const pendingViewingRequests = computed(() => crmStore.pendingViewingRequests)
+const activeViewingRequests = computed(() => crmStore.activeViewingRequests ?? 0)
 
 // Use Pharmacy store for state
 const shouldHideExploreAndCart = computed(() => pharmacyStore.shouldHideExploreAndCart)
@@ -256,7 +222,7 @@ const updateActiveTab = () => {
     'StoreCategory': 'storecategory',
     'Explore': 'explore',
     'Orders': 'orders',
-    'Cart': 'cart',
+    'MyListings': 'mylistings',
     'Rendezvous': 'rendezvous'
   }
   
@@ -274,11 +240,16 @@ onMounted(async () => {
     // Initialize notification store
     await notification.init()
     
-    // Fetch seller inquiries to get unread count
     try {
       await listingStore.fetchSellerInquiries()
     } catch (error) {
       console.warn('Failed to fetch seller inquiries:', error)
+    }
+    
+    try {
+      await crmStore.fetchViewingRequestStatsForBadge()
+    } catch (e) {
+      console.warn('Failed to fetch viewing request stats:', e)
     }
     
     // Load store categories to ensure default store icon is displayed
@@ -337,11 +308,11 @@ const storeCategories = ref([])
 
 const openMoreMenu = async () => {
   showMoreMenu.value = true
-  // Refresh inquiries count when opening the menu
   try {
     await listingStore.fetchSellerInquiries()
+    await crmStore.fetchViewingRequestStatsForBadge()
   } catch (error) {
-    console.warn('Failed to refresh seller inquiries:', error)
+    console.warn('Failed to refresh menu counts:', error)
   }
 }
 
@@ -440,16 +411,41 @@ const defaultStoreIcon = computed(() => getDefaultStoreIcon())
 </script>
 
 <style scoped>
-/* Slide left animation for drawer */
+.nav-tab {
+  @apply flex flex-col items-center justify-center flex-1 h-full transition-all duration-200 relative;
+}
+
+.nav-tab-active {
+  @apply opacity-100;
+}
+
+.drawer-item {
+  @apply flex items-center gap-3 py-3 px-3 rounded-2xl text-sm font-medium text-grey-600 hover:bg-grey-50 transition-all duration-200;
+}
+
+.drawer-item-active {
+  @apply bg-navy/5 text-navy;
+}
+
+.drawer-icon {
+  @apply w-9 h-9 rounded-xl bg-grey-50 flex items-center justify-center flex-shrink-0;
+}
+
+.drawer-item-active .drawer-icon {
+  @apply bg-navy/10;
+}
+
 .slide-left-enter-active,
 .slide-left-leave-active {
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.slide-left-enter-from .absolute.right-0 {
-  transform: translateX(100%);
+.slide-left-enter-from,
+.slide-left-leave-to {
+  opacity: 0;
 }
 
+.slide-left-enter-from .absolute.right-0,
 .slide-left-leave-to .absolute.right-0 {
   transform: translateX(100%);
 }

@@ -1,47 +1,54 @@
 <template>
   <!-- Back button header -->
-  <div v-if="showBack" class="mb-6">
+  <div v-if="showBack" class="mb-4">
     <button 
       @click="goBack"
-      class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-colors"
+      class="w-10 h-10 flex items-center justify-center rounded-2xl bg-grey-50 hover:bg-grey-100 transition-colors"
     >
-      <div class="gradient-arrow-wrapper">
-        <ArrowLeft class="w-6 h-6" />
-      </div>
+      <ArrowLeft class="w-5 h-5 text-navy" />
     </button>
   </div>
   
   <!-- Search bar -->
-  <div v-else-if="shouldShowSearch" class="fixed top-0 left-0 right-0 z-50 px-4 py-3">
-    <div class="relative group flex items-center gap-2">
-      <div class="relative flex-1" style="background: linear-gradient(to right, #8c36ea, #3060eb); padding: 2px; border-radius: 0.5rem;">
-        <div class="relative bg-white rounded-lg">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-          </div>
-          <input
-            ref="searchInput"
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search for products..."
-            class="input w-full pl-10 pr-10 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent border-0 bg-transparent"
-            @input="handleSearch"
-            @keyup.enter="handleSearch"
-          />
-          <button 
-            v-if="searchQuery" 
-            @click="clearSearch"
-            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X class="w-4 h-4" />
-          </button>
+  <div v-else-if="shouldShowSearch" class="fixed top-0 left-0 right-0 z-50 px-5 pt-3 pb-3 bg-white/90 backdrop-blur-md">
+    <div class="relative flex items-center gap-2">
+      <div class="relative flex-1 min-w-0">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <Search class="h-4 w-4 text-grey-400" />
         </div>
+        <input
+          ref="searchInput"
+          v-model="searchQuery"
+          type="text"
+          :placeholder="$t('common.search_placeholder')"
+          class="w-full pl-11 pr-10 h-12 text-sm bg-grey-50 border-0 rounded-2xl placeholder-grey-400 focus:outline-none focus:ring-2 focus:ring-navy/10 focus:bg-white transition-all duration-200"
+          @input="handleSearch"
+          @keyup.enter="handleSearch"
+        />
+        <button 
+          v-if="searchQuery" 
+          @click="clearSearch"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-grey-200 text-grey-500 hover:bg-grey-300 transition-colors"
+        >
+          <X class="w-3 h-3" />
+        </button>
       </div>
+      <router-link
+        :to="{ name: 'Notification' }"
+        class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center text-navy hover:opacity-80 transition-opacity"
+      >
+        <Bell class="w-5 h-5" />
+        <span
+          v-if="notification.hasUnreadNotifications"
+          class="absolute top-0 right-0 bg-error-500 text-white text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center font-bold leading-none px-1"
+        >
+          {{ notification.unreadCount > 99 ? '99+' : notification.unreadCount }}
+        </span>
+      </router-link>
       <button 
         v-if="showFilterButton"
         @click="handleFilterClick"
-        class="w-12 h-12 flex items-center justify-center rounded-xl transition-colors"
-        style="background: linear-gradient(to right, #8c36ea, #3060eb);"
+        class="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-2xl bg-navy transition-colors hover:bg-navy-500"
       >
         <Filter class="w-5 h-5 text-white" />
       </button>
@@ -53,7 +60,8 @@
 import { ref, watch, onMounted, computed, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useProductStore } from '@/stores/product'
-import { Search, X, ArrowLeft, Filter } from 'lucide-vue-next'
+import { Search, X, ArrowLeft, Filter, Bell } from 'lucide-vue-next'
+import { useNotificationStore } from '@/stores/notification'
 
 const props = defineProps({
   showBack: {
@@ -69,6 +77,7 @@ const props = defineProps({
 const router = useRouter()
 const route = useRoute()
 const productStore = useProductStore()
+const notification = useNotificationStore()
 const searchQuery = ref('')
 const searchInput = ref(null)
 
@@ -192,24 +201,3 @@ const goBack = () => {
   router.push({ name: 'Profile' })
 }
 </script>
-
-<style scoped>
-.gradient-arrow-wrapper {
-  position: relative;
-  width: 24px;
-  height: 24px;
-  background: linear-gradient(to right, #8c36ea, #3060eb);
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 19-7-7 7-7'/%3E%3Cpath d='M19 12H5'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 19-7-7 7-7'/%3E%3Cpath d='M19 12H5'/%3E%3C/svg%3E");
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-}
-
-.gradient-arrow-wrapper :deep(svg) {
-  display: none;
-}
-</style> 

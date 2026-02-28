@@ -134,7 +134,7 @@ onMounted(async () => {
 <style scoped>
 .splash-screen {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #1a1a2e;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -176,10 +176,10 @@ onMounted(async () => {
     justify-content: center;
     width: 140px;
     height: 140px;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 28px;
     backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.25);
+    border: 2px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
@@ -205,10 +205,9 @@ onMounted(async () => {
 
 .brand-subtitle {
     font-size: 16px;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.85);
     margin: 0;
     font-weight: 400;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     text-align: center;
     line-height: 1.4;
     letter-spacing: 0.5px;
@@ -323,7 +322,7 @@ onMounted(async () => {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
     background-size: 40px 40px;
     animation: float 30s infinite linear;
     z-index: 1;
@@ -336,7 +335,7 @@ onMounted(async () => {
     left: 0;
     right: 0;
     height: 40%;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.15), transparent);
     z-index: 1;
 }
 

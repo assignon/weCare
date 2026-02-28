@@ -1,374 +1,268 @@
 <template>
   <div>
     <!-- Normal Home Interface -->
-    <div v-if="!shouldShowPharmacyInterface" class="min-h-screen bg-white">
-      <div class="p-4 pb-24 pt-20">
-      <!-- Enhanced Header -->
+    <div v-if="!shouldShowPharmacyInterface" class="page-container">
       <AppHeader v-if="!shouldShowPharmacyInterface" />
+      <div class="px-5 pb-28 pt-20">
 
-      <!-- Select Default Store Category Dialog -->
+      <!-- Hero Greeting -->
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-navy leading-tight">
+          {{ $t('home.discover_title') || 'Discover' }}<br/>
+          <span class="text-grey-400 font-medium text-lg">{{ $t('home.discover_subtitle') || 'your next find!' }}</span>
+        </h1>
+      </div>
+
+      <!-- Store Category Dialog -->
       <Transition name="dialog">
-        <div v-if="showStoreDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-          <div class="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 w-full max-w-lg transform transition-all duration-300">
-            <!-- Header -->
-            <div class="p-8 pb-6">
-              <h3 class="text-2xl font-bold text-center text-slate-900 mb-2">Choose Your Store</h3>
-              <p class="text-center text-slate-600 text-sm leading-relaxed">Select a store category to personalize your shopping experience</p>
-              <div class="mt-3 text-center">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
-                  <AlertTriangle class="w-3 h-3 mr-1" />
-                  Required
-                </span>
-              </div>
+        <div v-if="showStoreDialog" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+          <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" @click.stop></div>
+          <div class="relative bg-white rounded-t-3xl sm:rounded-3xl shadow-float w-full sm:max-w-lg max-h-[85vh] overflow-hidden">
+            <div class="p-6 pb-4">
+              <h3 class="text-xl font-bold text-navy mb-1">{{ $t('home.choose_store') || 'Choose Your Store' }}</h3>
+              <p class="text-sm text-grey-400">{{ $t('home.choose_store_subtitle') || 'Select a category to personalize your experience' }}</p>
             </div>
-
-            <!-- Categories List -->
-            <div class="px-8 pb-6">
-              <div class="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
+            <div class="px-6 pb-6">
+              <div class="space-y-2 max-h-72 overflow-y-auto">
                 <button v-for="cat in storeCategories" :key="cat.id"
                         @click="selectDefaultStore(cat.id)"
-                        class="group w-full text-left p-4 rounded-2xl border border-slate-200/60 hover:border-blue-400 hover:bg-gradient-to-r hover:from-blue-50/80 hover:to-indigo-50/80 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] bg-white/80 backdrop-blur-sm">
-                  <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center group-hover:from-blue-100 group-hover:to-indigo-100 transition-all duration-300">
-                      <Tag class="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors duration-300" />
+                        class="group w-full text-left p-4 rounded-2xl bg-grey-50 hover:bg-navy hover:text-white transition-all duration-200">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-white group-hover:bg-white/20 flex items-center justify-center transition-all">
+                      <Tag class="w-5 h-5 text-navy group-hover:text-white transition-colors" />
                     </div>
-                    <div class="flex-1">
-                      <div class="font-semibold text-slate-900 group-hover:text-blue-900 transition-colors duration-300">{{ cat.name }}</div>
-                      <div class="text-xs text-slate-500 group-hover:text-blue-600 transition-colors duration-300">{{ cat.description || 'Explore amazing products' }}</div>
+                    <div class="flex-1 min-w-0">
+                      <div class="font-semibold text-sm text-navy group-hover:text-white transition-colors">{{ cat.name }}</div>
+                      <div class="text-xs text-grey-400 group-hover:text-white/70 transition-colors truncate">{{ cat.description || $t('home.explore_products') || 'Explore products' }}</div>
                     </div>
-                    <div class="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors duration-300">
-                      <ChevronRight class="w-full h-full" />
-                    </div>
+                    <ChevronRight class="w-5 h-5 text-grey-300 group-hover:text-white/70 transition-colors flex-shrink-0" />
                   </div>
                 </button>
               </div>
             </div>
-
-            <!-- Footer -->
-            <div class="px-8 pb-8">
-              <div class="text-center">
-                <div class="inline-flex items-center space-x-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-xl">
-                  <Info class="w-4 h-4 text-blue-600" />
-                  <span class="text-sm text-blue-700 font-medium">Please select a store category to continue</span>
-                </div>
+            <div class="px-6 pb-6">
+              <div class="flex items-center gap-2 px-4 py-3 bg-warning-50 rounded-2xl">
+                <AlertTriangle class="w-4 h-4 text-warning-600 flex-shrink-0" />
+                <span class="text-xs text-warning-700 font-medium">{{ $t('home.select_to_continue') || 'Please select a store category to continue' }}</span>
               </div>
             </div>
           </div>
         </div>
       </Transition>
 
-      <!-- Popular Products Section -->
+      <!-- Featured Categories: one row, horizontally scrollable like pills below -->
+      <div v-if="featuredCategories.length > 0" class="mb-6">
+        <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+          <button
+            v-for="cat in featuredCategories"
+            :key="'featured-' + cat.id"
+            @click="goToExploreWithCategory(cat)"
+            class="flex flex-col items-center justify-center rounded-2xl bg-grey-50 hover:bg-navy transition-all duration-200 w-24 h-24 flex-shrink-0 group"
+          >
+            <div class="w-11 h-11 rounded-xl bg-white group-hover:bg-white/20 flex items-center justify-center mb-2 transition-all shadow-sm">
+              <component :is="getCategoryIcon(cat.name)" class="w-5 h-5 text-navy group-hover:text-white transition-colors" />
+            </div>
+            <span class="text-xs font-bold text-navy group-hover:text-white transition-colors text-center line-clamp-1">{{ cat.name }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div v-if="loading" class="flex justify-center py-16">
+        <div class="w-10 h-10 border-2 border-navy border-t-transparent rounded-full animate-spin"></div>
+      </div>
+
+      <!-- Error -->
+      <div v-else-if="error" class="alert alert-error mb-6">
+        <span class="text-sm">{{ error }}</span>
+      </div>
+
+      <!-- Popular Products -->
       <div v-if="productStore.popularProducts.length > 0" class="mb-8">
-        <div class="flex justify-between items-center mb-4">
-          <div>
-            <h2 class="text-xl font-bold text-slate-900 mb-1">{{ $t('home.popular_products') }}</h2>
-            <p class="text-sm text-slate-600">{{ $t('home.popular_products_subtitle') }}</p>
-          </div>
+        <div class="section-header">
+          <h2 class="section-title">{{ $t('home.popular_products') }}</h2>
         </div>
 
-        <!-- Loading state -->
-        <div v-if="loading" class="flex justify-center my-8">
-          <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full flex items-center justify-center">
-            <div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        </div>
-
-        <!-- Error state -->
-        <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-2xl mb-4 flex items-center space-x-2">
-          <div class="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center">
-            <span class="text-red-600 text-xs">!</span>
-          </div>
-          <span class="text-sm">{{ error }}</span>
-        </div>
-
-        <!-- Popular products with horizontal scroll -->
-        <div v-else class="overflow-x-auto overflow-y-hidden scrollbar-hide">
-          <div class="flex gap-3 pb-2">
-            <div 
-              v-for="product in productStore.popularProducts.slice(0, 10)" 
-              :key="product.id"
-              class="flex-shrink-0 w-44 flex flex-col"
+        <div class="scroll-snap-x">
+          <div 
+            v-for="product in productStore.popularProducts.slice(0, 10)" 
+            :key="product.id"
+            @click="navigateToDetails(product.id, product.item_type)"
+            class="scroll-snap-item w-52 rounded-3xl overflow-hidden aspect-[3/4] cursor-pointer group relative"
+          >
+            <img 
+              :src="product.main_image || packagingImage" 
+              :alt="product.name"
+              class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <div class="hero-overlay"></div>
+            <button
+              v-if="product.item_type === 'store_product' && product.seller_is_verified && product.seller_account_status === 'APPROVED'"
+              @click.stop="showVerificationDialog = true; selectedProduct = product"
+              class="absolute top-3 right-3 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm z-10"
             >
-              <!-- Product Card - Only contains image -->
-              <div 
-                @click="navigateToDetails(product.id, product.item_type)"
-                class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square cursor-pointer relative"
-              >
-                <img 
-                  :src="product.main_image || packagingImage" 
-                  :alt="product.name"
-                  class="w-full h-full object-cover rounded-lg"
-                />
-                <!-- Verified Badge (only for verified store products) -->
-                <button
-                  v-if="product.item_type === 'store_product' && product.seller_is_verified && product.seller_account_status === 'APPROVED'"
-                  @click.stop="showVerificationDialog = true; selectedProduct = product"
-                  class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all z-10"
-                >
-                  <BadgeCheck class="w-4 h-4 text-blue-600" />
-                </button>
-              </div>
-              
-              <!-- Product Info - Outside the card -->
-              <div class="space-y-1">
-                <!-- Store Name Caption (only for store products, not shopper listings) -->
-                <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
-                  {{ product.seller_name || product.store_name || 'AfriQExpress Seller' }}
-                </p>
-                
-                <!-- Product Name -->
-                <h3 
-                  @click="navigateToDetails(product.id, product.item_type)"
-                  class="font-bold text-xs text-gray-900 mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors capitalize"
-                >
-                  {{ product.name }}
-                </h3>
-                
-                <!-- Price and Quantity -->
-                <div class="flex items-center justify-between">
-                  <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
-                    {{ formatPriceWithTranslation(product) }}
-                    <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
-                      / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
-                    </span>
-                  </span>
-                </div>
-              </div>
+              <BadgeCheck class="w-3.5 h-3.5 text-primary-600" />
+            </button>
+            <div class="absolute bottom-0 left-0 right-0 p-3">
+<p class="text-white text-sm leading-tight line-clamp-2 capitalize">{{ product.name }}</p>
+                <p v-if="product.item_type === 'store_product'" class="text-white/70 text-xs mt-0.5">{{ product.seller_name || product.store_name || '' }}</p>
+              <p class="text-white font-bold text-sm mt-1">
+                {{ formatPriceWithTranslation(product) }}
+                <span v-if="product.quantity || product.weight" class="text-white/80 text-xs font-normal ml-1">
+                  / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
+                </span>
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- New Arrivals Section -->
+      <!-- New Arrivals -->
       <div v-if="productStore.newArrivals.length > 0" class="mb-8">
-        <div class="flex justify-between items-center mb-4">
-          <div>
-            <h2 class="text-xl font-bold text-slate-900 mb-1">{{ $t('home.new_arrivals') }}</h2>
-            <p class="text-sm text-slate-600">{{ $t('home.new_arrivals_subtitle') }}</p>
-          </div>
+        <div class="section-header">
+          <h2 class="section-title">{{ $t('home.new_arrivals') }}</h2>
         </div>
 
-        <!-- Loading state -->
-        <div v-if="loading" class="flex justify-center my-8">
-          <div class="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center">
-            <div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        </div>
-
-        <!-- Error state -->
-        <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-2xl mb-4 flex items-center space-x-2">
-          <div class="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center">
-            <span class="text-red-600 text-xs">!</span>
-          </div>
-          <span class="text-sm">{{ error }}</span>
-        </div>
-
-        <!-- New arrivals with horizontal scroll -->
-        <div v-else class="overflow-x-auto overflow-y-hidden scrollbar-hide">
-          <div class="flex gap-3 pb-2">
-            <div 
-              v-for="product in productStore.newArrivals.slice(0, 10)" 
-              :key="product.id"
-              class="flex-shrink-0 w-44 flex flex-col"
+        <div class="scroll-snap-x">
+          <div 
+            v-for="product in productStore.newArrivals.slice(0, 10)" 
+            :key="product.id"
+            @click="navigateToDetails(product.id, product.item_type)"
+            class="scroll-snap-item w-52 rounded-3xl overflow-hidden aspect-[3/4] cursor-pointer group relative"
+          >
+            <img 
+              :src="product.main_image || packagingImage" 
+              :alt="product.name"
+              class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <div class="hero-overlay"></div>
+            <button
+              v-if="product.item_type === 'store_product' && product.seller_is_verified && product.seller_account_status === 'APPROVED'"
+              @click.stop="showVerificationDialog = true; selectedProduct = product"
+              class="absolute top-3 right-3 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm z-10"
             >
-              <!-- Product Card - Only contains image -->
-              <div 
-                @click="navigateToDetails(product.id, product.item_type)"
-                class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square cursor-pointer relative"
-              >
-                <img 
-                  :src="product.main_image || packagingImage" 
-                  :alt="product.name"
-                  class="w-full h-full object-cover rounded-lg"
-                />
-                <!-- Verified Badge (only for verified store products) -->
-                <button
-                  v-if="product.item_type === 'store_product' && product.seller_is_verified && product.seller_account_status === 'APPROVED'"
-                  @click.stop="showVerificationDialog = true; selectedProduct = product"
-                  class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all z-10"
-                >
-                  <BadgeCheck class="w-4 h-4 text-blue-600" />
-                </button>
-              </div>
-              
-              <!-- Product Info - Outside the card -->
-              <div class="space-y-1">
-                <!-- Store Name Caption (only for store products, not shopper listings) -->
-                <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
-                  {{ product.seller_name || product.store_name || 'AfriQExpress Seller' }}
-                </p>
-                
-                <!-- Product Name -->
-                <h3 
-                  @click="navigateToDetails(product.id, product.item_type)"
-                  class="font-bold text-xs text-gray-900 mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors capitalize"
-                >
-                  {{ product.name }}
-                </h3>
-                
-                <!-- Price and Quantity -->
-                <div class="flex items-center justify-between">
-                  <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
-                    {{ formatPriceWithTranslation(product) }}
-                    <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
-                      / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
-                    </span>
-                  </span>
-                </div>
-              </div>
+              <BadgeCheck class="w-3.5 h-3.5 text-primary-600" />
+            </button>
+            <div class="absolute bottom-0 left-0 right-0 p-3">
+<p class="text-white text-sm leading-tight line-clamp-2 capitalize">{{ product.name }}</p>
+                <p v-if="product.item_type === 'store_product'" class="text-white/70 text-xs mt-0.5">{{ product.seller_name || product.store_name || '' }}</p>
+              <p class="text-white font-bold text-sm mt-1">
+                {{ formatPriceWithTranslation(product) }}
+                <span v-if="product.quantity || product.weight" class="text-white/80 text-xs font-normal ml-1">
+                  / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
+                </span>
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- All Products Section -->
+      <!-- All Products -->
       <div v-if="allProducts.length > 0" class="mb-8">
-        <div class="flex justify-between items-center mb-4">
-          <div>
-            <h2 class="text-xl font-bold text-slate-900 mb-1">All Products</h2>
-            <p class="text-sm text-slate-600">Browse all available products</p>
-          </div>
+        <div class="section-header">
+          <h2 class="section-title">{{ $t('home.all_products') || 'All Products' }}</h2>
         </div>
 
-        <!-- All products grid -->
         <div class="grid grid-cols-2 gap-3">
           <div 
             v-for="product in allProducts" 
-            :key="product.id" 
+            :key="product.id"
             class="flex flex-col"
           >
-            <!-- Product Card - Only contains image -->
-            <div class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square relative">
+            <div 
+              @click="navigateToDetails(product.id, product.item_type)"
+              class="group bg-grey-50 rounded-2xl transition-all duration-200 overflow-hidden mb-2 aspect-square cursor-pointer relative"
+            >
               <img 
-                @click="navigateToDetails(product.id, product.item_type)"
                 :src="product.main_image || packagingImage" 
                 :alt="product.name"
-                class="w-full h-full object-cover rounded-lg"
+                class="w-full h-full object-cover rounded-2xl"
               />
-              <!-- Verified Badge (for all approved store products) -->
               <button
                 v-if="product.item_type === 'store_product' && product.seller_account_status === 'APPROVED'"
                 @click.stop="showVerificationDialog = true; selectedProduct = product"
                 class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all z-10"
               >
-                <BadgeCheck class="w-4 h-4 text-blue-600" />
+                <BadgeCheck class="w-4 h-4 text-navy" />
               </button>
             </div>
-            
-            <!-- Product Info - Outside the card -->
             <div class="space-y-1">
-              <!-- Store Name Caption (only for store products, not shopper listings) -->
-              <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
+              <p v-if="product.item_type === 'store_product'" class="text-xs text-grey-400 mb-0.5">
                 {{ product.seller_name || product.store_name || 'AfriQExpress Seller' }}
               </p>
-              
-              <!-- Product Name -->
               <h3 
                 @click="navigateToDetails(product.id, product.item_type)"
-                class="font-bold text-xs text-gray-900 mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors capitalize"
+                class="text-sm text-navy mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-navy/80 transition-colors capitalize"
               >
                 {{ product.name }}
               </h3>
-              
-                <!-- Price and Quantity -->
-                <div class="flex items-center justify-between">
-                  <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
-                    {{ formatPriceWithTranslation(product) }}
-                    <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
-                      / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
-                    </span>
+              <div v-if="product.local_name || product.description" class="flex items-start gap-1.5 mb-1">
+                <Flag class="w-3.5 h-3.5 text-grey-400 mt-0.5 flex-shrink-0" />
+                <p class="text-xs italic text-grey-400 line-clamp-1">
+                  {{ product.local_name || (product.description ? product.description.substring(0, 50) + '...' : '') }}
+                </p>
+              </div>
+              <div class="flex items-center justify-between">
+                <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-navy'">
+                  {{ formatPriceWithTranslation(product) }}
+                  <span v-if="product.quantity || product.weight" class="text-xs font-normal text-grey-400">
+                    / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
                   </span>
-                </div>
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Recommended Products Section -->
+      <!-- Recommended -->
       <div v-if="productStore.recommendedProducts.length > 0" class="mb-8">
-        <div class="flex justify-between items-center mb-4">
-          <div>
-            <h2 class="text-xl font-bold text-slate-900 mb-1">Recommended For You</h2>
-            <p class="text-sm text-slate-600">Personalized picks just for you</p>
-          </div>
-          <div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-            <span class="text-white text-xs font-bold">💫</span>
-          </div>
+        <div class="section-header">
+          <h2 class="section-title">{{ $t('home.recommended') || 'Recommended For You' }}</h2>
         </div>
 
-        <!-- Loading state -->
-        <div v-if="loading" class="flex justify-center my-8">
-          <div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-            <div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        </div>
-
-        <!-- Error state -->
-        <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-2xl mb-4 flex items-center space-x-2">
-          <div class="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center">
-            <span class="text-red-600 text-xs">!</span>
-          </div>
-          <span class="text-sm">{{ error }}</span>
-        </div>
-
-        <!-- Recommended products in 2x2 grid -->
-        <div v-else>
-          <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-4">
+          <div 
+            v-for="product in productStore.recommendedProducts.slice(0, 4)" 
+            :key="product.id"
+            class="rounded-3xl bg-grey-50 p-2"
+          >
             <div 
-              v-for="product in productStore.recommendedProducts.slice(0, 4)" 
-              :key="product.id"
-              class="flex flex-col"
+              @click="navigateToDetails(product.id, product.item_type)"
+              class="relative rounded-2xl overflow-hidden aspect-square cursor-pointer group"
             >
-              <!-- Product Card - Only contains image -->
-              <div 
-                @click="navigateToDetails(product.id, product.item_type)"
-                class="group bg-gray-100 rounded-lg border border-gray-200/50 transition-all duration-200 overflow-hidden mb-2 aspect-square cursor-pointer relative"
+              <img 
+                :src="product.main_image || packagingImage" 
+                :alt="product.name"
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div class="hero-overlay"></div>
+              <button
+                v-if="product.item_type === 'store_product' && product.seller_is_verified && product.seller_account_status === 'APPROVED'"
+                @click.stop="showVerificationDialog = true; selectedProduct = product"
+                class="absolute top-3 right-3 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm z-10"
               >
-                <img 
-                  :src="product.main_image || packagingImage" 
-                  :alt="product.name"
-                  class="w-full h-full object-cover rounded-lg"
-                />
-                <!-- Verified Badge (only for verified store products) -->
-                <button
-                  v-if="product.item_type === 'store_product' && product.seller_is_verified && product.seller_account_status === 'APPROVED'"
-                  @click.stop="showVerificationDialog = true; selectedProduct = product"
-                  class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all z-10"
-                >
-                  <BadgeCheck class="w-4 h-4 text-blue-600" />
-                </button>
+                <BadgeCheck class="w-3.5 h-3.5 text-primary-600" />
+              </button>
+              <div class="absolute bottom-0 left-0 right-0 p-3">
+                <p class="text-white text-xs leading-tight line-clamp-2 capitalize">{{ product.name }}</p>
               </div>
-              
-              <!-- Product Info - Outside the card -->
-              <div class="space-y-1">
-                <!-- Store Name Caption (only for store products, not shopper listings) -->
-                <p v-if="product.item_type === 'store_product'" class="text-xs text-gray-500 mb-0.5">
-                  {{ product.seller_name || product.store_name || 'AfriQExpress Seller' }}
-                </p>
-                
-                <!-- Product Name -->
-                <h3 
-                  @click="navigateToDetails(product.id, product.item_type)"
-                  class="font-bold text-xs text-gray-900 mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors capitalize"
-                >
-                  {{ product.name }}
-                </h3>
-                
-                <!-- Price and Quantity -->
-                <div class="flex items-center justify-between">
-                  <span :class="product.item_type === 'shopper_listing' ? 'font-bold text-sm text-orange-600' : 'font-bold text-sm text-blue-600'">
-                    {{ formatPriceWithTranslation(product) }}
-                    <span v-if="product.quantity || product.weight" class="text-xs font-normal text-gray-600">
-                      / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
-                    </span>
-                  </span>
-                </div>
-              </div>
+            </div>
+            <div class="mt-2 px-1">
+              <p v-if="product.item_type === 'store_product'" class="text-[11px] text-grey-400 mb-0.5 truncate">
+                {{ product.seller_name || product.store_name || '' }}
+              </p>
+              <span class="font-bold text-sm text-navy">
+                {{ formatPriceWithTranslation(product) }}
+              </span>
+              <span v-if="product.quantity || product.weight" class="text-xs text-grey-400 ml-1">
+                / {{ product.quantity ? product.quantity + ' ' + (product.unit || 'unit') : product.weight || '' }}
+              </span>
             </div>
           </div>
         </div>
-        </div>
+      </div>
+
       </div>
     </div>
 
@@ -1534,6 +1428,7 @@ import packagingImage from '@/assets/packaging_10471395.png'
 import { useNotificationStore } from '@/stores/notification'
 import { useAuthStore } from '@/stores/auth'
 import { usePharmacyStore } from '@/stores/pharmacy'
+import { useCRMStore } from '@/stores/crm'
 import { useCurrency } from '@/composables/useCurrency'
 import AppHeader from '@/components/AppHeader.vue'
 import apiService from '@/services/api'
@@ -1544,7 +1439,8 @@ import {
   Package, CheckCircle, XCircle, Clock, Star, Phone, Mail, BadgeCheck,
   Navigation, ArrowRight, ArrowLeft, Plus, Minus, X, Search,
   Heart, Share2, ShoppingCart, User, Bell, Settings, LogOut,
-  RefreshCw, Loader2, MessageCircle, Eye, Send
+  RefreshCw, Loader2, MessageCircle, Eye, Send,
+  Building2, Car, Sparkles, Shirt, Store
 } from 'lucide-vue-next'
 
 const { t } = useI18n()
@@ -1554,7 +1450,54 @@ const router = useRouter()
 const notification = useNotificationStore()
 const auth = useAuthStore()
 const pharmacyStore = usePharmacyStore()
+const crmStore = useCRMStore()
 const { formatApiPrice } = useCurrency()
+
+// Featured category slugs for home grid (order: Immobilier, Automobile, Beauté, Fashion)
+const FEATURED_CATEGORY_SLUGS = ['immobilier', 'automobile', 'beaute', 'fashion']
+
+function normalizeCategoryName(name) {
+  if (!name || typeof name !== 'string') return ''
+  return name.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').trim()
+}
+
+const featuredCategories = computed(() => {
+  const list = []
+  const slugToCat = new Map()
+  for (const cat of storeCategories.value) {
+    const normalized = normalizeCategoryName(cat.name)
+    if (!slugToCat.has(normalized)) slugToCat.set(normalized, cat)
+    // also match without extra chars (e.g. "beauty" -> beaute)
+    const base = normalized.replace(/\s+/g, '')
+    if (!slugToCat.has(base)) slugToCat.set(base, cat)
+  }
+  for (const slug of FEATURED_CATEGORY_SLUGS) {
+    const cat = slugToCat.get(slug) || slugToCat.get(slug.replace(/\s+/g, ''))
+    if (cat && !list.find(c => c.id === cat.id)) list.push(cat)
+  }
+  return list
+})
+
+function getCategoryIcon(categoryName) {
+  const n = normalizeCategoryName(categoryName || '')
+  if (n.includes('immobilier') || n.includes('real')) return Building2
+  if (n.includes('automobile') || n === 'auto') return Car
+  if (n.includes('beaute') || n.includes('beauty')) return Sparkles
+  if (n.includes('fashion') || n.includes('mode')) return Shirt
+  return Store
+}
+
+async function goToExploreWithCategory(cat) {
+  if (!cat?.id) return
+  sessionStorage.setItem('defaultStore', String(cat.id))
+  await crmStore.checkCategoryFlow(parseInt(cat.id))
+  await pharmacyStore.checkCategoryForPharmacy(parseInt(cat.id), cat.name)
+  if (pharmacyStore.shouldShowPharmacyInterface && cat.name?.toLowerCase() === 'pharmacy') {
+    router.push({ name: 'Home' })
+  } else {
+    router.push({ name: 'Explore' })
+  }
+}
 
 // Helper function to format price with translation for "FREE"
 const formatPriceWithTranslation = (product) => {
@@ -3561,6 +3504,10 @@ const updatePharmacyCount = (count) => {
   if (countElement) {
     countElement.textContent = count
   }
+}
+
+function isDefaultStore(id) {
+  return String(sessionStorage.getItem('defaultStore') || '') === String(id)
 }
 
 async function selectDefaultStore(id) {

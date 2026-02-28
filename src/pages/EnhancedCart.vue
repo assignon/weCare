@@ -132,7 +132,7 @@
                           <h3 class="text-lg font-medium text-gray-900 mb-1">
                             <button 
                               @click="goToProduct(item.product.id)"
-                              class="hover:text-blue-600 transition-colors"
+                              class="hover:text-blue-600 transition-colors capitalize"
                             >
                               {{ item.product.name }}
                             </button>
@@ -247,7 +247,7 @@
                   :alt="product.name"
                   class="w-full aspect-square object-cover rounded-lg mb-3"
                 />
-                <h4 class="font-medium text-gray-900 text-sm mb-1 line-clamp-2">{{ product.name }}</h4>
+                <h4 class="font-medium text-gray-900 text-sm mb-1 line-clamp-2 capitalize">{{ product.name }}</h4>
                 <p class="text-sm font-bold text-gray-900">{{ formatPrice(product.price) }}</p>
                 <button
                   @click.stop="addToCart(product)"
@@ -369,7 +369,7 @@
               :alt="item.product.name"
               class="w-full aspect-square object-cover rounded-lg mb-3"
             />
-            <h4 class="font-medium text-gray-900 mb-2">{{ item.product.name }}</h4>
+            <h4 class="font-medium text-gray-900 mb-2 capitalize">{{ item.product.name }}</h4>
             <p class="text-lg font-bold text-gray-900 mb-3">{{ formatPrice(item.product.price) }}</p>
             <div class="flex space-x-2">
               <button

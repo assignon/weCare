@@ -1,13 +1,13 @@
 <template>
-  <div class="min-h-screen bg-white pb-24">
-    <!-- Modern Header -->
+  <div class="page-container pb-24">
+    <!-- Sticky Header -->
     <BackButtonHeader :title="$t('notifications.title')">
       <template #right>
         <button 
           v-if="notifications.length > 0 && hasUnreadNotifications"
           @click="handleMarkAllAsRead"
           :disabled="markingAllAsRead"
-          class="px-3 py-1.5 text-white text-xs font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1.5 bg-blue-600 hover:bg-blue-700"
+          class="px-3 py-1.5 text-white text-xs font-semibold rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1.5 bg-navy hover:bg-navy/90"
         >
           <Loader2 v-if="markingAllAsRead" class="w-3 h-3 animate-spin" />
           <CheckCheck v-else class="w-3 h-3" />
@@ -20,9 +20,9 @@
 
       <!-- Unread count badge -->
       <div v-if="hasUnreadNotifications" class="mb-3">
-        <div class="inline-flex items-center px-2.5 py-1.5 bg-blue-50 rounded-lg border border-blue-200">
-          <div class="w-1.5 h-1.5 bg-blue-600 rounded-full mr-2 animate-pulse"></div>
-          <span class="text-xs font-semibold text-blue-800">
+        <div class="inline-flex items-center px-2.5 py-1.5 bg-grey-50 rounded-full shadow-card">
+          <div class="w-1.5 h-1.5 bg-navy rounded-full mr-2 animate-pulse"></div>
+          <span class="text-xs font-semibold text-navy">
             {{ unreadCount }} {{ unreadCount === 1 ? $t('notifications.unread_notification') : $t('notifications.unread_notifications') }}
           </span>
         </div>
@@ -30,15 +30,15 @@
 
       <!-- Loading state -->
       <div v-if="loading" class="text-center py-12">
-        <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
-          <Loader2 class="w-6 h-6 text-blue-600 animate-spin" />
+        <div class="w-12 h-12 bg-grey-50 rounded-full flex items-center justify-center mx-auto mb-3">
+          <Loader2 class="w-6 h-6 text-navy animate-spin" />
         </div>
-        <h3 class="text-sm font-semibold text-gray-800 mb-1">{{ $t('notifications.loading_notifications') }}</h3>
-        <p class="text-xs text-gray-600">{{ $t('notifications.loading_subtitle') }}</p>
+        <h3 class="text-sm font-semibold text-navy mb-1">{{ $t('notifications.loading_notifications') }}</h3>
+        <p class="text-xs text-grey-500">{{ $t('notifications.loading_subtitle') }}</p>
       </div>
 
       <!-- Error state -->
-      <div v-else-if="error" class="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+      <div v-else-if="error" class="mb-3 p-3 bg-red-50 rounded-2xl shadow-card">
         <div class="flex items-center">
           <div class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
             <AlertCircle class="w-3 h-3 text-red-600" />
@@ -59,10 +59,10 @@
           v-for="notification in notifications" 
           :key="notification.id"
           :class="[
-            'bg-white rounded-lg border transition-all duration-200 overflow-hidden cursor-pointer',
+            'bg-white rounded-2xl transition-all duration-200 overflow-hidden cursor-pointer',
             !notification.is_read 
-              ? 'border-blue-200 shadow-sm' 
-              : 'border-gray-200 hover:bg-gray-50'
+              ? 'shadow-card ring-1 ring-navy/10' 
+              : 'shadow-card hover:bg-grey-50'
           ]"
           @click="toggleNotification(notification.id)"
         >
@@ -71,7 +71,7 @@
             <div class="flex items-start justify-between">
               <div class="flex items-start space-x-2.5 flex-1">
                 <!-- Notification icon -->
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-blue-600">
+                <div class="w-8 h-8 rounded-2xl flex items-center justify-center flex-shrink-0 bg-navy">
                   <component 
                     :is="getNotificationIcon(notification.type).icon" 
                     class="w-4 h-4 text-white"
@@ -84,21 +84,21 @@
                 <!-- Notification content -->
                 <div class="flex-1 min-w-0 overflow-hidden max-w-full">
                   <div class="flex items-center space-x-2 mb-1">
-                    <h3 class="text-xs font-semibold text-gray-900 truncate flex-1 min-w-0">
+                    <h3 class="text-xs font-semibold text-navy truncate flex-1 min-w-0">
                       {{ getTranslatedTitle(notification) }}
                     </h3>
                     <div v-if="!notification.is_read" class="flex items-center flex-shrink-0">
-                      <div class="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></div>
+                      <div class="w-1.5 h-1.5 bg-navy rounded-full animate-pulse"></div>
                     </div>
                   </div>
                   
                   <!-- Preview message (truncated) -->
-                  <p class="text-xs text-gray-600 mb-2 line-clamp-2 break-words">
+                  <p class="text-xs text-grey-500 mb-2 line-clamp-2 break-words">
                     {{ getTranslatedMessage(notification) }}
                   </p>
                   
                   <div class="flex items-center justify-between">
-                    <span class="text-xs text-gray-400 flex items-center">
+                    <span class="text-xs text-grey-400 flex items-center">
                       <Clock class="w-3 h-3 mr-1" />
                       {{ formatDate(notification.created_at) }}
                     </span>
@@ -109,17 +109,17 @@
                         v-if="!notification.is_read"
                         @click.stop="handleMarkAsRead(notification.id)"
                         :disabled="markingAsRead[notification.id]"
-                        class="w-6 h-6 bg-blue-50 hover:bg-blue-100 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50"
+                        class="w-6 h-6 bg-grey-50 hover:bg-grey-100 rounded-2xl flex items-center justify-center transition-colors disabled:opacity-50"
                       >
-                        <Loader2 v-if="markingAsRead[notification.id]" class="w-3 h-3 text-blue-600 animate-spin" />
-                        <Check v-else class="w-3 h-3 text-blue-600" />
+                        <Loader2 v-if="markingAsRead[notification.id]" class="w-3 h-3 text-navy animate-spin" />
+                        <Check v-else class="w-3 h-3 text-navy" />
                       </button>
                       
                       <!-- Expand/collapse arrow -->
-                      <div class="w-6 h-6 bg-gray-50 hover:bg-gray-100 rounded-lg flex items-center justify-center transition-all duration-200">
+                      <div class="w-6 h-6 bg-grey-50 hover:bg-grey-100 rounded-2xl flex items-center justify-center transition-all duration-200">
                         <ChevronDown 
                           :class="[
-                            'w-3 h-3 text-gray-600 transition-transform duration-200',
+                            'w-3 h-3 text-grey-500 transition-transform duration-200',
                             expandedNotifications.includes(notification.id) ? 'rotate-180' : ''
                           ]"
                         />
@@ -142,13 +142,13 @@
           >
             <div 
               v-if="expandedNotifications.includes(notification.id)"
-              class="border-t border-gray-100 bg-gray-50"
+              class="border-t border-grey-100 bg-grey-50"
             >
               <div class="p-3">
                 <!-- Full message content -->
                 <div class="mb-3">
-                  <h4 class="text-xs font-semibold text-gray-700 mb-1.5">{{ $t('notifications.full_message') }}</h4>
-                  <p class="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere">
+                  <h4 class="text-xs font-semibold text-navy mb-1.5">{{ $t('notifications.full_message') }}</h4>
+                  <p class="text-xs text-grey-500 leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere">
                     {{ getTranslatedMessage(notification) }}
                   </p>
                 </div>
@@ -157,24 +157,24 @@
                 <div class="space-y-2">
                   <!-- Notification type -->
                   <div class="flex items-center justify-between text-xs">
-                    <span class="text-gray-500">{{ $t('notifications.type') }}</span>
-                    <span class="font-medium text-gray-700 capitalize">{{ notification.type }}</span>
+                    <span class="text-grey-400">{{ $t('notifications.type') }}</span>
+                    <span class="font-medium text-navy capitalize">{{ notification.type }}</span>
                   </div>
 
                   <!-- Created date (full format) -->
                   <div class="flex items-center justify-between text-xs">
-                    <span class="text-gray-500">{{ $t('notifications.created') }}</span>
-                    <span class="font-medium text-gray-700">{{ formatFullDate(notification.created_at) }}</span>
+                    <span class="text-grey-400">{{ $t('notifications.created') }}</span>
+                    <span class="font-medium text-navy">{{ formatFullDate(notification.created_at) }}</span>
                   </div>
 
                   <!-- Read status -->
                   <div class="flex items-center justify-between text-xs">
-                    <span class="text-gray-500">{{ $t('notifications.status') }}</span>
+                    <span class="text-grey-400">{{ $t('notifications.status') }}</span>
                     <span :class="[
                       'font-medium px-1.5 py-0.5 rounded-full text-xs',
                       notification.is_read 
                         ? 'bg-green-100 text-green-700' 
-                        : 'bg-blue-100 text-blue-700'
+                        : 'bg-navy/10 text-navy'
                     ]">
                       {{ notification.is_read ? $t('notifications.read') : $t('notifications.unread') }}
                     </span>
@@ -182,11 +182,11 @@
                 </div>
 
                 <!-- Action buttons -->
-                <div class="flex items-center justify-end space-x-2 mt-3 pt-3 border-t border-gray-200">
+                <div class="flex items-center justify-end space-x-2 mt-3 pt-3 border-t border-grey-200">
                   <button 
                     v-if="notification.reference_type && notification.reference_id"
                     @click.stop="navigateToReference(notification)"
-                    class="px-3 py-1.5 text-white text-xs font-semibold rounded-lg transition-all duration-200 flex items-center space-x-1.5 bg-blue-600 hover:bg-blue-700"
+                    class="px-3 py-1.5 text-white text-xs font-semibold rounded-full transition-all duration-200 flex items-center space-x-1.5 bg-navy hover:bg-navy/90"
                   >
                     <ArrowRight class="w-3 h-3" />
                     <span>{{ $t('notifications.view') }} {{ notification.reference_type }}</span>
@@ -196,7 +196,7 @@
                     v-if="!notification.is_read"
                     @click.stop="handleMarkAsRead(notification.id)"
                     :disabled="markingAsRead[notification.id]"
-                    class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition-all duration-200 flex items-center space-x-1.5"
+                    class="px-3 py-1.5 bg-grey-100 hover:bg-grey-200 text-navy text-xs font-semibold rounded-full transition-all duration-200 flex items-center space-x-1.5"
                   >
                     <Loader2 v-if="markingAsRead[notification.id]" class="w-3 h-3 animate-spin" />
                     <Check v-else class="w-3 h-3" />
@@ -213,7 +213,7 @@
           <button 
             @click="loadMoreNotifications"
             :disabled="loadingMore"
-            class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 text-xs font-semibold hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1.5 mx-auto"
+            class="px-4 py-2 bg-white shadow-card rounded-2xl text-navy text-xs font-semibold hover:bg-grey-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1.5 mx-auto"
           >
             <Loader2 v-if="loadingMore" class="w-4 h-4 animate-spin" />
             <span>{{ loadingMore ? $t('notifications.loading') : $t('notifications.load_more') }}</span>
@@ -222,9 +222,9 @@
 
         <!-- End of notifications -->
         <div v-if="!pagination.hasMore && notifications.length > 0" class="text-center py-8">
-          <div class="w-12 h-0.5 bg-gray-300 rounded-full mx-auto mb-3"></div>
-          <CheckCircle class="w-6 h-6 text-gray-400 mx-auto mb-2" />
-          <p class="text-xs text-gray-600 font-medium">
+          <div class="w-12 h-0.5 bg-grey-200 rounded-full mx-auto mb-3"></div>
+          <CheckCircle class="w-6 h-6 text-grey-400 mx-auto mb-2" />
+          <p class="text-xs text-grey-500 font-medium">
             {{ $t('notifications.seen_all', { count: notifications.length }) }}
           </p>
         </div>
@@ -232,11 +232,11 @@
 
       <!-- Empty state -->
       <div v-else-if="!loading && notifications.length === 0" class="text-center py-12">
-        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-          <Bell class="w-8 h-8 text-gray-400" />
+        <div class="w-16 h-16 bg-grey-50 rounded-full flex items-center justify-center mx-auto mb-3">
+          <Bell class="w-8 h-8 text-grey-400" />
         </div>
-        <h3 class="text-sm font-bold text-gray-900 mb-1">{{ $t('notifications.no_notifications_yet') }}</h3>
-        <p class="text-xs text-gray-600 max-w-md mx-auto">
+        <h3 class="text-sm font-bold text-navy mb-1">{{ $t('notifications.no_notifications_yet') }}</h3>
+        <p class="text-xs text-grey-500 max-w-md mx-auto">
           {{ $t('notifications.no_notifications_message') }}
         </p>
       </div>

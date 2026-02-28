@@ -1,14 +1,14 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+  <div class="page-container flex items-center justify-center p-4">
     <div class="w-full max-w-xs">
-      <div class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-6">
+      <div class="card p-6">
         <!-- Header Section -->
         <div class="text-center mb-6">
-          <div class="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg" style="background: linear-gradient(to right, #3b82f6, #9333ea);">
+          <div class="w-14 h-14 bg-navy rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-card">
             <Lock class="w-7 h-7 text-white" />
           </div>
-          <h1 class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text mb-1">Reset Password</h1>
-          <p class="text-gray-600 text-xs">Enter your new password below.</p>
+          <h1 class="text-2xl font-bold text-navy mb-1">Reset Password</h1>
+          <p class="text-grey-500 text-xs">Enter your new password below.</p>
         </div>
 
 
@@ -23,13 +23,13 @@
           <!-- Invalid Code State -->
           <div v-if="isValidCode === false && !loading" class="text-center space-y-4">
             <AlertCircle class="w-16 h-16 text-red-500 mx-auto" />
-            <h3 class="text-xl font-semibold text-gray-900">Invalid Reset Link</h3>
-            <p class="text-gray-600">This password reset link is invalid or has expired. Please request a new one.</p>
+            <h3 class="text-xl font-semibold text-navy">Invalid Reset Link</h3>
+            <p class="text-grey-500">This password reset link is invalid or has expired. Please request a new one.</p>
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
-              <router-link :to="{ name: 'ForgotPassword' }" class="inline-flex items-center justify-center px-4 py-2 h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl" style="background: linear-gradient(to right, #2563eb, #9333ea);">
+              <router-link :to="{ name: 'ForgotPassword' }" class="btn btn-primary inline-flex items-center justify-center px-4 py-2 h-12">
                 Request New Link
               </router-link>
-              <router-link :to="{ name: 'Login' }" class="inline-flex items-center justify-center px-4 py-2 h-12 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-blue-500 hover:text-blue-600 transition-all duration-200 transform hover:scale-[1.02]">
+              <router-link :to="{ name: 'Login' }" class="btn btn-outlined inline-flex items-center justify-center px-4 py-2 h-12">
                 Back to Login
               </router-link>
             </div>
@@ -37,18 +37,18 @@
 
           <!-- Loading State -->
           <div v-else-if="loading || isValidCode === null" class="text-center space-y-4">
-            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto"></div>
-            <p class="text-gray-600">Validating reset link...</p>
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-navy mx-auto"></div>
+            <p class="text-grey-500">Validating reset link...</p>
           </div>
 
           <!-- Valid Code State -->
           <div v-else-if="isValidCode === true" class="space-y-4">
             <!-- New Password field -->
             <div class="space-y-1">
-              <label for="password" class="block text-sm font-medium text-gray-700">New Password</label>
+              <label for="password" class="block text-sm font-semibold text-navy">New Password</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock class="h-5 w-5 text-gray-400" />
+                  <Lock class="h-5 w-5 text-grey-400" />
                 </div>
                 <input
                   id="password"
@@ -64,18 +64,18 @@
                   @click="showPassword = !showPassword"
                   class="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
-                  <Eye v-if="!showPassword" class="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  <EyeOff v-else class="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  <Eye v-if="!showPassword" class="h-5 w-5 text-grey-400 hover:text-grey-500" />
+                  <EyeOff v-else class="h-5 w-5 text-grey-400 hover:text-grey-500" />
                 </button>
               </div>
             </div>
 
             <!-- Confirm Password field -->
             <div class="space-y-1">
-              <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+              <label for="confirmPassword" class="block text-sm font-semibold text-navy">Confirm New Password</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock class="h-5 w-5 text-gray-400" />
+                  <Lock class="h-5 w-5 text-grey-400" />
                 </div>
                 <input
                   id="confirmPassword"
@@ -91,15 +91,15 @@
                   @click="showPassword = !showPassword"
                   class="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
-                  <Eye v-if="!showPassword" class="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  <EyeOff v-else class="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  <Eye v-if="!showPassword" class="h-5 w-5 text-grey-400 hover:text-grey-500" />
+                  <EyeOff v-else class="h-5 w-5 text-grey-400 hover:text-grey-500" />
                 </button>
               </div>
             </div>
 
             <!-- Validation Errors -->
             <div v-if="validationErrors.length > 0" class="space-y-2">
-              <div class="bg-red-50 border border-red-200 rounded-md p-3">
+              <div class="bg-red-50 border border-red-200 rounded-2xl p-3">
                 <div class="flex">
                   <XCircle class="h-5 w-5 text-red-400" />
                   <div class="ml-3">
@@ -118,8 +118,7 @@
             <button
               type="submit"
               :disabled="loading"
-              class="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-              style="background: linear-gradient(to right, #2563eb, #9333ea);"
+              class="btn-cta disabled:bg-grey-400 disabled:cursor-not-allowed"
             >
               <span v-if="loading" class="flex items-center justify-center">
                 <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -132,9 +131,9 @@
           </div>
 
           <!-- Login link -->
-          <div class="text-center text-gray-600">
+          <div class="text-center text-grey-500">
             Remember your password? 
-            <router-link :to="{ name: 'Login' }" class="text-blue-600 hover:text-blue-700 font-medium">
+            <router-link :to="{ name: 'Login' }" class="text-navy font-medium">
               Sign In
             </router-link>
           </div>
@@ -326,97 +325,4 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.auth-page {
-  width: 100%;
-  min-height: 100vh;
-  background: #f5f7fb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-
-.auth-container {
-  width: 100%;
-}
-
-.auth-content {
-  padding: 24px;
-  width: 100%;
-}
-
-.auth-title {
-  font-size: 35px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: #1a2233;
-  width: 100%;
-}
-
-.auth-subtitle {
-  font-size: 16px;
-  color: #707a8a;
-  margin-bottom: 28px;
-  width: 100%;
-}
-
-.input-field {
-  margin-bottom: 12px;
-  width: 100%;
-}
-
-.auth-btn {
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 16px;
-  min-height: 48px;
-  text-transform: none;
-  margin-bottom: 16px;
-  box-shadow: none;
-  width: 100%;
-}
-
-.auth-link {
-  margin-top: 16px;
-  color: #707a8a;
-  font-size: 15px;
-  width: 100%;
-}
-
-.auth-link a {
-  color: var(--primary-color);
-  font-weight: 600;
-  margin-left: 4px;
-  text-decoration: none;
-}
-
-.w-100 {
-  width: 100%;
-}
-
-/* Media queries for better responsiveness */
-@media screen and (max-width: 600px) {
-  .auth-container {
-    max-width: 100%;
-  }
-
-  .auth-content {
-    padding: 20px 16px;
-  }
-
-  .auth-title {
-    font-size: 35px;
-  }
-
-  .auth-subtitle {
-    font-size: 17px;
-  }
-}
-
-/* For very small screens */
-@media screen and (max-width: 320px) {
-  .auth-page {
-    padding: 8px;
-  }
-}
 </style>

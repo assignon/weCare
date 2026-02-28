@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 pb-20">
+  <div class="page-container pb-20">
     <div v-if="loading" class="flex justify-center py-8"><Loader2 class="w-8 h-8 animate-spin" /></div>
     <div v-else-if="listing">
       <!-- Images Carousel -->
@@ -11,35 +11,35 @@
             :key="i" 
             @click="currentImageIndex = i"
             :class="i === currentImageIndex ? 'ring-2 ring-white' : 'opacity-60'"
-            class="w-12 h-12 rounded-lg overflow-hidden border-2 border-white transition-all hover:opacity-100"
+            class="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white transition-all hover:opacity-100"
           >
             <img :src="img.image_url" :alt="`Image ${i + 1}`" class="w-full h-full object-cover" />
           </button>
         </div>
-        <button @click="$router.back()" class="absolute top-4 left-4 p-2">
-          <div class="gradient-arrow"></div>
+        <button @click="$router.back()" class="absolute top-4 left-4 p-2 bg-black/30 backdrop-blur-sm rounded-full">
+          <ArrowLeft class="w-5 h-5 text-white" />
         </button>
         <button 
           v-if="isOwnListing && listing.status !== 'sold'"
           @click="editListing"
-          class="absolute top-4 right-4 p-2 transition-all hover:opacity-90"
+          class="absolute top-4 right-4 p-2 bg-black/30 backdrop-blur-sm rounded-full transition-all hover:opacity-90"
         >
-          <div class="gradient-edit"></div>
+          <Edit class="w-5 h-5 text-white" />
         </button>
       </div>
 
       <div class="p-4 space-y-4">
         <!-- Price -->
         <div>
-          <p v-if="listing.price_type === 'fixed'" class="text-2xl font-bold text-blue-600">{{ formatPrice(listing.price) }}</p>
-          <p v-else-if="listing.price_type === 'free'" class="text-2xl font-bold text-green-600">{{ $t('listings.free') }}</p>
-          <p v-else class="text-lg font-bold text-blue-600">{{ $t('listings.best_offer') }} ({{ $t('listings.min') }}: {{ formatPrice(listing.min_offer_price) }})</p>
+          <p v-if="listing.price_type === 'fixed'" class="text-2xl font-bold text-navy">{{ formatPrice(listing.price) }}</p>
+          <p v-else-if="listing.price_type === 'free'" class="text-2xl font-bold text-success-600">{{ $t('listings.free') }}</p>
+          <p v-else class="text-lg font-bold text-navy">{{ $t('listings.best_offer') }} ({{ $t('listings.min') }}: {{ formatPrice(listing.min_offer_price) }})</p>
         </div>
 
         <!-- Title & Details -->
         <div>
-          <h1 class="text-xl font-bold capitalize">{{ listing.title }}</h1>
-          <div class="flex items-center gap-4 mt-2 text-sm text-gray-600">
+          <h1 class="text-xl font-bold capitalize text-navy">{{ listing.title }}</h1>
+          <div class="flex items-center gap-4 mt-2 text-sm text-grey-400">
             <div class="flex items-center gap-1"><MapPin class="w-4 h-4" />{{ listing.city }}{{ listing.neighborhood ? `, ${listing.neighborhood}` : '' }}</div>
             <div class="flex items-center gap-1"><Eye class="w-4 h-4" />{{ listing.views_count }} {{ $t('listings.views') }}</div>
             <div v-if="listing.category_name" class="flex items-center gap-1"><Tag class="w-4 h-4" />{{ listing.category_name }}</div>
@@ -48,7 +48,7 @@
 
         <!-- Status Badge -->
         <div v-if="isOwnListing" class="flex items-center gap-2">
-          <span class="text-sm font-medium text-gray-700">{{ $t('listings.status') }}:</span>
+          <span class="text-sm font-semibold text-grey-500">{{ $t('listings.status') }}:</span>
           <span :class="getStatusClass(listing.status)" class="px-3 py-1 rounded-full text-xs font-medium">
             {{ listing.status }}
           </span>
@@ -56,37 +56,37 @@
 
         <!-- Description -->
         <div>
-          <h3 class="font-medium mb-2">{{ $t('listings.description') }}</h3>
-          <p class="text-gray-700 whitespace-pre-wrap">{{ listing.description }}</p>
+          <h3 class="font-semibold text-navy mb-2">{{ $t('listings.description') }}</h3>
+          <p class="text-grey-500 whitespace-pre-wrap">{{ listing.description }}</p>
         </div>
 
         <!-- Product Information -->
-        <div class="bg-white rounded-lg p-4 space-y-3 border border-gray-200">
-          <h3 class="font-semibold text-gray-900 mb-3">{{ $t('listings.product_information') }}</h3>
+        <div class="card p-4 space-y-3">
+          <h3 class="font-semibold text-navy mb-3">{{ $t('listings.product_information') }}</h3>
           
           <!-- Category -->
-          <div v-if="listing.category_name" class="flex items-center justify-between py-2 border-b border-gray-100">
-            <span class="text-sm text-gray-600">{{ $t('listings.category') }}</span>
-            <span class="text-sm font-medium text-gray-900">{{ listing.category_name }}</span>
+          <div v-if="listing.category_name" class="flex items-center justify-between py-2 border-b border-grey-100">
+            <span class="text-sm text-grey-400">{{ $t('listings.category') }}</span>
+            <span class="text-sm font-medium text-navy">{{ listing.category_name }}</span>
           </div>
 
           <!-- Price Type -->
-          <div class="flex items-center justify-between py-2 border-b border-gray-100">
-            <span class="text-sm text-gray-600">{{ $t('listings.price_type') }}</span>
-            <span class="text-sm font-medium text-gray-900 capitalize">{{ listing.price_type === 'fixed' ? $t('listings.fixed') : listing.price_type === 'offer' ? $t('listings.offer') : $t('listings.free') }}</span>
+          <div class="flex items-center justify-between py-2 border-b border-grey-100">
+            <span class="text-sm text-grey-400">{{ $t('listings.price_type') }}</span>
+            <span class="text-sm font-medium text-navy capitalize">{{ listing.price_type === 'fixed' ? $t('listings.fixed') : listing.price_type === 'offer' ? $t('listings.offer') : $t('listings.free') }}</span>
           </div>
 
           <!-- Location -->
-          <div class="flex items-center justify-between py-2 border-b border-gray-100">
-            <span class="text-sm text-gray-600">{{ $t('listings.location') }}</span>
-            <span class="text-sm font-medium text-gray-900">{{ listing.city }}{{ listing.neighborhood ? `, ${listing.neighborhood}` : '' }}</span>
+          <div class="flex items-center justify-between py-2 border-b border-grey-100">
+            <span class="text-sm text-grey-400">{{ $t('listings.location') }}</span>
+            <span class="text-sm font-medium text-navy">{{ listing.city }}{{ listing.neighborhood ? `, ${listing.neighborhood}` : '' }}</span>
           </div>
 
           <!-- Contact Methods -->
-          <div class="flex items-center justify-between py-2 border-b border-gray-100">
-            <span class="text-sm text-gray-600">{{ $t('listings.contact_methods') }}</span>
+          <div class="flex items-center justify-between py-2 border-b border-grey-100">
+            <span class="text-sm text-grey-400">{{ $t('listings.contact_methods') }}</span>
             <div class="flex gap-2">
-              <span v-for="method in listing.contact_methods" :key="method" class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs capitalize">
+              <span v-for="method in listing.contact_methods" :key="method" class="px-2 py-1 bg-navy/10 text-navy rounded-full text-xs capitalize">
                 {{ method === 'in_app' ? $t('listings.in_app') : method }}
               </span>
             </div>
@@ -94,17 +94,17 @@
 
           <!-- Views & Inquiries -->
           <div class="flex items-center justify-between py-2">
-            <span class="text-sm text-gray-600">{{ $t('listings.views') }}</span>
-            <span class="text-sm font-medium text-gray-900">{{ listing.views_count || 0 }}</span>
+            <span class="text-sm text-grey-400">{{ $t('listings.views') }}</span>
+            <span class="text-sm font-medium text-navy">{{ listing.views_count || 0 }}</span>
           </div>
           <div class="flex items-center justify-between py-2">
-            <span class="text-sm text-gray-600">{{ $t('listings.inquiries') }}</span>
+            <span class="text-sm text-grey-400">{{ $t('listings.inquiries') }}</span>
             <div class="flex items-center gap-2">
-              <span class="text-sm font-medium text-gray-900">{{ listing.inquiry_count || 0 }}</span>
+              <span class="text-sm font-medium text-navy">{{ listing.inquiry_count || 0 }}</span>
               <button 
                 v-if="isOwnListing && (listing.inquiry_count || 0) > 0"
                 @click="goToInquiries"
-                class="text-xs text-blue-600 hover:text-blue-700 font-medium underline"
+                class="text-xs text-navy hover:text-navy/80 font-semibold underline"
               >
                 {{ $t('listings.view_chat') }}
               </button>
@@ -113,18 +113,18 @@
         </div>
 
         <!-- Seller Info -->
-        <div v-if="!listing.is_anonymous && !isOwnListing" class="p-3 bg-gray-100 rounded-lg">
-          <p class="text-sm font-medium">{{ $t('listings.seller') }}: {{ listing.seller_name }}</p>
+        <div v-if="!listing.is_anonymous && !isOwnListing" class="card-flat p-3">
+          <p class="text-sm font-medium text-navy">{{ $t('listings.seller') }}: {{ listing.seller_name }}</p>
         </div>
 
         <!-- Owner Actions -->
         <div v-if="isOwnListing" class="space-y-3">
           <!-- Status Toggle -->
-          <div class="bg-white rounded-lg p-4 border border-gray-200">
+          <div class="card p-4">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="font-semibold text-gray-900 mb-1">{{ $t('listings.listing_status') }}</h3>
-                <p class="text-sm text-gray-600">{{ $t('listings.toggle_status') }}</p>
+                <h3 class="font-semibold text-navy mb-1">{{ $t('listings.listing_status') }}</h3>
+                <p class="text-sm text-grey-400">{{ $t('listings.toggle_status') }}</p>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input 
@@ -134,7 +134,7 @@
                   :disabled="listing.status === 'sold' || updatingStatus"
                   class="sr-only peer"
                 />
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <div class="w-11 h-6 bg-grey-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-navy/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-grey-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-navy"></div>
               </label>
             </div>
           </div>
@@ -145,7 +145,7 @@
               v-if="listing.status !== 'sold'"
               @click="showSoldDialog = true"
               :disabled="listing.status === 'inactive'"
-              class="flex-1 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+              class="flex-1 py-3 bg-success-600 hover:bg-success-700 disabled:bg-grey-300 disabled:cursor-not-allowed text-white rounded-2xl font-semibold transition-colors flex items-center justify-center gap-2"
             >
               <CheckCircle class="w-5 h-5" />
               {{ $t('listings.mark_as_sold') }}
@@ -153,7 +153,7 @@
             <button 
               @click="showDeleteDialog = true"
               :disabled="deleting"
-              class="p-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center"
+              class="p-3 bg-error-600 hover:bg-error-700 disabled:bg-grey-300 disabled:cursor-not-allowed text-white rounded-2xl transition-colors flex items-center justify-center"
             >
               <Trash2 class="w-5 h-5" />
             </button>
@@ -162,14 +162,14 @@
 
         <!-- Contact Buttons -->
         <div v-if="!isOwnListing" class="space-y-2">
-          <button v-if="listing.contact_methods.includes('in_app')" @click="contactSeller" class="w-full py-3 bg-blue-600 text-white rounded-lg font-medium">
+          <button v-if="listing.contact_methods.includes('in_app')" @click="contactSeller" class="btn-cta">
             <MessageCircle class="w-5 h-5 inline mr-2" />{{ $t('listings.contact_seller') }}
           </button>
           <div class="grid grid-cols-2 gap-2">
-            <a v-if="listing.contact_methods.includes('whatsapp')" :href="`https://wa.me/${listing.whatsapp_number}`" target="_blank" class="py-3 bg-green-600 text-white rounded-lg text-center font-medium">
+            <a v-if="listing.contact_methods.includes('whatsapp')" :href="`https://wa.me/${listing.whatsapp_number}`" target="_blank" class="py-3 bg-success-600 text-white rounded-2xl text-center font-semibold">
               WhatsApp
             </a>
-            <a v-if="listing.contact_methods.includes('email')" :href="`mailto:${listing.contact_email}`" class="py-3 bg-gray-600 text-white rounded-lg text-center font-medium">
+            <a v-if="listing.contact_methods.includes('email')" :href="`mailto:${listing.contact_email}`" class="py-3 bg-grey-500 text-white rounded-2xl text-center font-semibold">
               Email
             </a>
           </div>
@@ -178,17 +178,17 @@
 
       <!-- Offer Modal -->
       <div v-if="showOfferModal" class="fixed inset-0 bg-black/50 flex items-end z-50" @click.self="showOfferModal = false">
-        <div class="bg-white rounded-t-2xl p-4 w-full">
-          <h3 class="text-lg font-bold mb-4">Send Inquiry</h3>
+        <div class="bg-white rounded-t-3xl p-4 w-full">
+          <h3 class="text-lg font-bold text-navy mb-4">Send Inquiry</h3>
           <div v-if="listing.price_type === 'offer'" class="mb-4">
-            <label class="block text-sm font-medium mb-1">Your Offer</label>
-            <input v-model.number="offerPrice" type="number" :min="listing.min_offer_price" class="w-full px-3 py-2 border rounded-lg" />
+            <label class="block text-sm font-semibold text-navy mb-1">Your Offer</label>
+            <input v-model.number="offerPrice" type="number" :min="listing.min_offer_price" class="input" />
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">Message (optional)</label>
-            <textarea v-model="offerMessage" rows="3" class="w-full px-3 py-2 border rounded-lg"></textarea>
+            <label class="block text-sm font-semibold text-navy mb-1">Message (optional)</label>
+            <textarea v-model="offerMessage" rows="3" class="textarea"></textarea>
           </div>
-          <button @click="submitInquiry" :disabled="submitting" class="w-full py-3 bg-blue-600 text-white rounded-lg font-medium">
+          <button @click="submitInquiry" :disabled="submitting" class="btn-cta">
             {{ submitting ? 'Sending...' : 'Send Inquiry' }}
           </button>
         </div>
@@ -198,24 +198,21 @@
       <Transition name="dialog">
         <div v-if="showSoldDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showSoldDialog = false"></div>
-          <div class="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 w-full max-w-md transform transition-all duration-300">
-            <!-- Header -->
+          <div class="relative bg-white rounded-3xl shadow-float w-full max-w-md transform transition-all duration-300">
             <div class="p-6 pb-4">
               <div class="flex items-center justify-center mb-4">
-                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle class="w-8 h-8 text-green-600" />
+                <div class="w-16 h-16 bg-success-50 rounded-full flex items-center justify-center">
+                  <CheckCircle class="w-8 h-8 text-success-600" />
                 </div>
               </div>
-              <h3 class="text-xl font-bold text-center text-slate-900 mb-2">{{ $t('listings.mark_as_sold_confirm') }}</h3>
-              <p class="text-center text-slate-600 text-sm leading-relaxed">{{ $t('listings.mark_sold_message') }}</p>
+              <h3 class="text-xl font-bold text-center text-navy mb-2">{{ $t('listings.mark_as_sold_confirm') }}</h3>
+              <p class="text-center text-grey-400 text-sm leading-relaxed">{{ $t('listings.mark_sold_message') }}</p>
             </div>
-
-            <!-- Actions -->
             <div class="p-6 pt-4 space-y-2">
               <button
                 @click="confirmMarkAsSold"
                 :disabled="updatingStatus"
-                class="w-full py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                class="w-full py-3 bg-success-600 hover:bg-success-700 disabled:bg-grey-300 text-white font-semibold rounded-2xl transition-all duration-200 shadow-card flex items-center justify-center gap-2"
               >
                 <Loader2 v-if="updatingStatus" class="w-5 h-5 animate-spin" />
                 <CheckCircle v-else class="w-5 h-5" />
@@ -224,7 +221,7 @@
               <button
                 @click="showSoldDialog = false"
                 :disabled="updatingStatus"
-                class="w-full py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl transition-all duration-200"
+                class="w-full py-3 bg-grey-100 hover:bg-grey-200 text-grey-500 font-semibold rounded-2xl transition-all duration-200"
               >
                 {{ $t('common.cancel') }}
               </button>
@@ -237,24 +234,21 @@
       <Transition name="dialog">
         <div v-if="showDeleteDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showDeleteDialog = false"></div>
-          <div class="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 w-full max-w-md transform transition-all duration-300">
-            <!-- Header -->
+          <div class="relative bg-white rounded-3xl shadow-float w-full max-w-md transform transition-all duration-300">
             <div class="p-6 pb-4">
               <div class="flex items-center justify-center mb-4">
-                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                  <Trash2 class="w-8 h-8 text-red-600" />
+                <div class="w-16 h-16 bg-error-50 rounded-full flex items-center justify-center">
+                  <Trash2 class="w-8 h-8 text-error-600" />
                 </div>
               </div>
-              <h3 class="text-xl font-bold text-center text-slate-900 mb-2">{{ $t('listings.delete_listing_confirm') }}</h3>
-              <p class="text-center text-slate-600 text-sm leading-relaxed">{{ $t('listings.delete_listing_message') }}</p>
+              <h3 class="text-xl font-bold text-center text-navy mb-2">{{ $t('listings.delete_listing_confirm') }}</h3>
+              <p class="text-center text-grey-400 text-sm leading-relaxed">{{ $t('listings.delete_listing_message') }}</p>
             </div>
-
-            <!-- Actions -->
             <div class="p-6 pt-4 space-y-2">
               <button
                 @click="confirmDelete"
                 :disabled="deleting"
-                class="w-full py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                class="w-full py-3 bg-error-600 hover:bg-error-700 disabled:bg-grey-300 text-white font-semibold rounded-2xl transition-all duration-200 shadow-card flex items-center justify-center gap-2"
               >
                 <Loader2 v-if="deleting" class="w-5 h-5 animate-spin" />
                 <Trash2 v-else class="w-5 h-5" />
@@ -263,7 +257,7 @@
               <button
                 @click="showDeleteDialog = false"
                 :disabled="deleting"
-                class="w-full py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl transition-all duration-200"
+                class="w-full py-3 bg-grey-100 hover:bg-grey-200 text-grey-500 font-semibold rounded-2xl transition-all duration-200"
               >
                 Cancel
               </button>
@@ -276,23 +270,20 @@
       <Transition name="dialog">
         <div v-if="showErrorDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeErrorDialog"></div>
-          <div class="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 w-full max-w-md transform transition-all duration-300">
-            <!-- Header -->
+          <div class="relative bg-white rounded-3xl shadow-float w-full max-w-md transform transition-all duration-300">
             <div class="p-6 pb-4">
               <div class="flex items-center justify-center mb-4">
-                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                  <AlertCircle class="w-8 h-8 text-red-600" />
+                <div class="w-16 h-16 bg-error-50 rounded-full flex items-center justify-center">
+                  <AlertCircle class="w-8 h-8 text-error-600" />
                 </div>
               </div>
-              <h3 class="text-xl font-bold text-center text-slate-900 mb-2">{{ errorDialogTitle }}</h3>
-              <p class="text-center text-slate-600 text-sm leading-relaxed">{{ errorDialogMessage }}</p>
+              <h3 class="text-xl font-bold text-center text-navy mb-2">{{ errorDialogTitle }}</h3>
+              <p class="text-center text-grey-400 text-sm leading-relaxed">{{ errorDialogMessage }}</p>
             </div>
-
-            <!-- Actions -->
             <div class="p-6 pt-4">
               <button
                 @click="closeErrorDialog"
-                class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                class="w-full py-3 bg-error-600 hover:bg-error-700 text-white font-semibold rounded-2xl transition-all duration-200 shadow-card"
               >
                 Got it
               </button>
@@ -475,33 +466,4 @@ async function submitInquiry() {
 .dialog-leave-to > div:last-child {
   transform: scale(0.9) translateY(20px);
 }
-
-.gradient-arrow {
-  width: 20px;
-  height: 20px;
-  background: linear-gradient(to right, #8c36ea, #3060eb);
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 19-7-7 7-7'/%3E%3Cpath d='M19 12H5'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 19-7-7 7-7'/%3E%3Cpath d='M19 12H5'/%3E%3C/svg%3E");
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-}
-
-.gradient-edit {
-  width: 20px;
-  height: 20px;
-  background: linear-gradient(to right, #8c36ea, #3060eb);
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7'/%3E%3Cpath d='M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7'/%3E%3Cpath d='M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z'/%3E%3C/svg%3E");
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-}
 </style>
-

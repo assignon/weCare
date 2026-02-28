@@ -1,15 +1,15 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+  <div class="page-container flex items-center justify-center p-4">
     <div class="w-11/12">
       <!-- Header Section -->
       <div class="text-center mb-6">
-        <div class="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg" style="background: linear-gradient(to right, #3b82f6, #9333ea);">
+        <div class="w-14 h-14 bg-navy rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-card">
           <User class="w-7 h-7 text-white" />
         </div>
-        <h1 class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text mb-1">
+        <h1 class="text-2xl font-bold text-navy mb-1">
           {{ $t('auth.join_afriqexpress') }}
         </h1>
-        <p class="text-gray-600 text-xs">{{ $t('auth.create_account_subtitle') }}</p>
+        <p class="text-grey-500 text-xs">{{ $t('auth.create_account_subtitle') }}</p>
       </div>
 
         <form @submit.prevent="onRegister" class="space-y-4">
@@ -25,17 +25,16 @@
 
             <!-- Email field -->
             <div class="space-y-1">
-              <!-- <label for="email" class="block text-sm font-semibold text-gray-700">Email Address</label> -->
               <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                  <Mail class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
                 </div>
                 <input
                   id="email"
                   v-model="formData.email"
                   type="email"
                   required
-                  class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input pl-10 pr-3 h-12 text-sm"
                   :placeholder="$t('auth.enter_email')"
                   autocomplete="email"
                 />
@@ -44,55 +43,53 @@
 
             <!-- Password field -->
             <div class="space-y-1">
-              <!-- <label for="password" class="block text-sm font-semibold text-gray-700">Password</label> -->
               <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                  <Lock class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
                 </div>
                 <input
                   id="password"
                   v-model="formData.password"
                   :type="showPassword ? 'text' : 'password'"
                   required
-                  class="input pl-10 pr-10 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input pl-10 pr-10 h-12 text-sm"
                   :placeholder="$t('auth.create_password')"
                   autocomplete="new-password"
                 />
                 <button
                   type="button"
                   @click="showPassword = !showPassword"
-                  class="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600 transition-colors"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-grey-500 transition-colors"
                 >
-                  <Eye v-if="!showPassword" class="h-4 w-4 text-gray-400" />
-                  <EyeOff v-else class="h-4 w-4 text-gray-400" />
+                  <Eye v-if="!showPassword" class="h-4 w-4 text-grey-400" />
+                  <EyeOff v-else class="h-4 w-4 text-grey-400" />
                 </button>
               </div>
-              <p class="text-xs text-gray-500 mt-1">{{ $t('auth.password_requirements') }}</p>
+              <p class="text-xs text-grey-400 mt-1">{{ $t('auth.password_requirements') }}</p>
             </div>
 
             <!-- Confirm Password field -->
             <div class="space-y-1">
-              <!-- <label for="password_confirm" class="block text-sm font-semibold text-gray-700">Confirm Password</label> -->
               <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                  <Lock class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
                 </div>
                 <input
                   id="password_confirm"
                   v-model="formData.password_confirm"
                   :type="showPassword ? 'text' : 'password'"
                   required
-                  class="input pl-10 pr-10 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input pl-10 pr-10 h-12 text-sm"
                   :placeholder="$t('auth.confirm_password_placeholder')"
                   autocomplete="new-password"
                 />
                 <button
                   type="button"
                   @click="showPassword = !showPassword"
-                  class="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600 transition-colors"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-grey-500 transition-colors"
                 >
-                  <Eye v-if="!showPassword" class="h-4 w-4 text-gray-400" />
-                  <EyeOff v-else class="h-4 w-4 text-gray-400" />
+                  <Eye v-if="!showPassword" class="h-4 w-4 text-grey-400" />
+                  <EyeOff v-else class="h-4 w-4 text-grey-400" />
                 </button>
               </div>
             </div>
@@ -102,8 +99,7 @@
               type="button"
               @click="nextStep"
               :disabled="!isStep1Valid"
-              class="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-              style="background: linear-gradient(to right, #2563eb, #9333ea);"
+              class="btn-cta disabled:bg-grey-400 disabled:cursor-not-allowed"
             >
               <span class="flex items-center justify-center">
                 <span class="mr-2">{{ $t('auth.next') }}</span>
@@ -116,17 +112,16 @@
           <div v-if="currentStep === 2" class="space-y-4">
             <!-- Mobile field -->
             <div class="space-y-1">
-              <!-- <label for="mobile" class="block text-sm font-semibold text-gray-700">Mobile Number</label> -->
               <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Phone class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                  <Phone class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
                 </div>
                 <input
                   id="mobile"
                   v-model="formData.mobile"
                   type="tel"
                   required
-                  class="input pl-10 pr-3 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input pl-10 pr-3 h-12 text-sm"
                   :placeholder="$t('auth.enter_mobile')"
                   autocomplete="tel"
                 />
@@ -135,17 +130,16 @@
 
             <!-- Country field -->
             <div class="space-y-1">
-              <!-- <label for="country" class="block text-sm font-semibold text-gray-700">Country</label> -->
               <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Globe class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                  <Globe class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
                 </div>
                 <select
                   id="country"
                   v-model="formData.country"
                   required
                   :disabled="loadingCountries"
-                  class="select pl-10 pr-8 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="select pl-10 pr-8 h-12 text-sm"
                 >
                   <option value="">{{ $t('auth.select_country') }}</option>
                   <option
@@ -157,23 +151,22 @@
                   </option>
                 </select>
                 <div v-if="loadingCountries" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500"></div>
+                  <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-navy"></div>
                 </div>
               </div>
             </div>
 
             <!-- Language field -->
             <div class="space-y-1">
-              <!-- <label for="language" class="block text-sm font-semibold text-gray-700">Preferred Language</label> -->
               <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MessageCircle class="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                  <MessageCircle class="h-4 w-4 text-grey-400 group-focus-within:text-navy transition-colors" />
                 </div>
                 <select
                   id="language"
                   v-model="formData.default_language"
                   :disabled="loadingLanguages"
-                  class="select pl-10 pr-8 h-12 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="select pl-10 pr-8 h-12 text-sm"
                 >
                   <option value="">{{ $t('auth.select_language') }}</option>
                   <option
@@ -185,7 +178,7 @@
                   </option>
                 </select>
                 <div v-if="loadingLanguages" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500"></div>
+                  <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-navy"></div>
                 </div>
               </div>
             </div>
@@ -195,7 +188,7 @@
               <button
                 type="button"
                 @click="prevStep"
-                class="flex-1 h-12 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-blue-500 hover:text-blue-600 transition-all duration-200 transform hover:scale-[1.02]"
+                class="btn btn-outlined flex-1"
               >
                 <span class="flex items-center justify-center">
                   <ArrowLeft class="w-4 h-4 mr-2" />
@@ -205,8 +198,7 @@
               <button
                 type="submit"
                 :disabled="authStore.loading || !isFormValid"
-                class="flex-1 h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-                style="background: linear-gradient(to right, #2563eb, #9333ea);"
+                class="flex-1 btn-cta disabled:bg-grey-400 disabled:cursor-not-allowed"
               >
                 <span v-if="authStore.loading" class="flex items-center justify-center">
                   <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -223,27 +215,27 @@
           <!-- Divider -->
           <div class="relative my-4">
             <div class="absolute inset-0 flex items-center">
-              <div class="w-full border-t border-gray-300"></div>
+              <div class="w-full border-t border-grey-200"></div>
             </div>
             <div class="relative flex justify-center text-xs">
-              <span class="px-2 bg-gray-100 text-gray-500">{{ $t('auth.already_have_account') }}</span>
+              <span class="px-2 bg-white text-grey-500">{{ $t('auth.already_have_account') }}</span>
             </div>
           </div>
 
           <!-- Login link -->
           <div class="text-center">
-            <router-link :to="{ name: 'Login' }" class="inline-flex items-center justify-center w-full h-12 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-blue-500 hover:text-blue-600 transition-all duration-200 transform hover:scale-[1.02]">
+            <router-link :to="{ name: 'Login' }" class="btn btn-outlined inline-flex items-center justify-center w-full">
               <Lock class="w-4 h-4 mr-2" />
               {{ $t('auth.sign_in') }}
             </router-link>
           </div>
         <!-- Footer -->
         <div class="text-center mt-6">
-          <p class="text-xs text-gray-500">
+          <p class="text-xs text-grey-500">
             {{ $t('auth.agree_terms_register') }} 
-            <a href="https://afriqxpress.com/terms" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 font-medium">{{ $t('auth.terms_of_service') }}</a> 
+            <a href="https://afriqxpress.com/terms" target="_blank" rel="noopener noreferrer" class="text-navy font-medium">{{ $t('auth.terms_of_service') }}</a> 
             {{ $t('auth.and') }} 
-            <a href="https://afriqxpress.com/privacy" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 font-medium">{{ $t('auth.privacy_policy') }}</a>
+            <a href="https://afriqxpress.com/privacy" target="_blank" rel="noopener noreferrer" class="text-navy font-medium">{{ $t('auth.privacy_policy') }}</a>
           </p>
         </div>
       </form>
@@ -382,150 +374,4 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.auth-page {
-  width: 100%;
-  min-height: 100vh;
-  background: #f5f7fb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-
-.auth-container {
-  width: 100%;
-}
-
-/* .auth-illustration {
-  width: 100%;
-  background-color: #f0f2f8;
-  display: flex;
-  justify-content: center;
-  padding: 30px 0;
-}
-
-.auth-illustration img {
-  height: 180px;
-  width: auto;
-  max-width: 100%;
-} */
-
-.auth-content {
-  padding: 24px;
-  width: 100%;
-  /* box-sizing: border-box; */
-}
-
-.auth-title {
-  font-size: 35px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: #1a2233;
-  width: 100%;
-}
-
-.auth-subtitle {
-  font-size: 16px;
-  color: #707a8a;
-  margin-bottom: 28px;
-  width: 100%;
-}
-
-.input-field {
-  margin-bottom: 12px;
-  width: 100%;
-}
-
-/* .auth-input {
-  width: 100%;
-}
-
-.auth-input :deep(.v-field__outline) {
-  border-color: #e0e4ec;
-}
-
-.auth-input :deep(.v-field--focused .v-field__outline) {
-  border-color: #1a2233;
-} */
-
-/* .auth-input :deep(.v-field__input) {
-  width: 100%;
-} */
-
-.remember-me {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 20px;
-  width: 100%;
-}
-
-/* .remember-switch :deep(.v-label) {
-  font-size: 14px;
-  color: #707a8a;
-  opacity: 1;
-} */
-
-.auth-btn {
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 16px;
-  min-height: 48px;
-  text-transform: none;
-  margin-bottom: 16px;
-  box-shadow: none;
-  width: 100%;
-}
-
-.auth-link {
-  margin-top: 16px;
-  color: #707a8a;
-  font-size: 15px;
-  width: 100%;
-}
-
-.auth-link a {
-  /* color: #1a2233; */
-  color: var(--primary-color);
-  font-weight: 600;
-  margin-left: 4px;
-  text-decoration: none;
-}
-
-/* Media queries for better responsiveness */
-@media screen and (max-width: 600px) {
-  .auth-container {
-    max-width: 100%;
-  }
-
-  .auth-content {
-    padding: 20px 16px;
-  }
-
-  .auth-title {
-    font-size: 35px;
-  }
-
-  .auth-subtitle {
-    font-size: 17px;
-  }
-}
-
-/* For very small screens */
-@media screen and (max-width: 320px) {
-  .auth-page {
-    padding: 8px;
-  }
-
-  .auth-illustration {
-    padding: 20px 0;
-  }
-
-  .auth-illustration img {
-    height: 140px;
-  }
-}
-
-.w-100 {
-  width: 100%;
-}
 </style>

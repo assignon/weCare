@@ -10,22 +10,22 @@
     >
       <!-- Header -->
       <div class="text-center mb-6">
-        <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <MailCheck class="w-8 h-8 text-blue-600" />
+        <div class="w-16 h-16 bg-grey-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <MailCheck class="w-8 h-8 text-navy" />
         </div>
-        <h3 class="text-xl font-bold text-slate-900 mb-2">Verify New Email Address</h3>
-        <p class="text-sm text-slate-600">
+        <h3 class="text-xl font-bold text-grey-900 mb-2">Verify New Email Address</h3>
+        <p class="text-sm text-grey-600">
           We've sent a verification code to:
         </p>
-        <p class="text-lg font-semibold text-blue-600 mt-1">{{ newEmail }}</p>
-        <p class="text-xs text-slate-500 mt-2">
+        <p class="text-lg font-semibold text-navy mt-1">{{ newEmail }}</p>
+        <p class="text-xs text-grey-500 mt-2">
           Enter the 5-digit code to complete your email change
         </p>
       </div>
 
       <!-- OTP Input -->
       <div class="mb-6">
-        <label class="block text-sm font-medium text-slate-700 mb-2">Verification Code</label>
+        <label class="block text-sm font-medium text-grey-700 mb-2">Verification Code</label>
         <input 
           v-model="verificationCode"
           type="text"
@@ -33,7 +33,7 @@
           placeholder="00000"
           @input="clearError"
           @keypress="onlyNumbers"
-          class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all duration-200 text-center text-lg tracking-widest font-mono"
+          class="w-full px-4 py-3 bg-grey-50/50 border border-grey-200 rounded-2xl focus:ring-2 focus:ring-navy/20 focus:border-navy/50 transition-all duration-200 text-center text-lg tracking-widest font-mono"
           :class="{ 'border-red-300 focus:ring-red-500/20 focus:border-red-500': errorMessage }"
         />
         <p v-if="errorMessage" class="text-sm text-red-600 mt-2">{{ errorMessage }}</p>
@@ -41,7 +41,7 @@
 
       <!-- Timer -->
       <div class="text-center mb-6">
-        <div v-if="timeRemaining > 0" class="flex items-center justify-center space-x-2 text-sm text-slate-600">
+        <div v-if="timeRemaining > 0" class="flex items-center justify-center space-x-2 text-sm text-grey-600">
           <Clock class="w-4 h-4" />
           <span>Code expires in {{ Math.floor(timeRemaining / 60) }}:{{ String(timeRemaining % 60).padStart(2, '0') }}</span>
         </div>
@@ -57,10 +57,7 @@
         <button 
           @click="verifyCode"
           :disabled="!isCodeValid || timeRemaining <= 0 || verifying"
-          class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
-          style="background: linear-gradient(to right, #2563eb, #4f46e5);"
-          onmouseover="this.style.background='linear-gradient(to right, #1d4ed8, #4338ca)'"
-          onmouseout="this.style.background='linear-gradient(to right, #2563eb, #4f46e5)'"
+          class="w-full py-3 bg-navy text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl hover:opacity-90"
         >
           <Loader2 v-if="verifying" class="w-5 h-5 animate-spin" />
           <CheckCircle v-else class="w-5 h-5" />
@@ -85,7 +82,7 @@
           <button 
             @click="resendCode"
             :disabled="timeRemaining > 30 || resending"
-            class="w-full py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 hover:border-blue-500 hover:text-blue-600"
+            class="w-full py-3 border-2 border-grey-300 text-grey-700 font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 hover:border-navy hover:text-navy"
           >
             <Loader2 v-if="resending" class="w-5 h-5 animate-spin" />
             <RefreshCw v-else class="w-5 h-5" />
@@ -97,7 +94,7 @@
         <button 
           @click="cancelVerification"
           :disabled="verifying || resending"
-          class="w-full py-3 text-slate-600 hover:text-slate-800 font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          class="w-full py-3 text-grey-600 hover:text-grey-800 font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
         >
           <X class="w-5 h-5" />
           <span>Cancel Email Change</span>

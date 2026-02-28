@@ -1,42 +1,42 @@
 <template>
-  <div class="min-h-screen bg-white pb-24">
+  <div class="page-container pb-24">
     <div class="p-3 pt-4">
 
       <!-- Profile Summary Card -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-3">
+      <div class="card p-3 mb-3">
         <div class="flex items-center space-x-3">
           <!-- Profile Avatar -->
           <div class="relative">
-            <div class="w-14 h-14 rounded-lg overflow-hidden bg-blue-100 flex items-center justify-center flex-shrink-0">
+            <div class="w-14 h-14 rounded-2xl overflow-hidden bg-navy/10 flex items-center justify-center flex-shrink-0">
               <img 
                 v-if="user && user.profile_picture" 
                 :src="user.profile_picture" 
                 :alt="user.first_name || user.email"
                 class="w-full h-full object-cover"
               />
-              <span v-else class="text-lg font-bold text-gray-700">{{ userInitials }}</span>
+              <span v-else class="text-lg font-bold text-navy">{{ userInitials }}</span>
             </div>
-            <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white">
+            <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-navy rounded-full flex items-center justify-center border-2 border-white">
               <Camera class="w-2 h-2 text-white" />
             </div>
           </div>
 
           <!-- User Info -->
           <div class="flex-1 min-w-0">
-            <h2 class="text-sm font-bold text-gray-900 truncate">
+            <h2 class="text-sm font-bold text-navy truncate">
               {{ user.first_name || user.last_name || user.email }}
             </h2>
-            <p class="text-xs text-gray-600">@{{ userHandle }}</p>
+            <p class="text-xs text-grey-500">@{{ userHandle }}</p>
             <div class="flex items-center space-x-1 mt-1">
               <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-              <span class="text-xs text-gray-500">{{ $t('profile.active') }}</span>
+              <span class="text-xs text-grey-500">{{ $t('profile.active') }}</span>
             </div>
           </div>
 
           <!-- Edit Profile Button -->
           <button 
             @click="$router.push({ name: 'EditProfile' })"
-            class="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center space-x-1.5 flex-shrink-0"
+            class="px-3 py-1.5 bg-navy text-white text-xs font-semibold rounded-2xl hover:opacity-90 transition-all duration-200 flex items-center space-x-1.5 flex-shrink-0"
           >
             <Edit3 class="w-3 h-3" />
             <span>{{ $t('profile.edit') }}</span>
@@ -47,173 +47,173 @@
       <!-- Profile Menu -->
       <div class="space-y-2">
         <!-- Profile Settings Section -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div class="p-2.5 border-b border-gray-100">
-            <h3 class="text-sm font-semibold text-gray-900">{{ $t('profile.profile_settings') }}</h3>
+        <div class="card overflow-hidden">
+          <div class="p-2.5 border-b border-grey-100">
+            <h3 class="text-sm font-semibold text-navy">{{ $t('profile.profile_settings') }}</h3>
           </div>
           
           <!-- Edit Profile -->
           <button 
             @click="$router.push({ name: 'EditProfile' })"
-            class="w-full p-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            class="w-full p-3 flex items-center justify-between hover:bg-grey-50 transition-colors"
           >
             <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <User class="w-4 h-4 text-blue-600" />
+              <div class="w-8 h-8 bg-navy/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <User class="w-4 h-4 text-navy" />
               </div>
               <div class="text-left">
-                <p class="text-xs font-semibold text-gray-900">{{ $t('profile.edit_profile') }}</p>
-                <p class="text-xs text-gray-600">{{ $t('profile.edit_profile_subtitle') }}</p>
+                <p class="text-xs font-semibold text-navy">{{ $t('profile.edit_profile') }}</p>
+                <p class="text-xs text-grey-500">{{ $t('profile.edit_profile_subtitle') }}</p>
               </div>
             </div>
-            <ChevronRight class="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <ChevronRight class="w-4 h-4 text-grey-400 flex-shrink-0" />
           </button>
 
           <!-- Skin Profile -->
           <button 
             @click="$router.push({ name: 'SkinProfile' })"
-            class="w-full p-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-t border-gray-100"
+            class="w-full p-3 flex items-center justify-between hover:bg-grey-50 transition-colors border-t border-grey-100"
           >
             <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div class="w-8 h-8 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Sparkles class="w-4 h-4 text-purple-600" />
               </div>
               <div class="text-left">
-                <p class="text-xs font-semibold text-gray-900">{{ $t('profile.skin_profile') }}</p>
-                <p class="text-xs text-gray-600">{{ $t('profile.skin_profile_subtitle') }}</p>
+                <p class="text-xs font-semibold text-navy">{{ $t('profile.skin_profile') }}</p>
+                <p class="text-xs text-grey-500">{{ $t('profile.skin_profile_subtitle') }}</p>
               </div>
             </div>
-            <ChevronRight class="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <ChevronRight class="w-4 h-4 text-grey-400 flex-shrink-0" />
           </button>
 
           <!-- Addresses -->
           <button 
             @click="$router.push({ name: 'Addresses' })"
-            class="w-full p-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-t border-gray-100"
+            class="w-full p-3 flex items-center justify-between hover:bg-grey-50 transition-colors border-t border-grey-100"
           >
             <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div class="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
                 <MapPin class="w-4 h-4 text-green-600" />
               </div>
               <div class="text-left">
-                <p class="text-xs font-semibold text-gray-900">{{ $t('profile.addresses') }}</p>
-                <p class="text-xs text-gray-600">{{ $t('profile.addresses_subtitle') }}</p>
+                <p class="text-xs font-semibold text-navy">{{ $t('profile.addresses') }}</p>
+                <p class="text-xs text-grey-500">{{ $t('profile.addresses_subtitle') }}</p>
               </div>
             </div>
-            <ChevronRight class="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <ChevronRight class="w-4 h-4 text-grey-400 flex-shrink-0" />
           </button>
         </div>
 
         <!-- Marketplace Section -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div class="p-2.5 border-b border-gray-100">
-            <h3 class="text-sm font-semibold text-gray-900">{{ $t('profile.marketplace') }}</h3>
+        <div class="card overflow-hidden">
+          <div class="p-2.5 border-b border-grey-100">
+            <h3 class="text-sm font-semibold text-navy">{{ $t('profile.marketplace') }}</h3>
           </div>
           
           <!-- My Listings -->
           <button 
             @click="$router.push({ name: 'MyListings' })"
-            class="w-full p-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            class="w-full p-3 flex items-center justify-between hover:bg-grey-50 transition-colors"
           >
             <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Package class="w-4 h-4 text-blue-600" />
+              <div class="w-8 h-8 bg-navy/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Package class="w-4 h-4 text-navy" />
               </div>
               <div class="text-left">
-                <p class="text-xs font-semibold text-gray-900">{{ $t('profile.my_listings') }}</p>
-                <p class="text-xs text-gray-600">{{ $t('profile.my_listings_subtitle') }}</p>
+                <p class="text-xs font-semibold text-navy">{{ $t('profile.my_listings') }}</p>
+                <p class="text-xs text-grey-500">{{ $t('profile.my_listings_subtitle') }}</p>
               </div>
             </div>
-            <ChevronRight class="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <ChevronRight class="w-4 h-4 text-grey-400 flex-shrink-0" />
           </button>
 
           <!-- Listing Inquiries -->
           <button 
             @click="$router.push({ name: 'ListingInquiries' })"
-            class="w-full p-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-t border-gray-100"
+            class="w-full p-3 flex items-center justify-between hover:bg-grey-50 transition-colors border-t border-grey-100"
           >
             <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div class="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
                 <MessageCircle class="w-4 h-4 text-green-600" />
               </div>
               <div class="text-left">
-                <p class="text-xs font-semibold text-gray-900">{{ $t('profile.inquiries') }}</p>
-                <p class="text-xs text-gray-600">{{ $t('profile.inquiries_subtitle') }}</p>
+                <p class="text-xs font-semibold text-navy">{{ $t('profile.inquiries') }}</p>
+                <p class="text-xs text-grey-500">{{ $t('profile.inquiries_subtitle') }}</p>
               </div>
             </div>
-            <ChevronRight class="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <ChevronRight class="w-4 h-4 text-grey-400 flex-shrink-0" />
           </button>
         </div>
 
         <!-- Preferences Section -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div class="p-2.5 border-b border-gray-100">
-            <h3 class="text-sm font-semibold text-gray-900">{{ $t('profile.preferences') }}</h3>
+        <div class="card overflow-hidden">
+          <div class="p-2.5 border-b border-grey-100">
+            <h3 class="text-sm font-semibold text-navy">{{ $t('profile.preferences') }}</h3>
           </div>
           
           <!-- Language -->
           <button 
             @click="showLanguageDialog = true"
-            class="w-full p-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            class="w-full p-3 flex items-center justify-between hover:bg-grey-50 transition-colors"
           >
             <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div class="w-8 h-8 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Globe class="w-4 h-4 text-orange-600" />
               </div>
               <div class="text-left">
-                <p class="text-xs font-semibold text-gray-900">{{ $t('profile.language') }}</p>
-                <p class="text-xs text-gray-600">{{ currentLanguageName }}</p>
+                <p class="text-xs font-semibold text-navy">{{ $t('profile.language') }}</p>
+                <p class="text-xs text-grey-500">{{ currentLanguageName }}</p>
               </div>
             </div>
-            <ChevronRight class="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <ChevronRight class="w-4 h-4 text-grey-400 flex-shrink-0" />
           </button>
 
           <!-- Default Store (Store Category) -->
           <button 
             @click="openDefaultStoreDialog"
-            class="w-full p-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-t border-gray-100"
+            class="w-full p-3 flex items-center justify-between hover:bg-grey-50 transition-colors border-t border-grey-100"
           >
             <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Store class="w-4 h-4 text-blue-600" />
+              <div class="w-8 h-8 bg-navy/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Store class="w-4 h-4 text-navy" />
               </div>
               <div class="text-left">
-                <p class="text-xs font-semibold text-gray-900">{{ $t('profile.default_store') }}</p>
-                <p class="text-xs text-gray-600">{{ defaultStoreLabel }}</p>
+                <p class="text-xs font-semibold text-navy">{{ $t('profile.default_store') }}</p>
+                <p class="text-xs text-grey-500">{{ defaultStoreLabel }}</p>
               </div>
             </div>
-            <ChevronRight class="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <ChevronRight class="w-4 h-4 text-grey-400 flex-shrink-0" />
           </button>
         </div>
 
         <!-- Support Section -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div class="p-2.5 border-b border-gray-100">
-            <h3 class="text-sm font-semibold text-gray-900">{{ $t('profile.support') }}</h3>
+        <div class="card overflow-hidden">
+          <div class="p-2.5 border-b border-grey-100">
+            <h3 class="text-sm font-semibold text-navy">{{ $t('profile.support') }}</h3>
           </div>
           
           <!-- Customer Support -->
           <button 
             @click="$router.push({ name: 'CustomerSupport' })"
-            class="w-full p-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            class="w-full p-3 flex items-center justify-between hover:bg-grey-50 transition-colors"
           >
             <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Headphones class="w-4 h-4 text-blue-600" />
+              <div class="w-8 h-8 bg-navy/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Headphones class="w-4 h-4 text-navy" />
               </div>
               <div class="text-left">
-                <p class="text-xs font-semibold text-gray-900">{{ $t('profile.customer_support') }}</p>
-                <p class="text-xs text-gray-600">{{ $t('profile.customer_support_subtitle') }}</p>
+                <p class="text-xs font-semibold text-navy">{{ $t('profile.customer_support') }}</p>
+                <p class="text-xs text-grey-500">{{ $t('profile.customer_support_subtitle') }}</p>
               </div>
             </div>
-            <ChevronRight class="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <ChevronRight class="w-4 h-4 text-grey-400 flex-shrink-0" />
           </button>
         </div>
 
         <!-- Account Section -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div class="p-2.5 border-b border-gray-100">
-            <h3 class="text-sm font-semibold text-gray-900">{{ $t('profile.account') }}</h3>
+        <div class="card overflow-hidden">
+          <div class="p-2.5 border-b border-grey-100">
+            <h3 class="text-sm font-semibold text-navy">{{ $t('profile.account') }}</h3>
           </div>
           
           <!-- Logout -->
@@ -222,12 +222,12 @@
             class="w-full p-3 flex items-center justify-between hover:bg-red-50 transition-colors"
           >
             <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div class="w-8 h-8 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
                 <LogOut class="w-4 h-4 text-red-600" />
               </div>
               <div class="text-left">
                 <p class="text-xs font-semibold text-red-600">{{ $t('profile.log_out') }}</p>
-                <p class="text-xs text-gray-600">{{ $t('profile.log_out_subtitle') }}</p>
+                <p class="text-xs text-grey-500">{{ $t('profile.log_out_subtitle') }}</p>
               </div>
             </div>
             <ChevronRight class="w-4 h-4 text-red-400 flex-shrink-0" />
@@ -242,7 +242,7 @@
         @click="showLanguageDialog = false"
       >
         <div 
-          class="bg-white rounded-lg p-5 max-w-md w-full shadow-xl"
+          class="bg-white rounded-2xl p-5 max-w-md w-full shadow-float"
           @click.stop
         >
           <div class="flex items-center mb-4">
@@ -250,45 +250,45 @@
               <Globe class="w-5 h-5 text-orange-600" />
             </div>
             <div>
-              <h3 class="text-base font-bold text-gray-900">{{ $t('profile.select_language') }}</h3>
-              <p class="text-gray-600 text-xs">{{ $t('profile.current') }}: {{ currentLanguageName }}</p>
+              <h3 class="text-base font-bold text-navy">{{ $t('profile.select_language') }}</h3>
+              <p class="text-grey-500 text-xs">{{ $t('profile.current') }}: {{ currentLanguageName }}</p>
             </div>
           </div>
 
           <div v-if="loadingLanguages" class="text-center py-6">
-            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Loader2 class="w-5 h-5 text-blue-600 animate-spin" />
+            <div class="w-10 h-10 bg-navy/10 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Loader2 class="w-5 h-5 text-navy animate-spin" />
             </div>
-            <p class="text-xs text-gray-600">{{ $t('profile.loading_languages') }}</p>
+            <p class="text-xs text-grey-500">{{ $t('profile.loading_languages') }}</p>
           </div>
 
           <div v-else class="space-y-2 max-h-64 overflow-y-auto">
             <label 
               v-for="lang in languages" 
               :key="lang.id"
-              class="flex items-center p-2.5 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer"
+              class="flex items-center p-2.5 rounded-2xl border border-grey-200 hover:border-navy/30 hover:bg-navy/5 transition-all cursor-pointer"
             >
               <input 
                 type="radio" 
                 :value="lang.id" 
                 v-model="selectedLanguage"
-                class="w-3.5 h-3.5 text-blue-600 border-gray-300 focus:ring-blue-500"
+                class="w-3.5 h-3.5 text-navy border-grey-300 focus:ring-navy"
               />
-              <span class="ml-2.5 text-xs font-medium text-gray-900">{{ lang.name }}</span>
+              <span class="ml-2.5 text-xs font-medium text-navy">{{ lang.name }}</span>
             </label>
           </div>
 
           <div class="flex space-x-2 mt-4">
             <button 
               @click="showLanguageDialog = false"
-              class="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+              class="btn btn-outlined flex-1 py-2.5 text-sm"
             >
               {{ $t('profile.cancel') }}
             </button>
             <button 
               @click="changeLanguage"
               :disabled="loadingLanguages"
-              class="flex-1 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
+              class="flex-1 py-2.5 bg-navy text-white text-sm font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
             >
               <Loader2 v-if="loadingLanguages" class="w-3.5 h-3.5 animate-spin" />
               <Check v-else class="w-3.5 h-3.5" />
@@ -305,24 +305,24 @@
         @click="showDefaultStoreDialog = false"
       >
         <div 
-          class="bg-white rounded-lg p-5 max-w-md w-full shadow-xl"
+          class="bg-white rounded-2xl p-5 max-w-md w-full shadow-float"
           @click.stop
         >
           <div class="flex items-center mb-4">
-            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-              <Store class="w-5 h-5 text-blue-600" />
+            <div class="w-10 h-10 bg-navy/10 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+              <Store class="w-5 h-5 text-navy" />
             </div>
             <div>
-              <h3 class="text-base font-bold text-gray-900">{{ $t('profile.select_default_store') }}</h3>
-              <p class="text-gray-600 text-xs">{{ $t('profile.choose_preferred_category') }}</p>
+              <h3 class="text-base font-bold text-navy">{{ $t('profile.select_default_store') }}</h3>
+              <p class="text-grey-500 text-xs">{{ $t('profile.choose_preferred_category') }}</p>
             </div>
           </div>
 
           <div v-if="loadingStoreCategories" class="text-center py-6">
-            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Loader2 class="w-5 h-5 text-blue-600 animate-spin" />
+            <div class="w-10 h-10 bg-navy/10 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Loader2 class="w-5 h-5 text-navy animate-spin" />
             </div>
-            <p class="text-xs text-gray-600">{{ $t('profile.loading_store_categories') }}</p>
+            <p class="text-xs text-grey-500">{{ $t('profile.loading_store_categories') }}</p>
           </div>
 
           <div v-else class="flex flex-wrap gap-1.5 max-h-64 overflow-y-auto">
@@ -330,8 +330,8 @@
               v-for="cat in storeCategories"
               :key="cat.id"
               @click="setDefaultStore(cat.id)"
-              class="px-3 py-1.5 rounded-full border text-xs"
-              :class="String(cat.id) === String(defaultStoreId) ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-800'"
+              class="chip text-xs"
+              :class="String(cat.id) === String(defaultStoreId) ? 'bg-navy/10 text-navy' : 'bg-grey-100 text-grey-500'"
             >
               {{ cat.name }}
             </button>
@@ -340,7 +340,7 @@
           <div class="flex space-x-2 mt-4">
             <button 
               @click="showDefaultStoreDialog = false"
-              class="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+              class="btn btn-outlined flex-1 py-2.5 text-sm"
             >
               {{ $t('profile.close') }}
             </button>
@@ -355,7 +355,7 @@
         @click="showLogoutDialog = false"
       >
         <div 
-          class="bg-white rounded-lg p-5 max-w-md w-full shadow-xl"
+          class="bg-white rounded-2xl p-5 max-w-md w-full shadow-float"
           @click.stop
         >
           <div class="flex items-center mb-4">
@@ -363,21 +363,21 @@
               <LogOut class="w-5 h-5 text-red-600" />
             </div>
             <div>
-              <h3 class="text-base font-bold text-gray-900">{{ $t('profile.log_out_confirm') }}</h3>
-              <p class="text-gray-600 text-xs">{{ $t('profile.log_out_confirm_message') }}</p>
+              <h3 class="text-base font-bold text-navy">{{ $t('profile.log_out_confirm') }}</h3>
+              <p class="text-grey-500 text-xs">{{ $t('profile.log_out_confirm_message') }}</p>
             </div>
           </div>
 
           <div class="flex space-x-2">
             <button 
               @click="showLogoutDialog = false"
-              class="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+              class="btn btn-outlined flex-1 py-2.5 text-sm"
             >
               {{ $t('profile.cancel') }}
             </button>
             <button 
               @click="logout"
-              class="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg transition-all duration-200 flex items-center justify-center space-x-1.5"
+              class="flex-1 py-2.5 bg-error-600 hover:bg-red-700 text-white text-sm font-semibold rounded-2xl transition-all duration-200 flex items-center justify-center space-x-1.5"
             >
               <LogOut class="w-3.5 h-3.5" />
               <span>{{ $t('profile.log_out') }}</span>
@@ -610,5 +610,4 @@ const changeLanguage = async () => {
 </script>
 
 <style scoped>
-/* Additional styles if needed */
 </style>
