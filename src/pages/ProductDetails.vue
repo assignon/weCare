@@ -1555,7 +1555,10 @@ const whatsappLink = computed(() => {
 })
 
 // Immobilier CTA from property_meta: 'booking' | 'viewing' | 'both'
+// Location types long_term_residential and commercial_rental always force viewing-only
 const immobilierCta = computed(() => {
+  const lt = product.value?.property_meta?.location_type
+  if (lt === 'long_term_residential' || lt === 'commercial_rental') return 'viewing'
   const cta = product.value?.property_meta?.cta
   if (cta === 'booking' || cta === 'viewing' || cta === 'both') return cta
   return null

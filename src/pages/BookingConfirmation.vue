@@ -92,25 +92,33 @@
         </div>
       </div>
 
-      <!-- Price Breakdown -->
+      <!-- Récapitulatif des coûts (saved at booking creation) -->
       <div class="card p-5">
-        <h3 class="text-sm font-semibold text-grey-500 uppercase tracking-wide mb-4">{{ $t('booking.price_breakdown') }}</h3>
+        <h3 class="text-sm font-semibold text-grey-500 uppercase tracking-wide mb-4">{{ $t('booking.cost_summary') }}</h3>
         <div class="space-y-3">
           <div class="flex justify-between text-sm">
             <span class="text-grey-500">{{ $t('booking.subtotal') }}</span>
-            <span class="font-medium text-navy">{{ formatCurrency(booking.subtotal || booking.total_price) }} XOF</span>
+            <span class="font-medium text-navy">{{ formatCurrency(booking.subtotal ?? 0) }} {{ bookingCurrency }}</span>
           </div>
-          <div v-if="booking.deposit_amount" class="flex justify-between text-sm">
+          <div class="flex justify-between text-sm">
             <span class="text-grey-500">{{ $t('booking.deposit') }}</span>
-            <span class="font-medium text-navy">{{ formatCurrency(booking.deposit_amount) }} XOF</span>
+            <span class="font-medium text-navy">{{ formatCurrency(booking.deposit_amount ?? 0) }} {{ bookingCurrency }}</span>
           </div>
-          <div v-if="booking.platform_fee" class="flex justify-between text-sm">
+          <div class="flex justify-between text-sm">
             <span class="text-grey-500">{{ $t('booking.platform_fee') }}</span>
-            <span class="font-medium text-navy">{{ formatCurrency(booking.platform_fee) }} XOF</span>
+            <span class="font-medium text-navy">{{ formatCurrency(booking.platform_fee ?? 0) }} {{ bookingCurrency }}</span>
           </div>
           <div class="border-t border-grey-200 pt-3 flex justify-between">
             <span class="font-semibold text-navy">{{ $t('booking.total') }}</span>
-            <span class="font-bold text-lg text-navy">{{ formatCurrency(booking.total_price) }} XOF</span>
+            <span class="font-bold text-lg text-navy">{{ formatCurrency(bookingTotal) }} {{ bookingCurrency }}</span>
+          </div>
+          <div class="flex justify-between text-sm font-semibold text-navy">
+            <span>{{ $t('booking.already_paid') }}</span>
+            <span>{{ formatCurrency(bookingAlreadyPaid) }} {{ bookingCurrency }}</span>
+          </div>
+          <div class="flex justify-between text-sm font-semibold text-navy">
+            <span>{{ $t('booking.pay_after_key_given') }}</span>
+            <span>{{ formatCurrency(bookingRestToPay) }} {{ bookingCurrency }}</span>
           </div>
         </div>
       </div>
@@ -130,7 +138,7 @@
           {{ $t('booking.view_all_bookings') }}
         </button>
         <button
-          v-if="bookingStatusForActions === 'pending_confirmation' || bookingStatusForActions === 'confirmed'"
+          v-if="bookingStatusForActions === 'pending_confirmation'"
           @click="showCancelDialog = true"
           class="w-full py-3.5 bg-white border border-red-200 text-red-600 rounded-2xl font-semibold text-base"
         >
@@ -149,7 +157,10 @@
     <div v-if="showCancelDialog" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-float">
         <h3 class="text-lg font-bold text-navy mb-2">{{ $t('booking.cancel_confirm_title') }}</h3>
-        <p class="text-sm text-grey-500 mb-4">{{ $t('booking.cancel_confirm_message') }}</p>
+        <p class="text-sm text-grey-500 mb-2">{{ $t('booking.cancel_confirm_message') }}</p>
+        <p class="text-sm text-amber-700 bg-amber-50 rounded-lg p-3 mb-4">
+          {{ $t('booking.cancel_reservation_fee_no_refund') }}
+        </p>
         <textarea
           v-model="cancelReason"
           :placeholder="$t('booking.cancel_reason_placeholder')"
@@ -231,17 +242,34 @@ const bookingStatusForActions = computed(() => normalizedStatus.value)
 
 const bookingPropertyName = computed(() => {
   const b = booking.value
-  return b?.product_details?.name || b?.product_name || ''
+  return b?.property_name || b?.product_details?.name || b?.product_name || ''
 })
 
 const bookingPropertyImage = computed(() => {
   const b = booking.value
-  return b?.product_details?.primary_image || b?.product_details?.images?.[0] || b?.property_image || null
+  return b?.property_image || b?.product_details?.primary_image || b?.product_details?.images?.[0] || null
+})
+
+const bookingRestToPay = computed(() => {
+  const b = booking.value
+  if (b == null) return 0
+  const sub = Number(b.subtotal ?? 0)
+  const dep = Number(b.deposit_amount ?? 0)
+  const plat = Number(b.platform_fee ?? 0)
+  return sub + dep + plat
+})
+
+const bookingAlreadyPaid = computed(() => {
+  const b = booking.value
+  return Number(b?.reservation_fee ?? 0)
 })
 
 const bookingTotal = computed(() => {
-  const b = booking.value
-  return b?.total_price ?? b?.total_amount ?? 0
+  return bookingRestToPay.value + bookingAlreadyPaid.value
+})
+
+const bookingCurrency = computed(() => {
+  return booking.value?.currency || 'XOF'
 })
 
 const formatDate = (dateStr) => {

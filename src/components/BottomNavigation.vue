@@ -99,8 +99,17 @@
               :to="{ name: 'MyBookings' }"
               @click="closeMoreMenu"
               class="drawer-item"
+              :class="activeTab === 'mybookings' ? 'drawer-item-active' : ''"
             >
-              <div class="drawer-icon"><CalendarDays class="w-5 h-5" /></div>
+              <div class="drawer-icon relative">
+                <CalendarDays class="w-5 h-5" />
+                <span 
+                  v-if="pendingBookingsCount > 0"
+                  class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center font-bold"
+                >
+                  {{ pendingBookingsCount > 99 ? '99+' : pendingBookingsCount }}
+                </span>
+              </div>
               <span>{{ $t('navigation.my_bookings') }}</span>
             </router-link>
             
@@ -215,6 +224,19 @@ const activeViewingRequests = computed(() => crmStore.activeViewingRequests ?? 0
 // Use Pharmacy store for state
 const shouldHideExploreAndCart = computed(() => pharmacyStore.shouldHideExploreAndCart)
 
+// Pending bookings count for "Mes réservations" badge (status = en attente / pending)
+const pendingBookingsCount = ref(0)
+const fetchPendingBookingsCount = async () => {
+  if (!auth.isAuthenticated) return
+  try {
+    const res = await apiService.getMyBookings({ status: 'pending' })
+    const list = res.data?.results ?? res.data ?? []
+    pendingBookingsCount.value = Array.isArray(list) ? list.length : 0
+  } catch (e) {
+    pendingBookingsCount.value = 0
+  }
+}
+
 // Update active tab based on current route
 const updateActiveTab = () => {
   const routeTabMap = {
@@ -223,7 +245,8 @@ const updateActiveTab = () => {
     'Explore': 'explore',
     'Orders': 'orders',
     'MyListings': 'mylistings',
-    'Rendezvous': 'rendezvous'
+    'Rendezvous': 'rendezvous',
+    'MyBookings': 'mybookings'
   }
   
   activeTab.value = routeTabMap[currentRouteName.value] || 'home'
@@ -250,6 +273,11 @@ onMounted(async () => {
       await crmStore.fetchViewingRequestStatsForBadge()
     } catch (e) {
       console.warn('Failed to fetch viewing request stats:', e)
+    }
+    try {
+      await fetchPendingBookingsCount()
+    } catch (e) {
+      console.warn('Failed to fetch pending bookings count:', e)
     }
     
     // Load store categories to ensure default store icon is displayed
@@ -311,6 +339,7 @@ const openMoreMenu = async () => {
   try {
     await listingStore.fetchSellerInquiries()
     await crmStore.fetchViewingRequestStatsForBadge()
+    await fetchPendingBookingsCount()
   } catch (error) {
     console.warn('Failed to refresh menu counts:', error)
   }

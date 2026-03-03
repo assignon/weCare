@@ -48,79 +48,93 @@
         </div>
       </div>
 
-      <!-- Check-in / Check-out -->
-      <div class="card p-5 space-y-4">
+      <!-- SHORT-TERM: Check-in / Check-out calendar range selection -->
+      <div v-if="isShortTerm" class="card p-5 space-y-4">
         <h3 class="font-bold text-navy text-sm">{{ $t('product.booking_title') }}</h3>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-navy mb-1.5">{{ $t('product.check_in') }}</label>
-            <input
-              ref="checkInInputRef"
-              v-model="checkIn"
-              type="date"
-              :min="checkInMin"
-              :max="checkInMax"
-              class="input text-sm w-full"
-              @click="openDatePicker('checkIn')"
-              @change="onCheckInChange"
-            />
+        <p v-if="checkIn && checkOut" class="text-sm text-grey-600">
+          {{ $t('product.check_in') }}: {{ formatCalendarDate(checkIn) }} — {{ $t('product.check_out') }}: {{ formatCalendarDate(checkOut) }}
+        </p>
+        <p v-else class="text-sm text-grey-500">{{ $t('booking.select_dates') }}</p>
+
+        <div class="flex flex-col items-center">
+          <div class="flex items-center justify-center gap-2 w-full max-w-[280px] mb-2">
+            <button type="button" @click="calendarPrevMonth" class="w-9 h-9 rounded-xl flex items-center justify-center text-navy hover:bg-grey-100 active:bg-grey-200 flex-shrink-0 transition-colors">
+              <ChevronLeft class="w-5 h-5" />
+            </button>
+            <span class="text-sm font-semibold text-navy capitalize flex-1 text-center">{{ calendarMonthLabel(0) }}</span>
+            <button type="button" @click="calendarNextMonth" class="w-9 h-9 rounded-xl flex items-center justify-center text-navy hover:bg-grey-100 active:bg-grey-200 flex-shrink-0 transition-colors">
+              <ChevronRight class="w-5 h-5" />
+            </button>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-navy mb-1.5">{{ $t('product.check_out') }}</label>
-            <input
-              ref="checkOutInputRef"
-              v-model="checkOut"
-              type="date"
-              :min="checkOutMin"
-              :max="checkOutMax"
-              class="input text-sm w-full"
-              @click="openDatePicker('checkOut')"
-              @change="onCheckOutChange"
-            />
+          <div class="w-full max-w-[280px] grid grid-cols-7 gap-0.5 text-center">
+            <div v-for="w in 7" :key="'w' + w" class="text-[10px] font-medium text-grey-500 py-1">{{ weekdayShort(w - 1) }}</div>
+            <button
+              v-for="day in getCalendarDays(0)" :key="day.dateStr || day.key"
+              type="button"
+              class="h-9 rounded-xl text-sm transition-colors"
+              :class="getCalendarDayClass(day)"
+              :disabled="day.isDisabled"
+              @click="day.isDisabled ? null : selectCalendarDate(day.dateStr)"
+            >
+              {{ day.dayNumber }}
+            </button>
           </div>
         </div>
 
-        <!-- Guests -->
-        <div>
+        <!-- Nombre de voyageurs (only when price is per person) -->
+        <div v-if="pricePerPerson">
           <label class="block text-xs font-bold text-navy mb-1.5">{{ $t('product.num_guests') }}</label>
           <div class="flex items-center bg-grey-50 rounded-2xl p-1 w-36">
-            <button @click="numGuests = Math.max(1, numGuests - 1)" type="button" class="w-10 h-10 flex items-center justify-center text-navy font-bold">-</button>
+            <button @click="decrementGuests" type="button" class="w-10 h-10 flex items-center justify-center text-navy font-bold">-</button>
             <span class="flex-1 text-center font-bold text-navy">{{ numGuests }}</span>
-            <button @click="numGuests = Math.min(maxGuests || 99, numGuests + 1)" type="button" class="w-10 h-10 flex items-center justify-center text-navy font-bold">+</button>
+            <button @click="incrementGuests" type="button" class="w-10 h-10 flex items-center justify-center text-navy font-bold">+</button>
           </div>
-          <p v-if="maxGuests" class="text-xs text-grey-400 mt-1">{{ $t('product.max_guests') }}: {{ maxGuests }}</p>
+          <p class="text-xs text-grey-600 mt-1">{{ $t('booking.price_updates_with_guests') }}</p>
         </div>
       </div>
 
-      <!-- Price breakdown -->
-      <div v-if="bookingPrice" class="card p-5 space-y-3">
-        <h3 class="font-bold text-navy text-sm">{{ $t('booking.price_breakdown') }}</h3>
-        <div class="flex justify-between text-sm text-grey-500">
-          <span>{{ bookingPrice.nights }} {{ $t('product.nights') }} x {{ formatCurrency(bookingPrice.price_per_night) }}</span>
-          <span>{{ formatCurrency(bookingPrice.subtotal ?? bookingPrice.total) }}</span>
+      <!-- MID-TERM: Start date + Duration selector -->
+      <div v-else-if="isMidTerm" class="card p-5 space-y-4">
+        <h3 class="font-bold text-navy text-sm">{{ $t('booking.mid_term_title') }}</h3>
+        <div>
+          <label class="block text-xs font-bold text-navy mb-1.5">{{ $t('booking.start_date') }}</label>
+          <input
+            ref="startDateInputRef"
+            type="date"
+            v-model="startDate"
+            :min="checkInMin"
+            :max="checkInMax"
+            class="w-full px-4 py-3 border border-grey-200 rounded-2xl text-sm focus:ring-2 focus:ring-navy/20 focus:border-navy"
+            @click="openStartDatePicker"
+            @change="onMidTermStartDateChange"
+          />
         </div>
-        <div v-if="(Number(bookingPrice.deposit_amount) || 0) > 0" class="flex justify-between text-sm text-grey-500">
-          <span>{{ $t('booking.deposit') }}</span>
-          <span>{{ formatCurrency(bookingPrice.deposit_amount) }}</span>
+        <div>
+          <label class="block text-xs font-bold text-navy mb-1.5">{{ $t('booking.duration') }}</label>
+          <select
+            v-model="durationMonths"
+            class="w-full px-4 py-3 border border-grey-200 rounded-2xl text-sm bg-white focus:ring-2 focus:ring-navy/20 focus:border-navy"
+            @change="calculateMidTermPrice"
+          >
+            <option v-for="m in 12" :key="m" :value="m" :disabled="m < minStayMonths">
+              {{ m }} {{ m === 1 ? $t('booking.month') : $t('booking.months') }}
+            </option>
+          </select>
+          <p class="text-xs text-grey-400 mt-1">{{ $t('booking.min_stay') }}: {{ minStayMonths }} {{ minStayMonths === 1 ? $t('booking.month') : $t('booking.months') }}</p>
         </div>
-        <div class="flex justify-between text-sm text-grey-500">
-          <span>{{ $t('product.platform_fee') }}</span>
-          <span>{{ formatCurrency(bookingPrice.platform_fee) }}</span>
+        <!-- Nombre de voyageurs (only when price is per person) -->
+        <div v-if="pricePerPerson">
+          <label class="block text-xs font-bold text-navy mb-1.5">{{ $t('product.num_guests') }}</label>
+          <div class="flex items-center bg-grey-50 rounded-2xl p-1 w-36">
+            <button @click="decrementGuests" type="button" class="w-10 h-10 flex items-center justify-center text-navy font-bold">-</button>
+            <span class="flex-1 text-center font-bold text-navy">{{ numGuests }}</span>
+            <button @click="incrementGuests" type="button" class="w-10 h-10 flex items-center justify-center text-navy font-bold">+</button>
+          </div>
+          <p class="text-xs text-grey-600 mt-1">{{ $t('booking.price_updates_with_guests') }}</p>
         </div>
-        <div class="flex justify-between text-sm text-grey-500">
-          <span>{{ $t('booking.reservation_fee') }}</span>
-          <span>{{ formatCurrency(reservationFeeAmount ?? 0) }}</span>
-        </div>
-        <div class="border-t border-grey-100 pt-3 flex justify-between font-bold text-navy">
-          <span>{{ $t('booking.total') }}</span>
-          <span>{{ formatCurrency(bookingPrice.total) }} {{ bookingPrice.currency || 'XOF' }}</span>
-        </div>
-      </div>
-      <div v-if="calculating" class="flex items-center justify-center py-4">
-        <div class="animate-spin h-6 w-6 border-2 border-navy border-t-transparent rounded-full"></div>
       </div>
 
-      <!-- Special requests -->
+      <!-- Special requests (Demandes spéciales) -->
       <div class="card p-5">
         <label class="block text-xs font-bold text-navy mb-1.5">{{ $t('product.special_requests') }}</label>
         <textarea
@@ -131,30 +145,68 @@
         ></textarea>
       </div>
 
-      <!-- Cost summary (caution, reservation fee, total, rest to pay) -->
-      <div class="card p-5 space-y-3">
+      <!-- Consolidated cost summary: subtotal line, deposit, platform fee, reservation fee, rest to pay -->
+      <div v-if="bookingPrice" class="card p-5 space-y-3">
         <h3 class="font-bold text-navy text-sm">{{ $t('booking.cost_summary') }}</h3>
+        <div class="flex justify-between text-sm text-grey-600">
+          <span v-if="isMidTerm">
+            <template v-if="pricePerPerson">{{ bookingPrice.months }} {{ bookingPrice.months === 1 ? $t('booking.month') : $t('booking.months') }} × {{ formatCurrency(bookingPrice.price_per_month) }} × {{ numGuests }} {{ $t('booking.guests') }}</template>
+            <template v-else>{{ bookingPrice.months }} {{ bookingPrice.months === 1 ? $t('booking.month') : $t('booking.months') }} × {{ formatCurrency(bookingPrice.price_per_month) }}</template>
+          </span>
+          <span v-else>
+            <template v-if="pricePerPerson">{{ bookingPrice.nights }} {{ $t('product.nights') }} × {{ formatCurrency(bookingPrice.price_per_night) }} × {{ numGuests }} {{ $t('booking.guests') }}</template>
+            <template v-else>{{ bookingPrice.nights }} {{ $t('product.nights') }} × {{ formatCurrency(bookingPrice.price_per_night) }}</template>
+          </span>
+          <span>{{ formatCurrency(bookingPrice.subtotal ?? bookingPrice.total) }} {{ summaryCurrency }}</span>
+        </div>
         <div class="flex justify-between text-sm text-grey-600">
           <span>{{ $t('booking.deposit') }}</span>
           <span>{{ formatCurrency(summaryDeposit) }} {{ summaryCurrency }}</span>
         </div>
         <div class="flex justify-between text-sm text-grey-600">
+          <span>{{ $t('product.platform_fee') }}</span>
+          <span>{{ formatCurrency(bookingPrice.platform_fee) }} {{ summaryCurrency }}</span>
+        </div>
+        <div class="flex justify-between text-sm text-grey-600">
           <span>{{ $t('booking.reservation_fee') }}</span>
           <span>{{ formatCurrency(summaryReservationFee) }} {{ summaryCurrency }}</span>
         </div>
-        <div class="flex justify-between text-sm text-grey-600">
+        <div class="border-t border-grey-200 pt-3 flex justify-between text-sm font-semibold text-navy">
           <span>{{ $t('booking.total') }}</span>
-          <span>{{ formatCurrency(summaryTotal) }} {{ summaryCurrency }}</span>
+          <span>{{ formatCurrency(totalPriceAmount ?? 0) }} {{ summaryCurrency }}</span>
         </div>
-        <div class="border-t border-grey-200 pt-3 flex justify-between font-semibold text-navy">
-          <span>{{ $t('booking.rest_to_pay_at_handover') }}</span>
+        <div class="flex justify-between text-sm font-semibold text-navy">
+          <span>{{ $t('booking.already_paid') }}</span>
+          <span>{{ formatCurrency(summaryReservationFee ?? 0) }} {{ summaryCurrency }}</span>
+        </div>
+        <div class="flex justify-between text-sm font-semibold text-navy">
+          <span>{{ $t('booking.pay_after_key_given') }}</span>
           <span>{{ formatCurrency(restToPayAmount ?? 0) }} {{ summaryCurrency }}</span>
         </div>
+      </div>
+      <div v-if="calculating" class="flex items-center justify-center py-4">
+        <div class="animate-spin h-6 w-6 border-2 border-navy border-t-transparent rounded-full"></div>
       </div>
 
       <p class="text-xs text-grey-500 leading-relaxed">
         {{ reservationFeeExplanationText }}
       </p>
+      <p class="text-xs text-amber-700 bg-amber-50/80 rounded-lg p-2.5 mt-2">
+        {{ $t('booking.reservation_fee_no_refund_notice') }}
+      </p>
+
+      <!-- Terms and conditions -->
+      <label class="flex items-start gap-3 cursor-pointer">
+        <input
+          v-model="acceptTerms"
+          type="checkbox"
+          class="checkbox mt-0.5 flex-shrink-0"
+        />
+        <span class="text-sm text-grey-700">
+          {{ $t('booking.accept_terms_before_booking') }}
+          <a :href="termsUrl" target="_blank" rel="noopener noreferrer" class="text-navy font-medium underline">{{ $t('auth.terms_of_service') }}</a>.
+        </span>
+      </label>
 
       <!-- Spacer so fixed button does not overlap content -->
       <div class="h-28" />
@@ -166,14 +218,155 @@
       class="fixed bottom-0 left-0 right-0 bg-white border-t border-grey-100 px-5 py-4 z-30 safe-area-pb"
     >
       <button
-        @click="submitBooking"
-        :disabled="!bookingPrice || submitting"
+        @click="showSummaryDialog = true"
+        :disabled="!bookingPrice || !acceptTerms || (isMidTerm && !startDate)"
         class="btn-cta w-full bg-success-600 hover:bg-success-700 disabled:opacity-50 py-4"
       >
-        <span v-if="submitting">{{ $t('product.processing') }}...</span>
-        <span v-else>{{ $t('product.book_now') }} — {{ (reservationFeeAmount ?? productReservationFee) != null ? formatCurrency(reservationFeeAmount ?? productReservationFee) : '—' }} {{ bookingPrice?.currency || product?.currency_info?.currency_code || 'XOF' }}</span>
+        {{ $t('product.book_now') }} — {{ (reservationFeeAmount ?? productReservationFee) != null ? formatCurrency(reservationFeeAmount ?? productReservationFee) : '—' }} {{ bookingPrice?.currency || product?.currency_info?.currency_code || 'XOF' }}
       </button>
     </div>
+
+    <!-- Full-height reservation summary dialog -->
+    <Teleport to="body">
+      <div
+        v-if="showSummaryDialog"
+        class="fixed inset-0 z-[100] bg-grey-50 flex flex-col overflow-hidden"
+      >
+        <!-- Header -->
+        <div class="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-grey-100 px-4 py-4 flex items-center justify-between z-10 shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-navy/10 flex items-center justify-center">
+              <Receipt class="w-5 h-5 text-navy" />
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-navy">{{ $t('booking.cost_summary') }}</h2>
+              <p class="text-xs text-grey-500">{{ $t('booking.review_before_confirm') }}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            @click="showSummaryDialog = false"
+            class="w-10 h-10 rounded-xl bg-grey-100 flex items-center justify-center text-grey-600 hover:bg-grey-200 transition-colors"
+          >
+            <X class="w-5 h-5" />
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-4 py-5 space-y-5">
+          <!-- Property card -->
+          <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-grey-100">
+            <div class="flex gap-4 p-4">
+              <img
+                :src="product?.main_image || product?.image_1"
+                :alt="product?.name"
+                class="w-20 h-20 rounded-xl object-cover flex-shrink-0 ring-1 ring-grey-100"
+              />
+              <div class="min-w-0 flex-1">
+                <h3 class="font-bold text-navy text-base leading-tight">{{ product?.name }}</h3>
+                <div class="mt-3 space-y-2">
+                  <div v-if="isShortTerm && checkIn && checkOut" class="flex items-center gap-2 text-sm text-grey-600">
+                    <Calendar class="w-4 h-4 text-grey-400 flex-shrink-0" />
+                    <span>{{ formatCalendarDate(checkIn) }} → {{ formatCalendarDate(checkOut) }}</span>
+                  </div>
+                  <div v-else-if="isMidTerm && startDate" class="flex items-center gap-2 text-sm text-grey-600">
+                    <Calendar class="w-4 h-4 text-grey-400 flex-shrink-0" />
+                    <span>{{ formatCalendarDate(startDate) }} · {{ durationMonths }} {{ durationMonths === 1 ? $t('booking.month') : $t('booking.months') }}</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-sm text-grey-600">
+                    <Users class="w-4 h-4 text-grey-400 flex-shrink-0" />
+                    <span>{{ numGuests }} {{ numGuests === 1 ? $t('booking.guest_label') : $t('booking.guests') }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Price breakdown card -->
+          <div v-if="bookingPrice" class="bg-white rounded-2xl border border-grey-100 shadow-sm overflow-hidden">
+            <div class="px-4 py-3 border-b border-grey-100 flex items-center gap-2">
+              <Receipt class="w-4 h-4 text-navy" />
+              <span class="text-sm font-semibold text-navy uppercase tracking-wide">{{ $t('booking.price_breakdown') }}</span>
+            </div>
+            <div class="p-4 space-y-3">
+              <!-- Subtotal line -->
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-grey-600 flex items-center gap-2">
+                  <Receipt class="w-3.5 h-3.5 text-grey-400" />
+                  <span v-if="isMidTerm">
+                    <template v-if="pricePerPerson">{{ bookingPrice.months }} {{ $t('booking.months') }} × {{ formatCurrency(bookingPrice.price_per_month) }} × {{ numGuests }}</template>
+                    <template v-else>{{ bookingPrice.months }} {{ $t('booking.months') }} × {{ formatCurrency(bookingPrice.price_per_month) }}</template>
+                  </span>
+                  <span v-else>
+                    <template v-if="pricePerPerson">{{ bookingPrice.nights }} {{ $t('product.nights') }} × {{ formatCurrency(bookingPrice.price_per_night) }} × {{ numGuests }}</template>
+                    <template v-else>{{ bookingPrice.nights }} {{ $t('product.nights') }} × {{ formatCurrency(bookingPrice.price_per_night) }}</template>
+                  </span>
+                </span>
+                <span class="font-medium text-navy">{{ formatCurrency(bookingPrice.subtotal ?? bookingPrice.total) }} {{ summaryCurrency }}</span>
+              </div>
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-grey-600 flex items-center gap-2">
+                  <Shield class="w-3.5 h-3.5 text-grey-400" />
+                  {{ $t('booking.deposit') }}
+                </span>
+                <span class="font-medium text-navy">{{ formatCurrency(summaryDeposit) }} {{ summaryCurrency }}</span>
+              </div>
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-grey-600 flex items-center gap-2">
+                  <BadgePercent class="w-3.5 h-3.5 text-grey-400" />
+                  {{ $t('product.platform_fee') }}
+                </span>
+                <span class="font-medium text-navy">{{ formatCurrency(bookingPrice.platform_fee) }} {{ summaryCurrency }}</span>
+              </div>
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-grey-600 flex items-center gap-2">
+                  <Wallet class="w-3.5 h-3.5 text-grey-400" />
+                  {{ $t('booking.reservation_fee') }}
+                </span>
+                <span class="font-medium text-navy">{{ formatCurrency(summaryReservationFee) }} {{ summaryCurrency }}</span>
+              </div>
+            </div>
+            <div class="px-4 py-3 bg-grey-50/80 border-t border-grey-100 space-y-2">
+              <div class="flex justify-between items-center text-sm font-semibold text-navy">
+                <span>{{ $t('booking.total') }}</span>
+                <span>{{ formatCurrency(totalPriceAmount ?? 0) }} {{ summaryCurrency }}</span>
+              </div>
+              <div class="flex justify-between items-center text-sm font-semibold text-success-600">
+                <span class="flex items-center gap-2">
+                  <Wallet class="w-3.5 h-3.5" />
+                  {{ $t('booking.already_paid') }}
+                </span>
+                <span>{{ formatCurrency(summaryReservationFee ?? 0) }} {{ summaryCurrency }}</span>
+              </div>
+              <div class="flex justify-between items-center text-sm font-semibold text-navy pt-1 border-t border-grey-200">
+                <span class="flex items-center gap-2">
+                  <KeyRound class="w-3.5 h-3.5 text-grey-500" />
+                  {{ $t('booking.pay_after_key_given') }}
+                </span>
+                <span>{{ formatCurrency(restToPayAmount ?? 0) }} {{ summaryCurrency }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer CTA -->
+        <div class="sticky bottom-0 bg-white border-t border-grey-100 px-4 py-4 safe-area-pb shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+          <button
+            @click="confirmAndSubmitBooking"
+            :disabled="submitting"
+            class="btn-cta w-full bg-success-600 hover:bg-success-700 disabled:opacity-50 py-4 rounded-2xl font-semibold flex items-center justify-center gap-2"
+          >
+            <span v-if="submitting" class="flex items-center gap-2">
+              <span class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+              {{ $t('product.processing') }}
+            </span>
+            <span v-else class="flex items-center gap-2">
+              <Calendar class="w-5 h-5" />
+              {{ $t('product.book_now') }} — {{ formatCurrency(summaryReservationFee ?? 0) }} {{ summaryCurrency }}
+            </span>
+          </button>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- Snackbar -->
     <Transition name="dialog">
@@ -185,13 +378,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useProductStore } from '@/stores/product'
 import { useCurrency } from '@/composables/useCurrency'
 import apiService from '@/services/api'
-import { ArrowLeft, AlertCircle } from 'lucide-vue-next'
+import { ArrowLeft, AlertCircle, ChevronLeft, ChevronRight, Calendar, Users, Receipt, Shield, BadgePercent, Wallet, KeyRound, X } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
@@ -204,10 +397,10 @@ const error = ref(null)
 const product = computed(() => productStore.currentProduct)
 const todayStr = new Date().toISOString().slice(0, 10)
 
-const checkInInputRef = ref(null)
-const checkOutInputRef = ref(null)
 const checkIn = ref('')
 const checkOut = ref('')
+/** First day of the first calendar month displayed */
+const calendarMonth = ref(new Date(new Date().getFullYear(), new Date().getMonth(), 1))
 /** Set of date strings (YYYY-MM-DD) that are unavailable (booked/blocked) from availability API */
 const unavailableDates = ref(new Set())
 const numGuests = ref(1)
@@ -215,13 +408,50 @@ const specialRequests = ref('')
 const bookingPrice = ref(null)
 const calculating = ref(false)
 const submitting = ref(false)
+const showSummaryDialog = ref(false)
 const snackbar = ref('')
 const snackbarError = ref(false)
+const acceptTerms = ref(false)
+const termsUrl = import.meta.env.VITE_TERMS_URL || 'https://afriqxpress.com/terms'
+
+// Mid-term rental state
+const startDate = ref('')
+const durationMonths = ref(1)
+const startDateInputRef = ref(null)
+
+function openStartDatePicker () {
+  nextTick(() => {
+    const el = startDateInputRef.value
+    if (el && typeof el.showPicker === 'function') {
+      el.showPicker()
+    }
+  })
+}
+
+const locationType = computed(() => product.value?.property_meta?.location_type || 'short_term_stay')
+const isShortTerm = computed(() => locationType.value === 'short_term_stay')
+const isMidTerm = computed(() => locationType.value === 'mid_term_rental')
+const isViewingOnly = computed(() => locationType.value === 'long_term_residential' || locationType.value === 'commercial_rental')
+
+const minStayMonths = computed(() => {
+  const n = product.value?.property_meta?.min_stay_months
+  return n != null ? parseInt(n, 10) : 1
+})
 
 const maxGuests = computed(() => {
   const n = product.value?.property_meta?.max_guests
   return n != null ? parseInt(n, 10) : null
 })
+
+const pricePerPerson = computed(() => !!product.value?.property_meta?.price_per_person)
+
+function incrementGuests () {
+  const max = pricePerPerson.value ? 99 : (maxGuests.value ?? 99)
+  numGuests.value = Math.min(max, numGuests.value + 1)
+}
+function decrementGuests () {
+  numGuests.value = Math.max(1, numGuests.value - 1)
+}
 
 // Date range from product (property_meta.available_from / available_to) for date picker min/max
 function toDateStr (raw) {
@@ -237,7 +467,12 @@ const checkInMin = computed(() => {
   if (!from) return todayStr
   return from >= todayStr ? from : todayStr
 })
-const checkInMax = computed(() => availableToStr.value)
+// Allow future bookings: only use available_to as max when it is today or in the future; if past or missing, no max
+const checkInMax = computed(() => {
+  const to = availableToStr.value
+  if (!to) return null
+  return to >= todayStr ? to : null
+})
 const checkOutMin = computed(() => {
   const ci = checkIn.value
   const from = availableFromStr.value
@@ -245,14 +480,113 @@ const checkOutMin = computed(() => {
   if (from && from >= todayStr) return from
   return todayStr
 })
-const checkOutMax = computed(() => availableToStr.value)
+const checkOutMax = computed(() => checkInMax.value)
 
-function openDatePicker (field) {
-  const el = field === 'checkIn' ? checkInInputRef.value : checkOutInputRef.value
-  if (el && typeof el.showPicker === 'function') {
-    try {
-      el.showPicker()
-    } catch (_) { /* ignore NotAllowedError if not user gesture */ }
+// ─── Calendar (range selection) ─────────────────────────────────────────────
+const WEEKDAY_KEYS = [0, 1, 2, 3, 4, 5, 6] // Sun=0
+const weekdayShort = (i) => {
+  const d = new Date(2024, 0, 7 + i) // 7 Jan 2024 = Sun
+  return d.toLocaleDateString('fr-FR', { weekday: 'short' }).replace(/\.$/, '')
+}
+
+function formatCalendarDate (dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr + 'T12:00:00')
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+function calendarMonthLabel (offset) {
+  const d = new Date(calendarMonth.value.getFullYear(), calendarMonth.value.getMonth() + offset, 1)
+  return d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+}
+
+function calendarPrevMonth () {
+  calendarMonth.value = new Date(calendarMonth.value.getFullYear(), calendarMonth.value.getMonth() - 1, 1)
+}
+
+function calendarNextMonth () {
+  calendarMonth.value = new Date(calendarMonth.value.getFullYear(), calendarMonth.value.getMonth() + 1, 1)
+}
+
+function getCalendarDays (monthOffset) {
+  const year = calendarMonth.value.getFullYear()
+  const month = calendarMonth.value.getMonth() + monthOffset
+  const first = new Date(year, month, 1)
+  const last = new Date(year, month + 1, 0)
+  const startPad = first.getDay()
+  const daysInMonth = last.getDate()
+  const total = 42
+  const days = []
+  const minStr = checkInMin.value
+  const maxStr = checkInMax.value
+  const unavail = unavailableDates.value
+  const ci = checkIn.value
+  const co = checkOut.value
+  for (let i = 0; i < total; i++) {
+    const date = new Date(year, month, i - startPad + 1)
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+    const dayNumber = date.getDate()
+    const isCurrentMonth = date.getMonth() === month
+    const isDisabled = !isCurrentMonth || (minStr && dateStr < minStr) || (maxStr && dateStr > maxStr) || unavail.has(dateStr)
+    const isCheckIn = dateStr === ci
+    const isCheckOut = dateStr === co
+    const isInRange = ci && co && dateStr > ci && dateStr < co
+    days.push({
+      key: `${year}-${month}-${i}`,
+      dateStr,
+      dayNumber: isCurrentMonth ? dayNumber : '',
+      isCurrentMonth,
+      isDisabled,
+      isCheckIn,
+      isCheckOut,
+      isInRange,
+    })
+  }
+  return days
+}
+
+function getCalendarDayClass (day) {
+  if (day.isDisabled) return 'text-grey-300 bg-transparent cursor-not-allowed'
+  const c = []
+  if (day.isInRange) c.push('bg-navy/10 text-navy')
+  if (day.isCheckIn || day.isCheckOut) c.push('bg-navy text-white font-semibold')
+  if (!day.isCheckIn && !day.isCheckOut && !day.isInRange) {
+    c.push(day.isCurrentMonth ? 'text-navy hover:bg-grey-100' : 'text-grey-400')
+  }
+  c.push('cursor-pointer')
+  return c.join(' ') || 'text-navy'
+}
+
+function selectCalendarDate (dateStr) {
+  const ci = checkIn.value
+  const co = checkOut.value
+  if (!ci || (ci && co)) {
+    if (isDateUnavailable(dateStr)) {
+      snackbar.value = t('booking.date_not_available')
+      snackbarError.value = true
+      setTimeout(() => { snackbar.value = ''; snackbarError.value = false }, 3000)
+      return
+    }
+    checkIn.value = dateStr
+    checkOut.value = ''
+    bookingPrice.value = null
+    return
+  }
+  if (ci && !co) {
+    if (dateStr <= ci) {
+      checkIn.value = dateStr
+      checkOut.value = ''
+      bookingPrice.value = null
+      return
+    }
+    if (rangeHasUnavailableNight(ci, dateStr)) {
+      snackbar.value = t('booking.range_has_unavailable')
+      snackbarError.value = true
+      setTimeout(() => { snackbar.value = ''; snackbarError.value = false }, 3000)
+      return
+    }
+    checkOut.value = dateStr
+    onCheckOutChange()
   }
 }
 
@@ -294,9 +628,10 @@ const restToPayFromProduct = computed(() => {
   return Math.round(price + deposit - fee)
 })
 
-// Reservation fee for button/breakdown: from product API, or 10% of booking subtotal when no product fee
+// Reservation fee: from product API when > 0; when 0 or null, use 10% of subtotal only (not deposit)
 const reservationFeeAmount = computed(() => {
-  if (productReservationFee.value != null) return productReservationFee.value
+  const productFee = productReservationFee.value
+  if (productFee != null && Number(productFee) > 0) return Math.round(Number(productFee))
   const bp = bookingPrice.value
   if (!bp) return null
   const subtotal = Number(bp.subtotal) ?? Number(bp.total) ?? 0
@@ -304,17 +639,32 @@ const reservationFeeAmount = computed(() => {
   return Math.round(safeSubtotal * 0.1)
 })
 
-// Rest to pay: from product API formula when product has data; else from booking breakdown
+// Rest to pay at handover = subtotal + deposit + platform fee (paid at key handover; reservation fee is paid now)
 const restToPayAmount = computed(() => {
-  if (restToPayFromProduct.value != null) return restToPayFromProduct.value
-  const fee = reservationFeeAmount.value
   const bp = bookingPrice.value
-  if (fee == null || !bp) return null
+  if (!bp) return null
   const subtotal = Number(bp.subtotal) ?? Number(bp.total) ?? 0
   const deposit = Number(bp.deposit_amount) ?? 0
+  const platformFee = Number(bp.platform_fee) ?? 0
   const s = Number.isNaN(subtotal) ? 0 : subtotal
   const d = Number.isNaN(deposit) ? 0 : deposit
-  return Math.round(s + d - fee)
+  const p = Number.isNaN(platformFee) ? 0 : platformFee
+  return Math.round(s + d + p)
+})
+
+// Total price = subtotal + deposit + platform fee + reservation fee
+const totalPriceAmount = computed(() => {
+  const bp = bookingPrice.value
+  if (!bp) return null
+  const subtotal = Number(bp.subtotal) ?? Number(bp.total) ?? 0
+  const deposit = Number(bp.deposit_amount) ?? 0
+  const platformFee = Number(bp.platform_fee) ?? 0
+  const fee = summaryReservationFee.value ?? 0
+  const s = Number.isNaN(subtotal) ? 0 : subtotal
+  const d = Number.isNaN(deposit) ? 0 : deposit
+  const p = Number.isNaN(platformFee) ? 0 : platformFee
+  const f = Number.isNaN(Number(fee)) ? 0 : Number(fee)
+  return Math.round(s + d + p + f)
 })
 
 // Cost summary (from product API or booking when available)
@@ -333,17 +683,16 @@ const summaryTotal = computed(() => {
   return price + deposit
 })
 
-// Explanation with real amounts from product API: (price + deposit − reservation_fee) = rest
+// Explanation with effective amounts: total (subtotal+deposit) − reservation_fee = rest
 const reservationFeeExplanationText = computed(() => {
-  const rest = restToPayFromProduct.value
-  const currency = bookingPrice.value?.currency || 'XOF'
-  if (rest != null) {
-    const price = productPrice.value ?? 0
-    const deposit = productDepositAmount.value ?? 0
-    const fee = productReservationFee.value ?? 0
+  const rest = restToPayAmount.value
+  const total = summaryTotal.value
+  const fee = summaryReservationFee.value ?? 0
+  const currency = summaryCurrency.value
+  if (rest != null && total != null) {
     return t('booking.reservation_fee_explanation_with_amounts', {
-      total: formatCurrency(price),
-      deposit: formatCurrency(deposit),
+      total: formatCurrency(total),
+      deposit: formatCurrency(summaryDeposit.value),
       reservation_fee: formatCurrency(fee),
       rest: formatCurrency(rest),
       currency,
@@ -365,11 +714,21 @@ const loadProduct = async () => {
   error.value = null
   try {
     await productStore.fetchProductById(id)
-    if (!productStore.currentProduct) error.value = t('product.not_found') || 'Product not found'
-    else if (maxGuests.value) numGuests.value = Math.min(numGuests.value, maxGuests.value)
+    if (!productStore.currentProduct) { error.value = t('product.not_found') || 'Product not found'; return }
+
+    // Redirect viewing-only types back to product details
+    if (isViewingOnly.value) {
+      router.replace({ name: 'ProductDetails', params: { id } })
+      return
+    }
+
+    if (maxGuests.value) numGuests.value = Math.min(numGuests.value, maxGuests.value)
+    if (isMidTerm.value) durationMonths.value = minStayMonths.value
+
     await nextTick()
     clampDatesToAvailability()
     await fetchAvailability()
+    setCalendarMonthFromProduct()
   } catch (e) {
     console.error(e)
     error.value = e.response?.data?.detail || t('common.error') || 'Error loading product'
@@ -384,9 +743,9 @@ async function fetchAvailability () {
   const toStr = availableToStr.value
   if (!pid) return
   const start = fromStr && fromStr >= todayStr ? fromStr : todayStr
-  let end = toStr
+  let end = toStr && toStr >= todayStr ? toStr : null
   if (!end) {
-    const from = fromStr ? new Date(fromStr) : new Date()
+    const from = new Date(start + 'T12:00:00')
     from.setFullYear(from.getFullYear() + 1)
     end = from.toISOString().slice(0, 10)
   }
@@ -409,6 +768,12 @@ async function fetchAvailability () {
     console.warn('Availability fetch failed:', e)
     unavailableDates.value = new Set()
   }
+}
+
+function setCalendarMonthFromProduct () {
+  const min = checkInMin.value
+  const d = min ? new Date(min + 'T12:00:00') : new Date()
+  calendarMonth.value = new Date(d.getFullYear(), d.getMonth(), 1)
 }
 
 function clampDatesToAvailability () {
@@ -471,6 +836,8 @@ const onCheckOutChange = () => {
 }
 
 const calculatePrice = async () => {
+  if (isMidTerm.value) return calculateMidTermPrice()
+
   if (!checkIn.value || !checkOut.value || !product.value?.id) { bookingPrice.value = null; return }
   if (isDateUnavailable(checkIn.value) || rangeHasUnavailableNight(checkIn.value, checkOut.value)) {
     bookingPrice.value = null
@@ -488,7 +855,6 @@ const calculatePrice = async () => {
       check_out: checkOut.value,
       num_guests: numGuests.value,
     })
-    // Support both direct body (res.data) and wrapped (res.data.data)
     const payload = res?.data
     const priceData = payload && typeof payload === 'object' && 'nights' in payload
       ? payload
@@ -511,20 +877,103 @@ const calculatePrice = async () => {
   }
 }
 
+/** True if the mid-term range [start, start + duration months) has any unavailable night */
+function midTermRangeHasUnavailable (startStr, months) {
+  if (!startStr || !months || !unavailableDates.value.size) return false
+  const start = new Date(startStr + 'T12:00:00')
+  const end = new Date(start)
+  end.setMonth(end.getMonth() + months)
+  const set = unavailableDates.value
+  const d = new Date(start)
+  while (d < end) {
+    if (set.has(d.toISOString().slice(0, 10))) return true
+    d.setDate(d.getDate() + 1)
+  }
+  return false
+}
+
+function onMidTermStartDateChange () {
+  if (!startDate.value) {
+    bookingPrice.value = null
+    return
+  }
+  if (isDateUnavailable(startDate.value)) {
+    startDate.value = ''
+    bookingPrice.value = null
+    snackbar.value = t('booking.date_not_available') || 'This date is not available'
+    snackbarError.value = true
+    setTimeout(() => { snackbar.value = ''; snackbarError.value = false }, 3000)
+    return
+  }
+  if (midTermRangeHasUnavailable(startDate.value, parseInt(durationMonths.value, 10))) {
+    startDate.value = ''
+    bookingPrice.value = null
+    snackbar.value = t('booking.range_has_unavailable') || 'Some dates in this range are not available'
+    snackbarError.value = true
+    setTimeout(() => { snackbar.value = ''; snackbarError.value = false }, 3000)
+    return
+  }
+  calculateMidTermPrice()
+}
+
+const calculateMidTermPrice = async () => {
+  if (!startDate.value || !durationMonths.value || !product.value?.id) { bookingPrice.value = null; return }
+  if (isDateUnavailable(startDate.value) || midTermRangeHasUnavailable(startDate.value, parseInt(durationMonths.value, 10))) {
+    bookingPrice.value = null
+    snackbar.value = t('booking.range_has_unavailable') || 'Some dates in this range are not available'
+    snackbarError.value = true
+    setTimeout(() => { snackbar.value = ''; snackbarError.value = false }, 3000)
+    return
+  }
+  calculating.value = true
+  bookingPrice.value = null
+  try {
+    const monthlyRate = Number(product.value.price) || 0
+    const months = parseInt(durationMonths.value, 10)
+    const deposit = Number(product.value.property_meta?.deposit_amount) || 0
+    const guests = pricePerPerson.value ? Math.max(1, numGuests.value) : 1
+    let subtotal = monthlyRate * months * guests
+    // Platform fee = 5% of total price to pay (subtotal + deposit)
+    const platformFee = Math.round((subtotal + deposit) * 0.05)
+    bookingPrice.value = {
+      months,
+      price_per_month: monthlyRate,
+      subtotal,
+      deposit_amount: deposit,
+      platform_fee: platformFee,
+      total: subtotal + deposit + platformFee,
+      currency: product.value.currency_info?.currency_code || 'XOF',
+    }
+  } finally {
+    calculating.value = false
+  }
+}
+
 const submitBooking = async () => {
   if (!bookingPrice.value || !product.value?.id) return
   submitting.value = true
   snackbar.value = ''
   try {
-    const res = await apiService.createBooking({
+    const payload = {
       product_id: product.value.id,
-      check_in: checkIn.value,
-      check_out: checkOut.value,
       num_guests: numGuests.value,
       special_requests: specialRequests.value,
-    })
+    }
+    if (isMidTerm.value) {
+      payload.check_in = startDate.value
+      payload.duration_months = parseInt(durationMonths.value, 10)
+      // Compute check_out from start date + duration
+      const sd = new Date(startDate.value + 'T12:00:00')
+      sd.setMonth(sd.getMonth() + payload.duration_months)
+      payload.check_out = sd.toISOString().slice(0, 10)
+    } else {
+      payload.check_in = checkIn.value
+      payload.check_out = checkOut.value
+    }
+    const res = await apiService.createBooking(payload)
     const data = res.data
     if (data?.id) {
+      showSummaryDialog.value = false
       router.replace({ name: 'BookingConfirmation', params: { id: data.id } })
       return
     }
@@ -540,6 +989,20 @@ const submitBooking = async () => {
     submitting.value = false
   }
 }
+
+const confirmAndSubmitBooking = () => {
+  submitBooking()
+}
+
+// When per-person pricing is on, recalculate price when number of guests changes
+watch(numGuests, () => {
+  if (!pricePerPerson.value) return
+  if (isShortTerm.value && checkIn.value && checkOut.value) {
+    calculatePrice()
+  } else if (isMidTerm.value && startDate.value) {
+    calculateMidTermPrice()
+  }
+})
 
 onMounted(() => {
   loadProduct()

@@ -189,7 +189,7 @@
                     class="px-3 py-1.5 text-white text-xs font-semibold rounded-full transition-all duration-200 flex items-center space-x-1.5 bg-navy hover:bg-navy/90"
                   >
                     <ArrowRight class="w-3 h-3" />
-                    <span>{{ $t('notifications.view') }} {{ notification.reference_type }}</span>
+                    <span>{{ getViewReferenceLabel(notification.reference_type) }}</span>
                   </button>
                   
                   <button 
@@ -359,12 +359,26 @@ const getNotificationIcon = (type) => {
   }
 }
 
+const viewReferenceKeys = {
+  'Order': 'notifications.view_order',
+  'Product': 'notifications.view_product',
+  'PropertyBooking': 'notifications.view_booking',
+  'ListingInquiry': 'notifications.view_listing_inquiry',
+  'Profile': 'notifications.view_profile'
+}
+
+const getViewReferenceLabel = (referenceType) => {
+  const key = viewReferenceKeys[referenceType]
+  return key ? t(key) : `${t('notifications.view')} ${referenceType || ''}`
+}
+
 const navigateToReference = (notification) => {
   if (!notification.reference_type || !notification.reference_id) return
 
   const linkMap = {
     'Order': `/order-status/${notification.reference_id}`,
     'Product': `/product/${notification.reference_id}`,
+    'PropertyBooking': `/booking/${notification.reference_id}`,
     'Profile': '/profile',
     'ListingInquiry': '/listing-inquiries'
   }
