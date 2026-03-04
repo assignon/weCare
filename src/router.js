@@ -86,6 +86,7 @@ const routes = [
   { path: '/reset-password/:code', name: 'ResetPassword', component: loadComponent(() => import('@/pages/ResetPassword.vue'), 'ResetPassword') },
   { path: '/product/:id', name: 'ProductDetails', component: loadComponent(() => import('@/pages/ProductDetails.vue'), 'ProductDetails'), meta: { requiresAuth: true } },
   { path: '/product/:id/book', name: 'PropertyBook', component: loadComponent(() => import('@/pages/PropertyBook.vue'), 'PropertyBook'), meta: { requiresAuth: true } },
+  { path: '/product/:id/reserve-vehicle', name: 'VehicleReserve', component: loadComponent(() => import('@/pages/VehicleReserve.vue'), 'VehicleReserve'), meta: { requiresAuth: true } },
   // { path: '/stores', name: 'StoreDirectory', component: loadComponent(() => import('@/pages/StoreDirectory.vue'), 'StoreDirectory'), meta: { requiresAuth: true } },
   // { path: '/store/:id', name: 'StoreDetails', component: loadComponent(() => import('@/pages/StoreDetails.vue'), 'StoreDetails'), meta: { requiresAuth: true } },
   { path: '/order-status/:id', name: 'OrderStatus', component: loadComponent(() => import('@/pages/OrderStatus.vue'), 'OrderStatus'), meta: { requiresAuth: true } },

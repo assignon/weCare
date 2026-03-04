@@ -127,7 +127,7 @@ import apiService from '@/services/api'
 import packagingImage from '@/assets/packaging_10471395.png'
 import { 
   Store, Sparkles, Shirt, Pill, Sofa, Monitor, Car, 
-  Package, AlertCircle 
+  Package, AlertCircle, Building2, UtensilsCrossed, Wine, Gamepad2 
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -178,15 +178,23 @@ const navigateToDetails = (productId, itemType) => {
 }
 
 const getCategoryIcon = (categoryName) => {
+  const n = (categoryName || '').toLowerCase().trim().normalize('NFD').replace(/\p{Diacritic}/gu, '')
+  if (n.includes('beaute') || n.includes('beauty')) return Sparkles
+  if (n.includes('electronique') || n.includes('electronics')) return Monitor
+  if (n.includes('immobilier') || n.includes('real')) return Building2
+  if (n.includes('meubles') || n.includes('furniture')) return Sofa
+  if (n.includes('alimentation') || n.includes('food') || n.includes('grocery')) return UtensilsCrossed
+  if (n.includes('boisson') || n.includes('drink') || n.includes('beverage')) return Wine
+  if (n.includes('jouets') || n.includes('toy') || n.includes('toys')) return Gamepad2
   const iconMap = {
-    'Beauty': Sparkles,
-    'Fashion': Shirt,
-    'Pharmacy': Pill,
-    'Furniture': Sofa,
-    'Electronics': Monitor,
-    'Automobile': Car
+    'beauty': Sparkles,
+    'fashion': Shirt,
+    'pharmacy': Pill,
+    'furniture': Sofa,
+    'electronics': Monitor,
+    'automobile': Car
   }
-  return iconMap[categoryName] || Store
+  return iconMap[n] || Store
 }
 
 const isDefault = (id) => String(sessionStorage.getItem('defaultStore') || '') === String(id)

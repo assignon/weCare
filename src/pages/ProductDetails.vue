@@ -369,22 +369,45 @@
           </div>
 
           <div class="px-5 pt-4 space-y-4">
-            <!-- Seller shop + stock -->
+            <!-- Seller shop + listing badges -->
             <div class="flex justify-between items-center">
               <span class="text-sm text-grey-400 font-medium">{{ product.seller_name || product.store?.name || '—' }}</span>
-              <span v-if="currentStock > 0" class="chip chip-success">{{ currentStock }} {{ $t('product.in_stock') }}</span>
-              <span v-else class="chip chip-error">{{ $t('product.out_of_stock') }}</span>
+              <div class="flex items-center gap-2">
+                <span v-if="autoListingLabel" class="rounded-lg px-3 py-1.5 text-xs font-semibold"
+                      :class="autoListingType === 'for_sale' ? 'bg-blue-100 text-blue-800' : autoListingType === 'for_rent' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'">
+                  {{ $t(autoListingLabel) }}
+                </span>
+                <span v-if="autoConditionLabel" class="rounded-lg px-3 py-1.5 bg-grey-100 text-grey-700 text-xs font-medium">{{ $t(autoConditionLabel) }}</span>
+              </div>
             </div>
             <!-- Vehicle name -->
             <h1 class="text-xl font-bold text-navy capitalize leading-tight">{{ product.name }}</h1>
-            <!-- Price -->
-            <p class="text-2xl font-bold text-navy tracking-tight">{{ formatApiPrice({ price: currentPrice }) }}</p>
+            <!-- Price with suffix (per day/month) -->
+            <div>
+              <p class="text-2xl font-bold text-red-500 tracking-tight" :class="(autoDepositAmount != null && autoDepositAmount > 0) ? 'mb-1' : ''">
+                {{ formatApiPrice({ price: currentPrice }) }}
+                <span v-if="autoPriceSuffix" class="text-base font-medium text-grey-500">/ {{ $t(autoPriceSuffix) }}</span>
+              </p>
+              <div class="flex flex-wrap items-center gap-2 mt-1">
+                <span v-if="autoNegotiable" class="text-xs font-medium text-green-700 bg-green-50 rounded-full px-2.5 py-1">{{ $t('product.negotiable') }}</span>
+                <span v-if="autoDepositAmount != null && autoDepositAmount > 0" class="text-sm text-primary-600 font-medium">{{ $t('product.deposit_label') }}: {{ formatApiPrice({ price: autoDepositAmount }) }}</span>
+              </div>
+              <p v-if="autoMeta.down_payment && Number(autoMeta.down_payment) > 0" class="text-sm text-grey-500 mt-1">{{ $t('product.down_payment_label') }}: {{ formatApiPrice({ price: Number(autoMeta.down_payment) }) }}</p>
+              <p v-if="autoListingType === 'for_leasing' && autoMeta.lease_duration_months" class="text-sm text-grey-500">{{ $t('product.lease_duration_label') }}: {{ autoMeta.lease_duration_months }} {{ $t('product.months_label') }}</p>
+            </div>
 
-            <!-- Key vehicle specs (quick glance chips) -->
-            <div v-if="vehicleSpecs.length > 0" class="flex flex-wrap gap-2">
-              <div v-for="spec in vehicleSpecs.slice(0, 4)" :key="spec.id" class="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-grey-50">
-                <component :is="spec.icon" class="w-4 h-4 text-navy" />
-                <span class="text-xs text-navy font-medium">{{ spec.value }}</span>
+            <!-- Under price: marque, modele, year, mileage, transmission, fuel (same style as property details grid) -->
+            <div v-if="autoKeySpecsUnderPrice.length > 0" class="grid grid-cols-2 gap-3 mt-4">
+              <div
+                v-for="item in autoKeySpecsUnderPrice"
+                :key="item.labelKey"
+                class="flex items-start gap-2 text-left"
+              >
+                <component :is="item.icon" class="w-4 h-4 text-grey-500 mt-0.5 flex-shrink-0" />
+                <div class="min-w-0">
+                  <span class="text-sm font-bold text-navy block">{{ item.value }}</span>
+                  <span class="text-xs text-grey-500">{{ $t(item.labelKey) }}</span>
+                </div>
               </div>
             </div>
 
@@ -397,18 +420,22 @@
               </button>
             </div>
 
-            <!-- Vehicle specifications (full list) -->
+            <!-- Notes from seller -->
+            <div v-if="autoMeta.notes" class="rounded-2xl bg-amber-50 border border-amber-200 p-4">
+              <h3 class="text-sm font-bold text-navy mb-1">{{ $t('product.seller_notes') }}</h3>
+              <p class="text-sm text-grey-600 leading-relaxed">{{ autoMeta.notes }}</p>
+            </div>
+
+            <!-- Vehicle specifications: link opening full-height dialog -->
             <div v-if="vehicleSpecs.length > 0" class="rounded-2xl bg-grey-50 p-4">
-              <h2 class="text-base font-bold text-navy mb-4">{{ $t('product.vehicle_specs') }}</h2>
-              <div class="space-y-3">
-                <div v-for="spec in vehicleSpecs" :key="spec.id" class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <component :is="spec.icon" class="w-4 h-4 text-grey-400" />
-                    <span class="text-sm text-grey-500">{{ spec.label }}</span>
-                  </div>
-                  <span class="text-sm font-medium text-navy">{{ spec.value }}</span>
-                </div>
-              </div>
+              <button
+                type="button"
+                @click="showVehicleSpecsDialog = true"
+                class="w-full flex items-center justify-between gap-3 text-left group"
+              >
+                <h2 class="text-base font-bold text-navy group-hover:text-navy/90">{{ $t('product.vehicle_specs') }}</h2>
+                <ChevronRight class="w-5 h-5 text-grey-400 group-hover:text-navy flex-shrink-0" />
+              </button>
             </div>
 
             <!-- Seller info card -->
@@ -846,7 +873,7 @@
           </template>
         </template>
 
-        <!-- Automobile: contact seller + schedule test drive -->
+        <!-- Automobile: CTA varies by listing type -->
         <div v-else-if="isAutomobile" class="flex items-center gap-3 w-full">
           <a
             v-if="product.store?.phone"
@@ -855,13 +882,33 @@
           >
             <Phone class="w-5 h-5 text-navy" />
           </a>
+          <!-- For Sale: schedule test drive -->
           <button
+            v-if="autoListingType === 'for_sale' || !autoListingType"
             @click="showViewingForm = true"
             :disabled="backendHasActiveViewingRequest"
-            class="flex-1 py-4 text-white font-semibold rounded-2xl flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 disabled:opacity-50 transition-all active:opacity-90"
+            class="flex-1 py-4 text-white font-semibold rounded-2xl flex items-center justify-center gap-2 bg-[#262A2E] shadow-[0_2px_8px_rgba(0,0,0,0.12)] hover:opacity-90 disabled:opacity-50 transition-all active:opacity-90"
           >
             <Calendar class="w-5 h-5" />
             {{ backendHasActiveViewingRequest ? $t('product.request_pending') : $t('product.schedule_test_drive') }}
+          </button>
+          <!-- For Rent: reserve vehicle → reserve & pay page -->
+          <button
+            v-else-if="autoListingType === 'for_rent'"
+            @click="$router.push({ name: 'VehicleReserve', params: { id: product.id } })"
+            class="flex-1 py-4 text-white font-semibold rounded-2xl flex items-center justify-center gap-2 bg-[#262A2E] shadow-[0_2px_8px_rgba(0,0,0,0.12)] hover:opacity-90 transition-all active:opacity-90"
+          >
+            <Calendar class="w-5 h-5" />
+            {{ $t('product.reserve_vehicle') }}
+          </button>
+          <!-- For Leasing: reserve vehicle → reserve & pay page (10% pay now) -->
+          <button
+            v-else-if="autoListingType === 'for_leasing'"
+            @click="$router.push({ name: 'VehicleReserve', params: { id: product.id } })"
+            class="flex-1 py-4 text-white font-semibold rounded-2xl flex items-center justify-center gap-2 bg-[#262A2E] shadow-[0_2px_8px_rgba(0,0,0,0.12)] hover:opacity-90 transition-all active:opacity-90"
+          >
+            <Calendar class="w-5 h-5" />
+            {{ $t('product.reserve_vehicle') }}
           </button>
           <a
             v-if="whatsappLink !== '#'"
@@ -1013,7 +1060,7 @@
             class="btn-cta bg-success-600 hover:bg-success-700 disabled:opacity-50"
           >
             <span v-if="bookingSubmitting">{{ $t('product.processing') }}...</span>
-            <span v-else>{{ $t('product.book_now') }} - {{ bookingPrice ? formatCurrency(bookingPrice.total) : '' }} {{ bookingPrice?.currency || 'XOF' }}</span>
+            <span v-else>{{ $t('product.book_now') }} - {{ bookingPrice ? formatCurrency(bookingPrice.total) : '' }} {{ (bookingPrice?.currency === 'XOF' ? 'FCFA' : bookingPrice?.currency) || 'FCFA' }}</span>
           </button>
         </div>
       </div>
@@ -1237,6 +1284,54 @@
         </div>
       </Transition>
     </Teleport>
+
+    <!-- Full-height vehicle specs dialog (automobile): Caractéristiques du véhicule -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div
+          v-if="showVehicleSpecsDialog"
+          class="fixed inset-0 z-[9999] flex flex-col bg-white min-h-screen"
+          role="dialog"
+          aria-modal="true"
+          :aria-label="$t('product.vehicle_specs')"
+        >
+          <div class="flex items-center justify-between flex-shrink-0 px-4 py-3 border-b border-gray-200 bg-white">
+            <h2 class="text-lg font-bold text-gray-900">{{ $t('product.vehicle_specs') }}</h2>
+            <button
+              type="button"
+              @click="showVehicleSpecsDialog = false"
+              class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
+              :aria-label="$t('common.close')"
+            >
+              <X class="w-5 h-5" />
+            </button>
+          </div>
+          <div class="flex-1 overflow-y-auto px-4 py-4">
+            <div v-if="vehicleSpecs.length === 0" class="text-center py-12">
+              <p class="text-gray-500 text-sm">{{ $t('product.not_specified') }}</p>
+            </div>
+            <div v-else class="space-y-4">
+              <div
+                v-for="spec in vehicleSpecs"
+                :key="spec.id"
+                class="flex items-start gap-3 py-3 border-b border-gray-100 last:border-0"
+              >
+                <component :is="spec.icon" class="w-5 h-5 text-navy flex-shrink-0 mt-0.5" />
+                <div class="min-w-0 flex-1">
+                  <p class="text-xs font-medium text-gray-500 mb-1">{{ spec.label }}</p>
+                  <div v-if="spec.valueIsArray" class="flex flex-wrap gap-2">
+                    <span v-for="chip in spec.value" :key="chip" class="inline-block px-3 py-1.5 rounded-xl bg-navy/10 text-navy text-sm font-medium">
+                      {{ chip }}
+                    </span>
+                  </div>
+                  <p v-else class="text-sm font-medium text-gray-900">{{ spec.value }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -1267,6 +1362,7 @@ const router = useRouter()
 const quantity = ref(1)
 const activeTab = ref('description')
 const showSpecsDialog = ref(false)
+const showVehicleSpecsDialog = ref(false)
 const selectedVariant = ref(null)
 const selectedSize = ref(null)
 const cart = useCartStore()
@@ -1341,6 +1437,44 @@ const storeCategorySlug = computed(() => {
 // Automobile layout
 const isAutomobile = computed(() => {
   return storeCategorySlug.value === 'automobile' || storeCategorySlug.value === 'auto'
+})
+
+// Automobile meta: listing type, pricing, condition, etc.
+const autoMeta = computed(() => product.value?.automobile_meta || {})
+const autoListingType = computed(() => autoMeta.value.listing_type || '')
+const autoCondition = computed(() => autoMeta.value.condition || '')
+const autoNegotiable = computed(() => !!autoMeta.value.negotiable)
+const autoDepositAmount = computed(() => {
+  const d = autoMeta.value.deposit_amount
+  return (d != null && d !== '' && !Number.isNaN(Number(d))) ? Number(d) : null
+})
+
+const autoPriceSuffix = computed(() => {
+  const lt = autoListingType.value
+  if (lt === 'for_rent') {
+    const unit = autoMeta.value.rental_price_unit || autoMeta.value.price_unit || 'day'
+    if (unit === 'day') return 'product.per_day'
+    if (unit === 'week') return 'product.per_week'
+    if (unit === 'month') return 'product.per_month'
+  }
+  if (lt === 'for_leasing') return 'product.per_month'
+  return null
+})
+
+const autoListingLabel = computed(() => {
+  const lt = autoListingType.value
+  if (lt === 'for_sale') return 'product.auto_for_sale'
+  if (lt === 'for_rent') return 'product.auto_for_rent'
+  if (lt === 'for_leasing') return 'product.auto_for_leasing'
+  return null
+})
+
+const autoConditionLabel = computed(() => {
+  const c = autoCondition.value
+  if (c === 'new') return 'product.condition_new'
+  if (c === 'used') return 'product.condition_used'
+  if (c === 'certified_pre_owned') return 'product.condition_certified'
+  return null
 })
 
 // Map/location only when store category is immobilier
@@ -1443,17 +1577,58 @@ const googleMapsLink = computed(() => {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`
 })
 
-// Vehicle specs computed from product attributes (for automobile)
+// Under-price key specs for automobile: marque, modele, year, mileage, transmission, fuel (from product attributes)
+const autoKeySpecsUnderPrice = computed(() => {
+  if (!isAutomobile.value || !productAttributes.value?.length) return []
+  const attrs = productAttributes.value.filter(a => !a.shopper_choice)
+  const findAttr = (keywords) => {
+    const a = attrs.find(attr => {
+      const n = (attr.label || attr.name || attr.attribute_template?.name || '').toLowerCase()
+      return keywords.some(k => n.includes(k))
+    })
+    if (!a) return null
+    const raw = getFormattedAttributeValue?.(a)
+    if (raw == null || raw === '') return null
+    if (Array.isArray(raw) && raw.length === 0) return null
+    const value = Array.isArray(raw) ? raw.join(', ') : String(raw)
+    return value.trim() ? value : null
+  }
+  const out = []
+  const marque = findAttr(['marque', 'brand', 'make'])
+  if (marque) out.push({ labelKey: 'product.auto_marque', value: marque, icon: Car })
+  const modele = findAttr(['modèle', 'modele', 'model'])
+  if (modele) out.push({ labelKey: 'product.auto_modele', value: modele, icon: Info })
+  const year = findAttr(['year', 'année', 'annee', 'manufacturing'])
+  if (year) out.push({ labelKey: 'product.auto_manufacturing_year', value: year, icon: Calendar })
+  const mileage = findAttr(['kilom', 'mileage', 'odometer'])
+  if (mileage) out.push({ labelKey: 'product.auto_mileage', value: mileage, icon: Gauge })
+  const transmission = findAttr(['boîte', 'boite', 'transmission', 'gearbox'])
+  if (transmission) out.push({ labelKey: 'product.auto_transmission', value: transmission, icon: Settings2 })
+  const fuel = findAttr(['fuel', 'carburant', 'essence', 'diesel'])
+  if (fuel) out.push({ labelKey: 'product.auto_fuel_type', value: fuel, icon: Fuel })
+  return out
+})
+
+// Vehicle specs computed from product attributes (for automobile); exclude empty values, arrays shown as chips
 const vehicleSpecs = computed(() => {
   if (!isAutomobile.value || !productAttributes.value.length) return []
   return productAttributes.value
     .filter(attr => !attr.shopper_choice)
-    .map(attr => ({
-      id: attr.id,
-      label: attr.label || attr.name || '',
-      value: getFormattedAttributeValue?.(attr) || '—',
-      icon: getAutoSpecIcon(attr.label || attr.name || '')
-    }))
+    .map(attr => {
+      const raw = getFormattedAttributeValue?.(attr)
+      const value = raw ?? null
+      const valueIsArray = Array.isArray(value)
+      const isEmpty = value == null || value === '' || (valueIsArray && value.length === 0)
+      if (isEmpty) return null
+      return {
+        id: attr.id,
+        label: attr.label || attr.name || '',
+        value: valueIsArray ? value : (value === '' ? null : value),
+        valueIsArray,
+        icon: getAutoSpecIcon(attr.label || attr.name || '')
+      }
+    })
+    .filter(Boolean)
 })
 
 function getAutoSpecIcon(label) {

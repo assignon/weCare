@@ -324,7 +324,7 @@ import BottomNavigation from '@/components/BottomNavigation.vue'
 import { 
   Search, X, Star, Store, Grid3X3, List, ArrowRight, AlertCircle
 } from 'lucide-vue-next'
-import { debounce } from 'lodash'
+import { debounce } from '@/utils/debounce'
 
 const router = useRouter()
 

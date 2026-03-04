@@ -7,7 +7,7 @@ const CURRENCY_FORMATS = {
   'USD': { symbol: '$', position: 'before', decimalPlaces: 2, thousandsSeparator: ',' },
   'EUR': { symbol: '€', position: 'after', decimalPlaces: 2, thousandsSeparator: '.' },
   'GBP': { symbol: '£', position: 'before', decimalPlaces: 2, thousandsSeparator: ',' },
-  'XOF': { symbol: 'CFA', position: 'after', decimalPlaces: 0, thousandsSeparator: ' ' }, // West African CFA franc
+  'XOF': { symbol: 'FCFA', position: 'after', decimalPlaces: 0, thousandsSeparator: ' ' }, // West African CFA franc
   'XAF': { symbol: 'FCFA', position: 'after', decimalPlaces: 0, thousandsSeparator: ' ' }, // Central African CFA franc
   'CFA': { symbol: 'CFA', position: 'after', decimalPlaces: 0, thousandsSeparator: ' ' }, // Central African CFA franc (alias)
   'NGN': { symbol: '₦', position: 'before', decimalPlaces: 2, thousandsSeparator: ',' },

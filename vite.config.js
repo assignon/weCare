@@ -125,19 +125,25 @@ export default defineConfig({
     },
   },
   build: {
-    // Disable CSS code splitting to avoid preload errors
-    // All CSS will be bundled into a single file
-    cssCodeSplit: false,
     rollupOptions: {
       output: {
-        // Ensure consistent chunk naming
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash][extname]',
+        manualChunks: {
+          'vue-vendor': ['vue', 'vue-router', 'pinia'],
+          'vuetify': ['vuetify'],
+          'firebase': ['firebase/app', 'firebase/messaging'],
+          'charts': ['apexcharts', 'chart.js'],
+          'i18n': ['vue-i18n'],
+        },
       },
     },
-    // Increase chunk size warning limit to avoid warnings
-    chunkSizeWarningLimit: 1000,
+    minify: 'esbuild',
+    target: 'es2020',
+  },
+  esbuild: {
+    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
   },
   server: {
     host: "shopper.local",

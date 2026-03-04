@@ -4,7 +4,7 @@
             <!-- Logo/Brand -->
             <div class="brand-section">
                 <div class="logo-container">
-                    <img src="/AE-no-text.svg" alt="AfriQExpress Logo" class="logo-image" />
+                    <img src="/favicon.svg" alt="AfriQExpress Logo" class="logo-image" />
                 </div>
                 <h1 class="brand-title">{{ $t('splash.title') }}</h1>
                 <p class="brand-subtitle">{{ $t('splash.subtitle') }}</p>
@@ -169,26 +169,20 @@ onMounted(async () => {
 }
 
 .logo-container {
-    margin-bottom: 24px;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 140px;
-    height: 140px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 28px;
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    width: 200px;
+    height: 200px;
 }
 
 .logo-image {
-    width: 100px;
-    height: 100px;
+    width: 200px;
+    height: 200px;
     object-fit: contain;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
-    animation: pulse 2s infinite;
+    /* filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2)); */
+    /* animation: pulse 2s infinite; */
 }
 
 .brand-title {
@@ -359,14 +353,13 @@ onMounted(async () => {
     }
 
     .logo-container {
-        width: 120px;
-        height: 120px;
-        border-radius: 24px;
+        width: 150px;
+        height: 150px;
     }
 
     .logo-image {
-        width: 80px;
-        height: 80px;
+        width: 150px;
+        height: 150px;
     }
 
     .brand-section {
@@ -384,14 +377,13 @@ onMounted(async () => {
     }
 
     .logo-container {
-        width: 100px;
-        height: 100px;
-        border-radius: 20px;
+        width: 200px;
+        height: 150px;
     }
 
     .logo-image {
-        width: 70px;
-        height: 70px;
+        width: 150px;
+        height: 150px;
     }
 }
 

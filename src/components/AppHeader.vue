@@ -196,8 +196,12 @@ const handleFilterClick = () => {
   window.dispatchEvent(new CustomEvent('openFilter'))
 }
 
-// Back button handler
+// Back button handler: go to previous page or Profile if no history
 const goBack = () => {
-  router.push({ name: 'Profile' })
+  if (window.history.length > 1) {
+    router.back()
+  } else {
+    router.push({ name: 'Profile' })
+  }
 }
 </script>

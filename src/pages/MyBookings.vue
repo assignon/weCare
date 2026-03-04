@@ -143,7 +143,7 @@
             </div>
 
             <div class="mt-2 flex items-center justify-between">
-              <span class="text-sm font-bold text-navy">{{ formatCurrency(b.total_amount ?? b.total_price) }} XOF</span>
+              <span class="text-sm font-bold text-navy">{{ formatCurrency(b.total_amount ?? b.total_price) }} FCFA</span>
               <ChevronRight class="w-4 h-4 text-grey-400" />
             </div>
           </div>
