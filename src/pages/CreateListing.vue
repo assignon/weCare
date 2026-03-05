@@ -253,7 +253,7 @@
         class="btn-cta h-12 flex items-center justify-center disabled:bg-grey-300 disabled:cursor-not-allowed transition-all duration-200"
       >
         <Loader2 v-if="loading" class="w-5 h-5 animate-spin mr-2" />
-        <span>{{ loading ? 'Creating...' : 'Create Listing' }}</span>
+        <span>{{ loading ? $t('listings.creating') : $t('listings.create_listing_btn') }}</span>
       </button>
     </div>
 
@@ -280,7 +280,7 @@
                 rel="noopener noreferrer"
                 class="text-navy hover:text-navy/80 underline font-medium"
               >
-                Visit Seller Platform →
+                {{ $t('listings.visit_seller_platform_link') }}
               </a>
             </div>
           </div>
@@ -304,12 +304,14 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useListingStore } from '@/stores/listing'
 import { Plus, X, Loader2, FileText, Tag, DollarSign, MapPin, MessageCircle, Phone, Mail, AlertCircle, CheckCircle, Info } from 'lucide-vue-next'
 import BackButtonHeader from '@/components/BackButtonHeader.vue'
 import apiService from '@/services/api'
 
 const router = useRouter()
+const { t } = useI18n()
 const listingStore = useListingStore()
 
 const loading = ref(false)
@@ -337,8 +339,18 @@ const form = ref({
 
 onMounted(async () => {
   try {
-    const response = await apiService.getCategories()
-    categories.value = response.data.results || response.data
+    // Request all categories for listing dropdown (backend returns all when all=true)
+    const response = await apiService.getCategories({ all: 'true' })
+    const raw = response.data?.results ?? response.data
+    const list = Array.isArray(raw) ? raw : []
+    // Deduplicate by id (keep first occurrence)
+    const seen = new Set()
+    categories.value = list.filter((cat) => {
+      const id = cat?.id ?? cat
+      if (seen.has(id)) return false
+      seen.add(id)
+      return true
+    })
   } catch (error) {
     console.error('Failed to fetch categories:', error)
   }
@@ -359,7 +371,7 @@ function addImage(e) {
   
   // Validate file type
   if (!file.type.startsWith('image/')) {
-    showErrorDialog('Invalid File', 'Please select an image file.')
+    showErrorDialog(t('listings.invalid_file_title'), t('listings.invalid_file_message'))
     e.target.value = ''
     return
   }
@@ -379,7 +391,7 @@ function addImage(e) {
     // Reset input to allow selecting the same file again
     e.target.value = ''
   } else {
-    showErrorDialog('Limit Reached', 'You can only upload up to 2 images.')
+    showErrorDialog(t('listings.limit_reached_title'), t('listings.limit_reached_message'))
     e.target.value = ''
   }
 }
@@ -477,24 +489,24 @@ async function submit() {
   loading.value = false
 
   if (images.value.length === 0) {
-    showErrorDialog('Missing Photos', 'Please add at least one photo to your listing.')
+    showErrorDialog(t('listings.missing_photos_title'), t('listings.missing_photos_message'))
     return
   }
 
   if (form.value.contact_methods.length === 0) {
-    showErrorDialog('Contact Method Required', 'Please select at least one contact method.')
+    showErrorDialog(t('listings.contact_method_required_title'), t('listings.contact_method_required_message'))
     return
   }
 
   // Validate WhatsApp number if WhatsApp is selected
   if (form.value.contact_methods.includes('whatsapp') && !form.value.whatsapp_number?.trim()) {
-    showErrorDialog('WhatsApp Number Required', 'Please provide your WhatsApp number since you selected WhatsApp as a contact method.')
+    showErrorDialog(t('listings.whatsapp_required_title'), t('listings.whatsapp_required_message'))
     return
   }
 
   // Validate email if Email is selected
   if (form.value.contact_methods.includes('email') && !form.value.contact_email?.trim()) {
-    showErrorDialog('Contact Email Required', 'Please provide your contact email since you selected Email as a contact method.')
+    showErrorDialog(t('listings.contact_email_required_title'), t('listings.contact_email_required_message'))
     return
   }
 
@@ -507,19 +519,19 @@ async function submit() {
     }
     
     await listingStore.createListing(data)
-    showSuccessDialog('Success!', 'Your listing has been created successfully.')
+    showSuccessDialog(t('listings.success_title'), t('listings.success_message'))
   } catch (error) {
     // Check if this is a limit reached error
     const errorData = error.response?.data
     if (errorData?.limit_reached || errorData?.non_field_errors) {
-      const errorMessage = Array.isArray(errorData.non_field_errors) 
-        ? errorData.non_field_errors[0] 
-        : errorData.non_field_errors || 'You have reached the maximum limit of listings.'
+      const errorMessage = Array.isArray(errorData.non_field_errors)
+        ? errorData.non_field_errors[0]
+        : errorData.non_field_errors || t('listings.listing_limit_reached_default')
       const portalUrl = errorData.seller_portal_url || ''
-      showErrorDialog('Listing Limit Reached', errorMessage, portalUrl)
+      showErrorDialog(t('listings.listing_limit_reached_title'), errorMessage, portalUrl)
     } else {
-      const errorMessage = errorData?.message || errorData?.detail || 'Failed to create listing. Please try again.'
-      showErrorDialog('Error', errorMessage)
+      const errorMessage = errorData?.message || errorData?.detail || t('listings.error_create_failed')
+      showErrorDialog(t('listings.error_title'), errorMessage)
     }
   } finally {
     loading.value = false

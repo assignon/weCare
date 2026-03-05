@@ -115,6 +115,8 @@ function getNotificationUrl(data) {
         return `${baseUrl}/product/${data.reference_id}`;
       case "Profile":
         return `${baseUrl}/profile`;
+      case "ListingInquiry":
+        return `${baseUrl}/listing-chat/${data.reference_id}`;
       default:
         return `${baseUrl}/notifications`;
     }

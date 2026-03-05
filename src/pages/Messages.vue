@@ -17,8 +17,14 @@
           class="bg-white rounded-2xl shadow-card p-2.5 cursor-pointer hover:bg-grey-50 transition">
           <div class="flex gap-2">
             <div class="w-12 h-12 rounded-2xl flex-shrink-0 overflow-hidden bg-grey-100 flex items-center justify-center">
-              <img v-if="inquiry.seller_avatar" :src="inquiry.seller_avatar" class="w-full h-full object-cover" />
-              <User v-else class="w-8 h-8 text-grey-400" />
+              <img
+                v-if="inquiry.listing_main_image && !imageErrors[inquiry.id]"
+                :src="inquiry.listing_main_image"
+                class="w-full h-full object-cover"
+                :alt="inquiry.listing_title"
+                @error="imageErrors[inquiry.id] = true"
+              />
+              <Package v-else class="w-8 h-8 text-grey-400" />
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between gap-2 mb-0.5">
@@ -56,6 +62,7 @@ const { formatPrice } = useCurrency()
 
 const inquiries = ref([])
 const loading = ref(false)
+const imageErrors = ref({})
 
 onMounted(async () => {
   loading.value = true

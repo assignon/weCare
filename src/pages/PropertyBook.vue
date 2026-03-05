@@ -222,7 +222,7 @@
         :disabled="!bookingPrice || !acceptTerms || (isMidTerm && !startDate)"
         class="btn-cta w-full bg-success-600 hover:bg-success-700 disabled:opacity-50 py-4"
       >
-        {{ $t('product.book_now') }} — {{ (reservationFeeAmount ?? productReservationFee) != null ? formatCurrency(reservationFeeAmount ?? productReservationFee) : '—' }} {{ (bookingPrice?.currency || product?.currency_info?.currency_code) === 'XOF' ? 'FCFA' : (bookingPrice?.currency || product?.currency_info?.currency_code || 'FCFA') }}
+        {{ $t('product.book_now') }} — {{ reservationFeeAmount != null ? formatCurrency(reservationFeeAmount) : '—' }} {{ (bookingPrice?.currency || product?.currency_info?.currency_code) === 'XOF' ? 'FCFA' : (bookingPrice?.currency || product?.currency_info?.currency_code || 'FCFA') }}
       </button>
     </div>
 
@@ -348,47 +348,6 @@
           </div>
         </div>
 
-        <!-- Payment method (reservation completed after payment) -->
-        <div class="bg-white rounded-2xl border border-grey-100 shadow-sm overflow-hidden">
-          <div class="px-4 py-3 border-b border-grey-100">
-            <span class="text-sm font-semibold text-navy">{{ $t('booking.payment_method') }}</span>
-          </div>
-          <div class="p-4 space-y-2">
-            <button
-              type="button"
-              :class="['w-full p-3 rounded-2xl border-2 text-left flex items-center gap-3 transition-all', paymentMethod === 'mobile_money' ? 'border-navy bg-navy/5' : 'border-grey-200 hover:border-grey-300']"
-              @click="paymentMethod = 'mobile_money'"
-            >
-              <div class="w-10 h-10 rounded-xl bg-navy/10 flex items-center justify-center flex-shrink-0">
-                <Smartphone class="w-5 h-5 text-navy" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <span class="text-sm font-semibold text-navy block">{{ $t('booking.mobile_money') }}</span>
-                <span class="text-xs text-grey-600">{{ $t('booking.pay_with_mobile_money') }}</span>
-              </div>
-              <div v-if="paymentMethod === 'mobile_money'" class="w-5 h-5 rounded-full bg-navy flex items-center justify-center flex-shrink-0">
-                <Check class="w-3 h-3 text-white" />
-              </div>
-            </button>
-            <button
-              type="button"
-              :class="['w-full p-3 rounded-2xl border-2 text-left flex items-center gap-3 transition-all', paymentMethod === 'paygate' ? 'border-navy bg-navy/5' : 'border-grey-200 hover:border-grey-300']"
-              @click="paymentMethod = 'paygate'"
-            >
-              <div class="w-10 h-10 rounded-xl bg-navy/10 flex items-center justify-center flex-shrink-0">
-                <CreditCard class="w-5 h-5 text-navy" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <span class="text-sm font-semibold text-navy block">{{ $t('booking.paygate') }}</span>
-                <span class="text-xs text-grey-600">{{ $t('booking.paygate_description') }}</span>
-              </div>
-              <div v-if="paymentMethod === 'paygate'" class="w-5 h-5 rounded-full bg-navy flex items-center justify-center flex-shrink-0">
-                <Check class="w-3 h-3 text-white" />
-              </div>
-            </button>
-          </div>
-        </div>
-
         <!-- Footer CTA -->
         <div class="sticky bottom-0 bg-white border-t border-grey-100 px-4 py-4 safe-area-pb shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
           <button
@@ -425,7 +384,7 @@ import { useI18n } from 'vue-i18n'
 import { useProductStore } from '@/stores/product'
 import { useCurrency } from '@/composables/useCurrency'
 import apiService from '@/services/api'
-import { ArrowLeft, AlertCircle, ChevronLeft, ChevronRight, Calendar, Users, Receipt, Shield, BadgePercent, Wallet, KeyRound, X, Smartphone, CreditCard, Check } from 'lucide-vue-next'
+import { ArrowLeft, AlertCircle, ChevronLeft, ChevronRight, Calendar, Users, Receipt, Shield, BadgePercent, Wallet, KeyRound, X } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
@@ -454,8 +413,6 @@ const snackbar = ref('')
 const snackbarError = ref(false)
 const acceptTerms = ref(false)
 const termsUrl = import.meta.env.VITE_TERMS_URL || 'https://afriqxpress.com/terms'
-const paymentMethod = ref('mobile_money')
-
 // Mid-term rental state
 const startDate = ref('')
 const durationMonths = ref(1)
@@ -670,10 +627,8 @@ const restToPayFromProduct = computed(() => {
   return Math.round(price + deposit - fee)
 })
 
-// Reservation fee: from product API when > 0; when 0 or null, use 10% of subtotal only (not deposit)
+// Immobilier: frais de réservation is always 10% of Sous-total (subtotal only, not deposit)
 const reservationFeeAmount = computed(() => {
-  const productFee = productReservationFee.value
-  if (productFee != null && Number(productFee) > 0) return Math.round(Number(productFee))
   const bp = bookingPrice.value
   if (!bp) return null
   const subtotal = Number(bp.subtotal) ?? Number(bp.total) ?? 0
@@ -712,7 +667,7 @@ const totalPriceAmount = computed(() => {
 // Cost summary (from product API or booking when available)
 const summaryCurrency = computed(() => bookingPrice.value?.currency || 'XOF')
 const summaryDeposit = computed(() => productDepositAmount.value ?? Number(bookingPrice.value?.deposit_amount) ?? 0)
-const summaryReservationFee = computed(() => reservationFeeAmount.value ?? productReservationFee.value ?? 0)
+const summaryReservationFee = computed(() => reservationFeeAmount.value ?? 0)
 const summaryTotal = computed(() => {
   const bp = bookingPrice.value
   if (bp) {
@@ -999,101 +954,61 @@ function getStandardDeliveryDate() {
 
 const submitBooking = async () => {
   if (!bookingPrice.value || !product.value?.id) return
-  submitting.value = true
-  snackbar.value = ''
-  let bookingId = null
-  try {
-    const payload = {
-      product_id: product.value.id,
-      num_guests: numGuests.value,
-      special_requests: specialRequests.value,
-    }
-    if (isMidTerm.value) {
-      payload.check_in = startDate.value
-      payload.duration_months = parseInt(durationMonths.value, 10)
-      const sd = new Date(startDate.value + 'T12:00:00')
-      sd.setMonth(sd.getMonth() + payload.duration_months)
-      payload.check_out = sd.toISOString().slice(0, 10)
-    } else {
-      payload.check_in = checkIn.value
-      payload.check_out = checkOut.value
-    }
-    const res = await apiService.createBooking(payload)
-    const data = res.data
-    bookingId = data?.id
-    if (!bookingId) {
-      snackbar.value = t('product.booking_created')
-      snackbarError.value = false
-      setTimeout(() => { snackbar.value = '' }, 2000)
-      return
-    }
-    const fee = summaryReservationFee.value ?? 0
-    if (fee <= 0) {
-      showSummaryDialog.value = false
-      router.replace({ name: 'BookingConfirmation', params: { id: bookingId } })
-      return
-    }
-    const notes = [
-      'Property reservation - reservation fee',
-      isMidTerm.value ? `${startDate.value} · ${durationMonths.value} mois` : (checkIn.value && checkOut.value ? `${checkIn.value} to ${checkOut.value}` : ''),
-      `Booking #${bookingId}`,
-    ].filter(Boolean).join('. ')
-    const orderData = {
-      items: [{
+  const fee = summaryReservationFee.value ?? 0
+  if (fee <= 0) {
+    submitting.value = true
+    snackbar.value = ''
+    try {
+      const payload = {
         product_id: product.value.id,
-        product_variant_id: null,
-        quantity: 1,
-        price: fee,
-      }],
-      shipping_address: 'Property reservation - contact at handover',
-      delivery_fee: 0,
-      notes,
-      express_item_product_ids: [],
-      custom_item_dates: {},
-      standard_item_dates: { [product.value.id]: getStandardDeliveryDate() },
-      payment_data: {
-        payment_method: paymentMethod.value,
-        phone_number: '',
-        currency: 'CFA',
-      },
-    }
-    const orderRes = await apiService.createOrder(orderData)
-    const orders = orderRes.data?.orders
-    if (orders && orders.length > 0) {
-      const order = orders[0]
-      showSummaryDialog.value = false
-      router.push({
-        name: 'PaymentSuccess',
-        query: {
-          order_id: order.id,
-          order_number: order.id,
-          total_amount: String(fee),
-          payment_method: paymentMethod.value,
-        },
-      })
-      return
-    }
-    showSummaryDialog.value = false
-    router.replace({ name: 'BookingConfirmation', params: { id: bookingId } })
-    snackbar.value = t('booking.reservation_placed_payment_pending')
-    snackbarError.value = false
-    setTimeout(() => { snackbar.value = '' }, 4000)
-  } catch (e) {
-    console.error(e)
-    if (bookingId) {
-      showSummaryDialog.value = false
-      router.replace({ name: 'BookingConfirmation', params: { id: bookingId } })
-      snackbar.value = t('booking.reservation_placed_payment_pending')
-      snackbarError.value = false
-      setTimeout(() => { snackbar.value = '' }, 4000)
-    } else {
+        num_guests: numGuests.value,
+        special_requests: specialRequests.value,
+      }
+      if (isMidTerm.value) {
+        payload.check_in = startDate.value
+        payload.duration_months = parseInt(durationMonths.value, 10)
+        const sd = new Date(startDate.value + 'T12:00:00')
+        sd.setMonth(sd.getMonth() + payload.duration_months)
+        payload.check_out = sd.toISOString().slice(0, 10)
+      } else {
+        payload.check_in = checkIn.value
+        payload.check_out = checkOut.value
+      }
+      const res = await apiService.createBooking(payload)
+      const bookingId = res.data?.id
+      if (bookingId) {
+        showSummaryDialog.value = false
+        router.replace({ name: 'BookingConfirmation', params: { id: bookingId } })
+      }
+    } catch (e) {
       snackbar.value = e.response?.data?.detail || t('product.booking_error') || 'Booking failed'
       snackbarError.value = true
       setTimeout(() => { snackbar.value = ''; snackbarError.value = false }, 3000)
+    } finally {
+      submitting.value = false
     }
-  } finally {
-    submitting.value = false
+    return
   }
+  showSummaryDialog.value = false
+  const query = {
+    product_id: product.value.id,
+    amount: String(fee),
+    context: 'property',
+    num_guests: String(numGuests.value),
+    special_requests: specialRequests.value || '',
+  }
+  if (isMidTerm.value) {
+    query.start_date = startDate.value
+    query.duration_months = String(durationMonths.value)
+    const sd = new Date(startDate.value + 'T12:00:00')
+    sd.setMonth(sd.getMonth() + parseInt(durationMonths.value, 10))
+    query.check_out = sd.toISOString().slice(0, 10)
+    query.check_in = startDate.value
+  } else {
+    query.check_in = checkIn.value
+    query.check_out = checkOut.value
+  }
+  router.push({ name: 'PayGate', query })
 }
 
 const confirmAndSubmitBooking = () => {

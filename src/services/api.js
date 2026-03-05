@@ -6,6 +6,14 @@ const API_BASE_URL = import.meta.env.PROD
   ? '/api' 
   : 'http://localhost:8000/api'
 
+/** Base URL for media (product images, etc.). Use same origin in production, localhost in dev. */
+export const MEDIA_BASE_URL = (() => {
+  const env = import.meta.env
+  if (env.VITE_MEDIA_URL !== undefined && env.VITE_MEDIA_URL !== '') return String(env.VITE_MEDIA_URL).replace(/\/$/, '')
+  if (env.PROD) return ''
+  return 'http://localhost:8000'
+})()
+
 // Create axios instance with base URL
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -392,10 +400,12 @@ export const apiService = {
   },
 
   // Password Reset
-  requestPasswordReset(email, hostUrl) {
+  requestPasswordReset(email, hostUrl, locale = null) {
     // Use public API instance to avoid auth issues
     const resetApi = createPublicApi()
-    return resetApi.post('/accounts/password/reset_password/', { email, hostUrl })
+    const body = { email, hostUrl }
+    if (locale && (locale === 'en' || locale === 'fr')) body.locale = locale
+    return resetApi.post('/accounts/password/reset_password/', body)
   },
 
   validateResetCode(code) {
@@ -682,6 +692,10 @@ export const apiService = {
 
   verifyPayment(paymentId) {
     return api.get(`/payments/${paymentId}/verify/`)
+  },
+
+  verifyPaygatePayment(identifier) {
+    return api.post('/orders/verify-paygate/', { identifier })
   },
 
   // Order Management

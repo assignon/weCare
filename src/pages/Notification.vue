@@ -363,7 +363,7 @@ const viewReferenceKeys = {
   'Order': 'notifications.view_order',
   'Product': 'notifications.view_product',
   'PropertyBooking': 'notifications.view_booking',
-  'ListingInquiry': 'notifications.view_listing_inquiry',
+  'ListingInquiry': 'notifications.view_message',
   'Profile': 'notifications.view_profile'
 }
 
@@ -380,7 +380,7 @@ const navigateToReference = (notification) => {
     'Product': `/product/${notification.reference_id}`,
     'PropertyBooking': `/booking/${notification.reference_id}`,
     'Profile': '/profile',
-    'ListingInquiry': '/listing-inquiries'
+    'ListingInquiry': `/listing-chat/${notification.reference_id}`
   }
 
   const link = linkMap[notification.reference_type]

@@ -24,10 +24,10 @@
           <span>{{ route.query.message }}</span>
         </div>
 
-        <!-- Error alert -->
+        <!-- Error alert (translated when possible) -->
         <div v-if="authStore.error" class="alert alert-error">
           <XCircle class="w-4 h-4" />
-          <span>{{ authStore.error }}</span>
+          <span>{{ loginErrorKey ? $t(loginErrorKey) : authStore.error }}</span>
         </div>
 
         <!-- Email field -->
@@ -130,7 +130,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { Mail, Lock, Eye, EyeOff, CheckCircle, XCircle, User } from 'lucide-vue-next'
@@ -142,6 +142,19 @@ const authStore = useAuthStore()
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
+
+// Map store error to i18n key so template can translate with current locale
+const loginErrorKey = computed(() => {
+  const err = authStore.error
+  if (!err || typeof err !== 'string') return null
+  const lower = err.toLowerCase()
+  if (err === 'Invalid email or password. Please try again.') return 'auth.error_invalid_credentials'
+  if (lower.includes('unable to log in') || (lower.includes('credential') && (lower.includes('invalid') || lower.includes('incorrect')))) return 'auth.error_invalid_credentials'
+  if (err === 'Invalid login request') return 'auth.error_invalid_request'
+  if (err === 'Connection error. Please check your internet connection.' || lower.startsWith('connection error')) return 'auth.error_network'
+  if (err === 'An error occurred during login') return 'auth.error_generic'
+  return null
+})
 
 const onLogin = async () => {
   if (!email.value || !password.value) return

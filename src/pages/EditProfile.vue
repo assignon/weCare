@@ -581,11 +581,7 @@ const submitForm = async () => {
     }, 1500)
   } catch (error) {
     console.error('Profile update error:', error)
-    const errorMessage = error.response?.data?.error ||
-      error.response?.data?.message ||
-      Object.values(error.response?.data || {}).flat().join(', ') ||
-      t('profile.edit_profile_page.failed_to_update')
-    showError(errorMessage)
+    showError(t('profile.edit_profile_page.failed_to_update'))
   } finally {
     loading.value = false
   }

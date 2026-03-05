@@ -251,7 +251,7 @@
         class="btn-cta h-12 flex items-center justify-center disabled:bg-grey-300 disabled:cursor-not-allowed transition-all duration-200"
       >
         <Loader2 v-if="submitting" class="w-5 h-5 animate-spin mr-2" />
-        <span>{{ submitting ? 'Updating...' : 'Update Listing' }}</span>
+        <span>{{ submitting ? $t('listings.updating') : $t('listings.update_listing_btn') }}</span>
       </button>
     </div>
 
@@ -280,7 +280,7 @@
               :class="dialogType === 'error' ? 'bg-red-600 hover:bg-red-700' : dialogType === 'success' ? 'bg-green-600 hover:bg-green-700' : 'bg-navy hover:bg-navy/90'"
               class="w-full py-3 text-white font-semibold rounded-2xl transition-all duration-200 shadow-card hover:shadow-float"
             >
-              {{ dialogType === 'success' ? 'OK' : 'Got it' }}
+              {{ dialogType === 'success' ? $t('listings.ok') : $t('listings.got_it') }}
             </button>
           </div>
         </div>
@@ -292,6 +292,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useListingStore } from '@/stores/listing'
 import { Plus, X, Loader2, FileText, Tag, DollarSign, MapPin, MessageCircle, Phone, Mail, AlertCircle, CheckCircle, Info } from 'lucide-vue-next'
 import BackButtonHeader from '@/components/BackButtonHeader.vue'
@@ -299,6 +300,7 @@ import apiService from '@/services/api'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const listingStore = useListingStore()
 
 const loading = ref(true)
@@ -328,27 +330,41 @@ const form = ref({
 
 onMounted(async () => {
   try {
-    // Fetch categories
-    const categoriesResponse = await apiService.getCategories()
-    categories.value = categoriesResponse.data.results || categoriesResponse.data
+    // Fetch all categories (same as create-listing; without all=true backend returns empty)
+    const categoriesResponse = await apiService.getCategories({ all: 'true' })
+    const raw = categoriesResponse.data?.results ?? categoriesResponse.data
+    const list = Array.isArray(raw) ? raw : []
+    const seen = new Set()
+    categories.value = list.filter((cat) => {
+      const id = cat?.id ?? cat
+      if (seen.has(id)) return false
+      seen.add(id)
+      return true
+    })
 
     // Fetch listing data
     const listing = await listingStore.fetchListing(route.params.id)
-    
+
     // Store listing status
     listingStatus.value = listing.status || null
-    
+
     // Check if listing is sold
     if (listing.status === 'sold') {
-      showErrorDialog('Cannot Edit', 'This listing has been marked as sold and cannot be edited.')
+      showErrorDialog(t('listings.cannot_edit_title'), t('listings.cannot_edit_sold_message'))
       return
     }
-    
+
+    // Category id: API may return category as number or as { id, name }; coerce to number so select option matches
+    const rawCategoryId = listing.category_id ?? (listing.category && typeof listing.category === 'object' ? listing.category.id : listing.category)
+    const categoryId = rawCategoryId !== undefined && rawCategoryId !== null && rawCategoryId !== ''
+      ? Number(rawCategoryId)
+      : ''
+
     // Prefill form with listing data
     form.value = {
       title: listing.title || '',
       description: listing.description || '',
-      category: listing.category || '',
+      category: categoryId,
       price_type: listing.price_type || 'fixed',
       price: listing.price || null,
       min_offer_price: listing.min_offer_price || null,
@@ -384,7 +400,7 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Failed to fetch listing:', error)
-    showErrorDialog('Error', 'Failed to load listing data. Please try again.')
+    showErrorDialog(t('listings.error_load_listing_title'), t('listings.error_load_listing_message'))
   } finally {
     loading.value = false
   }
@@ -405,27 +421,27 @@ function addImage(e) {
   
   // Validate file type
   if (!file.type.startsWith('image/')) {
-    showErrorDialog('Invalid File', 'Please select an image file.')
+    showErrorDialog(t('listings.invalid_file_title'), t('listings.invalid_file_message'))
     e.target.value = ''
     return
   }
-  
+
   // Validate file size (max 5MB)
   if (file.size > 5 * 1024 * 1024) {
-    showErrorDialog('File Too Large', 'Image size should be less than 5MB.')
+    showErrorDialog(t('listings.file_too_large_title'), t('listings.file_too_large_message'))
     e.target.value = ''
     return
   }
-  
+
   if (images.value.length < 2) {
     // Create preview using URL.createObjectURL (simpler and faster)
     const preview = URL.createObjectURL(file)
     images.value.push({ file, preview })
-    
+
     // Reset input to allow selecting the same file again
     e.target.value = ''
   } else {
-    showErrorDialog('Limit Reached', 'You can only upload up to 2 images.')
+    showErrorDialog(t('listings.limit_reached_title'), t('listings.limit_reached_message'))
     e.target.value = ''
   }
 }
@@ -494,24 +510,24 @@ function closeDialog() {
 
 async function submit() {
   if (images.value.length === 0) {
-    showErrorDialog('Missing Photos', 'Please add at least one photo to your listing.')
+    showErrorDialog(t('listings.missing_photos_title'), t('listings.missing_photos_message'))
     return
   }
 
   if (form.value.contact_methods.length === 0) {
-    showErrorDialog('Contact Method Required', 'Please select at least one contact method.')
+    showErrorDialog(t('listings.contact_method_required_title'), t('listings.contact_method_required_message'))
     return
   }
 
   // Validate WhatsApp number if WhatsApp is selected
   if (form.value.contact_methods.includes('whatsapp') && !form.value.whatsapp_number?.trim()) {
-    showErrorDialog('WhatsApp Number Required', 'Please provide your WhatsApp number since you selected WhatsApp as a contact method.')
+    showErrorDialog(t('listings.whatsapp_required_title'), t('listings.whatsapp_required_message'))
     return
   }
 
   // Validate email if Email is selected
   if (form.value.contact_methods.includes('email') && !form.value.contact_email?.trim()) {
-    showErrorDialog('Contact Email Required', 'Please provide your contact email since you selected Email as a contact method.')
+    showErrorDialog(t('listings.contact_email_required_title'), t('listings.contact_email_required_message'))
     return
   }
 
@@ -570,10 +586,10 @@ async function submit() {
     console.log('  - Final updateData:', updateData)
 
     await listingStore.updateListing(route.params.id, updateData)
-    showSuccessDialog('Success!', 'Your listing has been updated successfully.')
+    showSuccessDialog(t('listings.success_updated_title'), t('listings.success_updated_message'))
   } catch (error) {
-    const errorMessage = error.response?.data?.message || error.response?.data?.detail || 'Failed to update listing. Please try again.'
-    showErrorDialog('Error', errorMessage)
+    const errorMessage = error.response?.data?.message || error.response?.data?.detail || t('listings.error_update_failed')
+    showErrorDialog(t('listings.error_title'), errorMessage)
   } finally {
     submitting.value = false
   }

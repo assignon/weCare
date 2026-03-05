@@ -17,7 +17,7 @@
               <div class="flex items-start space-x-3">
                 <div class="w-14 h-14 rounded-2xl overflow-hidden flex-shrink-0">
                   <img 
-                    :src="'http://localhost:8000' + product.main_image || 'https://via.placeholder.com/150'"
+                    :src="product.main_image ? (MEDIA_BASE_URL + product.main_image) : 'https://via.placeholder.com/150'"
                     :alt="product.product_name"
                     class="w-full h-full object-cover"
                   />
@@ -246,7 +246,7 @@ import { useCRMStore } from '@/stores/crm'
 import { useRouter } from 'vue-router'
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useCurrency } from '@/composables/useCurrency'
-import { apiService } from '@/services/api'
+import { apiService, MEDIA_BASE_URL } from '@/services/api'
 import BackButtonHeader from '@/components/BackButtonHeader.vue'
 import { 
   ArrowLeft, Trash2, Truck, Minus, Plus, ShoppingCart, AlertTriangle 

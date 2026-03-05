@@ -101,6 +101,7 @@ const routes = [
   { path: '/debug-delivery', name: 'DebugDeliveryCost', component: loadComponent(() => import('@/pages/DebugDeliveryCost.vue'), 'DebugDeliveryCost'), meta: { requiresAuth: true } },
   { path: '/payment-success', name: 'PaymentSuccess', component: loadComponent(() => import('@/pages/PaymentSuccess.vue'), 'PaymentSuccess'), meta: { requiresAuth: true } },
   { path: '/payment-failed', name: 'PaymentFailed', component: loadComponent(() => import('@/pages/PaymentFailed.vue'), 'PaymentFailed'), meta: { requiresAuth: true } },
+  { path: '/payment/paygate', name: 'PayGate', component: loadComponent(() => import('@/pages/PayGate.vue'), 'PayGate'), meta: { requiresAuth: true } },
   { path: '/notifications', name: 'Notification', component: loadComponent(() => import('@/pages/Notification.vue'), 'Notification'), meta: { requiresAuth: true } },
   { path: '/wishlist', name: 'Wishlist', component: loadComponent(() => import('@/pages/Wishlist.vue'), 'Wishlist'), meta: { requiresAuth: true } },
   { path: '/fcm-test', name: 'FCMTest', component: loadComponent(() => import('@/pages/FCMTest.vue'), 'FCMTest'), meta: { requiresAuth: true } },

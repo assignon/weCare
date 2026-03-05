@@ -200,7 +200,7 @@ const handleAction = () => {
     'Order': `/order-status/${currentNotification.value.reference_id}`,
     'Product': `/product/${currentNotification.value.reference_id}`,
     'Profile': '/profile',
-    'ListingInquiry': '/listing-inquiries'
+    'ListingInquiry': `/listing-chat/${currentNotification.value.reference_id}`
   }
 
   const link = linkMap[currentNotification.value.reference_type]

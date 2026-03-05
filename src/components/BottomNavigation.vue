@@ -50,15 +50,15 @@
           <div class="flex items-center justify-between">
             <h3 class="text-lg font-bold text-navy">Menu</h3>
             <button 
-              @click="navigateToNotification"
+              @click="navigateToCart"
               class="relative w-10 h-10 flex items-center justify-center rounded-2xl bg-grey-50 hover:bg-grey-100 transition-colors"
             >
-              <Bell class="w-5 h-5 text-navy" />
+              <ShoppingCart class="w-5 h-5 text-navy" />
               <span 
-                v-if="notification.hasUnreadNotifications"
+                v-if="cart.cartItemCount > 0"
                 class="badge-count"
               >
-                {{ notification.unreadCount > 99 ? '99+' : notification.unreadCount }}
+                {{ cart.cartItemCount > 99 ? '99+' : cart.cartItemCount }}
               </span>
             </button>
           </div>
@@ -146,6 +146,24 @@
             >
               <div class="drawer-icon"><MessageCircle class="w-5 h-5" /></div>
               <span>{{ $t('navigation.messages') }}</span>
+            </router-link>
+            
+            <router-link 
+              :to="{ name: 'Notification' }"
+              @click="closeMoreMenu"
+              class="drawer-item"
+              :class="activeTab === 'notification' ? 'drawer-item-active' : ''"
+            >
+              <div class="drawer-icon relative">
+                <Bell class="w-5 h-5" />
+                <span 
+                  v-if="notification.hasUnreadNotifications"
+                  class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center font-bold"
+                >
+                  {{ notification.unreadCount > 99 ? '99+' : notification.unreadCount }}
+                </span>
+              </div>
+              <span>{{ $t('navigation.notifications') }}</span>
             </router-link>
             
             <router-link 
@@ -246,7 +264,8 @@ const updateActiveTab = () => {
     'Orders': 'orders',
     'MyListings': 'mylistings',
     'Rendezvous': 'rendezvous',
-    'MyBookings': 'mybookings'
+    'MyBookings': 'mybookings',
+    'Notification': 'notification'
   }
   
   activeTab.value = routeTabMap[currentRouteName.value] || 'home'
@@ -350,9 +369,9 @@ const closeMoreMenu = () => {
   updateActiveTab()
 }
 
-const navigateToNotification = () => {
+const navigateToCart = () => {
   closeMoreMenu()
-  router.push({ name: 'Notification' })
+  router.push({ name: 'Cart' })
 }
 
 const navigateToProfile = () => {

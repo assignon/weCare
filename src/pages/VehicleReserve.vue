@@ -215,47 +215,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Payment method -->
-          <div class="bg-white rounded-2xl border border-grey-100 shadow-sm overflow-hidden">
-            <div class="px-4 py-3 border-b border-grey-100">
-              <span class="text-sm font-semibold text-navy">{{ $t('vehicle_reserve.payment_method') }}</span>
-            </div>
-            <div class="p-4 space-y-2">
-              <button
-                type="button"
-                :class="['w-full p-3 rounded-2xl border-2 text-left flex items-center gap-3 transition-all', paymentMethod === 'mobile_money' ? 'border-navy bg-navy/5' : 'border-grey-200 hover:border-grey-300']"
-                @click="paymentMethod = 'mobile_money'"
-              >
-                <div class="w-10 h-10 rounded-xl bg-navy/10 flex items-center justify-center flex-shrink-0">
-                  <Smartphone class="w-5 h-5 text-navy" />
-                </div>
-                <div class="flex-1 min-w-0">
-                  <span class="text-sm font-semibold text-navy block">{{ $t('vehicle_reserve.mobile_money') }}</span>
-                  <span class="text-xs text-grey-600">{{ $t('vehicle_reserve.pay_with_mobile_money') }}</span>
-                </div>
-                <div v-if="paymentMethod === 'mobile_money'" class="w-5 h-5 rounded-full bg-navy flex items-center justify-center flex-shrink-0">
-                  <Check class="w-3 h-3 text-white" />
-                </div>
-              </button>
-              <button
-                type="button"
-                :class="['w-full p-3 rounded-2xl border-2 text-left flex items-center gap-3 transition-all', paymentMethod === 'paygate' ? 'border-navy bg-navy/5' : 'border-grey-200 hover:border-grey-300']"
-                @click="paymentMethod = 'paygate'"
-              >
-                <div class="w-10 h-10 rounded-xl bg-navy/10 flex items-center justify-center flex-shrink-0">
-                  <CreditCard class="w-5 h-5 text-navy" />
-                </div>
-                <div class="flex-1 min-w-0">
-                  <span class="text-sm font-semibold text-navy block">{{ $t('vehicle_reserve.paygate') }}</span>
-                  <span class="text-xs text-grey-600">{{ $t('vehicle_reserve.paygate_description') }}</span>
-                </div>
-                <div v-if="paymentMethod === 'paygate'" class="w-5 h-5 rounded-full bg-navy flex items-center justify-center flex-shrink-0">
-                  <Check class="w-3 h-3 text-white" />
-                </div>
-              </button>
-            </div>
-          </div>
         </div>
 
         <div class="sticky bottom-0 bg-white border-t border-grey-100 px-4 py-4 safe-area-pb shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
@@ -287,7 +246,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import apiService from '@/services/api'
 import { useCurrency } from '@/composables/useCurrency'
-import { ArrowLeft, ChevronLeft, ChevronRight, Receipt, X, Calendar, Smartphone, CreditCard, Check } from 'lucide-vue-next'
+import { ArrowLeft, ChevronLeft, ChevronRight, Receipt, X, Calendar } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
@@ -297,7 +256,6 @@ const { formatApiPrice } = useCurrency()
 const product = ref(null)
 const loading = ref(true)
 const error = ref(null)
-const paymentMethod = ref('mobile_money')
 const paying = ref(false)
 const snackbar = ref('')
 const snackbarError = ref(false)
@@ -667,86 +625,19 @@ function confirmAndPay() {
   submitPayment()
 }
 
-async function submitPayment() {
+function submitPayment() {
   if (!canPay.value || !product.value) return
-  paying.value = true
-  error.value = null
-  let bookingId = null
-  try {
-    // 1) Place reservation (like immobilier) via booking API
-    const bookingPayload = {
+  // Payment first: redirect to PayGate with reservation params. Booking + order are created only after payment.
+  router.push({
+    name: 'PayGate',
+    query: {
       product_id: product.value.id,
       check_in: checkIn.value,
       check_out: checkOut.value,
-      num_guests: 1,
-    }
-    const bookingRes = await apiService.createBooking(bookingPayload)
-    bookingId = bookingRes.data?.id
-
-    // 2) Try to create order for reservation fee (10% of subtotal)
-    const notes = [
-      'Vehicle reservation - 10% deposit',
-      checkIn.value && checkOut.value ? `Rental period: ${checkIn.value} to ${checkOut.value}` : '',
-      bookingId ? `Booking #${bookingId}` : '',
-    ].filter(Boolean).join('. ')
-    const orderData = {
-      items: [{
-        product_id: product.value.id,
-        product_variant_id: null,
-        quantity: 1,
-        price: payNowAmount.value
-      }],
-      shipping_address: 'Vehicle reservation - contact at handover',
-      delivery_fee: 0,
-      notes,
-      express_item_product_ids: [],
-      custom_item_dates: {},
-      standard_item_dates: { [product.value.id]: getStandardDeliveryDate() },
-      payment_data: {
-        payment_method: paymentMethod.value,
-        phone_number: '',
-        currency: 'CFA'
-      }
-    }
-    const response = await apiService.createOrder(orderData)
-    const orders = response.data?.orders
-    if (orders && orders.length > 0) {
-      const order = orders[0]
-      router.push({
-        name: 'PaymentSuccess',
-        query: {
-          order_id: order.id,
-          order_number: order.id,
-          total_amount: payNowAmount.value.toFixed(2),
-          payment_method: paymentMethod.value
-        }
-      })
-      return
-    }
-    // Order not created but booking exists → redirect to booking page
-    if (bookingId) {
-      router.push({ name: 'BookingConfirmation', params: { id: bookingId } })
-      snackbar.value = t('vehicle_reserve.reservation_placed_payment_pending')
-      snackbarError.value = false
-      setTimeout(() => { snackbar.value = '' }, 4000)
-    } else {
-      error.value = response?.data?.message || 'Order could not be created'
-    }
-  } catch (e) {
-    console.error(e)
-    // Booking succeeded but order failed (e.g. stock, validation) → redirect to booking page
-    if (bookingId) {
-      router.push({ name: 'BookingConfirmation', params: { id: bookingId } })
-      snackbar.value = t('vehicle_reserve.reservation_placed_payment_pending')
-      snackbarError.value = false
-      setTimeout(() => { snackbar.value = '' }, 4000)
-    } else {
-      const msg = e.response?.data?.message || e.response?.data?.error || e.message || 'Payment failed'
-      error.value = msg
-    }
-  } finally {
-    paying.value = false
-  }
+      amount: payNowAmount.value.toFixed(2),
+      context: 'vehicle',
+    },
+  })
 }
 
 onMounted(() => {

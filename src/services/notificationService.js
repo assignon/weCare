@@ -540,7 +540,7 @@ class NotificationService {
             Order: `/order-status/${notification.reference_id}`,
             Product: `/product/${notification.reference_id}`,
             Profile: "/profile",
-            ListingInquiry: "/listing-inquiries",
+            ListingInquiry: `/listing-chat/${notification.reference_id}`,
           };
           const link = linkMap[notification.reference_type];
           if (link) {

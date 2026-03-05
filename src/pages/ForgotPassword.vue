@@ -93,7 +93,7 @@ import { apiService } from '@/services/api'
 import { Mail, CheckCircle, XCircle, Lock } from 'lucide-vue-next'
 
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const email = ref('')
 const alert = ref('')
 const alertType = ref('success')
@@ -106,9 +106,8 @@ const onForgotPassword = async () => {
   alert.value = ''
 
   try {
-    // get host url
     const hostUrl = window.location.origin
-    await apiService.requestPasswordReset(email.value, hostUrl)
+    await apiService.requestPasswordReset(email.value, hostUrl, locale.value)
     alertType.value = 'success'
     alert.value = t('auth.reset_link_sent')
     email.value = ''

@@ -254,7 +254,7 @@
                       <!-- Product image -->
                       <div class="w-10 h-10 rounded-2xl overflow-hidden flex-shrink-0">
                         <img 
-                          :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
+                          :src="item.main_image ? (MEDIA_BASE_URL + item.main_image) : 'https://via.placeholder.com/150'"
                           :alt="item.product_name"
                           class="w-full h-full object-cover"
                         />
@@ -317,7 +317,7 @@
                 >
                   <div class="w-10 h-10 rounded-2xl overflow-hidden flex-shrink-0">
                     <img 
-                      :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
+                      :src="item.main_image ? (MEDIA_BASE_URL + item.main_image) : 'https://via.placeholder.com/150'"
                       :alt="item.product_name"
                       class="w-full h-full object-cover"
                     />
@@ -464,7 +464,7 @@
                     >
                       <div class="w-8 h-8 rounded-2xl overflow-hidden flex-shrink-0">
                         <img 
-                          :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
+                          :src="item.main_image ? (MEDIA_BASE_URL + item.main_image) : 'https://via.placeholder.com/150'"
                           :alt="item.product_name"
                           class="w-full h-full object-cover"
                         />
@@ -731,7 +731,7 @@
               <div class="flex items-start space-x-3">
                 <div class="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0">
                   <img 
-                    :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
+                    :src="item.main_image ? (MEDIA_BASE_URL + item.main_image) : 'https://via.placeholder.com/150'"
                     :alt="item.product_name"
                     class="w-full h-full object-cover"
                   />
@@ -818,7 +818,7 @@
           <div class="space-y-3">
             <div v-for="item in expressEligibleItems" :key="item.product_id" class="flex items-center justify-between p-3 rounded-xl border">
               <div class="flex items-center space-x-3">
-                <img :src="'http://localhost:8000' + item.main_image" class="w-10 h-10 rounded-lg object-cover" />
+                <img :src="item.main_image ? (MEDIA_BASE_URL + item.main_image) : 'https://via.placeholder.com/150'" class="w-10 h-10 rounded-lg object-cover" />
                 <div>
                   <p class="text-sm font-medium text-navy">{{ item.product_name }}</p>
                   <p class="text-xs text-grey-500">{{ getTotalQuantity(item) }} items</p>
@@ -847,7 +847,7 @@
           <div class="space-y-4">
              <div v-for="item in customDateItems" :key="item.product_id" class="p-3 rounded-xl border space-y-2">
               <div class="flex items-center space-x-3">
-                <img :src="'http://localhost:8000' + item.main_image" class="w-10 h-10 rounded-lg object-cover" />
+                <img :src="item.main_image ? (MEDIA_BASE_URL + item.main_image) : 'https://via.placeholder.com/150'" class="w-10 h-10 rounded-lg object-cover" />
                 <div class="flex-1">
                   <p class="text-sm font-medium text-navy">{{ item.product_name }}</p>
                   <p class="text-xs text-grey-500">Min: {{ minDateForItem(item) }}</p>
@@ -967,7 +967,7 @@
             <div class="flex items-center space-x-3 p-3 bg-grey-50 rounded-xl">
               <div class="w-12 h-12 rounded-2xl overflow-hidden">
                 <img 
-                  :src="'http://localhost:8000' + selectedProductForDelivery.main_image || 'https://via.placeholder.com/150'"
+                  :src="selectedProductForDelivery.main_image ? (MEDIA_BASE_URL + selectedProductForDelivery.main_image) : 'https://via.placeholder.com/150'"
                   :alt="selectedProductForDelivery.product_name"
                   class="w-full h-full object-cover"
                 />
@@ -1056,7 +1056,7 @@
                 >
                   <div class="w-8 h-8 rounded-lg overflow-hidden">
                     <img 
-                      :src="'http://localhost:8000' + item.main_image || 'https://via.placeholder.com/150'"
+                      :src="item.main_image ? (MEDIA_BASE_URL + item.main_image) : 'https://via.placeholder.com/150'"
                       :alt="item.product_name"
                       class="w-full h-full object-cover"
                     />
@@ -1135,7 +1135,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useDeliveryCostStore } from '@/stores/deliveryCost'
 import { useRouter } from 'vue-router'
-import { apiService } from '@/services/api'
+import { apiService, MEDIA_BASE_URL } from '@/services/api'
 import { useCurrency } from '@/composables/useCurrency'
 import { useLocationConfirmation } from '@/composables/useLocationConfirmation'
 import LocationConfirmationDialog from '@/components/LocationConfirmationDialog.vue'

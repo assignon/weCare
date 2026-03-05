@@ -6,6 +6,20 @@
 export function translateNotificationTitle(title, t) {
   if (!title) return title
 
+  // Chat / listing message titles (pattern-based for dynamic sender or listing title)
+  if (typeof title === 'string') {
+    if (title.startsWith('New message from ')) {
+      const sender = title.slice('New message from '.length)
+      const translated = t('notifications.translate.new_message_from', { sender })
+      if (translated && translated !== 'notifications.translate.new_message_from') return translated
+    }
+    if (title.startsWith('New message about ')) {
+      const listingTitle = title.slice('New message about '.length)
+      const translated = t('notifications.translate.new_message_about_listing', { title: listingTitle })
+      if (translated && translated !== 'notifications.translate.new_message_about_listing') return translated
+    }
+  }
+
   // Map common English titles to translation keys
   const titleMap = {
     'Order Status Update': 'notifications.translate.order_status_update',
